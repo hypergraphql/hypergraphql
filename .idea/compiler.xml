@@ -7,10 +7,12 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="graphql-ld" />
+        <module name="graphql-sparql-java" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="graphql-ld" target="1.8" />
+      <module name="graphql-sparql-java" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

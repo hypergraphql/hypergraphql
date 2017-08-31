@@ -167,4 +167,15 @@ public class RDFSchema {
                 NAME_MAP.put(graphqlName, jsonldName);
             }
     }
+
+    public static String graphql2jsonld (String ld) {
+        String output = ld;
+        Set<String> keys = NAME_MAP.keySet();
+
+        for (String key : keys) {
+            output = output.replace(key.toString(), NAME_MAP.get(key).toString());
+        }
+
+        return output;
+    }
 }
