@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
 import graphql.schema.GraphQLSchema;
@@ -27,6 +28,8 @@ public class Main {
         RDFSchema rdfschema = new RDFSchema();
 
         System.out.println(rdfschema.GRAPHQL_NAMES.toString());
+        System.out.println(rdfschema.NAME_MAP.toString());
+        System.out.println(rdfschema.NAME_TO_URI_MAP.toString());
 
         GraphQL graphQL = GraphQL.newGraphQL(rdfschema.schema).build();
 
@@ -49,9 +52,15 @@ public class Main {
 
             Map<String, Object> result = new HashMap<>();
 
-            Map<String, Object> data = graphQL.execute(query).getData();
-            List<GraphQLError> errors = graphQL.execute(query).getErrors();
-            Map<Object, Object> extensions = graphQL.execute(query).getExtensions();
+            ExecutionResult qlResult = graphQL.execute(query);
+
+            Map<String, Object> data = qlResult.getData();
+            List<GraphQLError> errors = qlResult.getErrors();
+            Map<Object, Object> extensions = qlResult.getExtensions();
+            if (extensions==null) extensions = new HashMap<>();
+            if (data!=null && data.containsKey("_graph")) {
+                extensions.put("json-ld", RDFSchema.graphql2jsonld(data));
+            }
 
             if (data!=null) result.put("data", data); // you have to wrap it into a data json key!
             if (!errors.isEmpty()) result.put("errors", errors);
@@ -59,6 +68,7 @@ public class Main {
 
             JsonNode resultJson = mapper.readTree( new ObjectMapper().writeValueAsString(result));
             res.type("application/json");
+
             return resultJson;
 
         });

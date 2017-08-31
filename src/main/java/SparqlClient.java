@@ -1,4 +1,5 @@
 import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.RDFNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,7 @@ public class SparqlClient {
     }
 
 
-    public static List<String> getOutgoingEdge(String node, String predicate, int limit) {
+    public static List<RDFNode> getOutgoingEdge(String node, String predicate, int limit) {
 
         limit = (limit==0)? defaultLimit : limit;
 
@@ -39,11 +40,11 @@ public class SparqlClient {
         ResultSet queryResults = sparqlSelect(queryString);
 
         if (queryResults!=null) {
-            List<String> uriList = new ArrayList<>();
+            List<RDFNode> uriList = new ArrayList<>();
 
             while (queryResults.hasNext()) {
                 QuerySolution nextSol = queryResults.nextSolution();
-                String target = nextSol.get("?target").toString();
+                RDFNode target = nextSol.get("?target");
                 uriList.add(target);
             }
             return uriList;

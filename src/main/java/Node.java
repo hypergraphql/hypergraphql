@@ -5,6 +5,7 @@ public class Node {
 
     String _id;
     String _value;
-    String _lang;
+    String _language;
+    String _type;
 
 }

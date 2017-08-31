@@ -7,6 +7,7 @@ http://zbw.eu/beta/sparql/stw/query
 For better experience, you can install the GraphiQL IDE extension for Chrome and point it to http://localhost:8890. 
 See: ChromiQL, available at https://chrome.google.com/webstore/detail/chromeiql/fkkiamalmpiidkljmicmjfbieiclmeij?hl=en
 
+A valid JSON-LD object is attached in the "extensions" section of the GraphQL response, as the value of the "json-ld" property. 
 
 
 

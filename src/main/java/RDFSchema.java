@@ -1,7 +1,9 @@
+import com.fasterxml.jackson.databind.JsonNode;
 import graphql.language.Field;
 import graphql.schema.*;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 
 import java.util.*;
@@ -23,7 +25,7 @@ public class RDFSchema {
         put("_id", "@id");
         put("_value", "@value");
         put("_type", "@type");
-        put("_lang", "@lang");
+        put("_language", "@language");
         put("_graph", "@graph");
     }}; //from graphql names to jsonld keys
     public static Map<String, String> NAME_TO_URI_MAP = new HashMap<>();
@@ -46,7 +48,12 @@ public class RDFSchema {
 
         DataFetcher<String> langFetch = environment -> {
             Node thisNode = environment.getSource();
-            return thisNode._lang;
+            return thisNode._language;
+        };
+
+        DataFetcher<String> typeFetch = environment -> {
+            Node thisNode = environment.getSource();
+            return thisNode._type;
         };
 
         DataFetcher<List<Node>> outgoingFetcher = environment -> {
@@ -56,11 +63,16 @@ public class RDFSchema {
             String nodeUri = ((Node) environment.getSource())._id;
             String predicate = ((Field) environment.getFields().toArray()[0]).getName();
             String predicateURI = NAME_TO_URI_MAP.get(predicate);
-            List<String> outgoing = SparqlClient.getOutgoingEdge(nodeUri, predicateURI, limit);
+            List<RDFNode> outgoing = SparqlClient.getOutgoingEdge(nodeUri, predicateURI, limit);
             List<Node> result = new ArrayList<>();
             outgoing.forEach(instance -> {
                 Node node = new Node();
-                node._id = instance;
+                if (instance.isURIResource()) node._id = instance.toString();
+                if (instance.isLiteral()) {
+                    node._value = instance.asLiteral().getValue().toString();
+                    node._language = instance.asLiteral().getLanguage();
+                    node._type = instance.asLiteral().getDatatypeURI();
+                }
                 result.add(node);
             });
             return result;
@@ -106,8 +118,6 @@ public class RDFSchema {
                 .build();
 
 
-
-
         List<GraphQLFieldDefinition> registeredFields = new ArrayList<>();
 
 
@@ -128,6 +138,18 @@ public class RDFSchema {
                         .name("_id")
                         .type(GraphQLString)
                         .dataFetcher(idFetch))
+                .field(newFieldDefinition()
+                        .name("_value")
+                        .type(GraphQLString)
+                        .dataFetcher(valueFetch))
+                .field(newFieldDefinition()
+                        .name("_language")
+                        .type(GraphQLString)
+                        .dataFetcher(langFetch))
+                .field(newFieldDefinition()
+                        .name("_type")
+                        .type(GraphQLString)
+                        .dataFetcher(typeFetch))
                 .build();
 
         Set<GraphQLType> types = new HashSet<>();
@@ -162,20 +184,92 @@ public class RDFSchema {
                 NAME_TO_URI_MAP.put(graphqlName, predicate.toString());
                 GRAPHQL_NAMES.add(graphqlName);
 
-                String jsonldName = prefix + ":" + localName;
+             //   String jsonldName = prefix + ":" + localName;
 
-                NAME_MAP.put(graphqlName, jsonldName);
+           //     NAME_MAP.put(graphqlName, jsonldName);
             }
     }
 
-    public static String graphql2jsonld (String ld) {
-        String output = ld;
-        Set<String> keys = NAME_MAP.keySet();
 
-        for (String key : keys) {
-            output = output.replace(key.toString(), NAME_MAP.get(key).toString());
+    public static Traversal restructure (Object dataObject) {
+
+       // System.out.println("Transforming this: " + dataObject.toString());
+       // System.out.println("And I know it's a... : " + dataObject.getClass().toString());
+
+        if (dataObject.getClass()==ArrayList.class) {
+         //   System.out.println("It's an array");
+            ArrayList<Object> newList = new ArrayList<>();
+            Map<String, String> context = new HashMap<>();
+            for (Object item : (ArrayList<Object>) dataObject) {
+                Traversal itemRes = restructure(item);
+                newList.add(itemRes.data);
+                context.putAll(itemRes.context);
+            }
+            Traversal restructured = new Traversal();
+            restructured.data = newList;
+            restructured.context = context;
+
+            return restructured;
         }
 
-        return output;
+        if (dataObject.getClass()!=LinkedHashMap.class) {
+           // System.out.println("It's not an array nor a map.");
+            Traversal restructured = new Traversal();
+            restructured.data = dataObject;
+            restructured.context = new HashMap<>();
+
+            return restructured;
+        } else {
+
+           // System.out.println("It's a map.");
+
+            Map<String, Object> mapObject = (Map<String, Object>) dataObject;
+            Map<String, Object> targetObject = new HashMap<>();
+
+            Set<String> keys = mapObject.keySet();
+
+            Map<String, String> context = new HashMap<>();
+
+            for (String key: keys) {
+                Object child = mapObject.get(key);
+                Traversal childRes = restructure(child);
+                if (NAME_MAP.containsKey(key)) targetObject.put(NAME_MAP.get(key), childRes.data);
+                else {
+                    targetObject.put(key, childRes.data);
+                    context.put(key, NAME_TO_URI_MAP.get(key));
+                }
+                context.putAll(childRes.context);
+            }
+
+            Traversal restructured = new Traversal();
+            restructured.data = targetObject;
+            restructured.context = context;
+
+            return restructured;
+        }
+
     }
+
+ public static Object graphql2jsonld (Map<String, Object> dataObject) {
+
+        if (dataObject.containsKey("_graph")) {
+      //      System.out.println("Original data object:");
+        //    System.out.println(dataObject.toString());
+            Traversal restructured = restructure(dataObject.get("_graph"));
+       //     System.out.println("Transformed object:");
+            Map<String, Object> output = new HashMap<>();
+
+            output.put("@graph", restructured.data);
+            output.put("@context", restructured.context);
+
+            System.out.println(output.toString());
+
+            return output;
+
+        }
+
+        return null;
+    }
+
+
 }
