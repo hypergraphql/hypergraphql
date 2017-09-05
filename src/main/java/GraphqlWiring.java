@@ -16,25 +16,17 @@ import static graphql.schema.GraphQLObjectType.newObject;
 /**
  * Created by szymon on 24/08/2017.
  */
-public class RDFSchema {
+public class GraphqlWiring {
 
     GraphQLSchema schema;
     public static Map<String, String> PREFIX_MAP = new HashMap<>(); //from namespaces to prefixes
-    public static Map<String, String> NAME_MAP = new HashMap<String, String>() {{
-        put("_context", "@context");
-        put("_id", "@id");
-        put("_value", "@value");
-        put("_type", "@type");
-        put("_language", "@language");
-        put("_graph", "@graph");
-    }}; //from graphql names to jsonld keys
     public static Map<String, String> NAME_TO_URI_MAP = new HashMap<>();
     public static Set<String> GRAPHQL_NAMES = new HashSet<>();
 
 
-    public RDFSchema() {
+    public GraphqlWiring(Config config) {
 
-        registerPredicates();
+       // registerPredicates(config.sparql.endpoint);
 
         DataFetcher<String> idFetch = environment -> {
             Node thisNode = environment.getSource();
@@ -58,12 +50,12 @@ public class RDFSchema {
 
         DataFetcher<List<Node>> outgoingFetcher = environment -> {
 
-            int limit = (environment.getArgument("limit")!=null)? environment.getArgument("limit") : 0;
+            int limit = (environment.getArgument("limit")!=null)? environment.getArgument("limit") : config.sparql.queryLimit;
 
             String nodeUri = ((Node) environment.getSource())._id;
             String predicate = ((Field) environment.getFields().toArray()[0]).getName();
             String predicateURI = NAME_TO_URI_MAP.get(predicate);
-            List<RDFNode> outgoing = SparqlClient.getOutgoingEdge(nodeUri, predicateURI, limit);
+            List<RDFNode> outgoing = SparqlClient.getOutgoingEdge(nodeUri, predicateURI, limit, config.sparql.endpoint);
             List<Node> result = new ArrayList<>();
             outgoing.forEach(instance -> {
                 Node node = new Node();
@@ -81,8 +73,8 @@ public class RDFSchema {
         DataFetcher<List<Node>> instanceFetcher = environment -> {
 
             if (environment.getArgument("type")!=null) {
-                int limit = (environment.getArgument("limit")!=null)? environment.getArgument("limit") : 0;
-                List<String> instances = SparqlClient.getInstances(environment.getArgument("type"), limit);
+                int limit = (environment.getArgument("limit")!=null)? environment.getArgument("limit") : config.sparql.queryLimit;
+                List<String> instances = SparqlClient.getInstances(environment.getArgument("type"), limit, config.sparql.endpoint);
                 List<Node> result = new ArrayList<>();
                 instances.forEach(instance -> {
                     Node node = new Node();
@@ -160,10 +152,15 @@ public class RDFSchema {
                 .build(types);
     }
 
-    public static void registerPredicates() {
+
+
+    //this approach of dynamically generating schema directly from the endpoint
+    //will be abondened
+
+    public static void registerPredicates(String endpoint) {
         int count = 0;
         String queryString = "select distinct ?predicate where {[] ?predicate []}";
-        ResultSet results = SparqlClient.sparqlSelect(queryString);
+        ResultSet results = SparqlClient.sparqlSelect(queryString, endpoint);
 
         if (results == null) return;
         else
@@ -189,87 +186,5 @@ public class RDFSchema {
            //     NAME_MAP.put(graphqlName, jsonldName);
             }
     }
-
-
-    public static Traversal restructure (Object dataObject) {
-
-       // System.out.println("Transforming this: " + dataObject.toString());
-       // System.out.println("And I know it's a... : " + dataObject.getClass().toString());
-
-        if (dataObject.getClass()==ArrayList.class) {
-         //   System.out.println("It's an array");
-            ArrayList<Object> newList = new ArrayList<>();
-            Map<String, String> context = new HashMap<>();
-            for (Object item : (ArrayList<Object>) dataObject) {
-                Traversal itemRes = restructure(item);
-                newList.add(itemRes.data);
-                context.putAll(itemRes.context);
-            }
-            Traversal restructured = new Traversal();
-            restructured.data = newList;
-            restructured.context = context;
-
-            return restructured;
-        }
-
-        if (dataObject.getClass()!=LinkedHashMap.class) {
-           // System.out.println("It's not an array nor a map.");
-            Traversal restructured = new Traversal();
-            restructured.data = dataObject;
-            restructured.context = new HashMap<>();
-
-            return restructured;
-        } else {
-
-           // System.out.println("It's a map.");
-
-            Map<String, Object> mapObject = (Map<String, Object>) dataObject;
-            Map<String, Object> targetObject = new HashMap<>();
-
-            Set<String> keys = mapObject.keySet();
-
-            Map<String, String> context = new HashMap<>();
-
-            for (String key: keys) {
-                Object child = mapObject.get(key);
-                Traversal childRes = restructure(child);
-                if (NAME_MAP.containsKey(key)) targetObject.put(NAME_MAP.get(key), childRes.data);
-                else {
-                    targetObject.put(key, childRes.data);
-                    context.put(key, NAME_TO_URI_MAP.get(key));
-                }
-                context.putAll(childRes.context);
-            }
-
-            Traversal restructured = new Traversal();
-            restructured.data = targetObject;
-            restructured.context = context;
-
-            return restructured;
-        }
-
-    }
-
- public static Object graphql2jsonld (Map<String, Object> dataObject) {
-
-        if (dataObject.containsKey("_graph")) {
-      //      System.out.println("Original data object:");
-        //    System.out.println(dataObject.toString());
-            Traversal restructured = restructure(dataObject.get("_graph"));
-       //     System.out.println("Transformed object:");
-            Map<String, Object> output = new HashMap<>();
-
-            output.put("@graph", restructured.data);
-            output.put("@context", restructured.context);
-
-            System.out.println(output.toString());
-
-            return output;
-
-        }
-
-        return null;
-    }
-
 
 }

@@ -1,0 +1,15 @@
+{
+    "schemaFile": "schema.graphql",
+    "contextFile": "context.jsonld",
+    "sparql": {
+            "endpoint": "http://ec2-52-23-193-209.compute-1.amazonaws.com:5820/photobox/query",
+            "user": "admin",
+            "password": "admin",
+            "queryLimit": 10000
+    },
+    "graphql": {
+        "port": 8890,
+        "path": "/",
+        "graphiql": "/"
+    }
+}

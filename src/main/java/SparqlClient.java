@@ -15,11 +15,11 @@ public class SparqlClient {
     static int defaultLimit = 10000;
 
 
-    public static ResultSet sparqlSelect(String queryString) {
+    public static ResultSet sparqlSelect(String queryString, String endpoint) {
         System.out.println(queryString);
         Query query = QueryFactory.create(queryString);
 
-        QueryExecution qexec = QueryExecutionFactory.sparqlService(SPARQL_ENDPOINT, query);
+        QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, query);
         try {
             ResultSet results = qexec.execSelect();
             return results;
@@ -31,13 +31,13 @@ public class SparqlClient {
     }
 
 
-    public static List<RDFNode> getOutgoingEdge(String node, String predicate, int limit) {
+    public static List<RDFNode> getOutgoingEdge(String node, String predicate, int limit, String endpoint) {
 
         limit = (limit==0)? defaultLimit : limit;
 
         String queryString = String.format(queryOutgoingTemplate, node, predicate, limit);
 
-        ResultSet queryResults = sparqlSelect(queryString);
+        ResultSet queryResults = sparqlSelect(queryString, endpoint);
 
         if (queryResults!=null) {
             List<RDFNode> uriList = new ArrayList<>();
@@ -52,13 +52,13 @@ public class SparqlClient {
         else return null;
     }
 
-    public static List<String> getInstances(String type, int limit) {
+    public static List<String> getInstances(String type, int limit, String endpoint) {
 
         limit = (limit==0)? defaultLimit : limit;
 
         String queryString = String.format(queryInstancesTemplate, type, limit);
 
-        ResultSet queryResults = sparqlSelect(queryString);
+        ResultSet queryResults = sparqlSelect(queryString, endpoint);
 
         if (queryResults!=null) {
             List<String> uriList = new ArrayList<>();

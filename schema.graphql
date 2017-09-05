@@ -1,0 +1,30 @@
+type Query {
+  products: [Product]
+  productsByType(type: String!): [Product]
+}
+
+type Product {
+  id: ID!
+  name: String
+  brand: String
+  physicalSupports: [PhysicalSupport]
+}
+
+type PhysicalSupport {
+  optionSpace: OptionSpace,
+}
+
+type OptionSpace {
+  oneOfEach: [OptionGroup]
+}
+
+type OptionGroup {
+  uri: String
+  groupSequence: Int
+  options: [Option]
+}
+
+type Option {
+  uri: String
+  optionSequence: Int
+}

@@ -11,9 +11,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: com.graphql-java:graphql-java:2.4.0" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Maven: org.antlr:antlr4-runtime:4.5.1" level="project" />
-    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.22" level="project" />
+    <orderEntry type="library" name="Maven: com.graphql-java:graphql-java:4.1" level="project" />
+    <orderEntry type="library" name="Maven: org.antlr:antlr4-runtime:4.5.1" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.25" level="project" />
     <orderEntry type="library" name="Maven: org.apache.jena:jena-tdb:3.0.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.jena:jena-arq:3.0.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.jena:jena-core:3.0.0" level="project" />

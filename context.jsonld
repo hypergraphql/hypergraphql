@@ -1,0 +1,18 @@
+{   
+    "product": "http://photobox.com/Product",
+    "book": "http://photobox.com/Book",
+    "print": "http://photobox.com/Print",
+    "mug": "http://photobox.com/Mug",
+    "canvas": "http://photobox.com/Canvas",
+    "case": "http://photobox.com/Case",
+    "id": "http://photobox.com/id",
+    "brand": "http://photobox.com/brand",
+    "physicalSupports": "http://photobox.com/physicalSupport",
+    "optionSpace": "http://photobox.com/optionSpace",
+    "oneOfEach": "http://photobox.com/oneOfEach",
+    "uri": "http://photobox.com/uri",
+    "options": "http://photobox.com/option",
+    "groupSequence": "http://photobox.com/groupSequence",
+    "name": "http://photobox.com/enName",
+    "optionSequence": "http://photobox.com/optionSequence"
+}
