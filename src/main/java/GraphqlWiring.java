@@ -1,4 +1,3 @@
-import com.fasterxml.jackson.databind.JsonNode;
 import graphql.language.Field;
 import graphql.schema.*;
 import org.apache.jena.query.QuerySolution;
@@ -26,69 +25,76 @@ public class GraphqlWiring {
 
     public GraphqlWiring(Config config) {
 
-       // registerPredicates(config.sparql.endpoint);
+        registerPredicates(config);
+
+        SparqlClient client = new SparqlClient(config);
+
 
         DataFetcher<String> idFetch = environment -> {
-            Node thisNode = environment.getSource();
+            RDFuriNode thisNode = environment.getSource();
             return thisNode._id;
         };
 
         DataFetcher<String> valueFetch = environment -> {
-            Node thisNode = environment.getSource();
+            RDFliteralNode thisNode = environment.getSource();
             return thisNode._value;
         };
 
         DataFetcher<String> langFetch = environment -> {
-            Node thisNode = environment.getSource();
+            RDFliteralNode thisNode = environment.getSource();
             return thisNode._language;
         };
 
         DataFetcher<String> typeFetch = environment -> {
-            Node thisNode = environment.getSource();
+            RDFliteralNode thisNode = environment.getSource();
             return thisNode._type;
         };
 
-        DataFetcher<List<Node>> outgoingFetcher = environment -> {
+        DataFetcher<List<Object>> outgoingFetcher = environment -> {
 
-            int limit = (environment.getArgument("limit")!=null)? environment.getArgument("limit") : config.sparql.queryLimit;
+            int limit = (environment.getArgument("limit")!=null)? environment.getArgument("limit") : 0;
 
-            String nodeUri = ((Node) environment.getSource())._id;
+            String nodeUri = ((RDFuriNode) environment.getSource())._id;
             String predicate = ((Field) environment.getFields().toArray()[0]).getName();
             String predicateURI = NAME_TO_URI_MAP.get(predicate);
-            List<RDFNode> outgoing = SparqlClient.getOutgoingEdge(nodeUri, predicateURI, limit, config.sparql.endpoint);
-            List<Node> result = new ArrayList<>();
+            List<RDFNode> outgoing = client.getOutgoingEdge(nodeUri, predicateURI, limit);
+            List<Object> result = new ArrayList<>();
             outgoing.forEach(instance -> {
-                Node node = new Node();
-                if (instance.isURIResource()) node._id = instance.toString();
-                if (instance.isLiteral()) {
-                    node._value = instance.asLiteral().getValue().toString();
-                    node._language = instance.asLiteral().getLanguage();
-                    node._type = instance.asLiteral().getDatatypeURI();
+                if (instance.isURIResource()) {
+                    RDFuriNode thisNode = new RDFuriNode();
+                    thisNode._id = instance.toString();
+                    result.add(thisNode);
                 }
-                result.add(node);
+                if (instance.isLiteral()) {
+                    RDFliteralNode thisNode = new RDFliteralNode();
+                    thisNode._value = instance.asLiteral().getValue().toString();
+                    thisNode._language = instance.asLiteral().getLanguage();
+                    thisNode._type = instance.asLiteral().getDatatypeURI();
+                    result.add(thisNode);
+                }
             });
             return result;
         };
 
-        DataFetcher<List<Node>> instanceFetcher = environment -> {
+        DataFetcher<List<RDFuriNode>> instanceFetcher = environment -> {
 
             if (environment.getArgument("type")!=null) {
-                int limit = (environment.getArgument("limit")!=null)? environment.getArgument("limit") : config.sparql.queryLimit;
-                List<String> instances = SparqlClient.getInstances(environment.getArgument("type"), limit, config.sparql.endpoint);
-                List<Node> result = new ArrayList<>();
+                int limit = (environment.getArgument("limit")!=null)? environment.getArgument("limit") : 0;
+                List<String> instances = client.getInstances(environment.getArgument("type"), limit);
+                List<RDFuriNode> result = new ArrayList<>();
                 instances.forEach(instance -> {
-                    Node node = new Node();
-                    node._id = instance;
-                    result.add(node);
+                    RDFuriNode RDFuriNode = new RDFuriNode();
+                    RDFuriNode._id = instance;
+                    result.add(RDFuriNode);
                 });
                 return result;
             }
 
             if (environment.getArgument("uri")!=null) {
-                List<Node> instances = new ArrayList<>();
-                Node node = new Node();
-                node._id = environment.getArgument("uri");
-                instances.add(node);
+                List<RDFuriNode> instances = new ArrayList<>();
+                RDFuriNode RDFuriNode = new RDFuriNode();
+                RDFuriNode._id = environment.getArgument("uri");
+                instances.add(RDFuriNode);
                 return instances;
             }
             else return null;
@@ -101,7 +107,7 @@ public class GraphqlWiring {
         GraphQLObjectType RootQuery = newObject()
                 .name("RootQuery")
                 .field(newFieldDefinition()
-                        .type(new GraphQLList(new GraphQLTypeReference("Node")))
+                        .type(new GraphQLList(new GraphQLTypeReference("RDFuriNode")))
                         .name("_graph")
                         .argument(typeArgument)
                         .argument(uriArgument)
@@ -116,7 +122,7 @@ public class GraphqlWiring {
         for (String name : GRAPHQL_NAMES) {
             GraphQLFieldDefinition field = newFieldDefinition()
                     .name(name)
-                    .type(new GraphQLList (new GraphQLTypeReference("Node")))
+                    .type(new GraphQLList (new GraphQLTypeReference("RDFuriNode")))
                     .argument(limitArgument)
                     .dataFetcher(outgoingFetcher).build();
 
@@ -124,7 +130,7 @@ public class GraphqlWiring {
         }
 
         GraphQLObjectType node = newObject()
-                .name("Node")
+                .name("RDFuriNode")
                 .fields(registeredFields)
                 .field(newFieldDefinition()
                         .name("_id")
@@ -157,10 +163,12 @@ public class GraphqlWiring {
     //this approach of dynamically generating schema directly from the endpoint
     //will be abondened
 
-    public static void registerPredicates(String endpoint) {
+    public static void registerPredicates(Config config) {
         int count = 0;
+
+        SparqlClient client = new SparqlClient(config);
         String queryString = "select distinct ?predicate where {[] ?predicate []}";
-        ResultSet results = SparqlClient.sparqlSelect(queryString, endpoint);
+        ResultSet results = client.sparqlSelect(queryString);
 
         if (results == null) return;
         else

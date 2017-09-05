@@ -1,3 +1,6 @@
+import org.apache.jena.atlas.web.auth.HttpAuthenticator;
+import org.apache.jena.atlas.web.auth.PreemptiveBasicAuthenticator;
+import org.apache.jena.atlas.web.auth.SimpleAuthenticator;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.RDFNode;
 
@@ -9,17 +12,23 @@ import java.util.List;
  */
 public class SparqlClient {
 
-    static String SPARQL_ENDPOINT = "http://zbw.eu/beta/sparql/stw/query";
     static String queryOutgoingTemplate = "SELECT distinct ?target WHERE {<%s> <%s> ?target} LIMIT %s";
     static String queryInstancesTemplate = "SELECT distinct ?instance WHERE {?instance a <%s>} LIMIT %s";
-    static int defaultLimit = 10000;
+    int defaultLimit;
+    String endpoint;
+    HttpAuthenticator authenticator;
 
+    public SparqlClient(Config config) {
+        defaultLimit = config.sparql.queryLimit;
+        endpoint = config.sparql.endpoint;
+        authenticator = new PreemptiveBasicAuthenticator(new SimpleAuthenticator(config.sparql.user, config.sparql.password.toCharArray()),false);
+    }
 
-    public static ResultSet sparqlSelect(String queryString, String endpoint) {
+    public ResultSet sparqlSelect(String queryString) {
         System.out.println(queryString);
         Query query = QueryFactory.create(queryString);
 
-        QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, query);
+        QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, query, authenticator);
         try {
             ResultSet results = qexec.execSelect();
             return results;
@@ -31,13 +40,13 @@ public class SparqlClient {
     }
 
 
-    public static List<RDFNode> getOutgoingEdge(String node, String predicate, int limit, String endpoint) {
+    public List<RDFNode> getOutgoingEdge(String node, String predicate, int limit) {
 
         limit = (limit==0)? defaultLimit : limit;
 
         String queryString = String.format(queryOutgoingTemplate, node, predicate, limit);
 
-        ResultSet queryResults = sparqlSelect(queryString, endpoint);
+        ResultSet queryResults = sparqlSelect(queryString);
 
         if (queryResults!=null) {
             List<RDFNode> uriList = new ArrayList<>();
@@ -52,13 +61,13 @@ public class SparqlClient {
         else return null;
     }
 
-    public static List<String> getInstances(String type, int limit, String endpoint) {
+    public List<String> getInstances(String type, int limit) {
 
         limit = (limit==0)? defaultLimit : limit;
 
         String queryString = String.format(queryInstancesTemplate, type, limit);
 
-        ResultSet queryResults = sparqlSelect(queryString, endpoint);
+        ResultSet queryResults = sparqlSelect(queryString);
 
         if (queryResults!=null) {
             List<String> uriList = new ArrayList<>();
