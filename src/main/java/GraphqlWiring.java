@@ -162,7 +162,7 @@ public class GraphqlWiring {
 
     //this approach of dynamically generating schema directly from the endpoint
     //will be abondened
-
+    // PJC - probably worth keeping it in place as a default / quickstart option
     public static void registerPredicates(Config config) {
         int count = 0;
 
