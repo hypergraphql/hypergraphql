@@ -51,7 +51,6 @@ public class SparqlClient {
 
                 while (queryResults.hasNext()) {
                     QuerySolution nextSol = queryResults.nextSolution();
-                    System.out.println(nextSol.toString());
                     RDFNode object = nextSol.get("?object");
                     uriList.add(object);
                 }
