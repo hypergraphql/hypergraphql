@@ -14,5 +14,11 @@ buildNumber.properties
 \.DS_Store
 
 queryTranslation\.txt
+<<<<<<< HEAD
 
 \.idea/
+=======
+.idea/
+.gradle/
+build/
+>>>>>>> master
