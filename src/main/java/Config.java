@@ -44,8 +44,8 @@ public class Config {
 
            if (config!=null) {
                 try {
-                    Map<String, String> context = (Map<String, String>) mapper.readValue(new File(config.contextFile), Object.class);
-                    config.context = context;
+                    Map<String, String> context = (Map<String, String>) mapper.readValue(new File(config.contextFile), Map.class);
+                    this.context = context;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

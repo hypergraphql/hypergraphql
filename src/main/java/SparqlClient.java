@@ -12,14 +12,15 @@ import java.util.List;
  */
 public class SparqlClient {
 
-    static String queryOutgoingTemplate = "SELECT distinct ?target WHERE {<%s> <%s> ?target} LIMIT %s";
-    static String queryInstancesTemplate = "SELECT distinct ?instance WHERE {?instance a <%s>} LIMIT %s";
-    int defaultLimit;
+    static String queryValuesOfObjectPropertyTemp = "SELECT distinct ?object WHERE {<%s> <%s> ?object}";
+    static String queryValuesOfDataPropertyTemp = "SELECT distinct (str(?object) as ?value) WHERE {<%s> <%s> ?object .}";
+    static String querySubjectsOfDataPropertyFilterTemp = "SELECT distinct ?subject WHERE {?subject <%s> ?value . FILTER (str(?value)=\"%s\") }";
+    static String querySubjectsOfObjectPropertyFilterTemp = "SELECT distinct ?subject WHERE {?subject <%s> <%s>}";
+
     String endpoint;
     HttpAuthenticator authenticator;
 
     public SparqlClient(Config config) {
-        defaultLimit = config.sparql.queryLimit;
         endpoint = config.sparql.endpoint;
         authenticator = new PreemptiveBasicAuthenticator(new SimpleAuthenticator(config.sparql.user, config.sparql.password.toCharArray()),false);
     }
@@ -39,46 +40,145 @@ public class SparqlClient {
         }
     }
 
+    public List<RDFNode> getValuesOfObjectProperty(String subject, String predicate) {
 
-    public List<RDFNode> getOutgoingEdge(String node, String predicate, int limit) {
-
-        limit = (limit==0)? defaultLimit : limit;
-
-        String queryString = String.format(queryOutgoingTemplate, node, predicate, limit);
-
+        String queryString = String.format(queryValuesOfObjectPropertyTemp, subject, predicate);
         ResultSet queryResults = sparqlSelect(queryString);
 
         if (queryResults!=null) {
+
+                List<RDFNode> uriList = new ArrayList<>();
+
+                while (queryResults.hasNext()) {
+                    QuerySolution nextSol = queryResults.nextSolution();
+                    System.out.println(nextSol.toString());
+                    RDFNode object = nextSol.get("?object");
+                    uriList.add(object);
+                }
+                return uriList;
+        }
+        else return null;
+    }
+
+    public RDFNode getValueOfObjectProperty(String subject, String predicate) {
+
+        String queryString = String.format(queryValuesOfObjectPropertyTemp, subject, predicate);
+        ResultSet queryResults = sparqlSelect(queryString);
+
+        if (queryResults!=null) {
+
+            QuerySolution nextSol = queryResults.nextSolution();
+            RDFNode object = nextSol.get("?object");
+
+            return object;
+        }
+
+        else return null;
+    }
+
+    public List<String> getValuesOfDataProperty(String subject, String predicate) {
+
+        String queryString = String.format(queryValuesOfDataPropertyTemp, subject, predicate);
+        ResultSet queryResults = sparqlSelect(queryString);
+
+        if (queryResults!=null) {
+
+            List<String> valList = new ArrayList<>();
+
+            while (queryResults.hasNext()) {
+                QuerySolution nextSol = queryResults.nextSolution();
+                String value = nextSol.get("?value").toString();
+                valList.add(value);
+            }
+            return valList;
+        }
+        else return null;
+    }
+
+    public String getValueOfDataProperty(String subject, String predicate) {
+
+        String queryString = String.format(queryValuesOfDataPropertyTemp, subject, predicate);
+        ResultSet queryResults = sparqlSelect(queryString);
+
+        if (queryResults!=null) {
+
+            QuerySolution nextSol = queryResults.nextSolution();
+            String value = nextSol.get("?value").toString();
+
+            return value;
+        }
+
+        else return null;
+    }
+
+    public List<RDFNode> getSubjectsOfDataPropertyFilter(String predicate, String value) {
+
+        String queryString = String.format(querySubjectsOfDataPropertyFilterTemp, predicate, value);
+        ResultSet queryResults = sparqlSelect(queryString);
+
+        if (queryResults!=null) {
+
             List<RDFNode> uriList = new ArrayList<>();
 
             while (queryResults.hasNext()) {
                 QuerySolution nextSol = queryResults.nextSolution();
-                RDFNode target = nextSol.get("?target");
-                uriList.add(target);
+                RDFNode subject = nextSol.get("?subject");
+                uriList.add(subject);
             }
             return uriList;
         }
         else return null;
     }
 
-    public List<String> getInstances(String type, int limit) {
+    public RDFNode getSubjectOfDataPropertyFilter(String predicate, String value) {
 
-        limit = (limit==0)? defaultLimit : limit;
-
-        String queryString = String.format(queryInstancesTemplate, type, limit);
-
+        String queryString = String.format(querySubjectsOfDataPropertyFilterTemp, predicate, value);
         ResultSet queryResults = sparqlSelect(queryString);
 
         if (queryResults!=null) {
-            List<String> uriList = new ArrayList<>();
+
+                QuerySolution nextSol = queryResults.nextSolution();
+                RDFNode subject = nextSol.get("?subject");
+
+            return subject;
+        }
+        else return null;
+    }
+
+
+    public List<RDFNode> getSubjectsOfObjectPropertyFilter(String predicate, String uri) {
+
+        String queryString = String.format(querySubjectsOfObjectPropertyFilterTemp, predicate, uri);
+        ResultSet queryResults = sparqlSelect(queryString);
+
+        if (queryResults!=null) {
+
+            List<RDFNode> uriList = new ArrayList<>();
 
             while (queryResults.hasNext()) {
                 QuerySolution nextSol = queryResults.nextSolution();
-                String instance = nextSol.get("?instance").toString();
-                uriList.add(instance);
+                RDFNode subject = nextSol.get("?subject");
+                uriList.add(subject);
             }
             return uriList;
         }
         else return null;
     }
+
+    public RDFNode getSubjectOfObjectPropertyFilter(String predicate, String uri) {
+
+        String queryString = String.format(querySubjectsOfObjectPropertyFilterTemp, predicate, uri);
+        ResultSet queryResults = sparqlSelect(queryString);
+
+        if (queryResults!=null) {
+
+            QuerySolution nextSol = queryResults.nextSolution();
+            RDFNode subject = nextSol.get("?subject");
+
+            return subject;
+        }
+        else return null;
+    }
+
+
 }

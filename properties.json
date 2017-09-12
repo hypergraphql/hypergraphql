@@ -10,6 +10,6 @@
     "graphql": {
         "port": 8890,
         "path": "/",
-        "graphiql": "/"
+        "graphiql": "/graphiql.html"
     }
 }

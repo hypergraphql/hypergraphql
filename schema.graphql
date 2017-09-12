@@ -1,10 +1,10 @@
 type Query {
-  products: [Product]
-  productsByType(type: String!): [Product]
+  type(uri: String!): [Product]
+  id(value: String!): Product
 }
 
 type Product {
-  id: ID!
+  id: String!
   name: String
   brand: String
   physicalSupports: [PhysicalSupport]
@@ -19,12 +19,13 @@ type OptionSpace {
 }
 
 type OptionGroup {
+  hide: Boolean
   uri: String
-  groupSequence: Int
+  groupSequence: String
   options: [Option]
 }
 
 type Option {
   uri: String
-  optionSequence: Int
+  optionSequence: String
 }
