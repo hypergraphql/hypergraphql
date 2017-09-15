@@ -44,7 +44,7 @@ public class Controller {
             Map<Object, Object> extensions = qlResult.getExtensions();
 
             if (extensions==null) extensions = new HashMap<>();
-            if (data!=null && data.containsKey("_graph")) {
+            if (data!=null) {
                 Converter converter = new Converter(config);
                 extensions.put("json-ld", converter.graphql2jsonld(data));
             }

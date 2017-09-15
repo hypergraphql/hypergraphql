@@ -39,20 +39,37 @@ public class Converter {
 
     public Object graphql2jsonld (Map<String, Object> dataObject) {
 
-        if (dataObject.containsKey("_graph")) {
-            Converter.Traversal restructured = rewrite(dataObject.get("_graph"));
+
+
+            ArrayList<Object> graphData = new ArrayList<>();
+            Map<String,String> graphContext = new HashMap<>();
+
+            Iterator<String> queryFields = dataObject.keySet().iterator();
+
+            while (queryFields.hasNext()) {
+
+                String field = queryFields.next();
+
+                Converter.Traversal restructured = rewrite(dataObject.get(field));
+
+                if (restructured.data.getClass() == ArrayList.class) graphData.addAll((ArrayList<Object>) restructured.data);
+                if (restructured.data.getClass() == LinkedHashMap.class) graphData.add(restructured.data);
+
+                Set<String> newContext = restructured.context.keySet();
+
+                for (String key : newContext) {
+                    graphContext.put(key, restructured.context.get(key));
+                }
+
+            }
+
             Map<String, Object> output = new HashMap<>();
 
-            output.put("@graph", restructured.data);
-            output.put("@context", restructured.context);
-
-            System.out.println(output.toString());
-
+            output.put("@graph", graphData);
+            output.put("@context", graphContext);
             return output;
         }
 
-        return null;
-    }
 
     public Converter.Traversal rewrite (Object dataObject) {
 
