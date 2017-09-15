@@ -45,8 +45,8 @@ public class Controller {
 
             if (extensions==null) extensions = new HashMap<>();
             if (data!=null && data.containsKey("_graph")) {
-                Graphql2Jsonld transformer = new Graphql2Jsonld(config);
-                extensions.put("json-ld", transformer.graphql2jsonld(data));
+                Converter converter = new Converter(config);
+                extensions.put("json-ld", converter.graphql2jsonld(data));
             }
 
             if (data!=null) result.put("data", data); // you have to wrap it into a data json key!

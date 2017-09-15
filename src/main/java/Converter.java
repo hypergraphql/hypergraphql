@@ -1,9 +1,12 @@
 import java.util.*;
 
 /**
- * Created by szymon on 05/09/2017.
+ * Created by szymon on 15/09/2017.
+ *
+ * This class contains rewrite methods between different query/response formats
  */
-public class Graphql2Jsonld {
+public class Converter {
+
 
     Map<String, String> globalContext;
     Map<String, String> JSONLD_VOC = new HashMap<String, String>() {{
@@ -16,7 +19,7 @@ public class Graphql2Jsonld {
     }}; //from graphql names to jsonld reserved names
 
 
-    public Graphql2Jsonld(Config config) {
+    public Converter(Config config) {
         this.globalContext = config.context;
     }
 
@@ -26,10 +29,18 @@ public class Graphql2Jsonld {
 
     }
 
+    public String graphql2sparql (String query) {
+
+        //this method will convert a given graphql query into a nested SPARQL construct query
+        // that will retrieve all relevant data in one go and put it into an in-memory jena store
+
+        return null;
+    }
+
     public Object graphql2jsonld (Map<String, Object> dataObject) {
 
         if (dataObject.containsKey("_graph")) {
-            Traversal restructured = restructure(dataObject.get("_graph"));
+            Converter.Traversal restructured = rewrite(dataObject.get("_graph"));
             Map<String, Object> output = new HashMap<>();
 
             output.put("@graph", restructured.data);
@@ -43,7 +54,7 @@ public class Graphql2Jsonld {
         return null;
     }
 
-    public Traversal restructure (Object dataObject) {
+    public Converter.Traversal rewrite (Object dataObject) {
 
         if (dataObject.getClass()==ArrayList.class) {
 
@@ -52,11 +63,11 @@ public class Graphql2Jsonld {
             ArrayList<Object> newList = new ArrayList<>();
             Map<String, String> context = new HashMap<>();
             for (Object item : (ArrayList<Object>) dataObject) {
-                Traversal itemRes = restructure(item);
+                Converter.Traversal itemRes = rewrite(item);
                 newList.add(itemRes.data);
                 context.putAll(itemRes.context);
             }
-            Traversal restructured = new Traversal();
+            Converter.Traversal restructured = new Converter.Traversal();
             restructured.data = newList;
             restructured.context = context;
 
@@ -67,7 +78,7 @@ public class Graphql2Jsonld {
 
             // System.out.println("It's not an array nor a map.");
 
-            Traversal restructured = new Traversal();
+            Converter.Traversal restructured = new Converter.Traversal();
             restructured.data = dataObject;
             restructured.context = new HashMap<>();
 
@@ -85,7 +96,7 @@ public class Graphql2Jsonld {
 
             for (String key: keys) {
                 Object child = mapObject.get(key);
-                Traversal childRes = restructure(child);
+                Converter.Traversal childRes = rewrite(child);
                 if (JSONLD_VOC.containsKey(key)) targetObject.put(JSONLD_VOC.get(key), childRes.data);
                 else {
                     targetObject.put(key, childRes.data);
@@ -94,7 +105,7 @@ public class Graphql2Jsonld {
                 context.putAll(childRes.context);
             }
 
-            Traversal restructured = new Traversal();
+            Converter.Traversal restructured = new Converter.Traversal();
             restructured.data = targetObject;
             restructured.context = context;
 
@@ -102,5 +113,4 @@ public class Graphql2Jsonld {
         }
 
     }
-
 }

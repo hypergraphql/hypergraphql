@@ -15,7 +15,11 @@ import static graphql.schema.GraphQLObjectType.newObject;
 
 /**
  * Created by szymon on 24/08/2017.
+ *
+ * This class defines the GraphQL wiring (data fetchers and type resolvers)
+ *
  */
+
 public class GraphqlWiring {
 
     //public static Map<String, String> PREFIX_MAP = new HashMap<>(); //from namespaces to prefixes
