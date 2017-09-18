@@ -40,16 +40,18 @@ public class Controller {
             ExecutionResult qlResult = graphQL.execute(query);
 
             Map<String, Object> data = qlResult.getData();
+
             List<GraphQLError> errors = qlResult.getErrors();
             Map<Object, Object> extensions = qlResult.getExtensions();
 
             if (extensions==null) extensions = new HashMap<>();
-            if (data!=null) {
+            if (data!=null&&!data.containsKey("__schema")) {
+                //System.out.println(data.toString());
                 Converter converter = new Converter(config);
                 extensions.put("json-ld", converter.graphql2jsonld(data));
             }
 
-            if (data!=null) result.put("data", data); // you have to wrap it into a data json key!
+            if (data!=null) result.put("data", data);
             if (!errors.isEmpty()) result.put("errors", errors);
             if (extensions!=null) result.put("extensions", extensions);
 
