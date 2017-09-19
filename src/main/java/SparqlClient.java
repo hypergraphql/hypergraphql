@@ -26,6 +26,7 @@ public class SparqlClient {
     }
 
     public ResultSet sparqlSelect(String queryString) {
+
         System.out.println(queryString);
         Query query = QueryFactory.create(queryString);
 

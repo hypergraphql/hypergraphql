@@ -1,9 +1,11 @@
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by szymon on 15/09/2017.
  *
- * This class contains rewrite methods between different query/response formats
+ * This class contains jsonRewrite methods between different query/response formats
  */
 public class Converter {
 
@@ -23,6 +25,12 @@ public class Converter {
         this.globalContext = config.context;
     }
 
+    class QueryTree {
+        String queryFragment;
+        Map<String, Set<String>> tree;
+        Set<String> root;
+    }
+
     class Traversal {
         Object data;
         Map<String, String> context;
@@ -34,7 +42,81 @@ public class Converter {
         //this method will convert a given graphql query into a nested SPARQL construct query
         // that will retrieve all relevant data in one go and put it into an in-memory jena store
 
+        QueryTree tree = new QueryTree();
+
+        Map<String, Set<String>> map = new HashMap<>();
+        tree.queryFragment = query;
+        tree.tree = map;
+
+      do {
+          tree = getQueryTree(tree);
+      } while (!tree.queryFragment.equals(""));
+
+      System.out.println(tree.root.toString());
+
         return null;
+    }
+
+    public QueryTree getQueryTree(QueryTree tree) {
+
+        String query = tree.queryFragment;
+
+        query = query
+                .replaceAll("\\s+", " ")
+                .replaceAll("\\s\\{", "{")
+                .replaceAll("\\{\\s", "{")
+                .replaceAll("\\s}", "}")
+                .replaceAll("}\\s", "}");
+
+        Pattern namePtrn = Pattern.compile("([\\w\\\\(\\\\):\"\"]*\\{[\\w\\\\(\\\\):\"\"\\s]+})");
+        Matcher nameMtchr = namePtrn.matcher(query);
+
+        nameMtchr.find();
+        String findOuterMatch = nameMtchr.group(1);
+
+        String findOuter = findOuterMatch
+                .replaceAll("\\(", "\\\\(")
+                .replaceAll("\\)", "\\\\)")
+                .replaceAll("\\{", "\\\\{");
+
+        Pattern namePtrn2 = Pattern.compile("\\{([\\w\\\\(\\\\):\"\"\\s]+)}");
+        Matcher nameMtchr2 = namePtrn2.matcher(findOuter);
+
+        nameMtchr2.find();
+        String findInner = nameMtchr2.group(1);
+
+        System.out.println("findOuter: " + findOuter);
+
+        System.out.println("findInner: " + findInner);
+
+        System.out.println("query before: " + query);
+
+        Set<String> refs = new HashSet<>(Arrays.asList(findInner.split("\\s")));
+
+        if (findOuterMatch.equals(query)) {
+            tree.queryFragment = "";
+            tree.root = refs;
+            return tree;
+        }
+
+        int count = tree.tree.size() + 1;
+
+        String ref = ":" + count;
+
+        System.out.println("ref: " + ref);
+
+
+        query = query.replaceFirst(findOuter, ref);
+
+
+        System.out.println("query after: " + query);
+
+        tree.tree.put(ref, refs);
+        tree.root = refs;
+        tree.queryFragment = query;
+
+        return tree;
+
     }
 
     public Object graphql2jsonld (Map<String, Object> dataObject) {
@@ -50,7 +132,7 @@ public class Converter {
 
                 String field = queryFields.next();
 
-                Converter.Traversal restructured = rewrite(dataObject.get(field));
+                Converter.Traversal restructured = jsonRewrite(dataObject.get(field));
 
                 if (restructured.data.getClass() == ArrayList.class) graphData.addAll((ArrayList<Object>) restructured.data);
                 if (restructured.data.getClass() == LinkedHashMap.class) graphData.add(restructured.data);
@@ -71,7 +153,7 @@ public class Converter {
         }
 
 
-    public Converter.Traversal rewrite (Object dataObject) {
+    public Converter.Traversal jsonRewrite(Object dataObject) {
 
         if (dataObject.getClass()==ArrayList.class) {
 
@@ -80,7 +162,7 @@ public class Converter {
             ArrayList<Object> newList = new ArrayList<>();
             Map<String, String> context = new HashMap<>();
             for (Object item : (ArrayList<Object>) dataObject) {
-                Converter.Traversal itemRes = rewrite(item);
+                Converter.Traversal itemRes = jsonRewrite(item);
                 newList.add(itemRes.data);
                 context.putAll(itemRes.context);
             }
@@ -113,7 +195,7 @@ public class Converter {
 
             for (String key: keys) {
                 Object child = mapObject.get(key);
-                Converter.Traversal childRes = rewrite(child);
+                Converter.Traversal childRes = jsonRewrite(child);
                 if (JSONLD_VOC.containsKey(key)) targetObject.put(JSONLD_VOC.get(key), childRes.data);
                 else {
                     targetObject.put(key, childRes.data);
@@ -130,4 +212,5 @@ public class Converter {
         }
 
     }
+
 }

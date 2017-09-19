@@ -17,8 +17,12 @@ import static spark.Spark.post;
  */
 public class Controller {
 
+        static Converter converter;
+
 
     public static void start(Config config, GraphQL graphQL) {
+
+        converter = new Converter(config);
 
         port(config.graphql.port);
 
@@ -35,6 +39,8 @@ public class Controller {
 
             String query = requestObject.get("query").asText();
 
+            converter.graphql2sparql(query);
+
             Map<String, Object> result = new HashMap<>();
 
             ExecutionResult qlResult = graphQL.execute(query);
@@ -46,12 +52,12 @@ public class Controller {
 
             if (extensions==null) extensions = new HashMap<>();
             if (data!=null&&!data.containsKey("__schema")) {
-                //System.out.println(data.toString());
-                Converter converter = new Converter(config);
+
                 extensions.put("json-ld", converter.graphql2jsonld(data));
             }
 
             if (data!=null) result.put("data", data);
+
             if (!errors.isEmpty()) result.put("errors", errors);
             if (extensions!=null) result.put("extensions", extensions);
 
