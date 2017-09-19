@@ -28,6 +28,7 @@ public class Converter {
     class QueryTree {
         String queryFragment;
         Map<String, Set<String>> tree;
+        Map<String, String> types;
         Set<String> root;
     }
 
@@ -45,14 +46,18 @@ public class Converter {
         QueryTree tree = new QueryTree();
 
         Map<String, Set<String>> map = new HashMap<>();
+        Map<String, String> types = new HashMap<>();
         tree.queryFragment = query;
         tree.tree = map;
+        tree.types = types;
 
       do {
           tree = getQueryTree(tree);
       } while (!tree.queryFragment.equals(""));
 
       System.out.println(tree.root.toString());
+        System.out.println(tree.tree.toString());
+        System.out.println(tree.types.toString());
 
         return null;
     }
@@ -106,6 +111,7 @@ public class Converter {
         System.out.println("ref: " + ref);
 
 
+
         query = query.replaceFirst(findOuter, ref);
 
 
@@ -113,6 +119,7 @@ public class Converter {
 
         tree.tree.put(ref, refs);
         tree.root = refs;
+        tree.types.put(ref, findOuterMatch.split("\\{")[0]);
         tree.queryFragment = query;
 
         return tree;
