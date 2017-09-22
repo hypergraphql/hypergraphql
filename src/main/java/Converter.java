@@ -1,6 +1,5 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import graphql.language.TypeDefinition;
 
 import java.io.IOException;
@@ -89,7 +88,7 @@ public class Converter {
                 .replaceAll("}\\s*\\{", "}, {")
                 .replaceAll("<", "[")
                 .replaceAll(">", "]");
-        
+
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode object = mapper.readTree(query);
