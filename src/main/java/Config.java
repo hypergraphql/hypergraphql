@@ -91,14 +91,17 @@ class SparqlConfig {
 class GraphqlConfig {
     public Integer port;
     public String path;
+    public String graphiql;
 
     @JsonCreator
     public GraphqlConfig(@JsonProperty("port") Integer port,
-                        @JsonProperty("path") String path
+                        @JsonProperty("path") String path,
+                        @JsonProperty("graphiql") String graphiql
     )
     {
         this.port = port;
         this.path = path;
+        this.graphiql = graphiql;
     }
 
 }

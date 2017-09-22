@@ -30,6 +30,35 @@ public class GraphqlWiring {
     public SparqlClient client;
     public Config config;
     public GraphQLSchema schema;
+    public Converter converter;
+
+
+    public GraphqlWiring(Config config) {
+
+        this.client = new SparqlClient(config);
+        this.config = config;
+        this.converter = new Converter(config);
+
+        Set<GraphQLType> schemaTypes = new HashSet<>();
+        GraphQLObjectType schemaQuery = null;
+
+        Map<String, TypeDefinition> typeMap = config.schema.types();
+
+        Set<String> typeDefs = typeMap.keySet();
+
+        for (String name : typeDefs) {
+
+            TypeDefinition type = typeMap.get(name);
+
+            if (type.getClass()==ObjectTypeDefinition.class)
+                if (name.equals("Query")) schemaQuery = registerGraphQLType(type);
+                else schemaTypes.add(registerGraphQLType(type));
+        }
+
+        this.schema = GraphQLSchema.newSchema()
+                .query(schemaQuery)
+                .build(schemaTypes);
+    }
 
     private DataFetcher<String> idFetcher = environment -> {
         RDFNode thisNode = environment.getSource();
@@ -110,44 +139,10 @@ public class GraphqlWiring {
             .name("_id")
             .dataFetcher(idFetcher).build();
 
-    public GraphqlWiring(Config config) {
-
-        this.config = config;
-        this.client = new SparqlClient(config);
-
-
-
-        Set<GraphQLType> schemaTypes = new HashSet<>();
-        GraphQLObjectType schemaQuery = null;
-
-        Map<String, TypeDefinition> typeMap = config.schema.types();
-
-      //  System.out.println(typeMap.toString());
-
-        Set<String> typeDefs = typeMap.keySet();
-
-        for (String name : typeDefs) {
-
-
-            TypeDefinition type = typeMap.get(name);
-
-            if (type.getClass()==ObjectTypeDefinition.class)
-                if (name.equals("Query")) schemaQuery = registerGraphQLType(type);
-            else schemaTypes.add(registerGraphQLType(type));
-
-        }
-
-        this.schema = GraphQLSchema.newSchema()
-                .query(schemaQuery)
-                .build(schemaTypes);
-
-
-        }
-
 
         public GraphQLObjectType registerGraphQLType(TypeDefinition type) {
 
-            JsonNode typeJson = definitionToJson(type);
+            JsonNode typeJson = converter.definitionToJson(type);
 
             JsonNode fieldDefs = typeJson.get("fieldDefinitions");
 
@@ -159,11 +154,6 @@ public class GraphqlWiring {
               builtFields.add(registerGraphQLField(isQueryType, fieldDef));
           }
 
-          //System.out.println("\nNow registering type:");
-          //System.out.println("\t"+type.getName());
-            //System.out.println("\t"+builtFields.toString());
-            //System.out.println("\t"+_idField.toString());
-
             GraphQLObjectType newObjectType = newObject()
                     .name(type.getName())
                     .fields(builtFields)
@@ -173,40 +163,6 @@ public class GraphqlWiring {
 
             return newObjectType;
         }
-
-    private JsonNode definitionToJson(TypeDefinition type) {
-
-        String typeData = type.toString();
-        Pattern namePtrn = Pattern.compile("(\\w+)\\{");
-        Matcher nameMtchr = namePtrn.matcher(typeData);
-
-        while (nameMtchr.find()) {
-            String find = nameMtchr.group(1);
-            typeData = typeData.replace(find + "{", "{\'_type\':\'" + find + "\', ");
-        }
-
-        namePtrn = Pattern.compile("(\\w+)=");
-        nameMtchr = namePtrn.matcher(typeData);
-
-        while (nameMtchr.find()) {
-            String find = nameMtchr.group(1);
-            typeData = typeData.replace(" " + find + "=", "\'"+find+"\':");
-        }
-
-        typeData = typeData.replace("'", "\"");
-
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            JsonNode object = mapper.readTree(typeData);
-
-            return object;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-
-    }
 
 
     public GraphQLFieldDefinition registerGraphQLField(Boolean isQueryType, JsonNode fieldDef) {

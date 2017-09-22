@@ -28,7 +28,7 @@ public class Controller {
 
         System.out.println("GraphQL server started at: "  + config.graphql.port);
 
-        get(config.graphql.path, (req, res) -> {
+        get(config.graphql.graphiql, (req, res) -> {
             Map<String, String> model = new HashMap<>();
             String portScript = config.graphql.port.toString();
             model.put("template", portScript);

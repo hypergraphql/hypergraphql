@@ -9,6 +9,7 @@
     },
     "graphql": {
         "port": 8001,
-        "path": "/"
+        "path": "/",
+        "graphiql": "/graphql"
     }
 }
