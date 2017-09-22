@@ -3,21 +3,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
+import spark.ModelAndView;
+import spark.template.velocity.VelocityTemplateEngine;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static spark.Spark.externalStaticFileLocation;
-import static spark.Spark.port;
-import static spark.Spark.post;
+import static spark.Spark.*;
 
 /**
  * Created by szymon on 05/09/2017.
  */
 public class Controller {
 
-        static Converter converter;
+    static Converter converter;
 
 
     public static void start(Config config, GraphQL graphQL) {
@@ -28,9 +28,13 @@ public class Controller {
 
         System.out.println("GraphQL server started at: "  + config.graphql.port);
 
-        //this will open the path to serving the graphiql IDE
-        String webdir = System.getProperty("user.dir");
-        externalStaticFileLocation(webdir);
+        get(config.graphql.path, (req, res) -> {
+            Map<String, String> model = new HashMap<>();
+            String portScript = config.graphql.port.toString();
+            model.put("template", portScript);
+            return new VelocityTemplateEngine().render(
+                    new ModelAndView(model, "graphiql.vtl")
+            ); });
 
         post(config.graphql.path, (req, res) -> {
 
@@ -39,7 +43,7 @@ public class Controller {
 
             String query = requestObject.get("query").asText();
 
-            converter.graphql2sparql(query);
+            if (!query.contains("IntrospectionQuery")) converter.graphql2sparql(query);
 
             Map<String, Object> result = new HashMap<>();
 
