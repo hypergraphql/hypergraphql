@@ -8,6 +8,7 @@
     "case": "http://photobox.com/Case",
     "id": "http://photobox.com/id",
     "brand": "http://photobox.com/brand",
+    "weighting": "http://photobox.com/weighting",
     "physicalSupports": "http://photobox.com/physicalSupport",
     "optionSpace": "http://photobox.com/optionSpace",
     "oneOfEach": "http://photobox.com/oneOfEach",

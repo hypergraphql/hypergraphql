@@ -4,9 +4,10 @@ type Query {
 }
 
 type Product {
-  id: String!
+  id: ID!
   name: String
   brand: String
+  weighting: Int
   physicalSupports: [PhysicalSupport]
 }
 

@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import graphql.GraphQL;
 import graphql.language.*;
 import graphql.schema.*;
 import org.apache.jena.rdf.model.RDFNode;
@@ -9,6 +10,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static graphql.Scalars.GraphQLID;
+import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
@@ -143,7 +146,7 @@ public class GraphqlWiring {
     };
 
     private GraphQLFieldDefinition _idField = newFieldDefinition()
-            .type(GraphQLString)
+            .type(GraphQLID)
             .name("_id")
             .dataFetcher(idFetcher).build();
 
@@ -159,9 +162,12 @@ public class GraphqlWiring {
 
         Map<String, TypeDefinition> typeMap = config.schema.types();
 
+      //  System.out.println(typeMap.toString());
+
         Set<String> typeDefs = typeMap.keySet();
 
         for (String name : typeDefs) {
+
 
             TypeDefinition type = typeMap.get(name);
 
@@ -182,7 +188,7 @@ public class GraphqlWiring {
         public GraphQLObjectType registerGraphQLType(TypeDefinition type) {
 
            // //System.out.println(type);
-            JsonNode typeJson = convertToJson(type);
+            JsonNode typeJson = definitionToJson(type);
 
             //System.out.println("Registering type: " + typeJson.toString());
 
@@ -211,7 +217,7 @@ public class GraphqlWiring {
             return newObjectType;
         }
 
-    private JsonNode convertToJson(TypeDefinition type) {
+    private JsonNode definitionToJson(TypeDefinition type) {
 
         String typeData = type.toString();
         Pattern namePtrn = Pattern.compile("(\\w+)\\{");
@@ -329,11 +335,36 @@ public class GraphqlWiring {
 
         //System.out.println("Getting output type: " + outputTypeDef.toString());
 
-        if (outputTypeDef.get("_type").asText().equals("ListType"))
-        return new GraphQLList (new GraphQLTypeReference(outputTypeDef.get("type").get("name").asText()));
-        else if (outputTypeDef.get("_type").asText().equals("NonNullType"))
-            return new GraphQLTypeReference(outputTypeDef.get("type").get("name").asText());
-        else return new GraphQLTypeReference(outputTypeDef.get("name").asText());
+        System.out.println(outputTypeDef.toString());
+
+        String typeName;
+        if (outputTypeDef.has("type")) typeName = outputTypeDef.get("type").get("name").asText();
+        else typeName = outputTypeDef.get("name").asText();
+
+        System.out.println(typeName);
+        GraphQLOutputType ref;
+        switch (typeName) {
+            case "String":
+                ref = GraphQLString;
+                break;
+            case "ID":
+                ref = GraphQLID;
+                break;
+            case "Int":
+                ref = GraphQLInt;
+                break;
+            default:
+                ref = new GraphQLTypeReference(typeName);
+                break;
+        }
+
+        System.out.println(ref.getName());
+
+        String arityType = outputTypeDef.get("_type").asText();
+
+        if (arityType.equals("ListType"))
+        return new GraphQLList ( ref );
+        else return ref;
 
     }
 
