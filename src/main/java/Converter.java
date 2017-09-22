@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import graphql.language.TypeDefinition;
 
 import java.io.IOException;
@@ -30,13 +31,6 @@ public class Converter {
         this.globalContext = config.context;
     }
 
-    class QueryTree {
-        String queryFragment;
-        Map<String, Set<String>> tree;
-        Map<String, String> types;
-        Set<String> root;
-    }
-
     class Traversal {
         Object data;
         Map<String, String> context;
@@ -48,88 +42,48 @@ public class Converter {
         //this method will convert a given graphql query into a nested SPARQL construct query
         // that will retrieve all relevant data in one go and put it into an in-memory jena store
 
-        QueryTree tree = new QueryTree();
+        JsonNode array = query2json(query);
 
-        Map<String, Set<String>> map = new HashMap<>();
-        Map<String, String> types = new HashMap<>();
-        tree.queryFragment = query;
-        tree.tree = map;
-        tree.types = types;
-
-      do {
-          tree = getQueryTree(tree);
-      } while (!tree.queryFragment.equals(""));
-
-      System.out.println(tree.root.toString());
-        System.out.println(tree.tree.toString());
-        System.out.println(tree.types.toString());
+        System.out.println(array.toString());
 
         return null;
     }
 
-    public QueryTree getQueryTree(QueryTree tree) {
-
-        String query = tree.queryFragment;
+    public JsonNode query2json(String query) {
 
         query = query
-                .replaceAll("\\s+", " ")
-                .replaceAll("\\s\\{", "{")
-                .replaceAll("\\{\\s", "{")
-                .replaceAll("\\s}", "}")
-                .replaceAll("}\\s", "}");
+                .replaceAll(",", " ")
+                .replaceAll("\\s*:\\s*", ":")
+                .replaceAll(",", " ")
+                .replaceAll("\\{", " { ")
+                .replaceAll("}", " } ")
+                .replaceAll("\\(", " ( ")
+                .replaceAll("\\)", " ) ")
+                .replaceAll("\\s+", " ");
 
-        Pattern namePtrn = Pattern.compile("([\\w\\\\(\\\\):\"\"]*\\{[\\w\\\\(\\\\):\"\"\\s]+})");
-        Matcher nameMtchr = namePtrn.matcher(query);
+        query = query
+                .replaceAll("\\{", "<")
+                .replaceAll("}", ">")
+                .replaceAll("(\\w+)\\s<([\\w\\s:\"_]*)>", "{\"name\":\"$1\", \"fields\":[$2]}")
+                .replaceAll("(\\w+)\\s\\(([\\w\\s:\"_]*)\\)\\s<([\\w\\s:\"_},{\\[\\]]*)>", "{\"name\":\"$1\", \"args\":{$2}, \"fields\":[$3]}")
+                .replaceAll("(\\w+) ", " {\"name\":\"$1\"} ")
+                .replaceAll("\\s(\\w+):", " \"$1\":")
+                .replaceAll("}\\s*\\{", "}, {")
+                .replaceAll("<", "[")
+                .replaceAll(">", "]");
 
-        nameMtchr.find();
-        String findOuterMatch = nameMtchr.group(1);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode object = mapper.readTree(query);
 
-        String findOuter = findOuterMatch
-                .replaceAll("\\(", "\\\\(")
-                .replaceAll("\\)", "\\\\)")
-                .replaceAll("\\{", "\\\\{");
-
-        Pattern namePtrn2 = Pattern.compile("\\{([\\w\\\\(\\\\):\"\"\\s]+)}");
-        Matcher nameMtchr2 = namePtrn2.matcher(findOuter);
-
-        nameMtchr2.find();
-        String findInner = nameMtchr2.group(1);
-
-        System.out.println("findOuter: " + findOuter);
-
-        System.out.println("findInner: " + findInner);
-
-        System.out.println("query before: " + query);
-
-        Set<String> refs = new HashSet<>(Arrays.asList(findInner.split("\\s")));
-
-        if (findOuterMatch.equals(query)) {
-            tree.queryFragment = "";
-            tree.root = refs;
-            return tree;
+            return object;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
 
-        int count = tree.tree.size() + 1;
-
-        String ref = ":" + count;
-
-        System.out.println("ref: " + ref);
-
-
-
-        query = query.replaceFirst(findOuter, ref);
-
-
-        System.out.println("query after: " + query);
-
-        tree.tree.put(ref, refs);
-        tree.root = refs;
-        tree.types.put(ref, findOuterMatch.split("\\{")[0]);
-        tree.queryFragment = query;
-
-        return tree;
-
     }
+
 
     public Object graphql2jsonld (Map<String, Object> dataObject) {
 

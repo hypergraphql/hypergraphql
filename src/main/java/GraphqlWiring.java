@@ -62,7 +62,9 @@ public class GraphqlWiring {
 
     private DataFetcher<String> idFetcher = environment -> {
         RDFNode thisNode = environment.getSource();
+        if (thisNode.asResource().isURIResource())
         return thisNode.asResource().getURI();
+        else return "blank node";
     };
 
     private DataFetcher<List<RDFNode>> subjectsOfObjectPropertyFetcher = environment -> {
