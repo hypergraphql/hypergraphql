@@ -76,14 +76,14 @@ public class SparqlClient {
         else return null;
     }
 
-    public List<String> getValuesOfDataProperty(String subject, String predicate) {
+    public List<Object> getValuesOfDataProperty(String subject, String predicate) {
 
         String queryString = String.format(queryValuesOfDataPropertyTemp, subject, predicate);
         ResultSet queryResults = sparqlSelect(queryString);
 
         if (queryResults!=null) {
 
-            List<String> valList = new ArrayList<>();
+            List<Object> valList = new ArrayList<>();
 
             while (queryResults.hasNext()) {
                 QuerySolution nextSol = queryResults.nextSolution();

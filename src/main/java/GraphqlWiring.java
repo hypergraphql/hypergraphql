@@ -10,9 +10,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static graphql.Scalars.GraphQLID;
-import static graphql.Scalars.GraphQLInt;
-import static graphql.Scalars.GraphQLString;
+import static graphql.Scalars.*;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
 
@@ -91,58 +89,20 @@ public class GraphqlWiring {
         return outgoing;
     };
 
-    private DataFetcher<List<String>> stringValuesFetcher = environment -> {
+    private DataFetcher<List<Object>> literalValuesFetcher = environment -> {
         String nodeUri = ((RDFNode) environment.getSource()).asResource().getURI();
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
         String predicateURI = config.context.get(predicate);
-        List<String> outgoing = client.getValuesOfDataProperty(nodeUri, predicateURI);
+        List<Object> outgoing = client.getValuesOfDataProperty(nodeUri, predicateURI);
         return outgoing;
     };
 
-    private DataFetcher<String> stringValueFetcher = environment -> {
+    private DataFetcher<Object> literalValueFetcher = environment -> {
         String nodeUri = ((RDFNode) environment.getSource()).asResource().getURI();
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
         String predicateURI = config.context.get(predicate);
         String outgoing = client.getValueOfDataProperty(nodeUri, predicateURI);
         return outgoing;
-    };
-
-    private DataFetcher<List<Integer>> integerValuesFetcher = environment -> {
-        String nodeUri = ((RDFNode) environment.getSource()).asResource().getURI();
-        String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-        String predicateURI = config.context.get(predicate);
-        List<String> outgoing = client.getValuesOfDataProperty(nodeUri, predicateURI);
-        List<Integer> result = new ArrayList<>();
-        outgoing.forEach(string -> result.add(Integer.valueOf(string)));
-        return result;
-    };
-
-    private DataFetcher<Integer> integerValueFetcher = environment -> {
-        String nodeUri = ((RDFNode) environment.getSource()).asResource().getURI();
-        String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-        String predicateURI = config.context.get(predicate);
-        String outgoing = client.getValueOfDataProperty(nodeUri, predicateURI);
-        Integer result = Integer.valueOf(outgoing);
-        return result;
-    };
-
-    private DataFetcher<List<Boolean>> booleanValuesFetcher = environment -> {
-        String nodeUri = ((RDFNode) environment.getSource()).asResource().getURI();
-        String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-        String predicateURI = config.context.get(predicate);
-        List<String> outgoing = client.getValuesOfDataProperty(nodeUri, predicateURI);
-        List<Boolean> result = new ArrayList<>();
-        outgoing.forEach(string -> result.add(Boolean.valueOf(string)));
-        return result;
-    };
-
-    private DataFetcher<Boolean> booleanValueFetcher = environment -> {
-        String nodeUri = ((RDFNode) environment.getSource()).asResource().getURI();
-        String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-        String predicateURI = config.context.get(predicate);
-        String outgoing = client.getValueOfDataProperty(nodeUri, predicateURI);
-        Boolean result = Boolean.valueOf(outgoing);
-        return result;
     };
 
     private GraphQLFieldDefinition _idField = newFieldDefinition()
@@ -187,10 +147,7 @@ public class GraphqlWiring {
 
         public GraphQLObjectType registerGraphQLType(TypeDefinition type) {
 
-           // //System.out.println(type);
             JsonNode typeJson = definitionToJson(type);
-
-            //System.out.println("Registering type: " + typeJson.toString());
 
             JsonNode fieldDefs = typeJson.get("fieldDefinitions");
 
@@ -254,18 +211,13 @@ public class GraphqlWiring {
 
     public GraphQLFieldDefinition registerGraphQLField(Boolean isQueryType, JsonNode fieldDef) {
         
-       //System.out.println("\nRegistering field: "+ fieldDef.toString());
 
        Boolean isList = fieldDef.get("type").get("_type").asText().equals("ListType");
 
        GraphQLOutputType refType = getOutputType(fieldDef.get("type"));
 
-        //System.out.println(isList);
-        //System.out.println(isQueryType);
 
        if (isQueryType) {
-           //System.out.println(fieldDef.get("inputValueDefinitions").toString());
-           //System.out.println(fieldDef.get("inputValueDefinitions").get(0).toString());
 
            if (fieldDef.get("inputValueDefinitions").get(0).get("name").asText().equals("uri")) {
                if (isList) return getBuiltField(fieldDef, refType, subjectsOfObjectPropertyFetcher);
@@ -276,40 +228,23 @@ public class GraphqlWiring {
                else return getBuiltField(fieldDef, refType, subjectOfDataPropertyFetcher);
            }
        } else {
-           String fieldName = (refType.getName()!=null) ? refType.getName() : fieldDef.get("type").get("type").get("name").asText();
-            if (fieldName.equals("String")) {
-                if (isList) return getBuiltField(fieldDef, refType, stringValuesFetcher);
-                else return getBuiltField(fieldDef, refType, stringValueFetcher);
-            }
-           if (fieldName.equals("ID")) {
-               if (isList) return getBuiltField(fieldDef, refType, stringValuesFetcher);
-               else return getBuiltField(fieldDef, refType, stringValueFetcher);
-           }
-           if (fieldName.equals("Int")) {
-               if (isList) return getBuiltField(fieldDef, refType, integerValuesFetcher);
-               else return getBuiltField(fieldDef, refType, integerValueFetcher);
-           }
-           if (fieldName.equals("Boolean")) {
-               if (isList) return getBuiltField(fieldDef, refType, booleanValuesFetcher);
-               else return getBuiltField(fieldDef, refType, booleanValueFetcher);
-           }
-           else {
-               if (isList) return getBuiltField(fieldDef, refType, objectsFetcher);
-               else return getBuiltField(fieldDef, refType, objectFetcher);
-           }
 
-       }
+           String fieldName = (refType.getName() != null) ? refType.getName() : fieldDef.get("type").get("type").get("name").asText();
+
+           if (fieldName.equals("String")||fieldName.equals("Int")||fieldName.equals("ID")||fieldName.equals("Boolean"))
+               {
+                   if (isList) return getBuiltField(fieldDef, refType, literalValuesFetcher);
+                   else return getBuiltField(fieldDef, refType, literalValueFetcher);
+               } else {
+                   if (isList) return getBuiltField(fieldDef, refType, objectsFetcher);
+                   else return getBuiltField(fieldDef, refType, objectFetcher);
+               }
+           }
 
        return null;
     }
 
     private GraphQLFieldDefinition getBuiltField(JsonNode fieldDef, GraphQLOutputType refType, DataFetcher fetcher) {
-
-        //System.out.println("\nNow building field:");
-        //System.out.println("\t"+fieldDef.get("name").asText());
-//        //System.out.println("\t"+registerGraphQLArgument(fieldDef.get("inputValueDefinitions").get(0)).toString());
-        //System.out.println("\t"+refType.toString());
-        //System.out.println("\t"+fetcher.toString());
 
         if (fieldDef.get("inputValueDefinitions").get(0)!=null) {
             GraphQLFieldDefinition field = newFieldDefinition()
@@ -317,8 +252,6 @@ public class GraphqlWiring {
                     .argument(registerGraphQLArgument(fieldDef.get("inputValueDefinitions").get(0)))
                     .type(refType)
                     .dataFetcher(fetcher).build();
-
-            //System.out.println("Registered field: " + field.toString());
             return field;
         } else {
             GraphQLFieldDefinition field = newFieldDefinition()
@@ -333,15 +266,11 @@ public class GraphqlWiring {
 
     private GraphQLOutputType getOutputType(JsonNode outputTypeDef) {
 
-        //System.out.println("Getting output type: " + outputTypeDef.toString());
-
-        System.out.println(outputTypeDef.toString());
 
         String typeName;
         if (outputTypeDef.has("type")) typeName = outputTypeDef.get("type").get("name").asText();
         else typeName = outputTypeDef.get("name").asText();
 
-        System.out.println(typeName);
         GraphQLOutputType ref;
         switch (typeName) {
             case "String":
@@ -353,12 +282,13 @@ public class GraphqlWiring {
             case "Int":
                 ref = GraphQLInt;
                 break;
+            case "Boolean":
+                ref = GraphQLBoolean;
+                break;
             default:
                 ref = new GraphQLTypeReference(typeName);
                 break;
         }
-
-        System.out.println(ref.getName());
 
         String arityType = outputTypeDef.get("_type").asText();
 
@@ -370,11 +300,8 @@ public class GraphqlWiring {
 
     public GraphQLArgument registerGraphQLArgument(JsonNode argDef) {
 
-        //System.out.println("Trying to register argument: " + argDef);
 
         GraphQLArgument arg = new GraphQLArgument(argDef.get("name").asText(), GraphQLString);
-
-        //System.out.println("Registered arg: " + arg.toString());
 
         return arg;
     }
