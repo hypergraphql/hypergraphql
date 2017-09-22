@@ -51,6 +51,7 @@ public class Converter {
 
     public JsonNode query2json(String query) {
 
+
         query = query
                 .replaceAll(",", " ")
                 .replaceAll("\\s*:\\s*", ":")
@@ -59,19 +60,36 @@ public class Converter {
                 .replaceAll("}", " } ")
                 .replaceAll("\\(", " ( ")
                 .replaceAll("\\)", " ) ")
-                .replaceAll("\\s+", " ");
+                .replaceAll("\\s+", " ")
+                .replaceAll("\\{", "<")
+                .replaceAll("}", ">");
+
+        Pattern namePtrn;
+        Matcher nameMtchr;
+
+        do {
+            namePtrn = Pattern.compile("(\\w+)\\s<([\\w\\s:\"_,}{\\[\\]]*)>");
+            nameMtchr = namePtrn.matcher(query);
+
+            query=query.replaceAll("(\\w+)\\s<([\\w\\s:\"_,}{\\[\\]]*)>", "{\"name\":\"$1\", \"fields\":[$2]}");
+
+        } while (nameMtchr.find());
+
+        do {
+        namePtrn = Pattern.compile("(\\w+)\\s\\(([\\w\\s:\"_]*)\\)\\s<([\\w\\s:\"_},{\\[\\]]*)>");
+        nameMtchr = namePtrn.matcher(query);
+
+        query=query.replaceAll("(\\w+)\\s\\(([\\w\\s:\"_]*)\\)\\s<([\\w\\s:\"_},{\\[\\]]*)>", "{\"name\":\"$1\", \"args\":{$2}, \"fields\":[$3]}");
+
+        } while (nameMtchr.find());
 
         query = query
-                .replaceAll("\\{", "<")
-                .replaceAll("}", ">")
-                .replaceAll("(\\w+)\\s<([\\w\\s:\"_]*)>", "{\"name\":\"$1\", \"fields\":[$2]}")
-                .replaceAll("(\\w+)\\s\\(([\\w\\s:\"_]*)\\)\\s<([\\w\\s:\"_},{\\[\\]]*)>", "{\"name\":\"$1\", \"args\":{$2}, \"fields\":[$3]}")
                 .replaceAll("(\\w+) ", " {\"name\":\"$1\"} ")
                 .replaceAll("\\s(\\w+):", " \"$1\":")
                 .replaceAll("}\\s*\\{", "}, {")
                 .replaceAll("<", "[")
                 .replaceAll(">", "]");
-
+        
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode object = mapper.readTree(query);
