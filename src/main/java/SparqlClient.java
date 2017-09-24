@@ -1,9 +1,15 @@
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.jena.atlas.web.auth.HttpAuthenticator;
 import org.apache.jena.atlas.web.auth.PreemptiveBasicAuthenticator;
 import org.apache.jena.atlas.web.auth.SimpleAuthenticator;
 import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,10 +25,14 @@ public class SparqlClient {
 
     String endpoint;
     HttpAuthenticator authenticator;
+    String user;
+    String password;
 
     public SparqlClient(Config config) {
         endpoint = config.sparql.endpoint;
         authenticator = new PreemptiveBasicAuthenticator(new SimpleAuthenticator(config.sparql.user, config.sparql.password.toCharArray()),false);
+        user = config.sparql.user;
+        password = config.sparql.password;
     }
 
     public ResultSet sparqlSelect(String queryString) {
@@ -178,6 +188,26 @@ public class SparqlClient {
             return subject;
         }
         else return null;
+    }
+
+    public Model getRdfModel(String query) {
+
+        Model model = ModelFactory.createDefaultModel();
+        try {
+            HttpResponse<String> response = Unirest.get(endpoint)
+                    .queryString("query", query)
+                    .queryString("reasoning", true)
+                    .basicAuth(user, password)
+                    .header("Accept", "application/rdf+xml").asString();
+
+            model.read(new ByteArrayInputStream(response.getBody().getBytes()), null, "RDF/XML");
+            return model;
+
+        } catch (UnirestException e) {
+            e.printStackTrace();
+            return null;
+        }
+
     }
 
 

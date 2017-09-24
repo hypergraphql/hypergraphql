@@ -1,8 +1,10 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
+import org.apache.jena.rdf.model.Model;
 import spark.ModelAndView;
 import spark.template.velocity.VelocityTemplateEngine;
 
@@ -43,15 +45,28 @@ public class Controller {
 
             String query = requestObject.get("query").asText();
 
-            if (!query.contains("IntrospectionQuery")) converter.graphql2sparql(query);
+            ExecutionResult qlResult;
 
-            Map<String, Object> result = new HashMap<>();
+            if (!query.contains("IntrospectionQuery")) {
+                String sparqlQuery = converter.graphql2sparql(query);
 
-            ExecutionResult qlResult = graphQL.execute(query);
+                SparqlClient client = new SparqlClient(config);
+                Model model = client.getRdfModel(sparqlQuery);
+
+                model.write(System.out);
+
+                ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                        .query(query)
+                        .context(model)
+                        .build();
+
+                qlResult = graphQL.execute(executionInput);
+
+            } else qlResult = graphQL.execute(query);
 
             Map<String, Object> data = qlResult.getData();
-
             List<GraphQLError> errors = qlResult.getErrors();
+            Map<String, Object> result = new HashMap<>();
             Map<Object, Object> extensions = qlResult.getExtensions();
 
             if (extensions==null) extensions = new HashMap<>();

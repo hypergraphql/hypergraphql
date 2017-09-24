@@ -45,7 +45,9 @@ public class Converter {
 
         System.out.println(array.toString());
 
-        return null;
+        String output = "CONSTRUCT {?x a <http://photobox.com/Book>}  WHERE {?x a <http://photobox.com/Book>}";
+
+        return output;
     }
 
     public JsonNode query2json(String query) {

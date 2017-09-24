@@ -3,6 +3,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.GraphQL;
 import graphql.language.*;
 import graphql.schema.*;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 
 import java.io.IOException;
