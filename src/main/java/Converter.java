@@ -36,18 +36,36 @@ public class Converter {
 
     }
 
-    public String graphql2sparql (String query) {
+    public Set<String> graphql2sparql (String query) {
 
         //this method will convert a given graphql query into a nested SPARQL construct query
         // that will retrieve all relevant data in one go and put it into an in-memory jena store
+
+        Set<String> output = new HashSet<>();
+
+        String topObjectPropertyTemplate = "CONSTRUCT { ?x <%1$s> <%2$s>  . %s } WHERE { ?x <%1$s> <%2$s> . %s }";
+        String topDataPropertyTemplate = "CONSTRUCT { ?x <%1$s> ?value . %s } WHERE { ?x <%1$s> ?value . FILTER (str(?value)=\"%2$s\"). %s }";
+
+        String test = String.format(topObjectPropertyTemplate, "a", "b");
+
+        System.out.println(test);
+
+        test = String.format(topDataPropertyTemplate, "pred", "val");
+
+        System.out.println(test);
 
         JsonNode array = query2json(query);
 
         System.out.println(array.toString());
 
-        String output = "CONSTRUCT {?x a <http://photobox.com/Book>}  WHERE {?x a <http://photobox.com/Book>}";
+        output.add("CONSTRUCT {?x a <http://photobox.com/Book>}  WHERE {?x a <http://photobox.com/Book>}");
 
         return output;
+    }
+
+    String[] getSubquery(JsonNode node) {
+
+       return null;
     }
 
     public JsonNode query2json(String query) {

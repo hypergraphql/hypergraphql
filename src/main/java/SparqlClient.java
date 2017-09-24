@@ -12,6 +12,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by szymon on 22/08/2017.
@@ -190,25 +191,24 @@ public class SparqlClient {
         else return null;
     }
 
-    public Model getRdfModel(String query) {
+    public Model getRdfModel(Set<String> queries) {
 
         Model model = ModelFactory.createDefaultModel();
-        try {
-            HttpResponse<String> response = Unirest.get(endpoint)
-                    .queryString("query", query)
-                    .queryString("reasoning", true)
-                    .basicAuth(user, password)
-                    .header("Accept", "application/rdf+xml").asString();
+        for (String constructQuery : queries) {
+            try {
+                HttpResponse<String> response = Unirest.get(endpoint)
+                        .queryString("query", constructQuery)
+                        .queryString("reasoning", true)
+                        .basicAuth(user, password)
+                        .header("Accept", "application/rdf+xml").asString();
 
-            model.read(new ByteArrayInputStream(response.getBody().getBytes()), null, "RDF/XML");
-            return model;
+                model.read(new ByteArrayInputStream(response.getBody().getBytes()), null, "RDF/XML");
 
-        } catch (UnirestException e) {
-            e.printStackTrace();
-            return null;
+            } catch (UnirestException e) {
+                e.printStackTrace();
+            }
         }
-
+        return model;
     }
-
 
 }

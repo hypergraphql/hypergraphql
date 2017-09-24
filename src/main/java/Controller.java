@@ -11,6 +11,7 @@ import spark.template.velocity.VelocityTemplateEngine;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static spark.Spark.*;
 
@@ -48,10 +49,10 @@ public class Controller {
             ExecutionResult qlResult;
 
             if (!query.contains("IntrospectionQuery")) {
-                String sparqlQuery = converter.graphql2sparql(query);
+                Set<String> sparqlQueries = converter.graphql2sparql(query);
 
                 SparqlClient client = new SparqlClient(config);
-                Model model = client.getRdfModel(sparqlQuery);
+                Model model = client.getRdfModel(sparqlQueries);
 
                 model.write(System.out);
 
