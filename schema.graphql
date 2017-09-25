@@ -20,7 +20,7 @@ type OptionSpace {
 }
 
 type OptionGroup {
-  hide: Boolean!
+  hide: Boolean
   uri: String
   groupSequence: String
   options: [Option]

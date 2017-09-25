@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.language.TypeDefinition;
 
 import java.io.IOException;
@@ -43,12 +44,10 @@ public class Converter {
 
         Set<String> output = new HashSet<>();
 
-        String topObjectPropertyTemplate = "CONSTRUCT { ?x <%1$s> <%2$s>  . \n %3$s } WHERE { ?x <%1$s> <%2$s> . \n %4$s }";
-        String topDataPropertyTemplate = "CONSTRUCT { ?x <%1$s> ?value . \n %3$s } WHERE { ?x <%1$s> ?value . FILTER (str(?value)=\"%2$s\"). \n %4$s }";
+        String topObjectPropertyTemplate = "CONSTRUCT { ?x <%1$s> <%2$s>  . %3$s } WHERE { ?x <%1$s> <%2$s> . %4$s }";
+        String topDataPropertyTemplate = "CONSTRUCT { ?x <%1$s> ?value . %3$s } WHERE { ?x <%1$s> ?value . FILTER (str(?value)=\"%2$s\"). %4$s }";
 
         JsonNode jsonQuery = query2json(query);
-
-      //  System.out.println(jsonQuery.toString());
 
         for (JsonNode root : jsonQuery) {
             String[] triplePatterns = getSubquery(root, "?x");
@@ -85,8 +84,8 @@ public class Converter {
 
     String[] getSubquery(JsonNode node, String parentVar) {
 
-        String constructPattern = "%1$s <%2$s> %3$s . \n ";
-        String optionalPattern = "OPTIONAL { %1$s <%2$s> %3$s . \n%4$s } ";
+        String constructPattern = "%1$s <%2$s> %3$s . ";
+        String optionalPattern = "OPTIONAL { %1$s <%2$s> %3$s . %4$s } ";
 
         String[] output = new String[2];
 
@@ -163,10 +162,10 @@ public class Converter {
         } while (nameMtchr.find());
 
         do {
-        namePtrn = Pattern.compile("(\\w+)\\s\\(([\\w\\s:\"_]*)\\)\\s<([\\w\\s:\"_},{\\[\\]]*)>");
+        namePtrn = Pattern.compile("(\\w+)\\s\\(([\\w\\s:\"_\\-]*)\\)\\s<([\\w\\s:\"_},{\\[\\]]*)>");
         nameMtchr = namePtrn.matcher(query);
 
-        query=query.replaceAll("(\\w+)\\s\\(([\\w\\s:\"_]*)\\)\\s<([\\w\\s:\"_},{\\[\\]]*)>", "{\"name\":\"$1\", \"args\":{$2}, \"fields\":[$3]}");
+        query=query.replaceAll("(\\w+)\\s\\(([\\w\\s:\"_\\-]*)\\)\\s<([\\w\\s:\"_},{\\[\\]]*)>", "{\"name\":\"$1\", \"args\":{$2}, \"fields\":[$3]}");
 
         } while (nameMtchr.find());
 
@@ -199,11 +198,18 @@ public class Converter {
             while (queryFields.hasNext()) {
 
                 String field = queryFields.next();
+                String newType = "http://this-graphql-server/" + field;
 
                 Converter.Traversal restructured = jsonRewrite(dataObject.get(field));
 
-                if (restructured.data.getClass() == ArrayList.class) graphData.addAll((ArrayList<Object>) restructured.data);
-                if (restructured.data.getClass() == LinkedHashMap.class) graphData.add(restructured.data);
+                if (restructured.data.getClass() == ArrayList.class) {
+                    for (Object data : (ArrayList<Object>) restructured.data) ((HashMap) data).put("@type", newType);
+                    graphData.addAll((ArrayList<Object>) restructured.data);
+                }
+                if (restructured.data.getClass() == HashMap.class) {
+                    ((HashMap) restructured.data).put("@type", newType);
+                    graphData.add(restructured.data);
+                }
 
                 Set<String> newContext = restructured.context.keySet();
 
@@ -225,7 +231,7 @@ public class Converter {
         if (dataObject == null) {
 
             Converter.Traversal restructured = new Converter.Traversal();
-            restructured.data = dataObject;
+            restructured.data = new ArrayList<>();
             restructured.context = new HashMap<>();
 
             return restructured;

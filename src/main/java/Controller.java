@@ -47,12 +47,11 @@ public class Controller {
 
             ExecutionResult qlResult;
 
+            Set<String> sparqlQueries = null;
             if (!query.contains("IntrospectionQuery")) {
-                Set<String> sparqlQueries = converter.graphql2sparql(query);
+                sparqlQueries = converter.graphql2sparql(query);
 
                 SparqlClient client = new SparqlClient(config, sparqlQueries);
-
-               client.model.write(System.out);
 
                 ExecutionInput executionInput = ExecutionInput.newExecutionInput()
                         .query(query)
@@ -69,9 +68,11 @@ public class Controller {
             Map<Object, Object> extensions = qlResult.getExtensions();
 
             if (extensions==null) extensions = new HashMap<>();
-           if (data!=null&&!data.containsKey("__schema")) {
+
+            if (data!=null && !data.containsKey("__schema")) {
 
                 extensions.put("json-ld", converter.graphql2jsonld(data));
+                extensions.put("sparql-queries", sparqlQueries);
             }
 
             if (data!=null) result.put("data", data);
