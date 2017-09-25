@@ -103,29 +103,32 @@ public class Converter {
 
             for (JsonNode field : fields) {
 
-                n++;
+                if (!JSONLD_VOC.containsKey(field.get("name").asText())) {
 
-                String childVar = parentVar + "_" + n;
+                    n++;
 
-                String[] grandChildPatterns = getSubquery(field, childVar);
+                    String childVar = parentVar + "_" + n;
 
-                String childConstructPattern = String.format(constructPattern,
-                        parentVar,
-                        globalContext.get(field.get("name").asText()),
-                        childVar
-                        );
+                    String[] grandChildPatterns = getSubquery(field, childVar);
 
-                String childOptionalPattern = String.format(optionalPattern,
-                        parentVar,
-                        globalContext.get(field.get("name").asText()),
-                        childVar,
-                        grandChildPatterns[1]
-                );
+                    String childConstructPattern = String.format(constructPattern,
+                            parentVar,
+                            globalContext.get(field.get("name").asText()),
+                            childVar
+                    );
 
-                childConstruct.add(childConstructPattern);
-                childConstruct.add(grandChildPatterns[0]);
+                    String childOptionalPattern = String.format(optionalPattern,
+                            parentVar,
+                            globalContext.get(field.get("name").asText()),
+                            childVar,
+                            grandChildPatterns[1]
+                    );
 
-                childOptional.add(childOptionalPattern);
+                    childConstruct.add(childConstructPattern);
+                    childConstruct.add(grandChildPatterns[0]);
+
+                    childOptional.add(childOptionalPattern);
+                }
             }
 
             output[0] = String.join(" ", childConstruct);
