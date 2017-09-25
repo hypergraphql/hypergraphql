@@ -69,7 +69,7 @@ public class Controller {
             Map<Object, Object> extensions = qlResult.getExtensions();
 
             if (extensions==null) extensions = new HashMap<>();
-            if (data!=null&&!data.containsKey("__schema")) {
+           if (data!=null&&!data.containsKey("__schema")) {
 
                 extensions.put("json-ld", converter.graphql2jsonld(data));
             }

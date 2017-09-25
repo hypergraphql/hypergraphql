@@ -186,13 +186,10 @@ public class Converter {
             e.printStackTrace();
             return null;
         }
-
     }
 
 
     public Object graphql2jsonld (Map<String, Object> dataObject) {
-
-
 
             ArrayList<Object> graphData = new ArrayList<>();
             Map<String,String> graphContext = new HashMap<>();
@@ -213,7 +210,6 @@ public class Converter {
                 for (String key : newContext) {
                     graphContext.put(key, restructured.context.get(key));
                 }
-
             }
 
             Map<String, Object> output = new HashMap<>();
@@ -226,9 +222,16 @@ public class Converter {
 
     public Converter.Traversal jsonRewrite(Object dataObject) {
 
-        if (dataObject.getClass()==ArrayList.class) {
+        if (dataObject == null) {
 
-            //System.out.println("It's an array");
+            Converter.Traversal restructured = new Converter.Traversal();
+            restructured.data = dataObject;
+            restructured.context = new HashMap<>();
+
+            return restructured;
+        }
+
+        if (dataObject.getClass()==ArrayList.class) {
 
             ArrayList<Object> newList = new ArrayList<>();
             Map<String, String> context = new HashMap<>();
@@ -246,7 +249,6 @@ public class Converter {
 
         if (dataObject.getClass()!=LinkedHashMap.class) {
 
-            // System.out.println("It's not an array nor a map.");
 
             Converter.Traversal restructured = new Converter.Traversal();
             restructured.data = dataObject;
@@ -254,8 +256,6 @@ public class Converter {
 
             return restructured;
         } else {
-
-            //System.out.println("It's a map.");
 
             Map<String, Object> mapObject = (Map<String, Object>) dataObject;
             Map<String, Object> targetObject = new HashMap<>();

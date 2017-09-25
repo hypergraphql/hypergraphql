@@ -5,7 +5,6 @@ type Query {
 
 type Product {
   id: ID!
-  fake: String
   name: String
   brand: String
   weighting: Int
@@ -21,7 +20,7 @@ type OptionSpace {
 }
 
 type OptionGroup {
-  hide: Boolean
+  hide: Boolean!
   uri: String
   groupSequence: String
   options: [Option]

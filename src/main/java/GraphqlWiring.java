@@ -36,7 +36,6 @@ public class GraphqlWiring {
 
     public GraphqlWiring(Config config) {
 
-    //    this.client = new SparqlClient(config);
         this.config = config;
         this.converter = new Converter(config);
 
@@ -152,7 +151,6 @@ public class GraphqlWiring {
         FetchParams params = new FetchParams(environment);
         Object outgoing = params.client.getValueOfDataProperty(params.nodeUri, params.predicateURI);
 
-        System.out.println(outgoing);
         return outgoing;
     };
 
@@ -181,7 +179,6 @@ public class GraphqlWiring {
                     .fields(builtFields)
                     .field(_idField)
                     .build();
-
 
             return newObjectType;
         }
@@ -237,42 +234,37 @@ public class GraphqlWiring {
                     .dataFetcher(fetcher).build();
             return field;
         }
-
-
     }
 
     private GraphQLOutputType getOutputType(JsonNode outputTypeDef) {
 
+        String outputType = outputTypeDef.get("_type").asText();
 
-        String typeName;
-        if (outputTypeDef.has("type")) typeName = outputTypeDef.get("type").get("name").asText();
-        else typeName = outputTypeDef.get("name").asText();
-
-        GraphQLOutputType ref;
-        switch (typeName) {
-            case "String":
-                ref = GraphQLString;
-                break;
-            case "ID":
-                ref = GraphQLID;
-                break;
-            case "Int":
-                ref = GraphQLInt;
-                break;
-            case "Boolean":
-                ref = GraphQLBoolean;
-                break;
-            default:
-                ref = new GraphQLTypeReference(typeName);
-                break;
+        if (outputType.equals("ListType")) {
+            return new GraphQLList ( getOutputType(outputTypeDef.get("type")) );
         }
 
-        String arityType = outputTypeDef.get("_type").asText();
+        if (outputType.equals("NonNullType")) {
+            return new GraphQLNonNull ( getOutputType(outputTypeDef.get("type")) );
+        }
 
-        if (arityType.equals("ListType"))
-        return new GraphQLList ( ref );
-        else return ref;
+        if (outputType.equals("TypeName")) {
+            String typeName = outputTypeDef.get("name").asText();
 
+            switch (typeName) {
+                case "String":
+                    return GraphQLString;
+                case "ID":
+                    return GraphQLID;
+                case "Int":
+                    return GraphQLInt;
+                case "Boolean":
+                    return GraphQLBoolean;
+                default:
+                    return new GraphQLTypeReference(typeName);
+            }
+        }
+        return null;
     }
 
     public GraphQLArgument registerGraphQLArgument(JsonNode argDef) {
