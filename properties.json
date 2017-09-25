@@ -8,7 +8,7 @@
             "queryLimit": 10000
     },
     "graphql": {
-        "port": 8001,
+        "port": 8009,
         "path": "/",
         "graphiql": "/graphql"
     }

@@ -54,7 +54,7 @@ public class Controller {
                 SparqlClient client = new SparqlClient(config);
                 Model model = client.getRdfModel(sparqlQueries);
 
-                model.write(System.out);
+              //  model.write(System.out);
 
                 ExecutionInput executionInput = ExecutionInput.newExecutionInput()
                         .query(query)

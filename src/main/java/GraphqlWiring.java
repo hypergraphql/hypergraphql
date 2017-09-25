@@ -73,7 +73,6 @@ public class GraphqlWiring {
         String objectUri = config.context.get(object);
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
         String predicateURI = config.context.get(predicate);
-        System.out.println(predicateURI);
         List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter(predicateURI, objectUri);
         return subjects;
     };

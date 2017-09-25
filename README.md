@@ -1,7 +1,7 @@
 # graphql-sparql-java
 This is a working repository for a GraphQL server over a SPARQL endpoint, implemented in Java.
 
-The GraphQL server starts by default at http://localhost:8001 and the GraphiQL IDE at http://localhost:8001/graphql. For testing purposes is currently pointing to the following SPARQL endpoint: 
+The GraphQL server starts by default at http://localhost:8009 and the GraphiQL IDE at http://localhost:8009/graphql. For testing purposes is currently pointing to the following SPARQL endpoint:
 http://ec2-52-23-193-209.compute-1.amazonaws.com:5820/photobox/query 
 
 (see properties.json file)

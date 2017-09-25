@@ -43,29 +43,97 @@ public class Converter {
 
         Set<String> output = new HashSet<>();
 
-        String topObjectPropertyTemplate = "CONSTRUCT { ?x <%1$s> <%2$s>  . %s } WHERE { ?x <%1$s> <%2$s> . %s }";
-        String topDataPropertyTemplate = "CONSTRUCT { ?x <%1$s> ?value . %s } WHERE { ?x <%1$s> ?value . FILTER (str(?value)=\"%2$s\"). %s }";
+        String topObjectPropertyTemplate = "CONSTRUCT { ?x <%1$s> <%2$s>  . \n %3$s } WHERE { ?x <%1$s> <%2$s> . \n %4$s }";
+        String topDataPropertyTemplate = "CONSTRUCT { ?x <%1$s> ?value . \n %3$s } WHERE { ?x <%1$s> ?value . FILTER (str(?value)=\"%2$s\"). \n %4$s }";
 
-        String test = String.format(topObjectPropertyTemplate, "a", "b");
+        JsonNode jsonQuery = query2json(query);
 
-        System.out.println(test);
+      //  System.out.println(jsonQuery.toString());
 
-        test = String.format(topDataPropertyTemplate, "pred", "val");
+        for (JsonNode root : jsonQuery) {
+            String[] triplePatterns = getSubquery(root, "?x");
 
-        System.out.println(test);
+            String constructQuery = null;
 
-        JsonNode array = query2json(query);
+            if (root.get("args").has("uri")) {
 
-        System.out.println(array.toString());
+                constructQuery = String.format(topObjectPropertyTemplate,
+                        globalContext.get(root.get("name").asText()),
+                        globalContext.get(root.get("args").get("uri").asText()),
+                        triplePatterns[0],
+                        triplePatterns[1]);
 
-        output.add("CONSTRUCT {?x a <http://photobox.com/Book>}  WHERE {?x a <http://photobox.com/Book>}");
+            }
+
+            if (root.get("args").has("value")) {
+
+                constructQuery = String.format(topDataPropertyTemplate,
+                        globalContext.get(root.get("name").asText()),
+                        root.get("args").get("value").asText(),
+                        triplePatterns[0],
+                        triplePatterns[1]);
+
+            }
+
+        //    System.out.println(constructQuery);
+
+            output.add(constructQuery);
+        }
 
         return output;
     }
 
-    String[] getSubquery(JsonNode node) {
+    String[] getSubquery(JsonNode node, String parentVar) {
 
-       return null;
+        String constructPattern = "%1$s <%2$s> %3$s . \n ";
+        String optionalPattern = "OPTIONAL { %1$s <%2$s> %3$s . \n%4$s } ";
+
+        String[] output = new String[2];
+
+        JsonNode fields = node.get("fields");
+
+        if (fields==null) {
+            output[0] = "";
+            output[1] = "";
+        } else {
+
+            int n = 0;
+
+            List<String> childConstruct = new ArrayList<>();
+            List<String> childOptional = new ArrayList<>();
+
+            for (JsonNode field : fields) {
+
+                n++;
+
+                String childVar = parentVar + "_" + n;
+
+                String[] grandChildPatterns = getSubquery(field, childVar);
+
+                String childConstructPattern = String.format(constructPattern,
+                        parentVar,
+                        globalContext.get(field.get("name").asText()),
+                        childVar
+                        );
+
+                String childOptionalPattern = String.format(optionalPattern,
+                        parentVar,
+                        globalContext.get(field.get("name").asText()),
+                        childVar,
+                        grandChildPatterns[1]
+                );
+
+                childConstruct.add(childConstructPattern);
+                childConstruct.add(grandChildPatterns[0]);
+
+                childOptional.add(childOptionalPattern);
+            }
+
+            output[0] = String.join(" ", childConstruct);
+            output[1] = String.join(" ", childOptional);
+
+        }
+        return output;
     }
 
     public JsonNode query2json(String query) {
