@@ -4,7 +4,6 @@ import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
-import org.apache.jena.rdf.model.Model;
 import spark.ModelAndView;
 import spark.template.velocity.VelocityTemplateEngine;
 
@@ -51,14 +50,13 @@ public class Controller {
             if (!query.contains("IntrospectionQuery")) {
                 Set<String> sparqlQueries = converter.graphql2sparql(query);
 
-                SparqlClient client = new SparqlClient(config);
-                Model model = client.getRdfModel(sparqlQueries);
+                SparqlClient client = new SparqlClient(config, sparqlQueries);
 
-              //  model.write(System.out);
+               client.model.write(System.out);
 
                 ExecutionInput executionInput = ExecutionInput.newExecutionInput()
                         .query(query)
-                        .context(model)
+                        .context(client)
                         .build();
 
                 qlResult = graphQL.execute(executionInput);

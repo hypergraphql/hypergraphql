@@ -28,20 +28,43 @@ public class SparqlClient {
     HttpAuthenticator authenticator;
     String user;
     String password;
+    Model model;
 
-    public SparqlClient(Config config) {
+//    public SparqlClient(Config config) {
+//        endpoint = config.sparql.endpoint;
+//        authenticator = new PreemptiveBasicAuthenticator(new SimpleAuthenticator(config.sparql.user, config.sparql.password.toCharArray()),false);
+//        user = config.sparql.user;
+//        password = config.sparql.password;
+//    }
+
+    public SparqlClient(Config config, Set<String> queries) {
         endpoint = config.sparql.endpoint;
         authenticator = new PreemptiveBasicAuthenticator(new SimpleAuthenticator(config.sparql.user, config.sparql.password.toCharArray()),false);
         user = config.sparql.user;
         password = config.sparql.password;
+        model = ModelFactory.createDefaultModel();
+
+        for (String constructQuery : queries) {
+            try {
+                HttpResponse<String> response = Unirest.get(endpoint)
+                        .queryString("query", constructQuery)
+                        .queryString("reasoning", true)
+                        .basicAuth(user, password)
+                        .header("Accept", "application/rdf+xml").asString();
+
+                model.read(new ByteArrayInputStream(response.getBody().getBytes()), null, "RDF/XML");
+
+            } catch (UnirestException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     public ResultSet sparqlSelect(String queryString) {
 
         System.out.println(queryString);
-        Query query = QueryFactory.create(queryString);
-
-        QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, query, authenticator);
+        QueryExecution qexec = QueryExecutionFactory.create(queryString, model);
         try {
             ResultSet results = qexec.execSelect();
             return results;
@@ -76,7 +99,7 @@ public class SparqlClient {
         String queryString = String.format(queryValuesOfObjectPropertyTemp, subject, predicate);
         ResultSet queryResults = sparqlSelect(queryString);
 
-        if (queryResults!=null) {
+        if (queryResults!=null  && queryResults.hasNext() ) {
 
             QuerySolution nextSol = queryResults.nextSolution();
             RDFNode object = nextSol.get("?object");
@@ -111,14 +134,13 @@ public class SparqlClient {
         String queryString = String.format(queryValuesOfDataPropertyTemp, subject, predicate);
         ResultSet queryResults = sparqlSelect(queryString);
 
-        if (queryResults!=null) {
+        if (queryResults!=null && queryResults.hasNext()) {
 
             QuerySolution nextSol = queryResults.nextSolution();
             String value = nextSol.get("?value").toString();
 
             return value;
         }
-
         else return null;
     }
 
@@ -191,24 +213,24 @@ public class SparqlClient {
         else return null;
     }
 
-    public Model getRdfModel(Set<String> queries) {
-
-        Model model = ModelFactory.createDefaultModel();
-        for (String constructQuery : queries) {
-            try {
-                HttpResponse<String> response = Unirest.get(endpoint)
-                        .queryString("query", constructQuery)
-                        .queryString("reasoning", true)
-                        .basicAuth(user, password)
-                        .header("Accept", "application/rdf+xml").asString();
-
-                model.read(new ByteArrayInputStream(response.getBody().getBytes()), null, "RDF/XML");
-
-            } catch (UnirestException e) {
-                e.printStackTrace();
-            }
-        }
-        return model;
-    }
+//    public Model getRdfModel(Set<String> queries) {
+//
+//        Model model = ModelFactory.createDefaultModel();
+//        for (String constructQuery : queries) {
+//            try {
+//                HttpResponse<String> response = Unirest.get(endpoint)
+//                        .queryString("query", constructQuery)
+//                        .queryString("reasoning", true)
+//                        .basicAuth(user, password)
+//                        .header("Accept", "application/rdf+xml").asString();
+//
+//                model.read(new ByteArrayInputStream(response.getBody().getBytes()), null, "RDF/XML");
+//
+//            } catch (UnirestException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        return model;
+//    }
 
 }

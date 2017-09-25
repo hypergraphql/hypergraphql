@@ -16,5 +16,7 @@
     "options": "http://photobox.com/option",
     "groupSequence": "http://photobox.com/groupSequence",
     "name": "http://photobox.com/enName",
+    "fake": "http://photobox.com/fake",
+    "hide": "http://photobox.com/hide",
     "optionSequence": "http://photobox.com/optionSequence"
 }

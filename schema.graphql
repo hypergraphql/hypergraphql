@@ -5,6 +5,7 @@ type Query {
 
 type Product {
   id: ID!
+  fake: String
   name: String
   brand: String
   weighting: Int

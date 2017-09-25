@@ -3,6 +3,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.GraphQL;
 import graphql.language.*;
 import graphql.schema.*;
+import org.apache.jena.rdf.model.AnonId;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 
@@ -28,7 +29,6 @@ public class GraphqlWiring {
     //public static Map<String, String> NAME_TO_URI_MAP = new HashMap<>();
     //public static Set<String> GRAPHQL_NAMES = new HashSet<>();
 
-    public SparqlClient client;
     public Config config;
     public GraphQLSchema schema;
     public Converter converter;
@@ -36,7 +36,7 @@ public class GraphqlWiring {
 
     public GraphqlWiring(Config config) {
 
-        this.client = new SparqlClient(config);
+    //    this.client = new SparqlClient(config);
         this.config = config;
         this.converter = new Converter(config);
 
@@ -61,6 +61,23 @@ public class GraphqlWiring {
                 .build(schemaTypes);
     }
 
+    class FetchParams {
+        String nodeUri;
+        String predicateURI;
+        SparqlClient client;
+
+        public FetchParams(DataFetchingEnvironment environment) {
+            RDFNode parent = environment.getSource();
+            if (parent.isAnon()) {
+                nodeUri = "_:" + ((RDFNode) environment.getSource()).asResource().getId();
+            } else nodeUri = ((RDFNode) environment.getSource()).asResource().getURI();
+
+            String predicate = ((Field) environment.getFields().toArray()[0]).getName();
+            predicateURI = config.context.get(predicate);
+            client = environment.getContext();
+        }
+    }
+
     private DataFetcher<String> idFetcher = environment -> {
         RDFNode thisNode = environment.getSource();
         if (thisNode.asResource().isURIResource())
@@ -73,6 +90,7 @@ public class GraphqlWiring {
         String objectUri = config.context.get(object);
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
         String predicateURI = config.context.get(predicate);
+        SparqlClient client = environment.getContext();
         List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter(predicateURI, objectUri);
         return subjects;
     };
@@ -82,6 +100,7 @@ public class GraphqlWiring {
         String objectUri = config.context.get(object);
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
         String predicateURI = config.context.get(predicate);
+        SparqlClient client = environment.getContext();
         RDFNode subject = client.getSubjectOfObjectPropertyFilter(predicateURI, objectUri);
         return subject;
     };
@@ -90,6 +109,7 @@ public class GraphqlWiring {
         String value = environment.getArgument("value");
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
         String predicateURI = config.context.get(predicate);
+        SparqlClient client = environment.getContext();
         List<RDFNode> subjects = client.getSubjectsOfDataPropertyFilter(predicateURI, value);
         return subjects;
     };
@@ -98,41 +118,41 @@ public class GraphqlWiring {
         String value = environment.getArgument("value");
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
         String predicateURI = config.context.get(predicate);
+        SparqlClient client = environment.getContext();
         RDFNode subject = client.getSubjectOfDataPropertyFilter(predicateURI, value);
         return subject;
     };
 
     private DataFetcher<List<RDFNode>> objectsFetcher = environment -> {
 
-        String nodeUri = ((RDFNode) environment.getSource()).asResource().getURI();
-        String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-        String predicateURI = config.context.get(predicate);
-        List<RDFNode> outgoing = client.getValuesOfObjectProperty(nodeUri, predicateURI);
+        FetchParams params = new FetchParams(environment);
+        List<RDFNode> outgoing = params.client.getValuesOfObjectProperty(params.nodeUri, params.predicateURI);
         return outgoing;
+
     };
 
     private DataFetcher<RDFNode> objectFetcher = environment -> {
 
-        String nodeUri = ((RDFNode) environment.getSource()).asResource().getURI();
-        String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-        String predicateURI = config.context.get(predicate);
-        RDFNode outgoing = client.getValueOfObjectProperty(nodeUri, predicateURI);
+        FetchParams params = new FetchParams(environment);
+        RDFNode outgoing = params.client.getValueOfObjectProperty(params.nodeUri, params.predicateURI);
+
         return outgoing;
     };
 
     private DataFetcher<List<Object>> literalValuesFetcher = environment -> {
-        String nodeUri = ((RDFNode) environment.getSource()).asResource().getURI();
-        String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-        String predicateURI = config.context.get(predicate);
-        List<Object> outgoing = client.getValuesOfDataProperty(nodeUri, predicateURI);
+
+        FetchParams params = new FetchParams(environment);
+        List<Object> outgoing = params.client.getValuesOfDataProperty(params.nodeUri, params.predicateURI);
+
         return outgoing;
     };
 
     private DataFetcher<Object> literalValueFetcher = environment -> {
-        String nodeUri = ((RDFNode) environment.getSource()).asResource().getURI();
-        String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-        String predicateURI = config.context.get(predicate);
-        String outgoing = client.getValueOfDataProperty(nodeUri, predicateURI);
+
+        FetchParams params = new FetchParams(environment);
+        Object outgoing = params.client.getValueOfDataProperty(params.nodeUri, params.predicateURI);
+
+        System.out.println(outgoing);
         return outgoing;
     };
 
@@ -173,7 +193,6 @@ public class GraphqlWiring {
        Boolean isList = fieldDef.get("type").get("_type").asText().equals("ListType");
 
        GraphQLOutputType refType = getOutputType(fieldDef.get("type"));
-
 
        if (isQueryType) {
 
