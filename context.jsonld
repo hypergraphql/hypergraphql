@@ -12,5 +12,6 @@
     "city": "http://dbpedia.org/ontology/City",
     "leader": "http://dbpedia.org/ontology/leaderName",
     "company": "http://dbpedia.org/ontology/Company",
-    "locationCity": "http://dbpedia.org/ontology/locationCity"
+    "locationCity": "http://dbpedia.org/ontology/locationCity",
+    "owner": "http://dbpedia.org/ontology/owner"
 }

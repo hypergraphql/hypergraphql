@@ -18,6 +18,7 @@ type Company {
     name: [String]
     label: [String]
     locationCity: [City]
+    owner: [Person]
 }
 
 type City {
