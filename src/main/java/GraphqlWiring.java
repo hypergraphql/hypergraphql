@@ -84,7 +84,15 @@ public class GraphqlWiring {
         else return "blank node";
     };
 
-    private DataFetcher<List<RDFNode>> subjectsOfObjectPropertyFetcher = environment -> {
+    private DataFetcher<List<RDFNode>> instancesOfTypeFetcher = environment -> {
+        String type = ((Field) environment.getFields().toArray()[0]).getName();
+        String typeURI = config.context.get(type);
+        SparqlClient client = environment.getContext();
+        List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", typeURI);
+        return subjects;
+    };
+
+   /* private DataFetcher<List<RDFNode>> subjectsOfObjectPropertyFetcher = environment -> {
         String object = environment.getArgument("uri");
         String objectUri = config.context.get(object);
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
@@ -121,6 +129,7 @@ public class GraphqlWiring {
         RDFNode subject = client.getSubjectOfDataPropertyFilter(predicateURI, value);
         return subject;
     };
+    */
 
     private DataFetcher<List<RDFNode>> objectsFetcher = environment -> {
 
@@ -193,6 +202,14 @@ public class GraphqlWiring {
 
        if (isQueryType) {
 
+
+           if (isList) return getBuiltField(fieldDef, refType, instancesOfTypeFetcher);
+           else {
+               System.out.println("All queries must return array types.");
+               System.exit(1);
+           }
+
+/*
            if (fieldDef.get("inputValueDefinitions").get(0).get("name").asText().equals("uri")) {
                if (isList) return getBuiltField(fieldDef, refType, subjectsOfObjectPropertyFetcher);
                else return getBuiltField(fieldDef, refType, subjectOfObjectPropertyFetcher);
@@ -200,7 +217,7 @@ public class GraphqlWiring {
            if (fieldDef.get("inputValueDefinitions").get(0).get("name").asText().equals("value")) {
                if (isList) return getBuiltField(fieldDef, refType, subjectsOfDataPropertyFetcher);
                else return getBuiltField(fieldDef, refType, subjectOfDataPropertyFetcher);
-           }
+           } */
        } else {
 
            String fieldName = (refType.getName() != null) ? refType.getName() : fieldDef.get("type").get("type").get("name").asText();

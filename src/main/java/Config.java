@@ -71,19 +71,16 @@ class SparqlConfig {
     public String endpoint;
     public String user;
     public String password;
-    public Integer queryLimit;
 
     @JsonCreator
     public SparqlConfig(@JsonProperty("endpoint") String endpoint,
                   @JsonProperty("user") String user,
-                  @JsonProperty("password") String password,
-                  @JsonProperty("queryLimit") Integer queryLimit
+                  @JsonProperty("password") String password
     )
     {
         this.endpoint = endpoint;
         this.user = user;
         this.password = password;
-        this.queryLimit = queryLimit;
     }
 
 }

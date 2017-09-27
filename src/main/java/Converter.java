@@ -1,6 +1,5 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.language.TypeDefinition;
 
 import java.io.IOException;
@@ -44,8 +43,11 @@ public class Converter {
 
         Set<String> output = new HashSet<>();
 
-        String topObjectPropertyTemplate = "CONSTRUCT { ?x <%1$s> <%2$s>  . %3$s } WHERE { ?x <%1$s> <%2$s> . %4$s }";
-        String topDataPropertyTemplate = "CONSTRUCT { ?x <%1$s> ?value . %3$s } WHERE { ?x <%1$s> ?value . FILTER (str(?value)=\"%2$s\"). %4$s }";
+       // String topObjectPropertyTemplate = "CONSTRUCT { ?x <%1$s> <%2$s>  . %3$s } WHERE { ?x <%1$s> <%2$s> . %4$s }";
+       // String topDataPropertyTemplate = "CONSTRUCT { ?x <%1$s> ?value . %3$s } WHERE { ?x <%1$s> ?value . FILTER (str(?value)=\"%2$s\"). %4$s }";
+
+        String topTemplate = "CONSTRUCT { ?x a <%1$s>  . %2$s } WHERE { ?x a <%1$s> . %3$s }";
+
 
         JsonNode jsonQuery = query2json(query);
 
@@ -54,7 +56,12 @@ public class Converter {
 
             String constructQuery = null;
 
-            if (root.get("args").has("uri")) {
+            constructQuery = String.format(topTemplate,
+                    globalContext.get(root.get("name").asText()),
+                    triplePatterns[0],
+                    triplePatterns[1]);
+
+       /*     if (root.get("args").has("uri")) {
 
                 constructQuery = String.format(topObjectPropertyTemplate,
                         globalContext.get(root.get("name").asText()),
@@ -73,6 +80,7 @@ public class Converter {
                         triplePatterns[1]);
 
             }
+            */
 
         //    System.out.println(constructQuery);
 
@@ -201,7 +209,7 @@ public class Converter {
             while (queryFields.hasNext()) {
 
                 String field = queryFields.next();
-                String newType = "http://this-graphql-server/" + field;
+                String newType = globalContext.get(field);
 
                 Converter.Traversal restructured = jsonRewrite(dataObject.get(field));
 

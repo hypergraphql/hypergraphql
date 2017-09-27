@@ -1,32 +1,31 @@
 type Query {
-  type(uri: String!): [Product]
-  id(value: String!): Product
+    person: [Person]
+    company: [Company]
+    city: [City]
 }
 
-type Product {
-  id: ID!
-  name: String
-  brand: String
-  weighting: Int
-  physicalSupports: [PhysicalSupport]
+type Person {
+    name: [String]
+    label: [String]
+    deathPlace: City
+    birthPlace: City
+    deathDate: String
+    birthDate: String
+    spouse: [Person]
 }
 
-type PhysicalSupport {
-  optionSpace: OptionSpace,
+type Company {
+    name: [String]
+    label: [String]
+    locationCity: [City]
 }
 
-type OptionSpace {
-  oneOfEach: [OptionGroup]
+type City {
+    label: [String]
+    country: Country
+    leader: Person
 }
 
-type OptionGroup {
-  hide: Boolean
-  uri: String
-  groupSequence: String
-  options: [Option]
-}
-
-type Option {
-  uri: String
-  optionSequence: String
+type Country {
+    label: [String]
 }
