@@ -1,7 +1,13 @@
 type Query {
+    mountain: [Mountain]
     person: [Person]
     company: [Company]
     city: [City]
+}
+
+type Mountain {
+    label: [String]
+    firstAscentPerson: [Person]
 }
 
 type Person {

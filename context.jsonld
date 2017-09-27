@@ -1,7 +1,9 @@
 {   
     "person": "http://dbpedia.org/ontology/Person",
+    "mountain": "http://dbpedia.org/ontology/Mountain",
+    "company": "http://dbpedia.org/ontology/Company",
+    "city": "http://dbpedia.org/ontology/City",
     "name": "http://xmlns.com/foaf/0.1/name",
-    "birth": "http://photobox.com/Book",
     "birthDate": "http://dbpedia.org/ontology/birthDate",
     "birthPlace": "http://dbpedia.org/ontology/birthPlace",
     "deathPlace": "http://dbpedia.org/ontology/deathPlace",
@@ -9,9 +11,8 @@
     "spouse": "http://dbpedia.org/property/spouse",
     "label": "http://www.w3.org/2000/01/rdf-schema#label",
     "country": "http://dbpedia.org/ontology/country",
-    "city": "http://dbpedia.org/ontology/City",
     "leader": "http://dbpedia.org/ontology/leaderName",
-    "company": "http://dbpedia.org/ontology/Company",
     "locationCity": "http://dbpedia.org/ontology/locationCity",
-    "owner": "http://dbpedia.org/ontology/owner"
+    "owner": "http://dbpedia.org/ontology/owner",
+    "firstAscentPerson": "http://dbpedia.org/ontology/firstAscentPerson"
 }

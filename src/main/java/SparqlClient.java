@@ -37,6 +37,8 @@ public class SparqlClient {
         password = config.sparql.password;
         model = ModelFactory.createDefaultModel();
 
+        Unirest.setTimeouts(0, 0);
+
         for (String constructQuery : queries) {
             try {
                 HttpResponse<String> response = Unirest.get(endpoint)
