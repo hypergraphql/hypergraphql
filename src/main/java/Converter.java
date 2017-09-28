@@ -54,7 +54,7 @@ public class Converter {
         for (JsonNode root : jsonQuery) {
             String[] triplePatterns = getSubquery(root, "?x");
 
-            String constructQuery = null;
+            String constructQuery;
 
             constructQuery = String.format(topTemplate,
                     globalContext.get(root.get("name").asText()),

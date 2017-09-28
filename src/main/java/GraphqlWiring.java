@@ -33,6 +33,33 @@ public class GraphqlWiring {
     public GraphQLSchema schema;
     public Converter converter;
 
+    Map<String, GraphQLArgument> defaultArguments = new HashMap<String, GraphQLArgument>() {{
+        put("limit", new GraphQLArgument("limit", GraphQLInt));
+        put("offset", new GraphQLArgument("offset", GraphQLInt));
+        put("objectPropertyURI", new GraphQLArgument("objectPropertyURI", GraphQLString));
+        put("dataPropertyURI", new GraphQLArgument("dataPropertyURI", GraphQLString));
+        put("objectURI", new GraphQLArgument("objectURI", GraphQLString));
+        put("literalValue", new GraphQLArgument("literalValue", GraphQLString));
+        put("graphName", new GraphQLArgument("graphName", GraphQLString));
+        put("endpoint", new GraphQLArgument("endpoint", GraphQLString));
+        put("lang", new GraphQLArgument("lang", GraphQLString));
+    }};
+
+    List<GraphQLArgument> queryArgs = new ArrayList() {{
+        add(defaultArguments.get("limit"));
+        add(defaultArguments.get("offset"));
+        add(defaultArguments.get("objectPropertyURI"));
+        add(defaultArguments.get("dataPropertyURI"));
+        add(defaultArguments.get("objectURI"));
+        add(defaultArguments.get("literalValue"));
+        add(defaultArguments.get("graphName"));
+        add(defaultArguments.get("endpoint"));
+    }};
+
+    List<GraphQLArgument> nonQueryArgs = new ArrayList() {{
+        add(defaultArguments.get("graphName"));
+        add(defaultArguments.get("endpoint"));
+    }};
 
     public GraphqlWiring(Config config) {
 
@@ -60,12 +87,12 @@ public class GraphqlWiring {
                 .build(schemaTypes);
     }
 
-    class FetchParams {
+    class fetchParams {
         String nodeUri;
         String predicateURI;
         SparqlClient client;
 
-        public FetchParams(DataFetchingEnvironment environment) {
+        public fetchParams(DataFetchingEnvironment environment) {
             RDFNode parent = environment.getSource();
             if (parent.isAnon()) {
                 nodeUri = "_:" + ((RDFNode) environment.getSource()).asResource().getId();
@@ -133,7 +160,7 @@ public class GraphqlWiring {
 
     private DataFetcher<List<RDFNode>> objectsFetcher = environment -> {
 
-        FetchParams params = new FetchParams(environment);
+        fetchParams params = new fetchParams(environment);
         List<RDFNode> outgoing = params.client.getValuesOfObjectProperty(params.nodeUri, params.predicateURI);
         return outgoing;
 
@@ -141,7 +168,7 @@ public class GraphqlWiring {
 
     private DataFetcher<RDFNode> objectFetcher = environment -> {
 
-        FetchParams params = new FetchParams(environment);
+        fetchParams params = new fetchParams(environment);
         RDFNode outgoing = params.client.getValueOfObjectProperty(params.nodeUri, params.predicateURI);
 
         return outgoing;
@@ -149,7 +176,7 @@ public class GraphqlWiring {
 
     private DataFetcher<List<Object>> literalValuesFetcher = environment -> {
 
-        FetchParams params = new FetchParams(environment);
+        fetchParams params = new fetchParams(environment);
         List<Object> outgoing = params.client.getValuesOfDataProperty(params.nodeUri, params.predicateURI);
 
         return outgoing;
@@ -157,13 +184,23 @@ public class GraphqlWiring {
 
     private DataFetcher<Object> literalValueFetcher = environment -> {
 
-        FetchParams params = new FetchParams(environment);
+        fetchParams params = new fetchParams(environment);
         Object outgoing = params.client.getValueOfDataProperty(params.nodeUri, params.predicateURI);
 
         return outgoing;
     };
 
-    private GraphQLFieldDefinition _idField = newFieldDefinition()
+    Map<Boolean, DataFetcher> objectFetchers = new HashMap<Boolean, DataFetcher>() {{
+            put(true, objectsFetcher);
+            put(false, objectFetcher);
+        }};
+
+    Map<Boolean, DataFetcher> literalFetchers = new HashMap<Boolean, DataFetcher>() {{
+        put(true, literalValuesFetcher);
+        put(false, literalValueFetcher);
+    }};
+
+        private GraphQLFieldDefinition _idField = newFieldDefinition()
             .type(GraphQLID)
             .name("_id")
             .dataFetcher(idFetcher).build();
@@ -196,14 +233,10 @@ public class GraphqlWiring {
     public GraphQLFieldDefinition registerGraphQLField(Boolean isQueryType, JsonNode fieldDef) {
         
 
-       Boolean isList = fieldDef.get("type").get("_type").asText().equals("ListType");
-
-       GraphQLOutputType refType = getOutputType(fieldDef.get("type"));
+       OutputSpecification refType = getOutputType(fieldDef.get("type"));
 
        if (isQueryType) {
-
-
-           if (isList) return getBuiltField(fieldDef, refType, instancesOfTypeFetcher);
+           if (refType.isList) return getBuiltField(isQueryType, fieldDef, refType, instancesOfTypeFetcher);
            else {
                System.out.println("All queries must return array types.");
                System.exit(1);
@@ -220,24 +253,19 @@ public class GraphqlWiring {
            } */
        } else {
 
-           String fieldName = (refType.getName() != null) ? refType.getName() : fieldDef.get("type").get("type").get("name").asText();
+           String fieldName = refType.dataType;
 
            if (fieldName.equals("String")||fieldName.equals("Int")||fieldName.equals("ID")||fieldName.equals("Boolean"))
-               {
-                   if (isList) return getBuiltField(fieldDef, refType, literalValuesFetcher);
-                   else return getBuiltField(fieldDef, refType, literalValueFetcher);
-               } else {
-                   if (isList) return getBuiltField(fieldDef, refType, objectsFetcher);
-                   else return getBuiltField(fieldDef, refType, objectFetcher);
-               }
+                return getBuiltField(isQueryType, fieldDef, refType, literalFetchers.get(refType.isList));
+               else return getBuiltField(isQueryType, fieldDef, refType, objectFetchers.get(refType.isList));
            }
 
        return null;
     }
 
-    private GraphQLFieldDefinition getBuiltField(JsonNode fieldDef, GraphQLOutputType refType, DataFetcher fetcher) {
+    private GraphQLFieldDefinition getBuiltField(Boolean isQueryType, JsonNode fieldDef, OutputSpecification refType, DataFetcher fetcher) {
 
-        if (fieldDef.get("inputValueDefinitions").get(0)!=null) {
+    /*    if (fieldDef.get("inputValueDefinitions").get(0)!=null) {
             GraphQLFieldDefinition field = newFieldDefinition()
                     .name(fieldDef.get("name").asText())
                     .argument(registerGraphQLArgument(fieldDef.get("inputValueDefinitions").get(0)))
@@ -245,45 +273,85 @@ public class GraphqlWiring {
                     .dataFetcher(fetcher).build();
             return field;
         } else {
-            GraphQLFieldDefinition field = newFieldDefinition()
-                    .name(fieldDef.get("name").asText())
-                    .type(refType)
-                    .dataFetcher(fetcher).build();
-            return field;
-        }
+
+        */
+
+    List<GraphQLArgument> args;
+
+    if (isQueryType) args = queryArgs;
+    else {
+        args = nonQueryArgs;
+        if (refType.dataType.equals("String")) args.add(defaultArguments.get("lang"));
     }
 
-    private GraphQLOutputType getOutputType(JsonNode outputTypeDef) {
+            GraphQLFieldDefinition field = newFieldDefinition()
+                    .name(fieldDef.get("name").asText())
+                    .argument(args)
+                    .type(refType.graphQLType)
+                    .dataFetcher(fetcher).build();
+
+            return field;
+    }
+
+    class OutputSpecification {
+        GraphQLOutputType graphQLType;
+        String dataType = null;
+        Boolean isList = false;
+    }
+
+    private OutputSpecification getOutputType(JsonNode outputTypeDef) {
 
         String outputType = outputTypeDef.get("_type").asText();
 
+        OutputSpecification outputSpec = new OutputSpecification();
+
         if (outputType.equals("ListType")) {
-            return new GraphQLList ( getOutputType(outputTypeDef.get("type")) );
+            OutputSpecification innerSpec = getOutputType(outputTypeDef.get("type"));
+            outputSpec.graphQLType = new GraphQLList ( innerSpec.graphQLType );
+            outputSpec.dataType = innerSpec.dataType;
+            outputSpec.isList = true;
+            return outputSpec ;
         }
 
         if (outputType.equals("NonNullType")) {
-            return new GraphQLNonNull ( getOutputType(outputTypeDef.get("type")) );
+            OutputSpecification innerSpec = getOutputType(outputTypeDef.get("type"));
+            outputSpec.graphQLType = new GraphQLNonNull ( innerSpec.graphQLType );
+            outputSpec.dataType = innerSpec.dataType;
+            return outputSpec ;
         }
 
         if (outputType.equals("TypeName")) {
             String typeName = outputTypeDef.get("name").asText();
 
             switch (typeName) {
-                case "String":
-                    return GraphQLString;
-                case "ID":
-                    return GraphQLID;
-                case "Int":
-                    return GraphQLInt;
-                case "Boolean":
-                    return GraphQLBoolean;
-                default:
-                    return new GraphQLTypeReference(typeName);
+                case "String": {
+                    outputSpec.dataType = "String";
+                    outputSpec.graphQLType = GraphQLString;
+                }
+                case "ID": {
+                    outputSpec.dataType = "ID";
+                    outputSpec.graphQLType = GraphQLID;
+                }
+                case "Int": {
+                    outputSpec.dataType = "Int";
+                    outputSpec.graphQLType = GraphQLInt;
+                }
+                case "Boolean": {
+                    outputSpec.dataType = "Boolean";
+                    outputSpec.graphQLType = GraphQLBoolean;
+                }
+                default: {
+                    outputSpec.dataType = "typeName";
+                    outputSpec.graphQLType = new GraphQLTypeReference(typeName);
+                }
             }
+
+            return outputSpec;
         }
         return null;
     }
 
+/*
     public GraphQLArgument registerGraphQLArgument(JsonNode argDef) {
 
 
@@ -291,7 +359,7 @@ public class GraphqlWiring {
 
         return arg;
     }
-
+*/
 /*
     public void oldGraphqlWiring(Config config) {
 
