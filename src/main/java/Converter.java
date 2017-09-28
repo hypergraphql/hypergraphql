@@ -148,6 +148,7 @@ public class Converter {
 
     public JsonNode query2json(String query) {
 
+        System.out.println("(0) " + query);
 
         query = query
                 .replaceAll(",", " ")
@@ -164,6 +165,9 @@ public class Converter {
         Pattern namePtrn;
         Matcher nameMtchr;
 
+        System.out.println("(1) " + query);
+
+/*
         do {
             namePtrn = Pattern.compile("(\\w+)\\s<([\\w\\s:\"_,}{\\[\\]]*)>");
             nameMtchr = namePtrn.matcher(query);
@@ -171,6 +175,9 @@ public class Converter {
             query=query.replaceAll("(\\w+)\\s<([\\w\\s:\"_,}{\\[\\]]*)>", "{\"name\":\"$1\", \"fields\":[$2]}");
 
         } while (nameMtchr.find());
+        */
+
+        System.out.println("(2) " +query);
 
         do {
         namePtrn = Pattern.compile("(\\w+)\\s\\(([\\w\\s:\"_\\-]*)\\)\\s<([\\w\\s:\"_},{\\[\\]]*)>");
@@ -180,6 +187,8 @@ public class Converter {
 
         } while (nameMtchr.find());
 
+        System.out.println("(3) " +query);
+
         query = query
                 .replaceAll("(\\w+) ", " {\"name\":\"$1\"} ")
                 .replaceAll("\\s(\\w+):", " \"$1\":")
@@ -187,10 +196,13 @@ public class Converter {
                 .replaceAll("<", "[")
                 .replaceAll(">", "]");
 
+        System.out.println("(4) " +query);
+
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode object = mapper.readTree(query);
 
+            System.out.println(object.toString());
             return object;
         } catch (IOException e) {
             e.printStackTrace();
