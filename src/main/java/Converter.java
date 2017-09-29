@@ -165,44 +165,46 @@ public class Converter {
         Pattern namePtrn;
         Matcher nameMtchr;
 
-        System.out.println("(1) " + query);
-
-/*
         do {
-            namePtrn = Pattern.compile("(\\w+)\\s<([\\w\\s:\"_,}{\\[\\]]*)>");
+            namePtrn = Pattern.compile("\\s(\\w+)\\s");
             nameMtchr = namePtrn.matcher(query);
 
-            query=query.replaceAll("(\\w+)\\s<([\\w\\s:\"_,}{\\[\\]]*)>", "{\"name\":\"$1\", \"fields\":[$2]}");
+            query=query.replaceAll("\\s(\\w+)\\s", " \"name\":\"$1\" ");
 
         } while (nameMtchr.find());
-        */
-
-        System.out.println("(2) " +query);
 
         do {
-        namePtrn = Pattern.compile("(\\w+)\\s\\(([\\w\\s:\"_\\-]*)\\)\\s<([\\w\\s:\"_},{\\[\\]]*)>");
-        nameMtchr = namePtrn.matcher(query);
+            namePtrn = Pattern.compile("\\s(\\w+):");
+            nameMtchr = namePtrn.matcher(query);
 
-        query=query.replaceAll("(\\w+)\\s\\(([\\w\\s:\"_\\-]*)\\)\\s<([\\w\\s:\"_},{\\[\\]]*)>", "{\"name\":\"$1\", \"args\":{$2}, \"fields\":[$3]}");
+            query=query.replaceAll("\\s(\\w+):", " \"$1\":");
 
         } while (nameMtchr.find());
 
-        System.out.println("(3) " +query);
+        do {
+            namePtrn = Pattern.compile("[^{](\"name\":\"\\w+\")(\\s(\\(\\s([^()]*)\\s\\)))?(\\s<([^<>]*)>)");
+            nameMtchr = namePtrn.matcher(query);
+
+            query = query
+                    .replaceAll("(\"name\":\"\\w+\")\\s\\(\\s([^()]*)\\s\\)\\s<([^<>]*)>", "{$1, \"args\":{$2}, \"fields\":[$3]}")
+                    .replaceAll("(\"name\":\"\\w+\")\\s<([^<>]*)>", "{$1, \"fields\":[$2]}");
+
+        } while (nameMtchr.find());
 
         query = query
-                .replaceAll("(\\w+) ", " {\"name\":\"$1\"} ")
-                .replaceAll("\\s(\\w+):", " \"$1\":")
+                .replaceAll("(\"name\":\"\\w+\")\\s\\(\\s([^()]*)\\s\\)", "{$1, \"args\":{$2}}")
+                .replaceAll("(\"name\":\"\\w+\")\\s", "{$1} ");
+
+        query = query
+                .replaceAll("([^,])\\s\"", "$1, \"")
                 .replaceAll("}\\s*\\{", "}, {")
                 .replaceAll("<", "[")
                 .replaceAll(">", "]");
-
-        System.out.println("(4) " +query);
 
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode object = mapper.readTree(query);
 
-            System.out.println(object.toString());
             return object;
         } catch (IOException e) {
             e.printStackTrace();
