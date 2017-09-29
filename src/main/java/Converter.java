@@ -43,15 +43,23 @@ public class Converter {
 
         Set<String> output = new HashSet<>();
 
-       // String topObjectPropertyTemplate = "CONSTRUCT { ?x <%1$s> <%2$s>  . %3$s } WHERE { ?x <%1$s> <%2$s> . %4$s }";
-       // String topDataPropertyTemplate = "CONSTRUCT { ?x <%1$s> ?value . %3$s } WHERE { ?x <%1$s> ?value . FILTER (str(?value)=\"%2$s\"). %4$s }";
-
-        String topTemplate = "CONSTRUCT { ?x a <%1$s>  . %2$s } WHERE { ?x a <%1$s> . %3$s }";
-
+        String topTemplate = "CONSTRUCT { ?x a <%1$s>  . %2$s } WHERE { {SELECT ?x WHERE { ?x a <%1$s> } %4$s } . %3$s } ";
 
         JsonNode jsonQuery = query2json(query);
 
         for (JsonNode root : jsonQuery) {
+
+            String postParams = "";
+
+            JsonNode args = root.get("args");
+
+            if (args.has("limit")) {
+                postParams = "LIMIT " + args.get("limit");
+                if (args.has("offset")) {
+                    postParams = postParams + " OFFSET "+ args.get("offset");
+                }
+            }
+
             String[] triplePatterns = getSubquery(root, "?x");
 
             String constructQuery;
@@ -59,30 +67,10 @@ public class Converter {
             constructQuery = String.format(topTemplate,
                     globalContext.get(root.get("name").asText()),
                     triplePatterns[0],
-                    triplePatterns[1]);
+                    triplePatterns[1],
+                    postParams);
 
-       /*     if (root.get("args").has("uri")) {
-
-                constructQuery = String.format(topObjectPropertyTemplate,
-                        globalContext.get(root.get("name").asText()),
-                        globalContext.get(root.get("args").get("uri").asText()),
-                        triplePatterns[0],
-                        triplePatterns[1]);
-
-            }
-
-            if (root.get("args").has("value")) {
-
-                constructQuery = String.format(topDataPropertyTemplate,
-                        globalContext.get(root.get("name").asText()),
-                        root.get("args").get("value").asText(),
-                        triplePatterns[0],
-                        triplePatterns[1]);
-
-            }
-            */
-
-        //    System.out.println(constructQuery);
+            System.out.println(constructQuery);
 
             output.add(constructQuery);
         }
@@ -93,7 +81,7 @@ public class Converter {
     String[] getSubquery(JsonNode node, String parentVar) {
 
         String constructPattern = "%1$s <%2$s> %3$s . ";
-        String optionalPattern = "OPTIONAL { %1$s <%2$s> %3$s . %4$s } ";
+        String optionalPattern = "OPTIONAL { %1$s <%2$s> %3$s %5$s. %4$s } ";
 
         String[] output = new String[2];
 
@@ -125,11 +113,16 @@ public class Converter {
                             childVar
                     );
 
+                    String langFilter = "";
+
+                    if (field.get("args").has("lang")) langFilter = "FILTER (lang("+childVar + ")="+"\""+field.get("args").get("lang").asText()+"\") ";
+
                     String childOptionalPattern = String.format(optionalPattern,
                             parentVar,
                             globalContext.get(field.get("name").asText()),
                             childVar,
-                            grandChildPatterns[1]
+                            grandChildPatterns[1],
+                            langFilter
                     );
 
                     childConstruct.add(childConstructPattern);
@@ -147,8 +140,6 @@ public class Converter {
     }
 
     public JsonNode query2json(String query) {
-
-        System.out.println("(0) " + query);
 
         query = query
                 .replaceAll(",", " ")
@@ -187,13 +178,13 @@ public class Converter {
 
             query = query
                     .replaceAll("(\"name\":\"\\w+\")\\s\\(\\s([^()]*)\\s\\)\\s<([^<>]*)>", "{$1, \"args\":{$2}, \"fields\":[$3]}")
-                    .replaceAll("(\"name\":\"\\w+\")\\s<([^<>]*)>", "{$1, \"fields\":[$2]}");
+                    .replaceAll("(\"name\":\"\\w+\")\\s<([^<>]*)>", "{$1, \"args\":{}, \"fields\":[$2]}");
 
         } while (nameMtchr.find());
 
         query = query
                 .replaceAll("(\"name\":\"\\w+\")\\s\\(\\s([^()]*)\\s\\)", "{$1, \"args\":{$2}}")
-                .replaceAll("(\"name\":\"\\w+\")\\s", "{$1} ");
+                .replaceAll("(\"name\":\"\\w+\")\\s", "{$1, \"args\":{}} ");
 
         query = query
                 .replaceAll("([^,])\\s\"", "$1, \"")
@@ -204,6 +195,8 @@ public class Converter {
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode object = mapper.readTree(query);
+
+            System.out.println(object.toString());
 
             return object;
         } catch (IOException e) {
