@@ -12,6 +12,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -20,40 +21,20 @@ import java.util.Set;
 public class SparqlClient {
 
     static String queryValuesOfObjectPropertyTemp = "SELECT distinct ?object WHERE {<%s> <%s> ?object . }";
-    static String queryValuesOfDataPropertyTemp = "SELECT distinct (str(?object) as ?value) WHERE {<%s> <%s> ?object . }";
-    static String querySubjectsOfDataPropertyFilterTemp = "SELECT distinct ?subject WHERE {?subject <%s> ?value . FILTER (str(?value)=\"%s\") }";
-    static String querySubjectsOfObjectPropertyFilterTemp = "SELECT distinct ?subject WHERE {?subject <%s> <%s> . }";
+    static String queryValuesOfDataPropertyTemp = "SELECT distinct (str(?object) as ?value) WHERE {<%1$s> <%2$s> ?object . %3$s }";
+    //static String querySubjectsOfDataPropertyFilterTemp = "SELECT distinct ?subject WHERE {?subject <%1$s> ?value . FILTER (str(?value)=\"%2$s\") %3$s }";
+    static String querySubjectsOfObjectPropertyFilterTemp = "SELECT distinct ?subject WHERE { ?subject a <root> . ?subject <%1$s> <%2$s> . } ";
 
-    String endpoint;
-    HttpAuthenticator authenticator;
-    String user;
-    String password;
     Model model;
 
-    public SparqlClient(Config config, Set<String> queries) {
-        endpoint = config.sparql.endpoint;
-        authenticator = new PreemptiveBasicAuthenticator(new SimpleAuthenticator(config.sparql.user, config.sparql.password.toCharArray()),false);
-        user = config.sparql.user;
-        password = config.sparql.password;
+    public SparqlClient(Set<String> queries) {
+
         model = ModelFactory.createDefaultModel();
 
-        Unirest.setTimeouts(0, 0);
-
         for (String constructQuery : queries) {
-            try {
-                HttpResponse<String> response = Unirest.get(endpoint)
-                        .queryString("query", constructQuery)
-                        .queryString("reasoning", true)
-                        .basicAuth(user, password)
-                        .header("Accept", "application/rdf+xml").asString();
-
-                model.read(new ByteArrayInputStream(response.getBody().getBytes()), null, "RDF/XML");
-
-            } catch (UnirestException e) {
-                e.printStackTrace();
-            }
+            QueryExecution qexec = QueryExecutionFactory.create(constructQuery, model);
+            model.add(qexec.execConstruct());
         }
-
     }
 
     public ResultSet sparqlSelect(String queryString) {
@@ -70,7 +51,7 @@ public class SparqlClient {
         }
     }
 
-    public List<RDFNode> getValuesOfObjectProperty(String subject, String predicate) {
+    public List<RDFNode> getValuesOfObjectProperty(String subject, String predicate, Map<String, Object> args) {
 
         String queryString = String.format(queryValuesOfObjectPropertyTemp, subject, predicate);
         ResultSet queryResults = sparqlSelect(queryString);
@@ -89,7 +70,7 @@ public class SparqlClient {
         else return null;
     }
 
-    public RDFNode getValueOfObjectProperty(String subject, String predicate) {
+    public RDFNode getValueOfObjectProperty(String subject, String predicate, Map<String, Object> args) {
 
         String queryString = String.format(queryValuesOfObjectPropertyTemp, subject, predicate);
         ResultSet queryResults = sparqlSelect(queryString);
@@ -105,9 +86,13 @@ public class SparqlClient {
         else return null;
     }
 
-    public List<Object> getValuesOfDataProperty(String subject, String predicate) {
+    public List<Object> getValuesOfDataProperty(String subject, String predicate, Map<String, Object> args) {
 
-        String queryString = String.format(queryValuesOfDataPropertyTemp, subject, predicate);
+        String langFilter = "";
+
+        if (args.containsKey("lang")) langFilter = "FILTER (lang(?object)=\""+args.get("lang").toString()+"\") ";
+
+        String queryString = String.format(queryValuesOfDataPropertyTemp, subject, predicate, langFilter);
         ResultSet queryResults = sparqlSelect(queryString);
 
         if (queryResults!=null) {
@@ -124,9 +109,13 @@ public class SparqlClient {
         else return null;
     }
 
-    public String getValueOfDataProperty(String subject, String predicate) {
+    public String getValueOfDataProperty(String subject, String predicate, Map<String, Object> args) {
 
-        String queryString = String.format(queryValuesOfDataPropertyTemp, subject, predicate);
+        String langFilter = "";
+
+        if (args.containsKey("lang")) langFilter = "FILTER (lang(?object)=\""+args.get("lang").toString()+"\") ";
+
+        String queryString = String.format(queryValuesOfDataPropertyTemp, subject, predicate, langFilter);
         ResultSet queryResults = sparqlSelect(queryString);
 
         if (queryResults!=null && queryResults.hasNext()) {
@@ -139,6 +128,7 @@ public class SparqlClient {
         else return null;
     }
 
+    /*
     public List<RDFNode> getSubjectsOfDataPropertyFilter(String predicate, String value) {
 
         String queryString = String.format(querySubjectsOfDataPropertyFilterTemp, predicate, value);
@@ -172,11 +162,13 @@ public class SparqlClient {
         }
         else return null;
     }
+    */
 
 
-    public List<RDFNode> getSubjectsOfObjectPropertyFilter(String predicate, String uri) {
+    public List<RDFNode> getSubjectsOfObjectPropertyFilter(String predicate, String uri, Map<String, Object> args) {
 
         String queryString = String.format(querySubjectsOfObjectPropertyFilterTemp, predicate, uri);
+
         ResultSet queryResults = sparqlSelect(queryString);
 
         if (queryResults!=null) {
@@ -193,7 +185,7 @@ public class SparqlClient {
         else return null;
     }
 
-    public RDFNode getSubjectOfObjectPropertyFilter(String predicate, String uri) {
+    /*public RDFNode getSubjectOfObjectPropertyFilter(String predicate, String uri) {
 
         String queryString = String.format(querySubjectsOfObjectPropertyFilterTemp, predicate, uri);
         ResultSet queryResults = sparqlSelect(queryString);
@@ -207,5 +199,6 @@ public class SparqlClient {
         }
         else return null;
     }
+    */
 
 }

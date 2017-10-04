@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 public class Converter {
 
 
-    Map<String, String> globalContext;
+    JsonNode globalContext;
     Map<String, String> JSONLD_VOC = new HashMap<String, String>() {{
         put("_context", "@context");
         put("_id", "@id");
@@ -43,45 +43,62 @@ public class Converter {
 
         Set<String> output = new HashSet<>();
 
-        String topTemplate = "CONSTRUCT { ?x a <%1$s>  . %2$s } WHERE { {SELECT ?x WHERE { ?x a <%1$s> } %4$s } . %3$s } ";
+        String rootTemplate = "CONSTRUCT { ?x a <root> . ?x a <%1$s> . %2$s } WHERE { %3$s } ";
+        String innerPattern = "{ SELECT ?x WHERE { ?x a <%1$s> } %2$s } %3$s ";
+        String graphPattern = "GRAPH <%1$s> { %2$s }";
+        String servicePattern = "SERVICE <%1$s> { %2$s }";
 
         JsonNode jsonQuery = query2json(query);
 
         for (JsonNode root : jsonQuery) {
 
-            String postParams = "";
+            String graphName = globalContext.get("@predicates").get(root.get("name").asText()).get("@namedGraph").asText();
+            String graphId = globalContext.get("@namedGraphs").get(graphName).get("@id").asText();
+            String endpointName = globalContext.get("@namedGraphs").get(graphName).get("@endpoint").asText();
+            String endpointId = globalContext.get("@endpoints").get(endpointName).get("@id").asText();
+
+            String[] triplePatterns = getSubquery(root, "?x", graphId, endpointId);
 
             JsonNode args = root.get("args");
 
+            String limitParams = "";
+
             if (args.has("limit")) {
-                postParams = "LIMIT " + args.get("limit");
+                limitParams = "LIMIT " + args.get("limit");
                 if (args.has("offset")) {
-                    postParams = postParams + " OFFSET "+ args.get("offset");
+                    limitParams = limitParams + " OFFSET "+ args.get("offset");
                 }
             }
 
-            String[] triplePatterns = getSubquery(root, "?x");
+            String wherePattern = String.format(innerPattern,
+                    globalContext.get("@predicates").get(root.get("name").asText()).get("@id").asText(),
+                    limitParams,
+                    triplePatterns[1]);
 
-            String constructQuery;
+            wherePattern = String.format(graphPattern, graphId, wherePattern);
+            wherePattern = String.format(servicePattern, endpointId, wherePattern);
 
-            constructQuery = String.format(topTemplate,
-                    globalContext.get(root.get("name").asText()),
+            String constructQuery = String.format(rootTemplate,
+                    globalContext.get("@predicates").get(root.get("name").asText()).get("@id").asText(),
                     triplePatterns[0],
-                    triplePatterns[1],
-                    postParams);
+                    wherePattern);
 
             System.out.println(constructQuery);
 
             output.add(constructQuery);
+
         }
 
         return output;
     }
 
-    String[] getSubquery(JsonNode node, String parentVar) {
+    String[] getSubquery(JsonNode node, String parentVar, String parentGraphId, String parentEndpointId) {
 
         String constructPattern = "%1$s <%2$s> %3$s . ";
-        String optionalPattern = "OPTIONAL { %1$s <%2$s> %3$s %5$s. %4$s } ";
+        String optionalPattern = "OPTIONAL { %1$s } ";
+        String triplePattern = "%1$s <%2$s> %3$s %4$s. %5$s";
+        String graphPattern = "GRAPH <%1$s> { %2$s }";
+        String servicePattern = "SERVICE <%1$s> { %2$s }";
 
         String[] output = new String[2];
 
@@ -101,15 +118,20 @@ public class Converter {
 
                 if (!JSONLD_VOC.containsKey(field.get("name").asText())) {
 
+                    String graphName = globalContext.get("@predicates").get(field.get("name").asText()).get("@namedGraph").asText();
+                    String graphId = globalContext.get("@namedGraphs").get(graphName).get("@id").asText();
+                    String endpointName = globalContext.get("@namedGraphs").get(graphName).get("@endpoint").asText();
+                    String endpointId = globalContext.get("@endpoints").get(endpointName).get("@id").asText();
+
                     n++;
 
                     String childVar = parentVar + "_" + n;
 
-                    String[] grandChildPatterns = getSubquery(field, childVar);
+                    String[] grandChildPatterns = getSubquery(field, childVar, graphId, endpointId);
 
                     String childConstructPattern = String.format(constructPattern,
                             parentVar,
-                            globalContext.get(field.get("name").asText()),
+                            globalContext.get("@predicates").get(field.get("name").asText()).get("@id").asText(),
                             childVar
                     );
 
@@ -117,13 +139,23 @@ public class Converter {
 
                     if (field.get("args").has("lang")) langFilter = "FILTER (lang("+childVar + ")="+"\""+field.get("args").get("lang").asText()+"\") ";
 
-                    String childOptionalPattern = String.format(optionalPattern,
+                    String childOptionalPattern = String.format(triplePattern,
                             parentVar,
-                            globalContext.get(field.get("name").asText()),
+                            globalContext.get("@predicates").get(field.get("name").asText()).get("@id").asText(),
                             childVar,
                             grandChildPatterns[1],
                             langFilter
                     );
+
+                    if (!graphId.equals(parentGraphId)||!endpointId.equals(parentEndpointId)) {
+                        childOptionalPattern = String.format(graphPattern, graphId, childOptionalPattern);
+                    }
+
+                    if (!endpointId.equals(parentEndpointId)) {
+                        childOptionalPattern = String.format(servicePattern, graphId, childOptionalPattern);
+                    }
+
+                    childOptionalPattern = String.format(optionalPattern, childOptionalPattern);
 
                     childConstruct.add(childConstructPattern);
                     childConstruct.add(grandChildPatterns[0]);
@@ -216,7 +248,7 @@ public class Converter {
             while (queryFields.hasNext()) {
 
                 String field = queryFields.next();
-                String newType = globalContext.get(field);
+                String newType = globalContext.get("@predicates").get(field).get("@id").asText();
 
                 Converter.Traversal restructured = jsonRewrite(dataObject.get(field));
 
@@ -294,7 +326,7 @@ public class Converter {
                 if (JSONLD_VOC.containsKey(key)) targetObject.put(JSONLD_VOC.get(key), childRes.data);
                 else {
                     targetObject.put(key, childRes.data);
-                    context.put(key, globalContext.get(key));
+                    context.put(key, globalContext.get("@predicates").get(key).get("@id").asText());
                 }
                 context.putAll(childRes.context);
             }

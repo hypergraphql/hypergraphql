@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
@@ -16,22 +17,19 @@ public class Config {
 
     public String contextFile;
     public String schemaFile;
-    public SparqlConfig sparql;
     public GraphqlConfig graphql;
 
-    public Map<String, String> context;
+    public JsonNode context;
     public TypeDefinitionRegistry schema;
 
     @JsonCreator
     public Config(@JsonProperty("contextFile") String contextFile,
                   @JsonProperty("schemaFile") String schemaFile,
-                  @JsonProperty("sparql") SparqlConfig sparql,
                   @JsonProperty("graphql") GraphqlConfig graphql
                   )
     {
         this.contextFile = contextFile;
         this.schemaFile = schemaFile;
-        this.sparql = sparql;
         this.graphql = graphql;
     }
 
@@ -44,8 +42,7 @@ public class Config {
 
            if (config!=null) {
                 try {
-                    Map<String, String> context = (Map<String, String>) mapper.readValue(new File(config.contextFile), Map.class);
-                    this.context = context;
+                    this.context = mapper.readTree(new File(config.contextFile));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -57,32 +54,12 @@ public class Config {
 
             this.schemaFile = config.schemaFile;
             this.contextFile = config.contextFile;
-            this.sparql = config.sparql;
             this.graphql = config.graphql;
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-}
-
-class SparqlConfig {
-
-    public String endpoint;
-    public String user;
-    public String password;
-
-    @JsonCreator
-    public SparqlConfig(@JsonProperty("endpoint") String endpoint,
-                  @JsonProperty("user") String user,
-                  @JsonProperty("password") String password
-    )
-    {
-        this.endpoint = endpoint;
-        this.user = user;
-        this.password = password;
-    }
-
 }
 
 class GraphqlConfig {

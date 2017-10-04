@@ -1,16 +1,10 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import graphql.ExecutionInput;
-import graphql.ExecutionResult;
-import graphql.GraphQL;
-import graphql.GraphQLError;
+import graphql.*;
 import spark.ModelAndView;
 import spark.template.velocity.VelocityTemplateEngine;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static spark.Spark.*;
 
@@ -45,40 +39,39 @@ public class Controller {
 
             String query = requestObject.get("query").asText();
 
+            Map<String, Object> result = new HashMap<>();
+            Map<String, Object> data = new HashMap<>();
+            List<GraphQLError> errors = new ArrayList<>();
+            Map<Object, Object> extensions = new HashMap<>();
+            result.put("data", data);
+            result.put("errors", errors);
+            result.put("extensions", extensions);
+
+            ExecutionInput executionInput;
             ExecutionResult qlResult;
 
-            Set<String> sparqlQueries = null;
+            Set<String> sparqlQueries;
+
             if (!query.contains("IntrospectionQuery")) {
+
                 sparqlQueries = converter.graphql2sparql(query);
 
-                SparqlClient client = new SparqlClient(config, sparqlQueries);
+                SparqlClient client = new SparqlClient(sparqlQueries);
 
-                ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                executionInput = ExecutionInput.newExecutionInput()
                         .query(query)
                         .context(client)
                         .build();
 
                 qlResult = graphQL.execute(executionInput);
 
+                extensions.put("json-ld", converter.graphql2jsonld(qlResult.getData()));
+                extensions.put("sparql-queries", sparqlQueries);
+
             } else qlResult = graphQL.execute(query);
 
-            Map<String, Object> data = qlResult.getData();
-            List<GraphQLError> errors = qlResult.getErrors();
-            Map<String, Object> result = new HashMap<>();
-            Map<Object, Object> extensions = qlResult.getExtensions();
-
-            if (extensions==null) extensions = new HashMap<>();
-
-            if (data!=null && !data.containsKey("__schema")) {
-
-                extensions.put("json-ld", converter.graphql2jsonld(data));
-                extensions.put("sparql-queries", sparqlQueries);
-            }
-
-            if (data!=null) result.put("data", data);
-
-            if (!errors.isEmpty()) result.put("errors", errors);
-            if (extensions!=null) result.put("extensions", extensions);
+            data.putAll(qlResult.getData());
+            errors.addAll(qlResult.getErrors());
 
             JsonNode resultJson = mapper.readTree( new ObjectMapper().writeValueAsString(result));
             res.type("application/json");

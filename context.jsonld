@@ -1,18 +1,81 @@
-{   
-    "person": "http://dbpedia.org/ontology/Person",
-    "mountain": "http://dbpedia.org/ontology/Mountain",
-    "company": "http://dbpedia.org/ontology/Company",
-    "city": "http://dbpedia.org/ontology/City",
-    "name": "http://xmlns.com/foaf/0.1/name",
-    "birthDate": "http://dbpedia.org/ontology/birthDate",
-    "birthPlace": "http://dbpedia.org/ontology/birthPlace",
-    "deathPlace": "http://dbpedia.org/ontology/deathPlace",
-    "deathDate": "http://dbpedia.org/ontology/deathDate",
-    "spouse": "http://dbpedia.org/property/spouse",
-    "label": "http://www.w3.org/2000/01/rdf-schema#label",
-    "country": "http://dbpedia.org/ontology/country",
-    "leader": "http://dbpedia.org/ontology/leaderName",
-    "locationCity": "http://dbpedia.org/ontology/locationCity",
-    "owner": "http://dbpedia.org/ontology/owner",
-    "firstAscentPerson": "http://dbpedia.org/ontology/firstAscentPerson"
+{
+  "@predicates": {
+    "person": {
+      "@id": "http://dbpedia.org/ontology/Person",
+      "@namedGraph": "dbpedia"
+    },
+    "mountain": {
+      "@id": "http://dbpedia.org/ontology/Mountain",
+      "@namedGraph": "dbpedia"
+    },
+    "company": {
+      "@id": "http://dbpedia.org/ontology/Company",
+      "@namedGraph": "dbpedia"
+    },
+    "city": {
+      "@id": "http://dbpedia.org/ontology/City",
+      "@namedGraph": "dbpedia"
+    },
+    "name": {
+      "@id": "http://xmlns.com/foaf/0.1/name",
+      "@namedGraph": "dbpedia"
+    },
+    "birthDate": {
+      "@id": "http://dbpedia.org/ontology/birthDate",
+      "@namedGraph": "dbpedia"
+    },
+    "birthPlace": {
+      "@id": "http://dbpedia.org/ontology/birthPlace",
+      "@namedGraph": "dbpedia"
+    },
+    "deathPlace": {
+      "@id": "http://dbpedia.org/ontology/deathPlace",
+      "@namedGraph": "dbpedia"
+    },
+    "deathDate": {
+      "@id": "http://dbpedia.org/ontology/deathDate",
+      "@namedGraph": "dbpedia"
+    },
+    "spouse": {
+      "@id": "http://dbpedia.org/property/spouse",
+      "@namedGraph": "dbpedia"
+    },
+    "label": {
+      "@id": "http://www.w3.org/2000/01/rdf-schema#label",
+      "@namedGraph": "dbpedia"
+    },
+    "country": {
+      "@id": "http://dbpedia.org/ontology/country",
+      "@namedGraph": "dbpedia"
+    },
+    "leader": {
+      "@id": "http://dbpedia.org/ontology/leaderName",
+      "@namedGraph": "dbpedia"
+    },
+    "locationCity": {
+      "@id": "http://dbpedia.org/ontology/locationCity",
+      "@namedGraph": "dbpedia"
+    },
+    "owner": {
+      "@id": "http://dbpedia.org/ontology/owner",
+      "@namedGraph": "dbpedia"
+    },
+    "firstAscentPerson": {
+      "@id": "http://dbpedia.org/ontology/firstAscentPerson",
+      "@namedGraph": "dbpedia"
+    }
+  },
+  "@namedGraphs": {
+    "dbpedia": {
+      "@id": "http://dbpedia.org",
+      "@endpoint": "dbpedia-endpoint"
+    }
+  },
+  "@endpoints": {
+    "dbpedia-endpoint": {
+      "@id": "http://dbpedia.org/sparql",
+      "@user": "",
+      "@password": ""
+    }
+  }
 }

@@ -45,15 +45,16 @@ public class GraphqlWiring {
         add(defaultArguments.get("dataPropertyURI"));
         add(defaultArguments.get("objectURI"));
         add(defaultArguments.get("literalValue"));
-        add(defaultArguments.get("graphName"));
-        add(defaultArguments.get("endpoint"));
+      //  add(defaultArguments.get("graphName"));
+      //  add(defaultArguments.get("endpoint"));
     }};
 
+    /*
     List<GraphQLArgument> nonQueryArgs = new ArrayList() {{
         add(defaultArguments.get("graphName"));
         add(defaultArguments.get("endpoint"));
     }};
-
+*/
     class OutputTypeSpecification {
         GraphQLOutputType graphQLType;
         String dataType = null;
@@ -98,7 +99,7 @@ public class GraphqlWiring {
             } else nodeUri = ((RDFNode) environment.getSource()).asResource().getURI();
 
             String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-            predicateURI = config.context.get(predicate);
+            predicateURI = config.context.get("@predicates").get(predicate).get("@id").asText();
             client = environment.getContext();
         }
     }
@@ -112,9 +113,9 @@ public class GraphqlWiring {
 
     private DataFetcher<List<RDFNode>> instancesOfTypeFetcher = environment -> {
         String type = ((Field) environment.getFields().toArray()[0]).getName();
-        String typeURI = config.context.get(type);
+        String typeURI = config.context.get("@predicates").get(type).get("@id").asText();
         SparqlClient client = environment.getContext();
-        List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", typeURI);
+        List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", typeURI, environment.getArguments());
         return subjects;
     };
 
@@ -122,7 +123,7 @@ public class GraphqlWiring {
         String object = environment.getArgument("uri");
         String objectUri = config.context.get(object);
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-        String predicateURI = config.context.get(predicate);
+        String predicateURI = config.context.get("@predicates").get(predicate).get("@id").asText();
         SparqlClient client = environment.getContext();
         List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter(predicateURI, objectUri);
         return subjects;
@@ -132,7 +133,7 @@ public class GraphqlWiring {
         String object = environment.getArgument("uri");
         String objectUri = config.context.get(object);
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-        String predicateURI = config.context.get(predicate);
+        String predicateURI = config.context.get("@predicates").get(predicate).get("@id").asText();
         SparqlClient client = environment.getContext();
         RDFNode subject = client.getSubjectOfObjectPropertyFilter(predicateURI, objectUri);
         return subject;
@@ -141,7 +142,7 @@ public class GraphqlWiring {
     private DataFetcher<List<RDFNode>> subjectsOfDataPropertyFetcher = environment -> {
         String value = environment.getArgument("value");
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-        String predicateURI = config.context.get(predicate);
+        String predicateURI = config.context.get("@predicates").get(predicate).get("@id").asText();
         SparqlClient client = environment.getContext();
         List<RDFNode> subjects = client.getSubjectsOfDataPropertyFilter(predicateURI, value);
         return subjects;
@@ -150,7 +151,7 @@ public class GraphqlWiring {
     private DataFetcher<RDFNode> subjectOfDataPropertyFetcher = environment -> {
         String value = environment.getArgument("value");
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-        String predicateURI = config.context.get(predicate);
+        String predicateURI = config.context.get("@predicates").get(predicate).get("@id").asText();
         SparqlClient client = environment.getContext();
         RDFNode subject = client.getSubjectOfDataPropertyFilter(predicateURI, value);
         return subject;
@@ -160,7 +161,7 @@ public class GraphqlWiring {
     private DataFetcher<List<RDFNode>> objectsFetcher = environment -> {
 
         fetchParams params = new fetchParams(environment);
-        List<RDFNode> outgoing = params.client.getValuesOfObjectProperty(params.nodeUri, params.predicateURI);
+        List<RDFNode> outgoing = params.client.getValuesOfObjectProperty(params.nodeUri, params.predicateURI, environment.getArguments());
         return outgoing;
 
     };
@@ -168,7 +169,7 @@ public class GraphqlWiring {
     private DataFetcher<RDFNode> objectFetcher = environment -> {
 
         fetchParams params = new fetchParams(environment);
-        RDFNode outgoing = params.client.getValueOfObjectProperty(params.nodeUri, params.predicateURI);
+        RDFNode outgoing = params.client.getValueOfObjectProperty(params.nodeUri, params.predicateURI, environment.getArguments());
 
         return outgoing;
     };
@@ -176,7 +177,7 @@ public class GraphqlWiring {
     private DataFetcher<List<Object>> literalValuesFetcher = environment -> {
 
         fetchParams params = new fetchParams(environment);
-        List<Object> outgoing = params.client.getValuesOfDataProperty(params.nodeUri, params.predicateURI);
+        List<Object> outgoing = params.client.getValuesOfDataProperty(params.nodeUri, params.predicateURI, environment.getArguments());
 
         return outgoing;
     };
@@ -184,7 +185,7 @@ public class GraphqlWiring {
     private DataFetcher<Object> literalValueFetcher = environment -> {
 
         fetchParams params = new fetchParams(environment);
-        Object outgoing = params.client.getValueOfDataProperty(params.nodeUri, params.predicateURI);
+        Object outgoing = params.client.getValueOfDataProperty(params.nodeUri, params.predicateURI, environment.getArguments());
 
         return outgoing;
     };
@@ -268,7 +269,7 @@ public class GraphqlWiring {
 
         if (isQueryType) args.addAll(queryArgs);
         else {
-            args.addAll(nonQueryArgs);
+        //    args.addAll(nonQueryArgs);
             if (refType.dataType.equals("String")) args.add(defaultArguments.get("lang"));
         }
 

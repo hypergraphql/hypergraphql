@@ -1,11 +1,6 @@
 {
     "schemaFile": "schema.graphql",
     "contextFile": "context.jsonld",
-    "sparql": {
-            "endpoint": "http://dbpedia.org/sparql",
-            "user": "",
-            "password": ""
-    },
     "graphql": {
         "port": 8009,
         "path": "/",
