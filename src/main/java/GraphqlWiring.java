@@ -45,16 +45,16 @@ public class GraphqlWiring {
         add(defaultArguments.get("dataPropertyURI"));
         add(defaultArguments.get("objectURI"));
         add(defaultArguments.get("literalValue"));
-      //  add(defaultArguments.get("graphName"));
-      //  add(defaultArguments.get("endpoint"));
+        add(defaultArguments.get("graphName"));
+        add(defaultArguments.get("endpoint"));
     }};
 
-    /*
+
     List<GraphQLArgument> nonQueryArgs = new ArrayList() {{
         add(defaultArguments.get("graphName"));
         add(defaultArguments.get("endpoint"));
     }};
-*/
+
     class OutputTypeSpecification {
         GraphQLOutputType graphQLType;
         String dataType = null;
@@ -269,7 +269,7 @@ public class GraphqlWiring {
 
         if (isQueryType) args.addAll(queryArgs);
         else {
-        //    args.addAll(nonQueryArgs);
+            args.addAll(nonQueryArgs);
             if (refType.dataType.equals("String")) args.add(defaultArguments.get("lang"));
         }
 

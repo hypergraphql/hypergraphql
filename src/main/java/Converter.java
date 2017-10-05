@@ -52,14 +52,19 @@ public class Converter {
 
         for (JsonNode root : jsonQuery) {
 
+            JsonNode args = root.get("args");
+
             String graphName = globalContext.get("@predicates").get(root.get("name").asText()).get("@namedGraph").asText();
-            String graphId = globalContext.get("@namedGraphs").get(graphName).get("@id").asText();
+            String graphId;
+            if (!args.has("graphName")) graphId = globalContext.get("@namedGraphs").get(graphName).get("@id").asText();
+            else graphId = args.get("graphName").asText();
+
             String endpointName = globalContext.get("@namedGraphs").get(graphName).get("@endpoint").asText();
-            String endpointId = globalContext.get("@endpoints").get(endpointName).get("@id").asText();
+            String endpointId;
+            if (!args.has("endpoint")) endpointId = globalContext.get("@endpoints").get(endpointName).get("@id").asText();
+            else endpointId = args.get("endpoint").asText();
 
             String[] triplePatterns = getSubquery(root, "?x", graphId, endpointId);
-
-            JsonNode args = root.get("args");
 
             String limitParams = "";
 
@@ -118,10 +123,17 @@ public class Converter {
 
                 if (!JSONLD_VOC.containsKey(field.get("name").asText())) {
 
+                    JsonNode args = field.get("args");
+
                     String graphName = globalContext.get("@predicates").get(field.get("name").asText()).get("@namedGraph").asText();
-                    String graphId = globalContext.get("@namedGraphs").get(graphName).get("@id").asText();
+                    String graphId;
+                    if (!args.has("graphName")) graphId = globalContext.get("@namedGraphs").get(graphName).get("@id").asText();
+                    else graphId = args.get("graphName").asText();
+
                     String endpointName = globalContext.get("@namedGraphs").get(graphName).get("@endpoint").asText();
-                    String endpointId = globalContext.get("@endpoints").get(endpointName).get("@id").asText();
+                    String endpointId;
+                    if (!args.has("endpoint")) endpointId = globalContext.get("@endpoints").get(endpointName).get("@id").asText();
+                    else endpointId = args.get("endpoint").asText();
 
                     n++;
 
@@ -137,7 +149,7 @@ public class Converter {
 
                     String langFilter = "";
 
-                    if (field.get("args").has("lang")) langFilter = "FILTER (lang("+childVar + ")="+"\""+field.get("args").get("lang").asText()+"\") ";
+                    if (args.has("lang")) langFilter = "FILTER (lang("+childVar + ")="+"\""+args.get("lang").asText()+"\") ";
 
                     String childOptionalPattern = String.format(triplePattern,
                             parentVar,
@@ -152,7 +164,7 @@ public class Converter {
                     }
 
                     if (!endpointId.equals(parentEndpointId)) {
-                        childOptionalPattern = String.format(servicePattern, graphId, childOptionalPattern);
+                        childOptionalPattern = String.format(servicePattern, endpointId, childOptionalPattern);
                     }
 
                     childOptionalPattern = String.format(optionalPattern, childOptionalPattern);

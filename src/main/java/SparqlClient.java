@@ -33,8 +33,13 @@ public class SparqlClient {
 
         for (String constructQuery : queries) {
             QueryExecution qexec = QueryExecutionFactory.create(constructQuery, model);
-            model.add(qexec.execConstruct());
+            try {
+                model.add(qexec.execConstruct());
+            } catch (Exception e) {
+                System.out.println(e.fillInStackTrace());
+            }
         }
+        model.write(System.out);
     }
 
     public ResultSet sparqlSelect(String queryString) {
