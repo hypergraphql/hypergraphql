@@ -80,7 +80,7 @@ public class Converter {
                     limitParams,
                     triplePatterns[1]);
 
-            wherePattern = String.format(graphPattern, graphId, wherePattern);
+            if (!graphId.equals("")) wherePattern = String.format(graphPattern, graphId, wherePattern);
             wherePattern = String.format(servicePattern, endpointId, wherePattern);
 
             String constructQuery = String.format(rootTemplate,
@@ -159,9 +159,10 @@ public class Converter {
                             langFilter
                     );
 
-                    if (!graphId.equals(parentGraphId)||!endpointId.equals(parentEndpointId)) {
-                        childOptionalPattern = String.format(graphPattern, graphId, childOptionalPattern);
-                    }
+                    if (!graphId.equals(""))
+                        if (!graphId.equals(parentGraphId)||!endpointId.equals(parentEndpointId)) {
+                            childOptionalPattern = String.format(graphPattern, graphId, childOptionalPattern);
+                        }
 
                     if (!endpointId.equals(parentEndpointId)) {
                         childOptionalPattern = String.format(servicePattern, endpointId, childOptionalPattern);
