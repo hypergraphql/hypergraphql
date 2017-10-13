@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.*;
+import org.apache.jena.sparql.util.Context;
 import spark.ModelAndView;
 import spark.template.velocity.VelocityTemplateEngine;
 
@@ -56,7 +57,7 @@ public class Controller {
 
                 sparqlQueries = converter.graphql2sparql(query);
 
-                SparqlClient client = new SparqlClient(sparqlQueries);
+                SparqlClient client = new SparqlClient(sparqlQueries, config.sparqlEndpointsContext);
 
                 executionInput = ExecutionInput.newExecutionInput()
                         .query(query)
@@ -80,6 +81,5 @@ public class Controller {
 
         });
     }
-
 
 }

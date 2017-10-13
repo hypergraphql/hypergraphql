@@ -8,12 +8,12 @@ import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.sparql.ARQConstants;
+import org.apache.jena.sparql.util.Context;
+import org.apache.jena.sparql.util.Symbol;
 
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by szymon on 22/08/2017.
@@ -27,12 +27,48 @@ public class SparqlClient {
 
     Model model;
 
-    public SparqlClient(Set<String> queries) {
+    public SparqlClient(Set<String> queries, Map<String, Context> sparqlEndpointsContext) {
 
         model = ModelFactory.createDefaultModel();
-
+//        String testQuery =
+//                "CONSTRUCT \n" +
+//                        "  { ?x a <root> . " +
+//                        "?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Person> .\n" +
+//                        "   ?x <http://dbpedia.org/ontology/spouse> ?s .\n" +
+//                        "    ?s <http://xmlns.com/foaf/0.1/name> ?x_1 .\n" +
+//                        "    }\n" +
+//                        "WHERE\n" +
+//                        "  { \n" +
+//                        "    SERVICE <http://live.dbpedia.org/sparql/>\n" +
+//                        "      { \n" +
+//                        "        { \n" +
+//                        "          SELECT  ?x\n" +
+//                        "          WHERE\n" +
+//                        "            { ?x a <http://dbpedia.org/ontology/Person> \n" +
+//                        "              OPTIONAL {?x <http://dbpedia.org/ontology/spouse> ?s .}\n" +
+//                        "            }\n" +
+//                        "          LIMIT 10\n" +
+//                        "        }\n" +
+//                        "      }\n" +
+//                        "FILTER ( bound(?s) )"+
+//                        "    SERVICE <http://dbpedia.org/sparql/>\n" +
+//                        "        { \n" +
+//                        "          GRAPH <http://dbpedia.org>\n" +
+//                        "            { \n" +
+//                        "              OPTIONAL { \n" +
+//                        "              ?s <http://xmlns.com/foaf/0.1/name>  ?x_1 . }\n" +
+//                        "            }\n" +
+//                        "        }\n" +
+//                        "  }";
+//        queries = new HashSet<>();
+//        queries.add(testQuery);
         for (String constructQuery : queries) {
             QueryExecution qexec = QueryExecutionFactory.create(constructQuery, model);
+
+            Context mycxt = qexec.getContext();
+            Symbol serviceContext = ARQConstants.allocSymbol("http://jena.hpl.hp.com/Service#", "serviceContext");
+            mycxt.put(serviceContext, sparqlEndpointsContext);
+
             try {
                 model.add(qexec.execConstruct());
             } catch (Exception e) {
