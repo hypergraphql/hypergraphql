@@ -40,11 +40,13 @@ public class SparqlClient {
             mycxt.put(serviceContext, sparqlEndpointsContext);
 
             try {
-                model.add(qexec.execConstruct());
+                qexec.execConstruct(model);
+
             } catch (Exception e) {
                 System.out.println(e.fillInStackTrace());
             }
         }
+
         model.write(System.out);
     }
 

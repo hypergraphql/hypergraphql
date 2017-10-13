@@ -78,6 +78,10 @@
       "@id": "http://dbpedia.org",
       "@endpoint": "dbpedia-endpoint"
     },
+    "live-dbpedia": {
+      "@id": "",
+      "@endpoint": "live-dbpedia-endpoint"
+    },
     "pbox-test": {
       "@id": "http://photobox/test2",
       "@endpoint": "photobox"
@@ -85,7 +89,7 @@
   },
   "@endpoints": {
     "dbpedia-endpoint": {
-      "@id": "http://dbpedia.org/sparql",
+      "@id": "http://dbpedia.org/sparql/",
       "@user": "",
       "@password": ""
     },

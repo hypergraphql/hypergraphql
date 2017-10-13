@@ -18,10 +18,6 @@ import static graphql.schema.GraphQLObjectType.newObject;
 
 public class GraphqlWiring {
 
-    //public static Map<String, String> PREFIX_MAP = new HashMap<>(); //from namespaces to prefixes
-    //public static Map<String, String> NAME_TO_URI_MAP = new HashMap<>();
-    //public static Set<String> GRAPHQL_NAMES = new HashSet<>();
-
     public Config config;
     public GraphQLSchema schema;
     public Converter converter;
@@ -29,11 +25,11 @@ public class GraphqlWiring {
     Map<String, GraphQLArgument> defaultArguments = new HashMap<String, GraphQLArgument>() {{
         put("limit", new GraphQLArgument("limit", GraphQLInt));
         put("offset", new GraphQLArgument("offset", GraphQLInt));
-        put("objectPropertyURI", new GraphQLArgument("objectPropertyURI", GraphQLString));
-        put("dataPropertyURI", new GraphQLArgument("dataPropertyURI", GraphQLString));
-        put("objectURI", new GraphQLArgument("objectURI", GraphQLString));
-        put("literalValue", new GraphQLArgument("literalValue", GraphQLString));
-        put("graphName", new GraphQLArgument("graphName", GraphQLString));
+       // put("objectPropertyURI", new GraphQLArgument("objectPropertyURI", GraphQLString));
+       // put("dataPropertyURI", new GraphQLArgument("dataPropertyURI", GraphQLString));
+       // put("objectURI", new GraphQLArgument("objectURI", GraphQLString));
+      //  put("literalValue", new GraphQLArgument("literalValue", GraphQLString));
+        put("graph", new GraphQLArgument("graph", GraphQLString));
         put("endpoint", new GraphQLArgument("endpoint", GraphQLString));
         put("lang", new GraphQLArgument("lang", GraphQLString));
     }};
@@ -45,13 +41,13 @@ public class GraphqlWiring {
        // add(defaultArguments.get("dataPropertyURI"));
        // add(defaultArguments.get("objectURI"));
        // add(defaultArguments.get("literalValue"));
-        add(defaultArguments.get("graphName"));
+        add(defaultArguments.get("graph"));
         add(defaultArguments.get("endpoint"));
     }};
 
 
     List<GraphQLArgument> nonQueryArgs = new ArrayList() {{
-        add(defaultArguments.get("graphName"));
+        add(defaultArguments.get("graph"));
         add(defaultArguments.get("endpoint"));
     }};
 
@@ -220,10 +216,11 @@ public class GraphqlWiring {
               builtFields.add(registerGraphQLField(isQueryType, fieldDef));
           }
 
+          if (!isQueryType) builtFields.add(_idField);
+
             GraphQLObjectType newObjectType = newObject()
                     .name(type.getName())
                     .fields(builtFields)
-                    .field(_idField)
                     .build();
 
             return newObjectType;
@@ -333,162 +330,4 @@ public class GraphqlWiring {
         }
         return null;
     }
-
-/*
-    public GraphQLArgument registerGraphQLArgument(JsonNode argDef) {
-
-
-        GraphQLArgument arg = new GraphQLArgument(argDef.get("name").asText(), GraphQLString);
-
-        return arg;
-    }
-*/
-/*
-    public void oldGraphqlWiring(Config config) {
-
-      //  registerPredicates(config);
-
-        SparqlClient client = new SparqlClient(config);
-
-
-        DataFetcher<String> idFetch = environment -> {
-            RDFuri thisNode = environment.getSource();
-            return thisNode._id;
-        };
-
-        DataFetcher<String> valueFetch = environment -> {
-            RDFliteral thisNode = environment.getSource();
-            return thisNode._value;
-        };
-
-        DataFetcher<String> langFetch = environment -> {
-            RDFliteral thisNode = environment.getSource();
-            return thisNode._language;
-        };
-
-        DataFetcher<String> typeFetch = environment -> {
-            RDFliteral thisNode = environment.getSource();
-            return thisNode._type;
-        };
-
-        DataFetcher<List<RDFuri>> instanceFetcher = environment -> {
-
-            if (environment.getArgument("type")!=null) {
-                int limit = (environment.getArgument("limit")!=null)? environment.getArgument("limit") : 0;
-                List<String> instances = client.getInstances(environment.getArgument("type"), limit);
-                List<RDFuri> result = new ArrayList<>();
-                instances.forEach(instance -> {
-                    RDFuri RDFuriNode = new RDFuri();
-                    RDFuriNode._id = instance;
-                    result.add(RDFuriNode);
-                });
-                return result;
-            }
-
-            if (environment.getArgument("uri")!=null) {
-                List<RDFuri> instances = new ArrayList<>();
-                RDFuri RDFuriNode = new RDFuri();
-                RDFuriNode._id = environment.getArgument("uri");
-                instances.add(RDFuriNode);
-                return instances;
-            }
-            else return null;
-        };
-
-        GraphQLArgument typeArgument = new GraphQLArgument("type", GraphQLString);
-        GraphQLArgument uriArgument = new GraphQLArgument("uri", GraphQLString);
-        GraphQLArgument limitArgument = new GraphQLArgument("limit", GraphQLInt);
-
-        GraphQLObjectType RootQuery = newObject()
-                .name("RootQuery")
-                .field(newFieldDefinition()
-                        .type(new GraphQLList(new GraphQLTypeReference("RDFuri")))
-                        .name("_graph")
-                        .argument(typeArgument)
-                        .argument(uriArgument)
-                        .argument(limitArgument)
-                        .dataFetcher(instanceFetcher))
-                .build();
-
-
-        List<GraphQLFieldDefinition> registeredFields = new ArrayList<>();
-
-
-        for (String name : GRAPHQL_NAMES) {
-            GraphQLFieldDefinition field = newFieldDefinition()
-                    .name(name)
-                    .type(new GraphQLList (new GraphQLTypeReference("RDFuri")))
-                    .argument(limitArgument)
-                    .dataFetcher(outgoingFetcher).build();
-
-            registeredFields.add(field);
-        }
-
-        GraphQLObjectType node = newObject()
-                .name("RDFuri")
-                .fields(registeredFields)
-                .field(newFieldDefinition()
-                        .name("_id")
-                        .type(GraphQLString)
-                        .dataFetcher(idFetch))
-                .field(newFieldDefinition()
-                        .name("_value")
-                        .type(GraphQLString)
-                        .dataFetcher(valueFetch))
-                .field(newFieldDefinition()
-                        .name("_language")
-                        .type(GraphQLString)
-                        .dataFetcher(langFetch))
-                .field(newFieldDefinition()
-                        .name("_type")
-                        .type(GraphQLString)
-                        .dataFetcher(typeFetch))
-                .build();
-
-        Set<GraphQLType> types = new HashSet<>();
-        types.add(node);
-
-        this.schema = GraphQLSchema.newSchema()
-                .query(RootQuery)
-                .build(types);
-    }
-
-
-
-    //this approach of dynamically generating schema directly from the endpoint
-    //will be abondened
-    // PJC - probably worth keeping it in place as a default / quickstart option
-    public static void registerPredicates(Config config) {
-        int count = 0;
-
-        SparqlClient client = new SparqlClient(config);
-        String queryString = "select distinct ?predicate where {[] ?predicate []}";
-        ResultSet results = client.sparqlSelect(queryString);
-
-        if (results == null) return;
-        else
-            while (results.hasNext()) {
-                QuerySolution nextSol = results.nextSolution();
-                Resource predicate = nextSol.get("?predicate").asResource();
-                String namespace = predicate.getNameSpace().toString();
-                if (!PREFIX_MAP.containsKey(namespace)) {
-                    String newPrefix = "ns" + count;
-                    count++;
-                    PREFIX_MAP.put(namespace, newPrefix);
-                }
-
-                String prefix = PREFIX_MAP.get(namespace);
-                String localName = predicate.getLocalName().toString();
-                String graphqlName = prefix + "_" + localName;
-
-                NAME_TO_URI_MAP.put(graphqlName, predicate.toString());
-                GRAPHQL_NAMES.add(graphqlName);
-
-             //   String jsonldName = prefix + ":" + localName;
-
-           //     NAME_MAP.put(graphqlName, jsonldName);
-            }
-    }
-*/
-
 }

@@ -67,8 +67,8 @@ public class Config {
                         String uri = context.get("@endpoints").get(endpoint).get("@id").asText();
                         String user = context.get("@endpoints").get(endpoint).get("@user").asText();
                         String password = context.get("@endpoints").get(endpoint).get("@password").asText();
-                        servCont.put(queryAuthUser, user);
-                        servCont.put(queryAuthPwd, password);
+                        if (!user.equals("")) servCont.put(queryAuthUser, user);
+                        if (!password.equals("")) servCont.put(queryAuthPwd, password);
                         serviceContexts.put(uri, servCont);
                     }
             );
