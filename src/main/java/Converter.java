@@ -97,8 +97,8 @@ public class Converter {
         JsonNode args = root.get("args");
         String graphName = globalContext.get("@predicates").get(root.get("name").asText()).get("@namedGraph").asText();
         String graphId;
-        if (!args.has("graphName")) graphId = globalContext.get("@namedGraphs").get(graphName).get("@id").asText();
-            else graphId = args.get("graphName").asText();
+        if (!args.has("graph")) graphId = globalContext.get("@namedGraphs").get(graphName).get("@id").asText();
+            else graphId = args.get("graph").asText();
         String endpointName = globalContext.get("@namedGraphs").get(graphName).get("@endpoint").asText();
         String endpointId;
         if (!args.has("endpoint")) endpointId = globalContext.get("@endpoints").get(endpointName).get("@id").asText();
@@ -179,9 +179,9 @@ public class Converter {
 
                     String graphName = globalContext.get("@predicates").get(field.get("name").asText()).get("@namedGraph").asText();
                     String graphId;
-                    if (!args.has("graphName"))
+                    if (!args.has("graph"))
                         graphId = globalContext.get("@namedGraphs").get(graphName).get("@id").asText();
-                    else graphId = args.get("graphName").asText();
+                    else graphId = args.get("graph").asText();
 
                     String endpointName = globalContext.get("@namedGraphs").get(graphName).get("@endpoint").asText();
                     String endpointId;
