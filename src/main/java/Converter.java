@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.language.TypeDefinition;
+import org.apache.jena.query.QuerySolution;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,6 +26,8 @@ public class Converter {
         put("_graph", "@graph");
     }}; //from graphql names to jsonld reserved names
 
+    List<QueryInQueue> queryQueue = new ArrayList<>();
+
 
     public Converter(Config config) {
         this.globalContext = config.context;
@@ -33,68 +36,106 @@ public class Converter {
     class Traversal {
         Object data;
         Map<String, String> context;
-
     }
 
-    public Set<String> graphql2sparql (String query) {
+    class QueryInQueue {
+        JsonNode query;
+        String rootNode;
+        String childNode;
 
-        //this method will convert a given graphql query into a nested SPARQL construct query
-        // that will retrieve all relevant data in one go and put it into an in-memory jena store
 
-        Set<String> output = new HashSet<>();
+        public QueryInQueue(JsonNode query, String rootNode, String childNode) {
+            this.query = query;
+            this.rootNode = rootNode;
+            this.childNode = childNode;
+        }
+    }
 
-        String rootTemplate = "CONSTRUCT { ?x a <root> . ?x a <%1$s> . %2$s } WHERE { %3$s } ";
-        String innerPattern = "{ SELECT ?x WHERE { ?x a <%1$s> } %2$s } %3$s ";
-        String graphPattern = "GRAPH <%1$s> { %2$s }";
-        String servicePattern = "SERVICE <%1$s> { %2$s }";
+
+
+    public List<String> graphql2sparql (String query) {
 
         JsonNode jsonQuery = query2json(query);
 
-        for (JsonNode root : jsonQuery) {
+        for (JsonNode topQuery : jsonQuery) {
+            QueryInQueue root = new QueryInQueue(topQuery, null, "x");
+            queryQueue.add(root);
+        }
 
-            JsonNode args = root.get("args");
+        List<String> output = new ArrayList<>();
 
-            String graphName = globalContext.get("@predicates").get(root.get("name").asText()).get("@namedGraph").asText();
-            String graphId;
-            if (!args.has("graphName")) graphId = globalContext.get("@namedGraphs").get(graphName).get("@id").asText();
+        for (QueryInQueue nextQuery : queryQueue ) {
+            try {
+                String constructQuery = getConstructQuery(nextQuery);
+                output.add(constructQuery);
+            } catch (Exception e) {
+                System.out.println(e.fillInStackTrace());
+            }
+        }
+
+        return output;
+    }
+
+    public String getConstructQuery(QueryInQueue jsonQuery) {
+
+
+        //this method will convert a given graphql query field into a SPARQL construct query
+        // that will retrieve all relevant data in one go and put it into an in-memory jena store
+
+        JsonNode root = jsonQuery.query;
+        JsonNode args = root.get("args");
+        String graphName = globalContext.get("@predicates").get(root.get("name").asText()).get("@namedGraph").asText();
+        String graphId;
+        if (!args.has("graphName")) graphId = globalContext.get("@namedGraphs").get(graphName).get("@id").asText();
             else graphId = args.get("graphName").asText();
-
-            String endpointName = globalContext.get("@namedGraphs").get(graphName).get("@endpoint").asText();
-            String endpointId;
-            if (!args.has("endpoint")) endpointId = globalContext.get("@endpoints").get(endpointName).get("@id").asText();
+        String endpointName = globalContext.get("@namedGraphs").get(graphName).get("@endpoint").asText();
+        String endpointId;
+        if (!args.has("endpoint")) endpointId = globalContext.get("@endpoints").get(endpointName).get("@id").asText();
             else endpointId = args.get("endpoint").asText();
-
-            String[] triplePatterns = getSubquery(root, "?x", graphId, endpointId);
-
+        String uri_ref = String.format("<%s>", globalContext.get("@predicates").get(root.get("name").asText()).get("@id").asText());
+        String parentNode = jsonQuery.rootNode;
+        String selfNode = jsonQuery.childNode;
+        String selfVar = "?" + selfNode;
+        String parentVar = "?" + parentNode;
+        String constructedTriple = "";
+        String rootMatch = "";
+        String innerPattern;
+        if (parentNode==null) {
             String limitParams = "";
-
             if (args.has("limit")) {
                 limitParams = "LIMIT " + args.get("limit");
                 if (args.has("offset")) {
                     limitParams = limitParams + " OFFSET "+ args.get("offset");
                 }
             }
-
-            String wherePattern = String.format(innerPattern,
-                    globalContext.get("@predicates").get(root.get("name").asText()).get("@id").asText(),
-                    limitParams,
-                    triplePatterns[1]);
-
-            if (!graphId.equals("")) wherePattern = String.format(graphPattern, graphId, wherePattern);
-            wherePattern = String.format(servicePattern, endpointId, wherePattern);
-
-            String constructQuery = String.format(rootTemplate,
-                    globalContext.get("@predicates").get(root.get("name").asText()).get("@id").asText(),
-                    triplePatterns[0],
-                    wherePattern);
-
-            System.out.println(constructQuery);
-
-            output.add(constructQuery);
-
+            constructedTriple = String.format(" ?x a %s . ", uri_ref);
+            innerPattern = String.format("{ SELECT ?x WHERE { %s } %s } ", constructedTriple, limitParams);
+        } else {
+            rootMatch = String.format(" %s a <node_%s> . ", parentVar, parentNode);
+            constructedTriple = String.format(" %s %s %s . ", parentVar, uri_ref, selfVar);
+            innerPattern = constructedTriple;
         }
 
-        return output;
+        String nodeMark = String.format("?%1$s a <node_%1$s> .", selfNode);
+
+        String topConstructTemplate = "CONSTRUCT { "+nodeMark+" %1$s } WHERE { "+ rootMatch +" SERVICE <%2$s> { %3$s } } ";
+
+        String[] triplePatterns = getSubquery(root, selfVar, graphId, endpointId);
+
+        constructedTriple = constructedTriple + triplePatterns[0];
+        innerPattern = innerPattern + triplePatterns[1];
+        String graphPattern = "GRAPH <%1$s> { %2$s }";
+
+        if (!graphId.equals("")) innerPattern = String.format(graphPattern, graphId, innerPattern);
+
+        String constructQuery = String.format(topConstructTemplate,
+                constructedTriple,
+                endpointId,
+                innerPattern);
+
+        System.out.println(constructQuery);
+
+        return constructQuery;
     }
 
     String[] getSubquery(JsonNode node, String parentVar, String parentGraphId, String parentEndpointId) {
@@ -241,7 +282,7 @@ public class Converter {
         try {
             JsonNode object = mapper.readTree(query);
 
-            System.out.println(object.toString());
+            System.out.println(object.toString()); //debug message
 
             return object;
         } catch (IOException e) {

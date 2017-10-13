@@ -3,6 +3,11 @@ type Query {
     person: [Person]
     company: [Company]
     city: [City]
+    pbox_product: [PB_Product]
+}
+
+type PB_Product {
+    pbox_label: String
 }
 
 type Mountain {

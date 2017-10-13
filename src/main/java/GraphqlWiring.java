@@ -41,10 +41,10 @@ public class GraphqlWiring {
     List<GraphQLArgument> queryArgs = new ArrayList() {{
         add(defaultArguments.get("limit"));
         add(defaultArguments.get("offset"));
-        add(defaultArguments.get("objectPropertyURI"));
-        add(defaultArguments.get("dataPropertyURI"));
-        add(defaultArguments.get("objectURI"));
-        add(defaultArguments.get("literalValue"));
+       // add(defaultArguments.get("objectPropertyURI"));
+       // add(defaultArguments.get("dataPropertyURI"));
+       // add(defaultArguments.get("objectURI"));
+       // add(defaultArguments.get("literalValue"));
         add(defaultArguments.get("graphName"));
         add(defaultArguments.get("endpoint"));
     }};

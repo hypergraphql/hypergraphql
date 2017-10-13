@@ -14,12 +14,8 @@ import static spark.Spark.*;
  */
 public class Controller {
 
-    static Converter converter;
-
 
     public static void start(Config config, GraphQL graphQL) {
-
-        converter = new Converter(config);
 
         port(config.graphql.port);
 
@@ -34,6 +30,8 @@ public class Controller {
             ); });
 
         post(config.graphql.path, (req, res) -> {
+
+            Converter converter = new Converter(config);
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode requestObject = mapper.readTree(req.body().toString());
@@ -51,7 +49,7 @@ public class Controller {
             ExecutionInput executionInput;
             ExecutionResult qlResult;
 
-            Set<String> sparqlQueries;
+            List<String> sparqlQueries;
 
             if (!query.contains("IntrospectionQuery")) {
 
