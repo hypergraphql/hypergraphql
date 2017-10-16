@@ -3,7 +3,6 @@ type Query {
     person: [Person]
     company: [Company]
     city: [City]
-    pbox_product: [PB_Product]
 }
 
 type Mountain {

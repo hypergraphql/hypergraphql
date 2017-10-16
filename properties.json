@@ -1,6 +1,6 @@
 {
     "schemaFile": "schema.graphql",
-    "contextFile": "context.jsonld",
+    "contextFile": "context.json",
     "graphql": {
         "port": 8009,
         "path": "/",

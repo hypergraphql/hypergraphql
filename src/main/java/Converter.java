@@ -76,9 +76,6 @@ public class Converter {
             try {
                 String constructQuery = getConstructQuery(nextQuery);
                 output.add(constructQuery);
-
-                System.out.println("Constructed query:  " + constructQuery);
-
             } catch (Exception e) {
                 System.out.println(e.fillInStackTrace());
             }
