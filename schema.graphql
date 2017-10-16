@@ -6,10 +6,6 @@ type Query {
     pbox_product: [PB_Product]
 }
 
-type PB_Product {
-    pbox_label: String
-}
-
 type Mountain {
     label: [String]
     firstAscentPerson: [Person]

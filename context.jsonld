@@ -1,13 +1,5 @@
 {
   "@predicates": {
-    "pbox_product": {
-      "@id": "http://photobox-test/ontology/Product",
-      "@namedGraph": "pbox-test"
-    },
-    "pbox_label": {
-      "@id": "http://photobox-test/ontology/label",
-      "@namedGraph": "pbox-test"
-    },
     "person": {
       "@id": "http://dbpedia.org/ontology/Person",
       "@namedGraph": "dbpedia"
@@ -81,10 +73,6 @@
     "live-dbpedia": {
       "@id": "",
       "@endpoint": "live-dbpedia-endpoint"
-    },
-    "pbox-test": {
-      "@id": "http://photobox/test2",
-      "@endpoint": "photobox"
     }
   },
   "@endpoints": {
@@ -97,11 +85,6 @@
       "@id": "http://live.dbpedia.org/sparql",
       "@user": "",
       "@password": ""
-    },
-    "photobox": {
-      "@id": "http://ec2-52-23-193-209.compute-1.amazonaws.com:5820/Photobox-ETL/query",
-      "@user": "admin",
-      "@password": "admin"
     }
   }
 }
