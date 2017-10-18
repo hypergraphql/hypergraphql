@@ -1,7 +1,6 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.*;
-import org.apache.jena.sparql.util.Context;
 import spark.ModelAndView;
 import spark.template.velocity.VelocityTemplateEngine;
 
@@ -19,8 +18,8 @@ public class Controller {
 
         port(config.graphql.port);
 
-        System.out.println("GraphQL server started at: http://localhost:"  + config.graphql.port + config.graphql.path);
-        System.out.println("GraphiQL UI available at: http://localhost:"  + config.graphql.port + config.graphql.graphiql);
+        System.out.println("GraphQL server started at: http://localhost:" + config.graphql.port + config.graphql.path);
+        System.out.println("GraphiQL UI available at: http://localhost:" + config.graphql.port + config.graphql.graphiql);
 
         get(config.graphql.graphiql, (req, res) -> {
             Map<String, String> model = new HashMap<>();
@@ -28,7 +27,8 @@ public class Controller {
             model.put("template", portScript);
             return new VelocityTemplateEngine().render(
                     new ModelAndView(model, "graphiql.vtl")
-            ); });
+            );
+        });
 
         post(config.graphql.path, (req, res) -> {
 
@@ -73,7 +73,7 @@ public class Controller {
             data.putAll(qlResult.getData());
             errors.addAll(qlResult.getErrors());
 
-            JsonNode resultJson = mapper.readTree( new ObjectMapper().writeValueAsString(result));
+            JsonNode resultJson = mapper.readTree(new ObjectMapper().writeValueAsString(result));
             res.type("application/json");
 
             return resultJson;

@@ -10,9 +10,7 @@ public class Main {
         Logger.getRootLogger().setLevel(Level.OFF);
 
         Config config = new Config("properties.json");
-
         GraphqlWiring wiring = new GraphqlWiring(config);
-
         GraphQL graphQL = GraphQL.newGraphQL(wiring.schema).build();
 
         Controller.start(config, graphQL);

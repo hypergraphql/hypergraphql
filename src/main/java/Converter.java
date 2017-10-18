@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 /**
  * Created by szymon on 15/09/2017.
- *
+ * <p>
  * This class contains jsonRewrite methods between different query/response formats
  */
 public class Converter {
@@ -56,8 +56,7 @@ public class Converter {
     }
 
 
-
-    public List<String> graphql2sparql (String query) {
+    public List<String> graphql2sparql(String query) {
 
         JsonNode jsonQuery = query2json(query);
 
@@ -68,7 +67,7 @@ public class Converter {
 
         List<String> output = new ArrayList<>();
 
-        while (queryQueue.size()>0) {
+        while (queryQueue.size() > 0) {
 
             QueryInQueue nextQuery = queryQueue.getFirst();
             queryQueue.removeFirst();
@@ -95,11 +94,11 @@ public class Converter {
         String graphName = globalContext.get("@predicates").get(root.get("name").asText()).get("@namedGraph").asText();
         String graphId;
         if (!args.has("graph")) graphId = globalContext.get("@namedGraphs").get(graphName).get("@id").asText();
-            else graphId = args.get("graph").asText();
+        else graphId = args.get("graph").asText();
         String endpointName = globalContext.get("@namedGraphs").get(graphName).get("@endpoint").asText();
         String endpointId;
         if (!args.has("endpoint")) endpointId = globalContext.get("@endpoints").get(endpointName).get("@id").asText();
-            else endpointId = args.get("endpoint").asText();
+        else endpointId = args.get("endpoint").asText();
         String uri_ref = String.format("<%s>", globalContext.get("@predicates").get(root.get("name").asText()).get("@id").asText());
         String parentNode = jsonQuery.rootNode;
         String selfNode = jsonQuery.childNode;
@@ -110,12 +109,12 @@ public class Converter {
         String nodeMark = "";
         String innerPattern;
 
-        if (parentNode==null) {
+        if (parentNode == null) {
             String limitParams = "";
             if (args.has("limit")) {
                 limitParams = "LIMIT " + args.get("limit");
                 if (args.has("offset")) {
-                    limitParams = limitParams + " OFFSET "+ args.get("offset");
+                    limitParams = limitParams + " OFFSET " + args.get("offset");
                 }
             }
             nodeMark = String.format("?%1$s a <node_%1$s> .", selfNode);
@@ -127,7 +126,7 @@ public class Converter {
             innerPattern = constructedTriple;
         }
 
-        String topConstructTemplate = "CONSTRUCT { "+nodeMark+" %1$s } WHERE { "+ rootMatch +" SERVICE <%2$s> { %3$s } } ";
+        String topConstructTemplate = "CONSTRUCT { " + nodeMark + " %1$s } WHERE { " + rootMatch + " SERVICE <%2$s> { %3$s } } ";
 
         String[] triplePatterns = getSubquery(root, selfNode, graphId, endpointId);
 
@@ -152,13 +151,13 @@ public class Converter {
         String optionalPattern = "OPTIONAL { %1$s } ";
         String triplePattern = "%1$s <%2$s> %3$s %4$s. %5$s";
         String graphPattern = "GRAPH <%1$s> { %2$s }";
-       // String servicePattern = "SERVICE <%1$s> { %2$s }";
+        // String servicePattern = "SERVICE <%1$s> { %2$s }";
 
         String[] output = new String[2];
 
         JsonNode fields = node.get("fields");
 
-        if (fields==null) {
+        if (fields == null) {
             output[0] = "";
             output[1] = "";
         } else {
@@ -267,7 +266,7 @@ public class Converter {
             namePtrn = Pattern.compile("\\s(\\w+)\\s");
             nameMtchr = namePtrn.matcher(query);
 
-            query=query.replaceAll("\\s(\\w+)\\s", " \"name\":\"$1\" ");
+            query = query.replaceAll("\\s(\\w+)\\s", " \"name\":\"$1\" ");
 
         } while (nameMtchr.find());
 
@@ -275,7 +274,7 @@ public class Converter {
             namePtrn = Pattern.compile("\\s(\\w+):");
             nameMtchr = namePtrn.matcher(query);
 
-            query=query.replaceAll("\\s(\\w+):", " \"$1\":");
+            query = query.replaceAll("\\s(\\w+):", " \"$1\":");
 
         } while (nameMtchr.find());
 
@@ -313,42 +312,42 @@ public class Converter {
     }
 
 
-    public Object graphql2jsonld (Map<String, Object> dataObject) {
+    public Object graphql2jsonld(Map<String, Object> dataObject) {
 
-            ArrayList<Object> graphData = new ArrayList<>();
-            Map<String,String> graphContext = new HashMap<>();
+        ArrayList<Object> graphData = new ArrayList<>();
+        Map<String, String> graphContext = new HashMap<>();
 
-            Iterator<String> queryFields = dataObject.keySet().iterator();
+        Iterator<String> queryFields = dataObject.keySet().iterator();
 
-            while (queryFields.hasNext()) {
+        while (queryFields.hasNext()) {
 
-                String field = queryFields.next();
-                String newType = globalContext.get("@predicates").get(field).get("@id").asText();
+            String field = queryFields.next();
+            String newType = globalContext.get("@predicates").get(field).get("@id").asText();
 
-                Converter.Traversal restructured = jsonRewrite(dataObject.get(field));
+            Converter.Traversal restructured = jsonRewrite(dataObject.get(field));
 
-                if (restructured.data.getClass() == ArrayList.class) {
-                    for (Object data : (ArrayList<Object>) restructured.data) ((HashMap) data).put("@type", newType);
-                    graphData.addAll((ArrayList<Object>) restructured.data);
-                }
-                if (restructured.data.getClass() == HashMap.class) {
-                    ((HashMap) restructured.data).put("@type", newType);
-                    graphData.add(restructured.data);
-                }
-
-                Set<String> newContext = restructured.context.keySet();
-
-                for (String key : newContext) {
-                    graphContext.put(key, restructured.context.get(key));
-                }
+            if (restructured.data.getClass() == ArrayList.class) {
+                for (Object data : (ArrayList<Object>) restructured.data) ((HashMap) data).put("@type", newType);
+                graphData.addAll((ArrayList<Object>) restructured.data);
+            }
+            if (restructured.data.getClass() == HashMap.class) {
+                ((HashMap) restructured.data).put("@type", newType);
+                graphData.add(restructured.data);
             }
 
-            Map<String, Object> output = new HashMap<>();
+            Set<String> newContext = restructured.context.keySet();
 
-            output.put("@graph", graphData);
-            output.put("@context", graphContext);
-            return output;
+            for (String key : newContext) {
+                graphContext.put(key, restructured.context.get(key));
+            }
         }
+
+        Map<String, Object> output = new HashMap<>();
+
+        output.put("@graph", graphData);
+        output.put("@context", graphContext);
+        return output;
+    }
 
 
     public Converter.Traversal jsonRewrite(Object dataObject) {
@@ -362,7 +361,7 @@ public class Converter {
             return restructured;
         }
 
-        if (dataObject.getClass()==ArrayList.class) {
+        if (dataObject.getClass() == ArrayList.class) {
 
             ArrayList<Object> newList = new ArrayList<>();
             Map<String, String> context = new HashMap<>();
@@ -378,7 +377,7 @@ public class Converter {
             return restructured;
         }
 
-        if (dataObject.getClass()!=LinkedHashMap.class) {
+        if (dataObject.getClass() != LinkedHashMap.class) {
 
 
             Converter.Traversal restructured = new Converter.Traversal();
@@ -395,7 +394,7 @@ public class Converter {
 
             Map<String, String> context = new HashMap<>();
 
-            for (String key: keys) {
+            for (String key : keys) {
                 Object child = mapObject.get(key);
                 Converter.Traversal childRes = jsonRewrite(child);
                 if (JSONLD_VOC.containsKey(key)) targetObject.put(JSONLD_VOC.get(key), childRes.data);
@@ -431,7 +430,7 @@ public class Converter {
 
         while (nameMtchr.find()) {
             String find = nameMtchr.group(1);
-            typeData = typeData.replace(" " + find + "=", "\'"+find+"\':");
+            typeData = typeData.replace(" " + find + "=", "\'" + find + "\':");
         }
 
         typeData = typeData.replace("'", "\"");
