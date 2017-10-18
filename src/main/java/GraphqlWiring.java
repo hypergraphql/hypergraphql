@@ -273,6 +273,7 @@ public class GraphqlWiring {
         GraphQLFieldDefinition field = newFieldDefinition()
                 .name(fieldDef.get("name").asText())
                 .argument(args)
+                .description(config.context.get("@predicates").get(fieldDef.get("name").asText()).get("@id").asText())
                 .type(refType.graphQLType)
                 .dataFetcher(fetcher).build();
 
