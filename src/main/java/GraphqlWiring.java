@@ -198,6 +198,7 @@ public class GraphqlWiring {
 
         private GraphQLFieldDefinition _idField = newFieldDefinition()
             .type(GraphQLID)
+            .description("The URI of this resource.")
             .name("_id")
             .dataFetcher(idFetcher).build();
 
