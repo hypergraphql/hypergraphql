@@ -270,10 +270,15 @@ public class GraphqlWiring {
             if (refType.dataType.equals("String")) args.add(defaultArguments.get("lang"));
         }
 
+        String description;
+        String uri = config.context.get("@predicates").get(fieldDef.get("name").asText()).get("@id").asText();
+        if (isQueryType) description = "Instances of " + uri;
+        else description = "Values of " + uri;
+
         GraphQLFieldDefinition field = newFieldDefinition()
                 .name(fieldDef.get("name").asText())
                 .argument(args)
-                .description(config.context.get("@predicates").get(fieldDef.get("name").asText()).get("@id").asText())
+                .description(description)
                 .type(refType.graphQLType)
                 .dataFetcher(fetcher).build();
 
