@@ -19,7 +19,8 @@ public class Controller {
 
         port(config.graphql.port);
 
-        System.out.println("GraphQL server started at: "  + config.graphql.port);
+        System.out.println("GraphQL server started at: http://localhost:"  + config.graphql.port + config.graphql.path);
+        System.out.println("GraphiQL UI available at: http://localhost:"  + config.graphql.port + config.graphql.graphiql);
 
         get(config.graphql.graphiql, (req, res) -> {
             Map<String, String> model = new HashMap<>();

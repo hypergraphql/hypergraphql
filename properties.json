@@ -4,6 +4,6 @@
     "graphql": {
         "port": 8009,
         "path": "/",
-        "graphiql": "/graphql"
+        "graphiql": "/graphiql"
     }
 }
