@@ -37,7 +37,7 @@ public class Converter {
 
 
   public Converter(Config config) {
-    this.globalContext = config.context;
+    this.globalContext = config.context();
   }
 
   private class Traversal {

@@ -77,7 +77,7 @@ public class GraphqlWiring {
     Set<GraphQLType> schemaTypes = new HashSet<>();
     GraphQLObjectType schemaQuery = null;
 
-    Map<String, TypeDefinition> typeMap = config.schema.types();
+    Map<String, TypeDefinition> typeMap = config.schema().types();
 
     Set<String> typeDefs = typeMap.keySet();
 
@@ -107,7 +107,7 @@ public class GraphqlWiring {
       } else nodeUri = ((RDFNode) environment.getSource()).asResource().getURI();
 
       String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-      predicateURI = config.context.get("@predicates").get(predicate).get("@id").asText();
+      predicateURI = config.context().get("@predicates").get(predicate).get("@id").asText();
       client = environment.getContext();
     }
   }
@@ -121,7 +121,7 @@ public class GraphqlWiring {
 
   private DataFetcher<List<RDFNode>> instancesOfTypeFetcher = environment -> {
     String type = ((Field) environment.getFields().toArray()[0]).getName();
-    String typeURI = config.context.get("@predicates").get(type).get("@id").asText();
+    String typeURI = config.context().get("@predicates").get(type).get("@id").asText();
     SparqlClient client = environment.getContext();
     List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", typeURI, environment.getArguments());
     return subjects;
@@ -195,7 +195,7 @@ public class GraphqlWiring {
   public GraphQLFieldDefinition registerGraphQLField(Boolean isQueryType, JsonNode fieldDef) {
 
 
-    OutputTypeSpecification refType = getOutputType(fieldDef.get("type"));
+    OutputTypeSpecification refType = outputType(fieldDef.get("type"));
 
     if (isQueryType) {
       if (refType.isList) {
@@ -248,14 +248,14 @@ public class GraphqlWiring {
     return field;
   }
 
-  private OutputTypeSpecification getOutputType(JsonNode outputTypeDef) {
+  private OutputTypeSpecification outputType(JsonNode outputTypeDef) {
 
     String outputType = outputTypeDef.get("_type").asText();
 
     OutputTypeSpecification outputSpec = new OutputTypeSpecification();
 
     if (outputType.equals("ListType")) {
-      OutputTypeSpecification innerSpec = getOutputType(outputTypeDef.get("type"));
+      OutputTypeSpecification innerSpec = outputType(outputTypeDef.get("type"));
       outputSpec.graphQLType = new GraphQLList(innerSpec.graphQLType);
       outputSpec.dataType = innerSpec.dataType;
       outputSpec.isList = true;
@@ -263,7 +263,7 @@ public class GraphqlWiring {
     }
 
     if (outputType.equals("NonNullType")) {
-      OutputTypeSpecification innerSpec = getOutputType(outputTypeDef.get("type"));
+      OutputTypeSpecification innerSpec = outputType(outputTypeDef.get("type"));
       outputSpec.graphQLType = new GraphQLNonNull(innerSpec.graphQLType);
       outputSpec.dataType = innerSpec.dataType;
       return outputSpec;
@@ -298,5 +298,9 @@ public class GraphqlWiring {
       return outputSpec;
     }
     return null;
+  }
+
+  public GraphQLSchema schema() {
+    return schema;
   }
 }

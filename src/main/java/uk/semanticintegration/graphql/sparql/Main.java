@@ -16,7 +16,7 @@ public class Main {
 
     GraphqlWiring wiring = new GraphqlWiring(config);
 
-    GraphQL graphQL = GraphQL.newGraphQL(wiring.schema).build();
+    GraphQL graphQL = GraphQL.newGraphQL(wiring.schema()).build();
 
     Controller.start(config, graphQL);
 

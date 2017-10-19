@@ -86,6 +86,22 @@ public class Config {
       e.printStackTrace();
     }
   }
+
+  public JsonNode context() {
+    return context;
+  }
+
+  public GraphqlConfig graphql() {
+    return graphql;
+  }
+
+  public TypeDefinitionRegistry schema() {
+    return schema;
+  }
+
+  public Map<String, Context> sparqlEndpointsContext() {
+    return sparqlEndpointsContext;
+  }
 }
 
 class GraphqlConfig {
@@ -104,5 +120,16 @@ class GraphqlConfig {
     this.graphiql = graphiql;
   }
 
+  public Integer port() {
+    return port;
+  }
+
+  public String path() {
+    return path;
+  }
+
+  public String graphiql() {
+    return graphiql;
+  }
 }
 

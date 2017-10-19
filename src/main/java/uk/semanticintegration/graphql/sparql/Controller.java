@@ -25,20 +25,19 @@ public class Controller {
 
   public static void start(Config config, GraphQL graphQL) {
 
-    port(config.graphql.port);
+    port(config.graphql().port());
 
-    System.out.println("GraphQL server started at: " + config.graphql.port);
+    System.out.println("GraphQL server started at: " + config.graphql().port());
 
-    get(config.graphql.graphiql, (req, res) -> {
+    get(config.graphql().graphiql(), (req, res) -> {
       Map<String, String> model = new HashMap<>();
-      String portScript = config.graphql.port.toString();
-      model.put("template", portScript);
+      model.put("template", String.valueOf(config.graphql().port()));
       return new VelocityTemplateEngine().render(
           new ModelAndView(model, "graphiql.vtl")
       );
     });
 
-    post(config.graphql.path, (req, res) -> {
+    post(config.graphql().path(), (req, res) -> {
 
       Converter converter = new Converter(config);
 
@@ -64,7 +63,7 @@ public class Controller {
 
         sparqlQueries = converter.graphql2sparql(query);
 
-        SparqlClient client = new SparqlClient(sparqlQueries, config.sparqlEndpointsContext);
+        SparqlClient client = new SparqlClient(sparqlQueries, config.sparqlEndpointsContext());
 
         executionInput = ExecutionInput.newExecutionInput()
             .query(query)
