@@ -7,7 +7,7 @@ HyperGraphQL is a GraphQL query interface over SPARQL endpoints. It enables fede
 
 Alongside the standard JSON-based GraphQL answers, HyperGraphQL delievers also JSON-LD responses conveying full semantic context of the retrieved data. This makes HyperGraphQL a natural query interface for hypermedia-driven Web APIs backed by RDF stores. 
 
-# Running:
+# Running
 
 Clone the Git repository into a local directory. 
 
@@ -15,7 +15,7 @@ Clone the Git repository into a local directory.
 
 **Gradle**:
 
-# Properties:
+# Properties
 
 Basic settings are defined in the *properties.json* file. The defaults are:
 
