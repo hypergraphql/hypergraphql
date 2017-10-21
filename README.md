@@ -8,6 +8,14 @@ HyperGraphQL is a GraphQL query interface over SPARQL endpoints. It enables fede
 
 Alongside the standard JSON-based GraphQL answers, HyperGraphQL delievers also JSON-LD responses conveying full semantic context of the retrieved data. This makes HyperGraphQL a natural query interface for hypermedia-driven Web APIs backed by RDF stores. 
 
+## Schema and context
+
+To configure a HyperGraphQL server one needs to provide only a basic GraphQL type schema and its mapping to the RDF vocabulary of the target SPARQL endpoints. The complete GraphQL wiring is done automatically on starting the server. 
+
+## Execution
+
+To minimise the number of return trips between HyperGraphQL server and RDF stores, the original GraphQL query is translated into the smallest possible number of SPARQL CONSTRUCT queries necessary to fetch all the relevant RDF data. The further transformation of the data into proper GraphQL responses is done locally by the HyperGraphQL server. When the query requests data from a single SPARQL endpoint, only one SPARQL CONSTRUCT query is issued. 
+
 ## Running
 
 Clone the Git repository into a local directory. 
@@ -37,15 +45,6 @@ Basic settings are defined in the *properties.json* file. The defaults are:
 - *graphql.port*: the address of the port at thich the GraphQL server and GraphiQL interface are initiated
 - *graphql.path*: the relative URL of the GraphQL server
 - *graphql.graphiql*: the relative URL of the GraphiQL UI
-
-## Schema and context
-
-To set up a HyperGraphQL server one only needs to provide a basic GraphQL type schema and its mapping to the RDF vocabulary of the target SPARQL endpoints, as explained below. 
-The complete wiring is done automatically on initiating the server. 
-
-## Execution
-
-To minimise the number of return trips between HyperGraphQL server and RDF stores, the original GraphQL query is translated into the smallest number of SPARQL CONSTRUCT queries necessary to fetch all the relevant RDF data. The data is then further transformed into proper GraphQL responses locally, by the HyperGraphQL server. If the query requests data from a single SPARQL endpoint, only one SPARQL CONSTRUCT query is issued. 
 
 ## Schema
 
