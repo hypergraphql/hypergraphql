@@ -1,7 +1,7 @@
 ![HyperGraphQL](HyperGraphQL.png)  HyperGraphQL
 ======
 
-HyperGraphQL is a GraphQL query interface over SPARQL endpoints. It enables federated querying of RDF stores using GraphQL query language and schemas mapped at query-time onto the target RDF vocabularies. HyperGraphQL serves two key objectives:
+HyperGraphQL is a GraphQL query interface for RDF triple stores. It enables federated querying of local and remote RDF stores via SPARQL endpoints using GraphQL query language and schemas mapped  onto the target RDF vocabularies. HyperGraphQL serves two key objectives:
 
 - hiding the complexities of the Semantic Web stack behind the GraphQL server, thus facilitating access to linked data via a simpler and more familiar to many clients GraphQL interface;
 - providing a flexible mechanism for restricting access to RDF stores down to naturally defineable subsets of (tree-shaped) queries, which can be efficiently handled by the RDF stores, thus minimising the impact on the stores' availability. 
