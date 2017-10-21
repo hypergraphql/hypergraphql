@@ -18,6 +18,94 @@ To configure a HyperGraphQL server one needs to provide only a basic GraphQL typ
 
 To minimise the number of return trips between HyperGraphQL server and RDF stores, the original GraphQL query is translated into the smallest possible number of SPARQL CONSTRUCT queries necessary to fetch all the relevant RDF data. The further transformation of the data into proper GraphQL responses is done locally by the HyperGraphQL server. When the query requests data from a single SPARQL endpoint, only one SPARQL CONSTRUCT query is issued. 
 
+## Example
+
+### HyperGraphQL query:
+```
+{
+  person(limit: 1, offset: 4) {
+    _id
+    name
+    birthDate
+    birthPlace {
+      _id
+      label(lang: "en")
+      country {
+        _id
+        label(lang: "en")
+      }
+    }
+  }
+}
+```
+
+### HyperGraphQL response:
+```
+{
+  "extensions": {
+    "sparql-queries": [
+      "CONSTRUCT { ?x a <node_x> .  ?x a <http://dbpedia.org/ontology/Person> . ?x <http://xmlns.com/foaf/0.1/name> ?x_1 .   ?x <http://dbpedia.org/ontology/birthDate> ?x_2 .   ?x <http://dbpedia.org/ontology/birthPlace> ?x_3 .  ?x_3 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_1 .   ?x_3 <http://dbpedia.org/ontology/country> ?x_3_2 .  ?x_3_2 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_2_1 .   } WHERE {  SERVICE <http://dbpedia.org/sparql/> { GRAPH <http://dbpedia.org> {  { SELECT ?x WHERE {  ?x a <http://dbpedia.org/ontology/Person> .  } LIMIT 1 OFFSET 4 } OPTIONAL { ?x <http://xmlns.com/foaf/0.1/name> ?x_1 .  }  OPTIONAL { ?x <http://dbpedia.org/ontology/birthDate> ?x_2 .  }  OPTIONAL { ?x <http://dbpedia.org/ontology/birthPlace> ?x_3 OPTIONAL { ?x_3 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_1 . FILTER (lang(?x_3_1)=\"en\")  }  OPTIONAL { ?x_3 <http://dbpedia.org/ontology/country> ?x_3_2 OPTIONAL { ?x_3_2 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_2_1 . FILTER (lang(?x_3_2_1)=\"en\")  } .  } .  }  } } } "
+    ],
+    "json-ld": {
+      "@graph": [
+        {
+          "birthPlace": {
+            "country": {
+              "@id": "http://dbpedia.org/resource/Greece",
+              "label": [
+                "Greece"
+              ]
+            },
+            "@id": "http://dbpedia.org/resource/Corfu",
+            "label": [
+              "Corfu"
+            ]
+          },
+          "@type": "http://dbpedia.org/ontology/Person",
+          "name": [
+            "Nikolaos Ventouras"
+          ],
+          "@id": "http://dbpedia.org/resource/Nikolaos_Ventouras",
+          "birthDate": "1899-1-1"
+        }
+      ],
+      "@context": {
+        "birthPlace": "http://dbpedia.org/ontology/birthPlace",
+        "country": "http://dbpedia.org/ontology/country",
+        "name": "http://xmlns.com/foaf/0.1/name",
+        "label": "http://www.w3.org/2000/01/rdf-schema#label",
+        "birthDate": "http://dbpedia.org/ontology/birthDate"
+      }
+    }
+  },
+  "data": {
+    "person": [
+      {
+        "_id": "http://dbpedia.org/resource/Nikolaos_Ventouras",
+        "name": [
+          "Nikolaos Ventouras"
+        ],
+        "birthDate": "1899-1-1",
+        "birthPlace": {
+          "_id": "http://dbpedia.org/resource/Corfu",
+          "label": [
+            "Corfu"
+          ],
+          "country": {
+            "_id": "http://dbpedia.org/resource/Greece",
+            "label": [
+              "Greece"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "errors": []
+}
+```
+
+
 ## Running
 
 Clone the Git repository into a local directory. 
@@ -52,7 +140,7 @@ Basic settings are defined in the *properties.json* file. The defaults are:
 
 ## Schema
 
-The schema definition complies with the GraphQL spec (see: 	[http://graphql.org/learn/schema/](http://graphql.org/learn/schema/)). Currently, only the core fragment of the spec, including object types and fields, is supported, as presented in the example below.  
+The schema definition complies with the GraphQL spec (see: 	[http://graphql.org/learn/schema/](http://graphql.org/learn/schema/)). Currently, only the core fragment of the spec, including object types and fields, is supported, as presented in the example below. Additionally, some default SPARQL-related fields and arguments are added automatically to each schema. 
 
 
 ```
