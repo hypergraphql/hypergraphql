@@ -1,4 +1,5 @@
-# ![HyperGraphQL](HyperGraphQL.png)  HyperGraphQL
+![HyperGraphQL](HyperGraphQL.png)  HyperGraphQL
+======
 
 HyperGraphQL is a GraphQL query interface over SPARQL endpoints. It enables federated querying of RDF stores using GraphQL query language and schemas mapped at query-time onto the target RDF vocabularies. HyperGraphQL serves two key objectives:
 
@@ -7,7 +8,7 @@ HyperGraphQL is a GraphQL query interface over SPARQL endpoints. It enables fede
 
 Alongside the standard JSON-based GraphQL answers, HyperGraphQL delievers also JSON-LD responses conveying full semantic context of the retrieved data. This makes HyperGraphQL a natural query interface for hypermedia-driven Web APIs backed by RDF stores. 
 
-# Running
+## Running
 
 Clone the Git repository into a local directory. 
 
@@ -15,7 +16,7 @@ Clone the Git repository into a local directory.
 
 **Gradle**:
 
-# Properties
+## Properties
 
 Basic settings are defined in the *properties.json* file. The defaults are:
 
@@ -37,16 +38,16 @@ Basic settings are defined in the *properties.json* file. The defaults are:
 - *graphql.path*: the relative URL of the GraphQL server
 - *graphql.graphiql*: the relative URL of the GraphiQL UI
 
-# Schema and context
+## Schema and context
 
 To set up a HyperGraphQL server one only needs to provide a basic GraphQL type schema and its mapping to the RDF vocabulary of the target SPARQL endpoints, as explained below. 
 The complete wiring is done automatically on initiating the server. 
 
-# Execution
+## Execution
 
 To minimise the number of return trips between HyperGraphQL server and RDF stores, the original GraphQL query is translated into the smallest number of SPARQL CONSTRUCT queries necessary to fetch all the relevant RDF data. The data is then further transformed into proper GraphQL responses locally, by the HyperGraphQL server. If the query requests data from a single SPARQL endpoint, only one SPARQL CONSTRUCT query is issued. 
 
-# Schema
+## Schema
 
 The schema definition complies with the GraphQL spec (see: 	[http://graphql.org/learn/schema/](http://graphql.org/learn/schema/)). Currently, only the core fragment of the spec, including basic types and fields, is supported, as presented in the example below.  
 
@@ -94,7 +95,7 @@ WHERE {
 }
 ```
 
-# Context
+## Context
 
 The context specification consists of three components:
 
