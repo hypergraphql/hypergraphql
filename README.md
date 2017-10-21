@@ -16,7 +16,7 @@ To configure a HyperGraphQL server one needs to provide only a basic GraphQL typ
 
 ## Execution
 
-To minimise the number of return trips between HyperGraphQL server and RDF stores, the original GraphQL query is translated into the smallest possible number of SPARQL CONSTRUCT queries necessary to fetch all the relevant RDF data. The further transformation of the data into proper GraphQL responses is done locally by the HyperGraphQL server. When the query requests data from a single SPARQL endpoint, only one SPARQL CONSTRUCT query is issued. 
+To minimise the number of return trips between HyperGraphQL server and RDF stores, the original GraphQL query is translated into possibly few SPARQL CONSTRUCT queries necessary to fetch all the relevant RDF data. The further transformation of the data into proper GraphQL responses is done locally by the HyperGraphQL server. When the query requests data from a single SPARQL endpoint, only one SPARQL CONSTRUCT query is issued. 
 
 ## Example
 
@@ -44,29 +44,33 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
 {
   "extensions": {
     "sparql-queries": [
-      "CONSTRUCT { ?x a <node_x> .  ?x a <http://dbpedia.org/ontology/Person> . ?x <http://xmlns.com/foaf/0.1/name> ?x_1 .   ?x <http://dbpedia.org/ontology/birthDate> ?x_2 .   ?x <http://dbpedia.org/ontology/birthPlace> ?x_3 .  ?x_3 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_1 .   ?x_3 <http://dbpedia.org/ontology/country> ?x_3_2 .  ?x_3_2 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_2_1 .   } WHERE {  SERVICE <http://dbpedia.org/sparql/> { GRAPH <http://dbpedia.org> {  { SELECT ?x WHERE {  ?x a <http://dbpedia.org/ontology/Person> .  } LIMIT 1 OFFSET 4 } OPTIONAL { ?x <http://xmlns.com/foaf/0.1/name> ?x_1 .  }  OPTIONAL { ?x <http://dbpedia.org/ontology/birthDate> ?x_2 .  }  OPTIONAL { ?x <http://dbpedia.org/ontology/birthPlace> ?x_3 OPTIONAL { ?x_3 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_1 . FILTER (lang(?x_3_1)=\"en\")  }  OPTIONAL { ?x_3 <http://dbpedia.org/ontology/country> ?x_3_2 OPTIONAL { ?x_3_2 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_2_1 . FILTER (lang(?x_3_2_1)=\"en\")  } .  } .  }  } } } "
+      "CONSTRUCT { ?x a <node_x> .  ?x a <http://dbpedia.org/ontology/Person> . ?x a <node_x> . ?x a <node_x> . ?x a <node_x> . } WHERE {  SERVICE <http://live.dbpedia.org/sparql> {  { SELECT ?x WHERE {  ?x a <http://dbpedia.org/ontology/Person> .  } LIMIT 1 OFFSET 4 }  } } ",
+      "CONSTRUCT {   ?x <http://xmlns.com/foaf/0.1/name> ?x_1 .  } WHERE {  ?x a <node_x> .  SERVICE <http://dbpedia.org/sparql/> { GRAPH <http://dbpedia.org> {  ?x <http://xmlns.com/foaf/0.1/name> ?x_1 .  } } } ",
+      "CONSTRUCT {   ?x <http://dbpedia.org/ontology/birthDate> ?x_2 .  } WHERE {  ?x a <node_x> .  SERVICE <http://dbpedia.org/sparql/> { GRAPH <http://dbpedia.org> {  ?x <http://dbpedia.org/ontology/birthDate> ?x_2 .  } } } ",
+      "CONSTRUCT {   ?x <http://dbpedia.org/ontology/birthPlace> ?x_3 . ?x_3 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_1 .   ?x_3 <http://dbpedia.org/ontology/country> ?x_3_2 .  ?x_3_2 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_2_1 .   } WHERE {  ?x a <node_x> .  SERVICE <http://dbpedia.org/sparql/> { GRAPH <http://dbpedia.org> {  ?x <http://dbpedia.org/ontology/birthPlace> ?x_3 . OPTIONAL { ?x_3 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_1 . FILTER (lang(?x_3_1)=\"en\")  }  OPTIONAL { ?x_3 <http://dbpedia.org/ontology/country> ?x_3_2 OPTIONAL { ?x_3_2 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_2_1 . FILTER (lang(?x_3_2_1)=\"en\")  } .  }  } } } "
     ],
     "json-ld": {
       "@graph": [
         {
           "birthPlace": {
             "country": {
-              "@id": "http://dbpedia.org/resource/Greece",
+              "@id": "http://dbpedia.org/resource/Australia",
               "label": [
-                "Greece"
+                "Australia"
               ]
             },
-            "@id": "http://dbpedia.org/resource/Corfu",
+            "@id": "http://dbpedia.org/resource/Perth",
             "label": [
-              "Corfu"
+              "Perth"
             ]
           },
           "@type": "http://dbpedia.org/ontology/Person",
           "name": [
-            "Nikolaos Ventouras"
+            "Adam Jake Taggart",
+            "Adam Taggart"
           ],
-          "@id": "http://dbpedia.org/resource/Nikolaos_Ventouras",
-          "birthDate": "1899-1-1"
+          "@id": "http://dbpedia.org/resource/Adam_Taggart",
+          "birthDate": "1993-6-2"
         }
       ],
       "@context": {
@@ -81,20 +85,21 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
   "data": {
     "person": [
       {
-        "_id": "http://dbpedia.org/resource/Nikolaos_Ventouras",
+        "_id": "http://dbpedia.org/resource/Adam_Taggart",
         "name": [
-          "Nikolaos Ventouras"
+          "Adam Jake Taggart",
+          "Adam Taggart"
         ],
-        "birthDate": "1899-1-1",
+        "birthDate": "1993-6-2",
         "birthPlace": {
-          "_id": "http://dbpedia.org/resource/Corfu",
+          "_id": "http://dbpedia.org/resource/Perth",
           "label": [
-            "Corfu"
+            "Perth"
           ],
           "country": {
-            "_id": "http://dbpedia.org/resource/Greece",
+            "_id": "http://dbpedia.org/resource/Australia",
             "label": [
-              "Greece"
+              "Australia"
             ]
           }
         }
@@ -260,3 +265,13 @@ The following example presents a possible context associated with the schema abo
   }
 }
 ```
+
+## Demo
+
+A live instance of the HyperGraphQL server configured as in this repository is available at: 
+
+
+
+## Contact
+
+Email: [info@semanticintegration.co.uk](info@semanticintegration.co.uk)
