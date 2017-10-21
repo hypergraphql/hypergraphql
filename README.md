@@ -49,7 +49,7 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
 
 ## Schema
 
-The schema definition complies with the GraphQL spec (see: 	[http://graphql.org/learn/schema/](http://graphql.org/learn/schema/)). Currently, only the core fragment of the spec, including basic types and fields, is supported, as presented in the example below.  
+The schema definition complies with the GraphQL spec (see: 	[http://graphql.org/learn/schema/](http://graphql.org/learn/schema/)). Currently, only the core fragment of the spec, including object types and fields, is supported, as presented in the example below.  
 
 
 ```
