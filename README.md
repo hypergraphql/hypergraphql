@@ -270,7 +270,7 @@ The following example presents a possible context associated with the schema abo
 
 ## Demo
 
-A live instance of the HyperGraphQL server configured as in this repository is available at: 
+A live demo of the HyperGraphQL server configured as in this repository is available at: [http://104.154.59.211:8009/graphiql](http://104.154.59.211:8009/graphiql)
 
 
 
