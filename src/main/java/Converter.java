@@ -191,7 +191,7 @@ public class Converter {
                     String childVar = "?" + childNode;
 
                     if (!endpointId.equals(parentEndpointId)) {
-                        System.out.println("Adding new query to queue");
+                     //   System.out.println("Adding new query to queue");
                         QueryInQueue newQuery = new QueryInQueue(field, parentNode, childNode);
                         queryQueue.addLast(newQuery);
 
@@ -302,7 +302,7 @@ public class Converter {
         try {
             JsonNode object = mapper.readTree(query);
 
-            System.out.println(object.toString()); //debug message
+        //    System.out.println(object.toString()); //debug message
 
             return object;
         } catch (IOException e) {

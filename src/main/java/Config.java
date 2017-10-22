@@ -90,16 +90,19 @@ public class Config {
 }
 
 class GraphqlConfig {
+    public String host;
     public Integer port;
     public String path;
     public String graphiql;
 
     @JsonCreator
-    public GraphqlConfig(@JsonProperty("port") Integer port,
+    public GraphqlConfig(@JsonProperty("host") String host,
+                         @JsonProperty("port") Integer port,
                         @JsonProperty("path") String path,
                         @JsonProperty("graphiql") String graphiql
     )
     {
+        this.host = host;
         this.port = port;
         this.path = path;
         this.graphiql = graphiql;

@@ -47,12 +47,12 @@ public class SparqlClient {
             }
         }
 
-        model.write(System.out);
+      //  model.write(System.out);
     }
 
     public ResultSet sparqlSelect(String queryString) {
 
-        System.out.println(queryString);
+      //  System.out.println(queryString);
         QueryExecution qexec = QueryExecutionFactory.create(queryString, model);
         try {
             ResultSet results = qexec.execSelect();

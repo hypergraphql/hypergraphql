@@ -18,13 +18,13 @@ public class Controller {
 
         port(config.graphql.port);
 
-        System.out.println("GraphQL server started at: http://localhost:" + config.graphql.port + config.graphql.path);
-        System.out.println("GraphiQL UI available at: http://localhost:" + config.graphql.port + config.graphql.graphiql);
+        System.out.println("GraphQL server started at: "+ config.graphql.host +":" + config.graphql.port + config.graphql.path);
+        System.out.println("GraphiQL UI available at: "+ config.graphql.host +":" + config.graphql.port + config.graphql.graphiql);
 
         get(config.graphql.graphiql, (req, res) -> {
             Map<String, String> model = new HashMap<>();
-            String portScript = config.graphql.port.toString();
-            model.put("template", portScript);
+            String hostAddress =  config.graphql.host.toString() + ":" +config.graphql.port.toString();
+            model.put("template", hostAddress);
             return new VelocityTemplateEngine().render(
                     new ModelAndView(model, "graphiql.vtl")
             );

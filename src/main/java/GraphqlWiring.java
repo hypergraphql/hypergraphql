@@ -29,8 +29,8 @@ public class GraphqlWiring {
        // put("dataPropertyURI", new GraphQLArgument("dataPropertyURI", GraphQLString));
        // put("objectURI", new GraphQLArgument("objectURI", GraphQLString));
       //  put("literalValue", new GraphQLArgument("literalValue", GraphQLString));
-        put("graph", new GraphQLArgument("graph", GraphQLString));
-        put("endpoint", new GraphQLArgument("endpoint", GraphQLString));
+       // put("graph", new GraphQLArgument("graph", GraphQLString));
+       // put("endpoint", new GraphQLArgument("endpoint", GraphQLString));
         put("lang", new GraphQLArgument("lang", GraphQLString));
     }};
 
@@ -41,14 +41,14 @@ public class GraphqlWiring {
        // add(defaultArguments.get("dataPropertyURI"));
        // add(defaultArguments.get("objectURI"));
        // add(defaultArguments.get("literalValue"));
-        add(defaultArguments.get("graph"));
-        add(defaultArguments.get("endpoint"));
+       // add(defaultArguments.get("graph"));
+       // add(defaultArguments.get("endpoint"));
     }};
 
 
     List<GraphQLArgument> nonQueryArgs = new ArrayList() {{
-        add(defaultArguments.get("graph"));
-        add(defaultArguments.get("endpoint"));
+    //    add(defaultArguments.get("graph"));
+    //    add(defaultArguments.get("endpoint"));
     }};
 
     class OutputTypeSpecification {
@@ -272,9 +272,20 @@ public class GraphqlWiring {
         }
 
         String description;
-        String uri = config.context.get("@predicates").get(fieldDef.get("name").asText()).get("@id").asText();
-        if (isQueryType) description = "Instances of " + uri;
-        else description = "Values of " + uri;
+        JsonNode predicate =  config.context.get("@predicates").get(fieldDef.get("name").asText());
+        String uri = predicate.get("@id").asText();
+        String graph = predicate.get("@namedGraph").asText();
+        String graphName = config.context.get("@namedGraphs").get(graph).get("@id").asText();
+        String endpoint =  config.context.get("@namedGraphs").get(graph).get("@endpoint").asText();
+        String endpointURI = config.context.get("@endpoints").get(endpoint).get("@id").asText();
+        String descString = uri + " (graph: " + graphName + "; endpoint: " + endpointURI + ")";
+
+        if (isQueryType) {
+            description = "Instances of " + descString;
+        } else
+        {
+            description = "Values of " + descString;
+        }
 
         GraphQLFieldDefinition field = newFieldDefinition()
                 .name(fieldDef.get("name").asText())

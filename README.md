@@ -130,6 +130,7 @@ Basic settings are defined in the *properties.json* file. The defaults are:
     "schemaFile": "schema.graphql",
     "contextFile": "context.json",
     "graphql": {
+        "host": "http://localhost"
         "port": 8009,
         "path": "/",
         "graphiql": "/graphiql"
@@ -139,7 +140,8 @@ Basic settings are defined in the *properties.json* file. The defaults are:
 
 - *schemaFile*: the file containing GraphQL schema definition
 - *contextFile*: the file containing mapping from the schema file to RDF vocabularies and respective SPARQL endpoints to be used for resolving GraphQL fields
-- *graphql.port*: the address of the port at thich the GraphQL server and GraphiQL interface are initiated
+- *graphql.host*: the address of the host at thich the GraphQL server and GraphiQL interface are initiated
+- *graphql.port*: the port number at thich the GraphQL server and GraphiQL interface are initiated
 - *graphql.path*: the relative URL of the GraphQL server
 - *graphql.graphiql*: the relative URL of the GraphiQL UI
 
@@ -206,7 +208,7 @@ The following example presents a possible context associated with the schema abo
   "@predicates": {
     "person": {
       "@id": "http://dbpedia.org/ontology/Person",
-      "@namedGraph": "live-dbpedia-endpoint"
+      "@namedGraph": "live-dbpedia"
     },
     "city": {
       "@id": "http://dbpedia.org/ontology/City",
