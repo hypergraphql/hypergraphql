@@ -23,7 +23,7 @@ public class Controller {
 
         get(config.graphql.graphiql, (req, res) -> {
             Map<String, String> model = new HashMap<>();
-            String hostAddress =  config.graphql.host.toString() + ":" +config.graphql.port.toString();
+            String hostAddress =  config.graphql.host + ":" + config.graphql.port;
             model.put("template", hostAddress);
             return new VelocityTemplateEngine().render(
                     new ModelAndView(model, "graphiql.vtl")
