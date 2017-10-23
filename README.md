@@ -113,13 +113,17 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
 
 ## Running
 
-Clone the Git repository into a local directory. 
+Clone the Git repository into a local directory. Then in the root of the project execute the following: 
 
-**Maven**: in the root directory, first execute **mvn install**, and then **mvn exec:java**
+**Maven**: 
+1) **mvn install**
+2) **mvn exec:java**
 
 (*Note*: in Windows these must be executed in a *cmd* terminal, not *PowerShell*).
 
-**Gradle**:
+**Gradle**: 
+1) **gradle build**
+2) **gradle execute**
 
 ## Properties
 
