@@ -45,22 +45,22 @@ public class GraphqlWiring {
   private Map<String, GraphQLArgument> defaultArguments = new HashMap<String, GraphQLArgument>() {{
     put("limit", new GraphQLArgument("limit", GraphQLInt));
     put("offset", new GraphQLArgument("offset", GraphQLInt));
-    put("graph", new GraphQLArgument("graph", GraphQLString));
-    put("endpoint", new GraphQLArgument("endpoint", GraphQLString));
+   // put("graph", new GraphQLArgument("graph", GraphQLString));
+   // put("endpoint", new GraphQLArgument("endpoint", GraphQLString));
     put("lang", new GraphQLArgument("lang", GraphQLString));
   }};
 
   private List<GraphQLArgument> queryArgs = new ArrayList<GraphQLArgument>() {{
     add(defaultArguments.get("limit"));
     add(defaultArguments.get("offset"));
-    add(defaultArguments.get("graph"));
-    add(defaultArguments.get("endpoint"));
+   // add(defaultArguments.get("graph"));
+   // add(defaultArguments.get("endpoint"));
   }};
 
 
   private List<GraphQLArgument> nonQueryArgs = new ArrayList<GraphQLArgument>() {{
-    add(defaultArguments.get("graph"));
-    add(defaultArguments.get("endpoint"));
+//    add(defaultArguments.get("graph"));
+//    add(defaultArguments.get("endpoint"));
   }};
 
   private class OutputTypeSpecification {
@@ -164,6 +164,7 @@ public class GraphqlWiring {
   private GraphQLFieldDefinition _idField = newFieldDefinition()
       .type(GraphQLID)
       .name("_id")
+      .description("The URI of this resource.")
       .dataFetcher(idFetcher).build();
 
 
@@ -239,9 +240,26 @@ public class GraphqlWiring {
       }
     }
 
+    String description;
+    JsonNode predicate =  config.context().get("@predicates").get(fieldDef.get("name").asText());
+    String uri = predicate.get("@id").asText();
+    String graph = predicate.get("@namedGraph").asText();
+    String graphName = config.context().get("@namedGraphs").get(graph).get("@id").asText();
+    String endpoint =  config.context().get("@namedGraphs").get(graph).get("@endpoint").asText();
+    String endpointURI = config.context().get("@endpoints").get(endpoint).get("@id").asText();
+    String descString = uri + " (graph: " + graphName + "; endpoint: " + endpointURI + ")";
+
+    if (isQueryType) {
+      description = "Instances of " + descString;
+    } else
+    {
+      description = "Values of " + descString;
+    }
+
     GraphQLFieldDefinition field = newFieldDefinition()
         .name(fieldDef.get("name").asText())
         .argument(args)
+        .description(description)
         .type(refType.graphQLType)
         .dataFetcher(fetcher).build();
 

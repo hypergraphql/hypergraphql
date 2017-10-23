@@ -27,11 +27,12 @@ public class Controller {
 
     port(config.graphql().port());
 
-    System.out.println("GraphQL server started at: " + config.graphql().port());
+    System.out.println("GraphQL server started at: http://localhost:" + config.graphql().port() + config.graphql().path());
+    System.out.println("GraphiQL UI available at: http://localhost:" + config.graphql().port() + config.graphql().graphiql());
 
     get(config.graphql().graphiql(), (req, res) -> {
       Map<String, String> model = new HashMap<>();
-      model.put("template", String.valueOf(config.graphql().port()));
+      model.put("template", String.valueOf(config.graphql().path()));
       return new VelocityTemplateEngine().render(
           new ModelAndView(model, "graphiql.vtl")
       );

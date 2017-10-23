@@ -3,7 +3,7 @@
     "contextFile": "context.json",
     "graphql": {
         "port": 8009,
-        "path": "/",
-        "graphiql": "/graphql"
+        "path": "/myhost",
+        "graphiql": "/graphiql"
     }
 }
