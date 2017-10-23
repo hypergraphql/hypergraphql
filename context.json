@@ -2,7 +2,7 @@
   "@predicates": {
     "person": {
       "@id": "http://dbpedia.org/ontology/Person",
-      "@namedGraph": "live-dbpedia"
+      "@namedGraph": "dbpedia"
     },
     "mountain": {
       "@id": "http://dbpedia.org/ontology/Mountain",
