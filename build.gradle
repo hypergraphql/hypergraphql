@@ -24,3 +24,8 @@ dependencies {
     testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0")
     testRuntime("org.junit.platform:junit-platform-launcher:1.0.0")
 }
+
+task execute(type:JavaExec) {
+    main = 'uk.semanticintegration.graphql.sparql.Main'
+    classpath = sourceSets.main.runtimeClasspath
+}
