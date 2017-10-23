@@ -1,14 +1,14 @@
 ![HyperGraphQL](HyperGraphQL.png)  HyperGraphQL
 ======
 
-HyperGraphQL is a GraphQL query interface for RDF triple stores. It enables federated querying of local and remote RDF stores via SPARQL endpoints using GraphQL query language and schemas mapped  onto the target RDF vocabularies. 
+HyperGraphQL is a [GraphQL](http://graphql.org) query interface for RDF triple stores. It facilitates federated querying of local and remote RDF stores via SPARQL endpoints using GraphQL query language and schemas mapped  onto the target RDF vocabularies. 
 
 HyperGraphQL serves two key objectives:
 
-- hiding the complexities of the Semantic Web stack behind the GraphQL server, thus facilitating access to linked data via a simpler and more familiar to many clients GraphQL interface;
-- providing a flexible mechanism for restricting access to RDF stores down to naturally defineable subsets of (tree-shaped) queries, which can be efficiently handled by the RDF stores, thus minimising the impact on the stores' availability. 
+- hiding the complexities of the Semantic Web stack behind the GraphQL server, thus enabling access to linked data via a simpler and more familiar to many clients GraphQL interface;
+- providing a flexible mechanism for restricting access to RDF stores down to naturally definable subsets of (tree-shaped) queries, which can be efficiently handled by the RDF stores, thus minimising the impact on the stores' availability. 
 
-Alongside the standard JSON-based GraphQL answers, HyperGraphQL delievers also JSON-LD responses conveying full semantic context of the retrieved data. This makes HyperGraphQL a natural query interface for hypermedia-driven Web APIs backed by RDF stores. 
+Alongside the standard JSON-based GraphQL answers, HyperGraphQL returns also [JSON-LD](http://json-ld.org) responses that convey full semantic context of the data. This makes HyperGraphQL a natural [Linked Data Fragment](http://linkeddatafragments.org) interface for hypermedia-driven Web APIs backed by RDF stores. 
 
 ## Schema and context
 
@@ -44,7 +44,7 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
 {
   "extensions": {
     "sparql-queries": [
-      "CONSTRUCT { ?x a <node_x> .  ?x a <http://dbpedia.org/ontology/Person> . ?x a <node_x> . ?x a <node_x> . ?x a <node_x> . } WHERE {  SERVICE <http://live.dbpedia.org/sparql> {  { SELECT ?x WHERE {  ?x a <http://dbpedia.org/ontology/Person> .  } LIMIT 1 OFFSET 4 }  } } ",
+      "CONSTRUCT { ?x a <node_x> .  ?x a <http://dbpedia.org/ontology/Person> . } WHERE {  SERVICE <http://live.dbpedia.org/sparql> {  { SELECT ?x WHERE {  ?x a <http://dbpedia.org/ontology/Person> .  } LIMIT 1 OFFSET 4 }  } } ",
       "CONSTRUCT {   ?x <http://xmlns.com/foaf/0.1/name> ?x_1 .  } WHERE {  ?x a <node_x> .  SERVICE <http://dbpedia.org/sparql/> { GRAPH <http://dbpedia.org> {  ?x <http://xmlns.com/foaf/0.1/name> ?x_1 .  } } } ",
       "CONSTRUCT {   ?x <http://dbpedia.org/ontology/birthDate> ?x_2 .  } WHERE {  ?x a <node_x> .  SERVICE <http://dbpedia.org/sparql/> { GRAPH <http://dbpedia.org> {  ?x <http://dbpedia.org/ontology/birthDate> ?x_2 .  } } } ",
       "CONSTRUCT {   ?x <http://dbpedia.org/ontology/birthPlace> ?x_3 . ?x_3 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_1 .   ?x_3 <http://dbpedia.org/ontology/country> ?x_3_2 .  ?x_3_2 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_2_1 .   } WHERE {  ?x a <node_x> .  SERVICE <http://dbpedia.org/sparql/> { GRAPH <http://dbpedia.org> {  ?x <http://dbpedia.org/ontology/birthPlace> ?x_3 . OPTIONAL { ?x_3 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_1 . FILTER (lang(?x_3_1)=\"en\")  }  OPTIONAL { ?x_3 <http://dbpedia.org/ontology/country> ?x_3_2 OPTIONAL { ?x_3_2 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_2_1 . FILTER (lang(?x_3_2_1)=\"en\")  } .  }  } } } "
