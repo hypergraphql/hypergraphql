@@ -43,12 +43,6 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
 ```
 {
   "extensions": {
-    "sparql-queries": [
-      "CONSTRUCT { ?x a <node_x> .  ?x a <http://dbpedia.org/ontology/Person> . } WHERE {  SERVICE <http://live.dbpedia.org/sparql> {  { SELECT ?x WHERE {  ?x a <http://dbpedia.org/ontology/Person> .  } LIMIT 1 OFFSET 4 }  } } ",
-      "CONSTRUCT {   ?x <http://xmlns.com/foaf/0.1/name> ?x_1 .  } WHERE {  ?x a <node_x> .  SERVICE <http://dbpedia.org/sparql/> { GRAPH <http://dbpedia.org> {  ?x <http://xmlns.com/foaf/0.1/name> ?x_1 .  } } } ",
-      "CONSTRUCT {   ?x <http://dbpedia.org/ontology/birthDate> ?x_2 .  } WHERE {  ?x a <node_x> .  SERVICE <http://dbpedia.org/sparql/> { GRAPH <http://dbpedia.org> {  ?x <http://dbpedia.org/ontology/birthDate> ?x_2 .  } } } ",
-      "CONSTRUCT {   ?x <http://dbpedia.org/ontology/birthPlace> ?x_3 . ?x_3 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_1 .   ?x_3 <http://dbpedia.org/ontology/country> ?x_3_2 .  ?x_3_2 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_2_1 .   } WHERE {  ?x a <node_x> .  SERVICE <http://dbpedia.org/sparql/> { GRAPH <http://dbpedia.org> {  ?x <http://dbpedia.org/ontology/birthPlace> ?x_3 . OPTIONAL { ?x_3 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_1 . FILTER (lang(?x_3_1)=\"en\")  }  OPTIONAL { ?x_3 <http://dbpedia.org/ontology/country> ?x_3_2 OPTIONAL { ?x_3_2 <http://www.w3.org/2000/01/rdf-schema#label> ?x_3_2_1 . FILTER (lang(?x_3_2_1)=\"en\")  } .  }  } } } "
-    ],
     "json-ld": {
       "@graph": [
         {
@@ -109,8 +103,7 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
   "errors": []
 }
 ```
-
-
+ 
 ## Running
 
 Clone the Git repository into a local directory. Then in the root of the project execute the following: 

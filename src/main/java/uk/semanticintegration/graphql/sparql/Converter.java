@@ -264,6 +264,7 @@ public class Converter {
 
     public JsonNode query2json(String query) {
 
+
         query = query
                 .replaceAll(",", " ")
                 .replaceAll("\\s*:\\s*", ":")
@@ -338,6 +339,7 @@ public class Converter {
 
         while (queryFields.hasNext()) {
 
+
             String field = queryFields.next();
             String newType = globalContext.get("@predicates").get(field).get("@id").asText();
 
@@ -357,6 +359,7 @@ public class Converter {
             for (String key : newContext) {
                 graphContext.put(key, restructured.context.get(key));
             }
+
         }
 
         Map<String, Object> output = new HashMap<>();
@@ -414,8 +417,9 @@ public class Converter {
             for (String key : keys) {
                 Object child = mapObject.get(key);
                 Converter.Traversal childRes = jsonRewrite(child);
-                if (JSONLD_VOC.containsKey(key)) targetObject.put(JSONLD_VOC.get(key), childRes.data);
-                else {
+                if (JSONLD_VOC.containsKey(key)) {
+                    targetObject.put(JSONLD_VOC.get(key), childRes.data);
+                } else {
                     targetObject.put(key, childRes.data);
                     context.put(key, globalContext.get("@predicates").get(key).get("@id").asText());
                 }
