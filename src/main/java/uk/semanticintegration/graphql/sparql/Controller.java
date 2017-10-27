@@ -87,7 +87,7 @@ public class Controller {
                 Map<String, Object> introspectData = qlResult.getData();
 
             //    JsonNode introspectDataJson = mapper.readTree(new ObjectMapper().writeValueAsString(introspectData));
-           
+
 
             }
 

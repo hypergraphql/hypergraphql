@@ -203,7 +203,7 @@ The following example presents a possible context associated with the schema abo
   "@predicates": {
     "person": {
       "@id": "http://dbpedia.org/ontology/Person",
-      "@namedGraph": "live-dbpedia"
+      "@namedGraph": "dbpedia"
     },
     "city": {
       "@id": "http://dbpedia.org/ontology/City",
@@ -242,20 +242,11 @@ The following example presents a possible context associated with the schema abo
     "dbpedia": {
       "@id": "http://dbpedia.org",
       "@endpoint": "dbpedia-endpoint"
-    },
-    "live-dbpedia": {
-      "@id": "",
-      "@endpoint": "live-dbpedia-endpoint"
     }
   },
   "@endpoints": {
     "dbpedia-endpoint": {
       "@id": "http://dbpedia.org/sparql/",
-      "@user": "",
-      "@password": ""
-    },
-    "live-dbpedia-endpoint": {
-      "@id": "http://live.dbpedia.org/sparql",
       "@user": "",
       "@password": ""
     }
