@@ -42,63 +42,29 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
 ### HyperGraphQL response:
 ```
 {
-  "extensions": {
-    "json-ld": {
-      "@graph": [
-        {
-          "birthPlace": {
-            "country": {
-              "@id": "http://dbpedia.org/resource/Australia",
-              "label": [
-                "Australia"
-              ]
-            },
-            "@id": "http://dbpedia.org/resource/Perth",
-            "label": [
-              "Perth"
-            ]
-          },
-          "@type": "http://dbpedia.org/ontology/Person",
-          "name": [
-            "Adam Jake Taggart",
-            "Adam Taggart"
-          ],
-          "@id": "http://dbpedia.org/resource/Adam_Taggart",
-          "birthDate": "1993-6-2"
-        }
-      ],
-      "@context": {
-        "birthPlace": "http://dbpedia.org/ontology/birthPlace",
-        "country": "http://dbpedia.org/ontology/country",
-        "name": "http://xmlns.com/foaf/0.1/name",
-        "label": "http://www.w3.org/2000/01/rdf-schema#label",
-        "birthDate": "http://dbpedia.org/ontology/birthDate"
-      }
-    }
-  },
+  "extensions": {},
   "data": {
     "person": [
       {
-        "_id": "http://dbpedia.org/resource/Adam_Taggart",
-        "name": [
-          "Adam Jake Taggart",
-          "Adam Taggart"
-        ],
-        "birthDate": "1993-6-2",
-        "birthPlace": {
-          "_id": "http://dbpedia.org/resource/Perth",
-          "label": [
-            "Perth"
-          ],
-          "country": {
-            "_id": "http://dbpedia.org/resource/Australia",
-            "label": [
-              "Australia"
-            ]
-          }
-        }
+        "_type": "http://dbpedia.org/ontology/Person",
+        "_id": "http://dbpedia.org/resource/Danilo_Tognon",
+        "name": "Danilo Tognon",
+        "birthDate": "1937-10-9"
+      },
+      {
+        "_type": "http://dbpedia.org/ontology/Person",
+        "_id": "http://dbpedia.org/resource/Andreas_Ekberg",
+        "name": "Andreas Ekberg",
+        "birthDate": "1985-1-1"
       }
-    ]
+    ],
+    "@context": {
+      "person": "@graph",
+      "_type": "@type",
+      "name": "http://xmlns.com/foaf/0.1/name",
+      "_id": "@id",
+      "birthDate": "http://dbpedia.org/ontology/birthDate"
+    }
   },
   "errors": []
 }
