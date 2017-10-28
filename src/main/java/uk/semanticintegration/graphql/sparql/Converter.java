@@ -41,6 +41,7 @@ public class Converter {
         this.globalContext = config.context();
     }
 
+
     private class Traversal {
         Object data;
         Map<String, String> context;
@@ -63,6 +64,49 @@ public class Converter {
         }
     }
 
+
+    public Map<String,Object> getJSONLDdata(Object data) throws IOException {
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        JsonNode dataJson = mapper.readTree(new ObjectMapper().writeValueAsString(data));
+
+        Map<String, Object> ldContext = new HashMap<>();
+        Map<String, Object> output = new HashMap<>();
+
+        dataJson.fieldNames().forEachRemaining(key -> ldContext.put(key, "@graph"));
+
+        Pattern namePtrn = Pattern.compile("\"([^\"]*)\":");
+        Matcher nameMtchr = namePtrn.matcher(dataJson.toString());
+
+        while(nameMtchr.find())
+        {
+            String find = nameMtchr.group(1);
+            if (!ldContext.containsKey(find)) {
+                if (JSONLD_VOC.containsKey(find)) {
+                    ldContext.put(find, JSONLD_VOC.get(find));
+                } else {
+                    if (globalContext.get("@predicates").has(find)) {
+                        ldContext.put(find, globalContext.get("@predicates").get(find).get("@id"));
+                    }
+                }
+            }
+        }
+
+        output = mapper.readValue(dataJson.toString(), HashMap.class);
+        output.put("@context", ldContext);
+
+
+        System.out.println(dataJson.toString());
+        System.out.println(output.toString());
+
+        //  String dataJsonString = dataJson.toString()
+        //          .replaceAll("(\"_id\":\"[^\"]*\",)", "");
+
+        //  result.put("data", mapper.readValue(dataJsonString, HashMap.class));
+
+        return output;
+    }
 
     public List<String> graphql2sparql(String query) {
 
@@ -119,6 +163,7 @@ public class Converter {
         String selfVar = "?" + selfNode;
         String parentVar = "?" + parentNode;
         String constructedTriple;
+        String selectedTriple;
         String rootMatch = "";
         String nodeMark = "";
         String innerPattern;
@@ -131,11 +176,12 @@ public class Converter {
                     limitParams = limitParams + " OFFSET " + args.get("offset");
                 }
             }
-            nodeMark = String.format("?%1$s a <node_%1$s> .", selfNode);
-            constructedTriple = String.format(" %s a %s . ", selfVar, uri_ref);
-            innerPattern = String.format(" { SELECT %s WHERE { %s } %s } ", selfVar, constructedTriple, limitParams);
+            nodeMark = String.format("?%1$s <http://hgql/root> <http://hgql/node_%1$s> . ", selfNode );
+            constructedTriple = String.format(" %1$s <http://hgql/root> %2$s . ", selfVar, uri_ref);
+            selectedTriple = String.format(" %1$s a %2$s . ", selfVar, uri_ref);
+            innerPattern = String.format(" { SELECT %s WHERE { %s } %s } ", selfVar, selectedTriple, limitParams);
         } else {
-            rootMatch = String.format(" %s a <node_%s> . ", parentVar, parentNode);
+            rootMatch = String.format(" %s <http://hgql/root> <http://hgql/node_%s> . ", parentVar, parentNode);
             constructedTriple = String.format(" %s %s %s . ", parentVar, uri_ref, selfVar);
             innerPattern = constructedTriple;
         }
@@ -212,7 +258,7 @@ public class Converter {
                         QueryInQueue newQuery = new QueryInQueue(field, parentNode, childNode);
                         queryQueue.addLast(newQuery);
 
-                        String nodeMark = String.format("?%1$s a <node_%1$s> .", parentNode);
+                        String nodeMark = String.format("?%1$s <http://hgql/root> <http://hgql/node_%1$s> .", parentNode);
 
                         childConstruct.add(nodeMark);
 

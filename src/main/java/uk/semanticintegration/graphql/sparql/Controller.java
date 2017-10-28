@@ -53,9 +53,6 @@ public class Controller {
             Map<String, Object> data = new HashMap<>();
             List<GraphQLError> errors = new ArrayList<>();
             Map<Object, Object> extensions = new HashMap<>();
-            result.put("data", data);
-            result.put("errors", errors);
-            result.put("extensions", extensions);
 
             ExecutionInput executionInput;
             ExecutionResult qlResult;
@@ -66,9 +63,9 @@ public class Controller {
 
                 sparqlQueries = converter.graphql2sparql(query);
 
-                query = query
-                    .replaceAll("(\\{)", "$1_id ")
-                    .replaceAll("^(\\s*\\{_id\\s)", "{");
+          //      query = query
+          //          .replaceAll("(\\{)", "$1_id ")
+          //          .replaceAll("^(\\s*\\{_id\\s)", "{");
 
                 SparqlClient client = new SparqlClient(sparqlQueries, config.sparqlEndpointsContext());
 
@@ -79,20 +76,28 @@ public class Controller {
 
                 qlResult = graphQL.execute(executionInput);
 
-                extensions.put("json-ld", converter.graphql2jsonld(qlResult.getData()));
-                //extensions.put("sparql-queries", sparqlQueries);
+           //     extensions.put("json-ld", converter.graphql2jsonld(qlResult.getData()));
+          //      extensions.put("sparql-queries", sparqlQueries);
+
+                data = converter.getJSONLDdata(qlResult.getData());
 
             } else {
                 qlResult = graphQL.execute(query);
-                Map<String, Object> introspectData = qlResult.getData();
+                data = qlResult.getData();
+
+
+            //    Map<String, Object> introspectData = qlResult.getData();
 
             //    JsonNode introspectDataJson = mapper.readTree(new ObjectMapper().writeValueAsString(introspectData));
 
 
             }
 
-            data.putAll(qlResult.getData());
             errors.addAll(qlResult.getErrors());
+
+            result.put("data", data);
+            result.put("errors", errors);
+            result.put("extensions", extensions);
 
           //  JsonNode dataJson = mapper.readTree(new ObjectMapper().writeValueAsString(data));
           //  String dataJsonString = dataJson.toString()

@@ -8,9 +8,7 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
@@ -22,7 +20,8 @@ public class SparqlClient {
 
     private static String queryValuesOfObjectPropertyTemp = "SELECT distinct ?object WHERE {<%s> <%s> ?object . }";
     private static String queryValuesOfDataPropertyTemp = "SELECT distinct (str(?object) as ?value) WHERE {<%1$s> <%2$s> ?object . %3$s }";
-    private static String querySubjectsOfObjectPropertyFilterTemp = "SELECT distinct ?subject WHERE { ?subject a <node_x> . ?subject <%1$s> <%2$s> . } ";
+    private static String querySubjectsOfObjectPropertyFilterTemp = "SELECT distinct ?subject WHERE { ?subject <http://hgql/root> <http://hgql/node_x> . ?subject <%1$s> <%2$s> . } ";
+    private static String queryRootTypeTemp = "SELECT distinct ?object WHERE { <%1$s> <http://hgql/root>  ?object . <%1$s> <http://hgql/root>  <http://hgql/node_x>  FILTER (?object != <http://hgql/node_x> )} ";
 
     private Model model;
 
@@ -46,7 +45,7 @@ public class SparqlClient {
             }
         }
 
-        // model.write(System.out);
+         // model.write(System.out);
     }
 
     public ResultSet sparqlSelect(String queryString) {
@@ -139,7 +138,23 @@ public class SparqlClient {
         }
     }
 
-    public List<RDFNode> getSubjectsOfObjectPropertyFilter(String predicate, String uri, Map<String, Object> args) {
+    public String getRootTypeOfResource(RDFNode node) {
+        String queryString = String.format(queryRootTypeTemp, node.asResource().getURI().toString());
+
+        ResultSet queryResults = sparqlSelect(queryString);
+
+        String result = null;
+
+        if (queryResults != null && queryResults.hasNext()) {
+
+            result = queryResults.next().get("?object").toString();
+        }
+
+        return result;
+
+    }
+
+    public List<RDFNode> getSubjectsOfObjectPropertyFilter(String predicate, String uri) {
 
         String queryString = String.format(querySubjectsOfObjectPropertyFilterTemp, predicate, uri);
 
