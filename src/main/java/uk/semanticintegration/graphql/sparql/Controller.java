@@ -71,7 +71,7 @@ public class Controller {
                         .build();
 
                 qlResult = graphQL.execute(executionInput);
-                data = converter.jsonLDdata(qlResult.getData());
+                data = converter.jsonLDdata(query, qlResult.getData());
 
             } else {
                 qlResult = graphQL.execute(query);

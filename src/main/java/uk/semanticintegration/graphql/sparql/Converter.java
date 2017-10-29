@@ -3,6 +3,7 @@ package uk.semanticintegration.graphql.sparql;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.language.TypeDefinition;
+import org.json.JSONArray;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,19 +66,18 @@ public class Converter {
     }
 
 
-    public Map<String,Object> jsonLDdata(Object data) throws IOException {
+    public Map<String,Object> jsonLDdata(String query, Map<String, Object> data) throws IOException {
 
-        ObjectMapper mapper = new ObjectMapper();
-
-        JsonNode dataJson = mapper.readTree(new ObjectMapper().writeValueAsString(data));
+        JsonNode jsonQuery = query2json(query);
 
         Map<String, Object> ldContext = new HashMap<>();
-        Map<String, Object> output;
+        Map<String, Object> output = new HashMap<>();
 
-        dataJson.fieldNames().forEachRemaining(key -> ldContext.put(key, "@graph"));
+        jsonQuery.elements().forEachRemaining(el ->
+                ldContext.put(el.get("name").asText(), "http://hypergraphql/"+el.get("name").asText()));
 
-        Pattern namePtrn = Pattern.compile("\"([^\"]*)\":");
-        Matcher nameMtchr = namePtrn.matcher(dataJson.toString());
+        Pattern namePtrn = Pattern.compile("\"name\":\"([^\"]*)\"");
+        Matcher nameMtchr = namePtrn.matcher(jsonQuery.toString());
 
         while(nameMtchr.find())
         {
@@ -93,7 +93,7 @@ public class Converter {
             }
         }
 
-        output = mapper.readValue(dataJson.toString(), HashMap.class);
+        output.putAll(data);
         output.put("@context", ldContext);
 
         return output;
