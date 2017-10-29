@@ -230,6 +230,8 @@ The following example presents a possible context associated with the schema abo
 }
 ```
 
+Note that HyperGraphQL supports also federated querying over a collection of SPARQL endpoints, although the current prototype implementation requires further optimizations. The federation is achieved by associating predicates with different SPARQL endpoints.  
+
 ## Demo
 
 A live demo of the HyperGraphQL server configured as in this repository is available at: [http://klarman.me/proving-ground/hypergraphql](http://klarman.me/proving-ground/hypergraphql)
