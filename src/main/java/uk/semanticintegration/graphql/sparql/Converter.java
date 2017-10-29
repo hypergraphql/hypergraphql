@@ -65,14 +65,14 @@ public class Converter {
     }
 
 
-    public Map<String,Object> getJSONLDdata(Object data) throws IOException {
+    public Map<String,Object> jsonLDdata(Object data) throws IOException {
 
         ObjectMapper mapper = new ObjectMapper();
 
         JsonNode dataJson = mapper.readTree(new ObjectMapper().writeValueAsString(data));
 
         Map<String, Object> ldContext = new HashMap<>();
-        Map<String, Object> output = new HashMap<>();
+        Map<String, Object> output;
 
         dataJson.fieldNames().forEachRemaining(key -> ldContext.put(key, "@graph"));
 
@@ -95,15 +95,6 @@ public class Converter {
 
         output = mapper.readValue(dataJson.toString(), HashMap.class);
         output.put("@context", ldContext);
-
-
-        System.out.println(dataJson.toString());
-        System.out.println(output.toString());
-
-        //  String dataJsonString = dataJson.toString()
-        //          .replaceAll("(\"_id\":\"[^\"]*\",)", "");
-
-        //  result.put("data", mapper.readValue(dataJsonString, HashMap.class));
 
         return output;
     }
