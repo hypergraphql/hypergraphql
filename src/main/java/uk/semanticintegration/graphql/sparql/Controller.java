@@ -63,11 +63,7 @@ public class Controller {
 
                 sparqlQueries = converter.graphql2sparql(query);
 
-          //      query = query
-          //          .replaceAll("(\\{)", "$1_id ")
-          //          .replaceAll("^(\\s*\\{_id\\s)", "{");
-
-                SparqlClient client = new SparqlClient(sparqlQueries, config.sparqlEndpointsContext());
+               SparqlClient client = new SparqlClient(sparqlQueries, config.sparqlEndpointsContext());
 
                 executionInput = ExecutionInput.newExecutionInput()
                         .query(query)
@@ -75,36 +71,18 @@ public class Controller {
                         .build();
 
                 qlResult = graphQL.execute(executionInput);
-
-           //     extensions.put("json-ld", converter.graphql2jsonld(qlResult.getData()));
-          //      extensions.put("sparql-queries", sparqlQueries);
-
                 data = converter.getJSONLDdata(qlResult.getData());
 
             } else {
                 qlResult = graphQL.execute(query);
                 data = qlResult.getData();
-
-
-            //    Map<String, Object> introspectData = qlResult.getData();
-
-            //    JsonNode introspectDataJson = mapper.readTree(new ObjectMapper().writeValueAsString(introspectData));
-
-
-            }
+   }
 
             errors.addAll(qlResult.getErrors());
 
             result.put("data", data);
             result.put("errors", errors);
             result.put("extensions", extensions);
-
-          //  JsonNode dataJson = mapper.readTree(new ObjectMapper().writeValueAsString(data));
-          //  String dataJsonString = dataJson.toString()
-          //          .replaceAll("(\"_id\":\"[^\"]*\",)", "");
-
-          //  result.put("data", mapper.readValue(dataJsonString, HashMap.class));
-
 
             JsonNode resultJson = mapper.readTree(new ObjectMapper().writeValueAsString(result));
             res.type("application/json");
