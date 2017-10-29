@@ -186,9 +186,9 @@ public class GraphqlWiring {
     private GraphQLFieldDefinition _typeField = newFieldDefinition()
             .type(GraphQLID)
             .name("_type")
-            .description("The rdf:type of this resource via which it was retrieved from the endpoint. " +
-                    "If the resource was not retrieved via rdf:type value (i.e., it is not an instance of " +
-                    "any GraphQL field of the query type), this value will be set to null.")
+            .description("The rdf:type of this resource via which it was retrieved from the SPARQL endpoint. " +
+                    "Note that this field is applicable only to root resources. For all others it will be set to null," +
+                    "which might result in errors when processing the JSON-LD response.")
             .dataFetcher(typeFetcher).build();
 
 

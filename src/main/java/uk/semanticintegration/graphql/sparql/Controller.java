@@ -63,7 +63,7 @@ public class Controller {
 
                 sparqlQueries = converter.graphql2sparql(query);
 
-               SparqlClient client = new SparqlClient(sparqlQueries, config.sparqlEndpointsContext());
+                SparqlClient client = new SparqlClient(sparqlQueries, config.sparqlEndpointsContext());
 
                 executionInput = ExecutionInput.newExecutionInput()
                         .query(query)
