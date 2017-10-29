@@ -11,7 +11,7 @@ type Mountain {
 }
 
 type Person {
-    name: [String]
+    name: String
     label: [String]
     deathPlace: City
     birthPlace: City

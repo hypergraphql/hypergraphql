@@ -3,6 +3,7 @@ package uk.semanticintegration.graphql.sparql;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.language.TypeDefinition;
+import org.json.JSONArray;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class Converter {
         this.globalContext = config.context();
     }
 
+
     private class Traversal {
         Object data;
         Map<String, String> context;
@@ -63,6 +65,39 @@ public class Converter {
         }
     }
 
+
+    public Map<String,Object> jsonLDdata(String query, Map<String, Object> data) throws IOException {
+
+        JsonNode jsonQuery = query2json(query);
+
+        Map<String, Object> ldContext = new HashMap<>();
+        Map<String, Object> output = new HashMap<>();
+
+        jsonQuery.elements().forEachRemaining(el ->
+                ldContext.put(el.get("name").asText(), "http://hypergraphql/"+el.get("name").asText()));
+
+        Pattern namePtrn = Pattern.compile("\"name\":\"([^\"]*)\"");
+        Matcher nameMtchr = namePtrn.matcher(jsonQuery.toString());
+
+        while(nameMtchr.find())
+        {
+            String find = nameMtchr.group(1);
+            if (!ldContext.containsKey(find)) {
+                if (JSONLD_VOC.containsKey(find)) {
+                    ldContext.put(find, JSONLD_VOC.get(find));
+                } else {
+                    if (globalContext.get("@predicates").has(find)) {
+                        ldContext.put(find, globalContext.get("@predicates").get(find).get("@id"));
+                    }
+                }
+            }
+        }
+
+        output.putAll(data);
+        output.put("@context", ldContext);
+
+        return output;
+    }
 
     public List<String> graphql2sparql(String query) {
 
@@ -119,6 +154,7 @@ public class Converter {
         String selfVar = "?" + selfNode;
         String parentVar = "?" + parentNode;
         String constructedTriple;
+        String selectedTriple;
         String rootMatch = "";
         String nodeMark = "";
         String innerPattern;
@@ -131,11 +167,12 @@ public class Converter {
                     limitParams = limitParams + " OFFSET " + args.get("offset");
                 }
             }
-            nodeMark = String.format("?%1$s a <node_%1$s> .", selfNode);
-            constructedTriple = String.format(" %s a %s . ", selfVar, uri_ref);
-            innerPattern = String.format(" { SELECT %s WHERE { %s } %s } ", selfVar, constructedTriple, limitParams);
+            nodeMark = String.format("?%1$s <http://hgql/root> <http://hgql/node_%1$s> . ", selfNode );
+            constructedTriple = String.format(" %1$s <http://hgql/root> %2$s . ", selfVar, uri_ref);
+            selectedTriple = String.format(" %1$s a %2$s . ", selfVar, uri_ref);
+            innerPattern = String.format(" { SELECT %s WHERE { %s } %s } ", selfVar, selectedTriple, limitParams);
         } else {
-            rootMatch = String.format(" %s a <node_%s> . ", parentVar, parentNode);
+            rootMatch = String.format(" %s <http://hgql/root> <http://hgql/node_%s> . ", parentVar, parentNode);
             constructedTriple = String.format(" %s %s %s . ", parentVar, uri_ref, selfVar);
             innerPattern = constructedTriple;
         }
@@ -212,7 +249,7 @@ public class Converter {
                         QueryInQueue newQuery = new QueryInQueue(field, parentNode, childNode);
                         queryQueue.addLast(newQuery);
 
-                        String nodeMark = String.format("?%1$s a <node_%1$s> .", parentNode);
+                        String nodeMark = String.format("?%1$s <http://hgql/root> <http://hgql/node_%1$s> .", parentNode);
 
                         childConstruct.add(nodeMark);
 
@@ -327,112 +364,6 @@ public class Converter {
             e.printStackTrace();
             return null;
         }
-    }
-
-
-    public Object graphql2jsonld(Map<String, Object> dataObject) {
-
-        ArrayList<Object> graphData = new ArrayList<>();
-        Map<String, String> graphContext = new HashMap<>();
-
-        Iterator<String> queryFields = dataObject.keySet().iterator();
-
-        while (queryFields.hasNext()) {
-
-
-            String field = queryFields.next();
-            String newType = globalContext.get("@predicates").get(field).get("@id").asText();
-
-            Converter.Traversal restructured = jsonRewrite(dataObject.get(field));
-
-            if (restructured.data.getClass() == ArrayList.class) {
-                for (Object data : (ArrayList<Object>) restructured.data) ((HashMap) data).put("@type", newType);
-                graphData.addAll((ArrayList<Object>) restructured.data);
-            }
-            if (restructured.data.getClass() == HashMap.class) {
-                ((HashMap) restructured.data).put("@type", newType);
-                graphData.add(restructured.data);
-            }
-
-            Set<String> newContext = restructured.context.keySet();
-
-            for (String key : newContext) {
-                graphContext.put(key, restructured.context.get(key));
-            }
-
-        }
-
-        Map<String, Object> output = new HashMap<>();
-
-        output.put("@graph", graphData);
-        output.put("@context", graphContext);
-        return output;
-    }
-
-
-    public Converter.Traversal jsonRewrite(Object dataObject) {
-
-        if (dataObject == null) {
-
-            Converter.Traversal restructured = new Converter.Traversal();
-            restructured.data = new ArrayList<>();
-            restructured.context = new HashMap<>();
-
-            return restructured;
-        }
-
-        if (dataObject.getClass() == ArrayList.class) {
-
-            ArrayList<Object> newList = new ArrayList<>();
-            Map<String, String> context = new HashMap<>();
-            for (Object item : (ArrayList<Object>) dataObject) {
-                Converter.Traversal itemRes = jsonRewrite(item);
-                newList.add(itemRes.data);
-                context.putAll(itemRes.context);
-            }
-            Converter.Traversal restructured = new Converter.Traversal();
-            restructured.data = newList;
-            restructured.context = context;
-
-            return restructured;
-        }
-
-        if (dataObject.getClass() != LinkedHashMap.class) {
-
-
-            Converter.Traversal restructured = new Converter.Traversal();
-            restructured.data = dataObject;
-            restructured.context = new HashMap<>();
-
-            return restructured;
-        } else {
-
-            Map<String, Object> mapObject = (Map<String, Object>) dataObject;
-            Map<String, Object> targetObject = new HashMap<>();
-
-            Set<String> keys = mapObject.keySet();
-
-            Map<String, String> context = new HashMap<>();
-
-            for (String key : keys) {
-                Object child = mapObject.get(key);
-                Converter.Traversal childRes = jsonRewrite(child);
-                if (JSONLD_VOC.containsKey(key)) {
-                    targetObject.put(JSONLD_VOC.get(key), childRes.data);
-                } else {
-                    targetObject.put(key, childRes.data);
-                    context.put(key, globalContext.get("@predicates").get(key).get("@id").asText());
-                }
-                context.putAll(childRes.context);
-            }
-
-            Converter.Traversal restructured = new Converter.Traversal();
-            restructured.data = targetObject;
-            restructured.context = context;
-
-            return restructured;
-        }
-
     }
 
     public JsonNode definitionToJson(TypeDefinition type) {

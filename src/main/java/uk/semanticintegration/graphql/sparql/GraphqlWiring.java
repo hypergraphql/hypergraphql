@@ -10,6 +10,7 @@ import static graphql.schema.GraphQLObjectType.newObject;
 import com.fasterxml.jackson.databind.JsonNode;
 import graphql.language.Field;
 import graphql.language.ObjectTypeDefinition;
+import graphql.language.SourceLocation;
 import graphql.language.TypeDefinition;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -23,14 +24,11 @@ import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeReference;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.ResourceFactory;
 
 /**
  * Created by szymon on 24/08/2017.
@@ -124,15 +122,24 @@ public class GraphqlWiring {
         if (thisNode.asResource().isURIResource()) {
             return thisNode.asResource().getURI();
         } else {
-            return "blank node";
+            UUID uuid = UUID.randomUUID();
+            return "_:"+ uuid;
         }
+    };
+
+    private DataFetcher<String> typeFetcher = environment -> {
+
+        SparqlClient client = environment.getContext();
+        String type = client.getRootTypeOfResource(environment.getSource());
+        return type;
+
     };
 
     private DataFetcher<List<RDFNode>> instancesOfTypeFetcher = environment -> {
         String type = ((Field) environment.getFields().toArray()[0]).getName();
         String typeURI = config.context().get("@predicates").get(type).get("@id").asText();
         SparqlClient client = environment.getContext();
-        List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", typeURI, environment.getArguments());
+        List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter("http://hgql/root", typeURI);
         return subjects;
     };
 
@@ -176,6 +183,14 @@ public class GraphqlWiring {
             .description("The URI of this resource.")
             .dataFetcher(idFetcher).build();
 
+    private GraphQLFieldDefinition _typeField = newFieldDefinition()
+            .type(GraphQLID)
+            .name("_type")
+            .description("The rdf:type of this resource via which it was retrieved from the SPARQL endpoint. " +
+                    "Note that this field is applicable only to root resources. For all others it will be set to null," +
+                    "which might result in errors when processing the JSON-LD response.")
+            .dataFetcher(typeFetcher).build();
+
 
     public GraphQLObjectType registerGraphQLType(TypeDefinition type) {
 
@@ -191,7 +206,11 @@ public class GraphqlWiring {
             builtFields.add(registerGraphQLField(isQueryType, fieldDef));
         }
 
-        if (!isQueryType) builtFields.add(_idField);
+        if (!isQueryType) {
+            builtFields.add(_idField);
+            builtFields.add(_typeField);
+        }
+
 
         GraphQLObjectType newObjectType = newObject()
                 .name(type.getName())
