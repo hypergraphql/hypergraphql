@@ -172,7 +172,7 @@ The context specification consists of three components:
 - *@namedGraphs*: defining the RDF graph ids are associated with their full names and the SPARQL endpoints in which they are located;
 - *@endpoints*: defining the URL associated with each endpoint and possibly the authentication details. 
 
-The following example presents a possible context associated with the schema above, where one predicate is associated with the *live.dbpedia.org* endpoint while all the others with *dbpedia.org*.
+The following example presents a possible context associated with the schema above, where all predicates are associated with the *http://dbpedia.org* graph.
 
 ```
 {
@@ -232,7 +232,7 @@ The following example presents a possible context associated with the schema abo
 
 ## Demo
 
-A live demo of the HyperGraphQL server configured as in this repository is available at: [http://104.154.59.211:8009/graphiql](http://104.154.59.211:8009/graphiql)
+A live demo of the HyperGraphQL server configured as in this repository is available at: [http://klarman.me/proving-ground/hypergraphql](http://klarman.me/proving-ground/hypergraphql)
 
 
 
