@@ -234,7 +234,7 @@ Note that HyperGraphQL supports also federated querying over a collection of SPA
 
 ## Demo
 
-A live demo of the HyperGraphQL server configured as in this repository is available at: [http://klarman.me/proving-ground/hypergraphql](http://klarman.me/proving-ground/hypergraphql)
+A live demo of the HyperGraphQL server configured as in this repository is available at: [http://hypergraphql-demo/graphiql](http://104.154.59.211:8009/graphiql)
 
 
 
