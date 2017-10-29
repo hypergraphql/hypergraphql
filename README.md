@@ -1,22 +1,22 @@
 ![HyperGraphQL](HyperGraphQL.png)  HyperGraphQL
 ======
 
-HyperGraphQL is a [GraphQL](http://graphql.org) query interface for RDF triple stores. It facilitates federated querying of local and remote RDF stores via SPARQL endpoints using GraphQL query language and schemas mapped  onto the target RDF vocabularies. 
+HyperGraphQL is a [GraphQL](http://graphql.org) query interface for RDF triple stores. It enables  querying of RDF stores via SPARQL endpoints using GraphQL query language and schemas mapped onto the target RDF vocabularies. 
 
 HyperGraphQL serves two key objectives:
 
 - hiding the complexities of the Semantic Web stack behind the GraphQL server, thus enabling access to linked data via a simpler and more familiar to many clients GraphQL interface;
 - providing a flexible mechanism for restricting access to RDF stores down to naturally definable subsets of (tree-shaped) queries, which can be efficiently handled by the RDF stores, thus minimising the impact on the stores' availability. 
 
-Alongside the standard JSON-based GraphQL answers, HyperGraphQL returns also [JSON-LD](http://json-ld.org) responses that convey full semantic context of the data. This makes HyperGraphQL a natural [Linked Data Fragment](http://linkeddatafragments.org) interface for hypermedia-driven Web APIs backed by RDF stores. 
+The responses of HyperGraphQL are [JSON-LD](http://json-ld.org) objects that convey full semantic context of the fetched data. This makes HyperGraphQL a natural [Linked Data Fragment](http://linkeddatafragments.org) interface for hypermedia-driven Web APIs backed by RDF stores. 
 
 ## Schema and context
 
-To configure a HyperGraphQL server one needs to provide only a basic GraphQL type schema and its mapping to the RDF vocabulary of the target SPARQL endpoints. The complete GraphQL wiring is done automatically on starting the server. 
+To configure a HyperGraphQL server one needs to provide only a basic GraphQL type schema and its mapping to the RDF vocabulary of the target SPARQL endpoints. The complete GraphQL wiring is done automatically on initiating the server. 
 
 ## Execution
 
-To minimise the number of return trips between HyperGraphQL server and RDF stores, the original GraphQL query is translated into possibly few SPARQL CONSTRUCT queries necessary to fetch all the relevant RDF data. The further transformation of the data into proper GraphQL responses is done locally by the HyperGraphQL server. When the query requests data from a single SPARQL endpoint, only one SPARQL CONSTRUCT query is issued. 
+To minimise the number of return trips between HyperGraphQL server and RDF stores, the original GraphQL query is translated into possibly few SPARQL CONSTRUCT queries necessary to fetch all the relevant RDF data. The further transformation of the data into  HyperGraphQL responses is done locally by the HyperGraphQL server. When the query requests data from a single SPARQL endpoint, only one SPARQL CONSTRUCT query is issued. 
 
 ## Example
 
@@ -25,6 +25,7 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
 {
   person(limit: 1, offset: 4) {
     _id
+    _type
     name
     birthDate
     birthPlace {
@@ -44,27 +45,36 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
 {
   "extensions": {},
   "data": {
+    "@context": {
+      "person": "http://hypergraphql/person",
+      "_id": "@id",
+      "_type": "@type",
+      "birthPlace": "http://dbpedia.org/ontology/birthPlace",
+      "country": "http://dbpedia.org/ontology/country",
+      "name": "http://xmlns.com/foaf/0.1/name",
+      "label": "http://www.w3.org/2000/01/rdf-schema#label",
+      "birthDate": "http://dbpedia.org/ontology/birthDate"
+    },
     "person": [
       {
+        "_id": "http://dbpedia.org/resource/Nikolaos_Ventouras",
         "_type": "http://dbpedia.org/ontology/Person",
-        "_id": "http://dbpedia.org/resource/Danilo_Tognon",
-        "name": "Danilo Tognon",
-        "birthDate": "1937-10-9"
-      },
-      {
-        "_type": "http://dbpedia.org/ontology/Person",
-        "_id": "http://dbpedia.org/resource/Andreas_Ekberg",
-        "name": "Andreas Ekberg",
-        "birthDate": "1985-1-1"
+        "name": "Nikolaos Ventouras",
+        "birthDate": "1899-1-1",
+        "birthPlace": {
+          "_id": "http://dbpedia.org/resource/Corfu",
+          "label": [
+            "Corfu"
+          ],
+          "country": {
+            "_id": "http://dbpedia.org/resource/Greece",
+            "label": [
+              "Greece"
+            ]
+          }
+        }
       }
-    ],
-    "@context": {
-      "person": "@graph",
-      "_type": "@type",
-      "name": "http://xmlns.com/foaf/0.1/name",
-      "_id": "@id",
-      "birthDate": "http://dbpedia.org/ontology/birthDate"
-    }
+    ]
   },
   "errors": []
 }
@@ -228,4 +238,4 @@ A live demo of the HyperGraphQL server configured as in this repository is avail
 
 ## Contact
 
-Email: [info@semanticintegration.co.uk](info@semanticintegration.co.uk)
+Email: [szymon.klarman@semanticintegration.co.uk](szymon.klarman@semanticintegration.co.uk)
