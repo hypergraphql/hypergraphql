@@ -1,4 +1,4 @@
-package uk.semanticintegration.graphql.sparql;
+package uk.co.semanticintegration.hypergraphql;
 
 import static org.junit.jupiter.api.Assertions.*;
 

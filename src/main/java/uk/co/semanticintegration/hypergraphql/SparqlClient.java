@@ -1,4 +1,4 @@
-package uk.semanticintegration.graphql.sparql;
+package uk.co.semanticintegration.hypergraphql;
 
 import java.util.ArrayList;
 import java.util.List;

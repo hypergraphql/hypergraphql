@@ -1,4 +1,4 @@
-package uk.semanticintegration.graphql.sparql;
+package uk.co.semanticintegration.hypergraphql;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

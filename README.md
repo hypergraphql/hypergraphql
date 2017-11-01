@@ -41,7 +41,7 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
 ```
 
 ### HyperGraphQL response:
-```
+```json
 {
   "extensions": {},
   "data": {
@@ -98,7 +98,7 @@ Clone the Git repository into a local directory. Then in the root of the project
 
 Basic settings are defined in the *properties.json* file. The defaults are:
 
-```
+```json
 {
     "schemaFile": "schema.graphql",
     "contextFile": "context.json",
@@ -114,7 +114,7 @@ Basic settings are defined in the *properties.json* file. The defaults are:
 - *contextFile*: the file containing mapping from the schema file to RDF vocabularies and respective SPARQL endpoints to be used for resolving GraphQL fields
 - *graphql.port*: the port number at thich the GraphQL server and GraphiQL interface are initiated
 - *graphql.path*: the relative URL of the GraphQL server
-- *graphql.graphiql*: the relative URL of the GraphiQL UI
+- *graphql.graphiql*: the relative URL of the [GraphiQL UI](https://github.com/graphql/graphiql)
 
 ## Schema
 
@@ -132,7 +132,6 @@ type Person {
     label: [String]
     birthPlace: City
     birthDate: String
-    spouse: [Person]
 }
 
 type City {
@@ -174,7 +173,7 @@ The context specification consists of three components:
 
 The following example presents a possible context associated with the schema above, where all predicates are associated with the *http://dbpedia.org* graph.
 
-```
+```json
 {
   "@predicates": {
     "person": {
@@ -195,10 +194,6 @@ The following example presents a possible context associated with the schema abo
     },
     "birthPlace": {
       "@id": "http://dbpedia.org/ontology/birthPlace",
-      "@namedGraph": "dbpedia"
-    },
-    "spouse": {
-      "@id": "http://dbpedia.org/property/spouse",
       "@namedGraph": "dbpedia"
     },
     "label": {

@@ -1,4 +1,4 @@
-package uk.semanticintegration.graphql.sparql;
+package uk.co.semanticintegration.hypergraphql;
 
 import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLID;
@@ -10,7 +10,6 @@ import static graphql.schema.GraphQLObjectType.newObject;
 import com.fasterxml.jackson.databind.JsonNode;
 import graphql.language.Field;
 import graphql.language.ObjectTypeDefinition;
-import graphql.language.SourceLocation;
 import graphql.language.TypeDefinition;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -26,9 +25,7 @@ import graphql.schema.GraphQLTypeReference;
 
 import java.util.*;
 
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.ResourceFactory;
 
 /**
  * Created by szymon on 24/08/2017.

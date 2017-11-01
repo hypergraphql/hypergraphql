@@ -1,4 +1,4 @@
-package uk.semanticintegration.graphql.sparql;
+package uk.co.semanticintegration.hypergraphql;
 
 import static spark.Spark.get;
 import static spark.Spark.port;
@@ -6,14 +6,9 @@ import static spark.Spark.post;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import graphql.ExecutionInput;
-import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.GraphQLError;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import spark.ModelAndView;

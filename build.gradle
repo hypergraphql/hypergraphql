@@ -1,7 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'maven'
 
-group = 'uk.semanticintegration'
+group = 'uk.co.semanticintegration'
 version = '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
@@ -26,6 +26,6 @@ dependencies {
 }
 
 task execute(type:JavaExec) {
-    main = 'uk.semanticintegration.graphql.sparql.Main'
+    main = 'Main'
     classpath = sourceSets.main.runtimeClasspath
 }

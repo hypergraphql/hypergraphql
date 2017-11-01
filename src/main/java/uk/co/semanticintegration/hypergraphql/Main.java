@@ -1,4 +1,4 @@
-package uk.semanticintegration.graphql.sparql;
+package uk.co.semanticintegration.hypergraphql;
 
 import graphql.GraphQL;
 import org.apache.log4j.BasicConfigurator;

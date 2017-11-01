@@ -36,10 +36,6 @@
       "@id": "http://dbpedia.org/ontology/deathDate",
       "@namedGraph": "dbpedia"
     },
-    "spouse": {
-      "@id": "http://dbpedia.org/property/spouse",
-      "@namedGraph": "dbpedia"
-    },
     "label": {
       "@id": "http://www.w3.org/2000/01/rdf-schema#label",
       "@namedGraph": "dbpedia"

@@ -17,7 +17,6 @@ type Person {
     birthPlace: City
     deathDate: String
     birthDate: String
-    spouse: [Person]
 }
 
 type Company {
