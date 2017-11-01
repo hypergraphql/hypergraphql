@@ -15,6 +15,7 @@ import java.util.Map;
 import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
+import org.apache.log4j.Logger;
 
 /**
  * Created by szymon on 05/09/2017.
@@ -29,6 +30,10 @@ public class Config {
     private JsonNode context;
     private Map<String, Context> sparqlEndpointsContext;
     private TypeDefinitionRegistry schema;
+
+    static Logger logger = Logger.getLogger(Config.class);
+
+
 
     @JsonCreator
     public Config(@JsonProperty("contextFile") String contextFile,
@@ -51,7 +56,7 @@ public class Config {
                 try {
                     this.context = mapper.readTree(new File(config.contextFile));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error(e);
                 }
             }
 
@@ -85,7 +90,7 @@ public class Config {
             this.graphql = config.graphql;
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
     }
 
