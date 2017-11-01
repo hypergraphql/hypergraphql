@@ -18,6 +18,9 @@ public class Main {
 
         GraphQL graphQL = GraphQL.newGraphQL(wiring.schema()).build();
 
+        System.out.println("GraphQL server started at: http://localhost:" + config.graphql().port() + config.graphql().path());
+        System.out.println("GraphiQL UI available at: http://localhost:" + config.graphql().port() + config.graphql().graphiql());
+
         Controller.start(config, graphQL);
 
     }

@@ -18,8 +18,8 @@ import org.apache.jena.sparql.util.Symbol;
  */
 public class SparqlClient {
 
-    private static String queryValuesOfObjectPropertyTemp = "SELECT distinct ?object WHERE {<%s> <%s> ?object . }";
-    private static String queryValuesOfDataPropertyTemp = "SELECT distinct (str(?object) as ?value) WHERE {<%1$s> <%2$s> ?object . %3$s }";
+    private static String queryValuesOfObjectPropertyTemp = "SELECT distinct ?object WHERE {<%s> <%s> ?object FILTER (!isLiteral(?object)) . }";
+    private static String queryValuesOfDataPropertyTemp = "SELECT distinct (str(?object) as ?value) WHERE {<%1$s> <%2$s> ?object  FILTER isLiteral(?object) . %3$s }";
     private static String querySubjectsOfObjectPropertyFilterTemp = "SELECT distinct ?subject WHERE { ?subject <http://hgql/root> <http://hgql/node_x> . ?subject <%1$s> <%2$s> . } ";
     private static String queryRootTypeTemp = "SELECT distinct ?object WHERE { <%1$s> <http://hgql/root>  ?object . <%1$s> <http://hgql/root>  <http://hgql/node_x>  FILTER (?object != <http://hgql/node_x> )} ";
 
