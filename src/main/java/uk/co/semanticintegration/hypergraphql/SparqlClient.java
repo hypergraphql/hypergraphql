@@ -12,6 +12,7 @@ import org.apache.jena.rdf.model.*;
 import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
+import org.apache.log4j.Logger;
 
 /**
  * Created by szymon on 22/08/2017.
@@ -25,11 +26,17 @@ public class SparqlClient {
 
     private Model model;
 
+    private static Logger logger = Logger.getLogger(SparqlClient.class);
+
+
+
     public SparqlClient(List<String> queries, Map<String, Context> sparqlEndpointsContext) {
 
         model = ModelFactory.createDefaultModel();
 
         for (String constructQuery : queries) {
+
+            logger.debug("Executing construct query: " + constructQuery);
 
             QueryExecution qexec = QueryExecutionFactory.create(constructQuery, model);
 
@@ -39,9 +46,8 @@ public class SparqlClient {
 
             try {
                 qexec.execConstruct(model);
-
             } catch (Exception e) {
-                System.out.println(e.fillInStackTrace());
+                logger.error(e);
             }
         }
 
@@ -50,14 +56,14 @@ public class SparqlClient {
 
     public ResultSet sparqlSelect(String queryString) {
 
-        // System.out.println(queryString);
+        logger.debug("Executing SPARQL fetchquery: " + queryString);
         QueryExecution qexec = QueryExecutionFactory.create(queryString, model);
         try {
             ResultSet results = qexec.execSelect();
             return results;
         } catch (Exception e) {
-            System.out.println("Failed to return the response on query: " + queryString);
-            System.out.println(e);
+            logger.error("Failed to return the response on query: " + queryString);
+            logger.error(e);
             return null;
         }
     }

@@ -1,16 +1,17 @@
 package uk.co.semanticintegration.hypergraphql;
 
 import graphql.GraphQL;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 public class Main {
 
+    static Logger logger = Logger.getLogger(Main.class);
+
+
     public static void main(String[] args) {
 
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.OFF);
+        PropertyConfigurator.configure("log4j.properties");
 
         Config config = new Config("properties.json");
 
@@ -20,6 +21,8 @@ public class Main {
 
         System.out.println("GraphQL server started at: http://localhost:" + config.graphql().port() + config.graphql().path());
         System.out.println("GraphiQL UI available at: http://localhost:" + config.graphql().port() + config.graphql().graphiql());
+
+        logger.info("Server started at http://localhost:" + config.graphql().port() + config.graphql().path());
 
         Controller.start(config, graphQL);
 

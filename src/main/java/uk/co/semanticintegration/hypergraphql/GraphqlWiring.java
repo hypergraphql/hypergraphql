@@ -26,6 +26,7 @@ import graphql.schema.GraphQLTypeReference;
 import java.util.*;
 
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.log4j.Logger;
 
 /**
  * Created by szymon on 24/08/2017.
@@ -38,6 +39,10 @@ public class GraphqlWiring {
     private Config config;
     private GraphQLSchema schema;
     private Converter converter;
+
+    static Logger logger = Logger.getLogger(GraphqlWiring.class);
+
+
 
     private Map<String, GraphQLArgument> defaultArguments = new HashMap<String, GraphQLArgument>() {{
         put("limit", new GraphQLArgument("limit", GraphQLInt));
@@ -227,12 +232,12 @@ public class GraphqlWiring {
             if (refType.isList) {
                 return getBuiltField(isQueryType, fieldDef, refType, instancesOfTypeFetcher);
             } else {
-                System.out.println("All queries must return array types.");
+                logger.error("Wrong schema: all fields in the Query type must return array types. This is not the case for: " + fieldDef.get("name"));
                 System.exit(1);
             }
         } else {
 
-            String fieldName = refType.dataType;
+            String targetDataTypeName = refType.dataType;
 
             final Set<String> allowedTypes = new HashSet<String>() {{
                 add("String");
@@ -241,8 +246,8 @@ public class GraphqlWiring {
                 add("Boolean");
             }};
 
-//      if (fieldName.equals("String") || fieldName.equals("Int") || fieldName.equals("ID") || fieldName.equals("Boolean")) {
-            if (allowedTypes.contains(fieldName)) {
+//      if (targetDataTypeName.equals("String") || targetDataTypeName.equals("Int") || targetDataTypeName.equals("ID") || targetDataTypeName.equals("Boolean")) {
+            if (allowedTypes.contains(targetDataTypeName)) {
                 return getBuiltField(isQueryType, fieldDef, refType, literalFetchers.get(refType.isList));
             } else {
                 return getBuiltField(isQueryType, fieldDef, refType, objectFetchers.get(refType.isList));

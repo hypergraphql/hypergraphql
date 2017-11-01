@@ -41,7 +41,7 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
 ```
 
 ### HyperGraphQL response:
-```json
+```js
 {
   "extensions": {},
   "data": {
@@ -98,7 +98,7 @@ Clone the Git repository into a local directory. Then in the root of the project
 
 Basic settings are defined in the *properties.json* file. The defaults are:
 
-```json
+```js
 {
     "schemaFile": "schema.graphql",
     "contextFile": "context.json",
@@ -173,7 +173,7 @@ The context specification consists of three components:
 
 The following example presents a possible context associated with the schema above, where all predicates are associated with the *http://dbpedia.org* graph.
 
-```json
+```js
 {
   "@predicates": {
     "person": {

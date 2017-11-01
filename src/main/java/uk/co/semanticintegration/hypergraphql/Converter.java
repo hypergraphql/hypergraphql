@@ -3,6 +3,7 @@ package uk.co.semanticintegration.hypergraphql;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.language.TypeDefinition;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import java.util.regex.Pattern;
  * This class contains jsonRewrite methods between different query/response formats
  */
 public class Converter {
-
+    static Logger logger = Logger.getLogger(Converter.class);
 
     private JsonNode globalContext;
     private Map<String, String> JSONLD_VOC = new HashMap<String, String>() {{
@@ -115,7 +116,7 @@ public class Converter {
                 String constructQuery = getConstructQuery(nextQuery);
                 output.add(constructQuery);
             } catch (Exception e) {
-                System.out.println(e.fillInStackTrace());
+                logger.error(e);
             }
         }
 
@@ -249,7 +250,6 @@ public class Converter {
 
                         childConstruct.add(nodeMark);
 
-                        // childOptionalPattern = String.format(servicePattern, endpointId, childOptionalPattern);
                     } else {
 
                         String[] grandChildPatterns = getSubquery(field, childNode, graphId, endpointId);
@@ -353,7 +353,7 @@ public class Converter {
         try {
             JsonNode object = mapper.readTree(query);
 
-            // System.out.println(object.toString()); //debug message
+             logger.debug("Generated query JSON: " + object.toString()); //debug message
 
             return object;
         } catch (IOException e) {
@@ -389,7 +389,7 @@ public class Converter {
 
             return object;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
 
         return null;

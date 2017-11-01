@@ -2,6 +2,7 @@ package uk.co.semanticintegration.hypergraphql;
 
 import graphql.*;
 import graphql.language.SourceLocation;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,6 +16,9 @@ import java.util.Map;
 public class GraphqlService {
     private GraphQL graphQL;
     private Config config;
+    static Logger logger = Logger.getLogger(GraphqlService.class);
+
+
 
     public GraphqlService(Config config, GraphQL graphQL) {
         this.graphQL = graphQL;
@@ -51,26 +55,7 @@ public class GraphqlService {
             try {
                 data = converter.jsonLDdata(query, qlResult.getData());
             } catch (IOException e) {
-
-                GraphQLError error = new GraphQLError() {
-                    @Override
-                    public String getMessage() {
-                        return e.getMessage();
-                    }
-
-                    @Override
-                    public List<SourceLocation> getLocations() {
-                        return null;
-                    }
-
-                    @Override
-                    public ErrorType getErrorType() {
-                        return null ;
-                    }
-                };
-
-                errors.add(error);
-
+                logger.error(e);
             }
 
         } else {
