@@ -40,10 +40,10 @@ public class Converter {
     }
 
 
-    private class Traversal {
-        Object data;
-        Map<String, String> context;
-    }
+//    private class Traversal {
+//        Object data;
+//        Map<String, String> context;
+//    }
 
     private class QueryInQueue {
         JsonNode query;
