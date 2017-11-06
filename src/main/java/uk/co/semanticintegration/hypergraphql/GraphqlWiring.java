@@ -79,6 +79,7 @@ public class GraphqlWiring {
         Set<GraphQLType> schemaTypes = new HashSet<>();
         GraphQLObjectType schemaQuery = null;
 
+
         Map<String, TypeDefinition> typeMap = config.schema().types();
 
         Set<String> typeDefs = typeMap.keySet();
@@ -98,6 +99,7 @@ public class GraphqlWiring {
         this.schema = GraphQLSchema.newSchema()
                 .query(schemaQuery)
                 .build(schemaTypes);
+
     }
 
     class fetchParams {
@@ -114,7 +116,7 @@ public class GraphqlWiring {
             }
 
             String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-            predicateURI = config.context().get("@predicates").get(predicate).get("@id").asText();
+            predicateURI = config.predicateURI(predicate);
             client = environment.getContext();
         }
     }
@@ -139,7 +141,7 @@ public class GraphqlWiring {
 
     private DataFetcher<List<RDFNode>> instancesOfTypeFetcher = environment -> {
         String type = ((Field) environment.getFields().toArray()[0]).getName();
-        String typeURI = config.context().get("@predicates").get(type).get("@id").asText();
+        String typeURI = config.predicateURI(type);
         SparqlClient client = environment.getContext();
         List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter("http://hgql/root", typeURI);
         return subjects;
@@ -225,7 +227,6 @@ public class GraphqlWiring {
 
     public GraphQLFieldDefinition registerGraphQLField(Boolean isQueryType, JsonNode fieldDef) {
 
-
         OutputTypeSpecification refType = outputType(fieldDef.get("type"));
 
         if (isQueryType) {
@@ -246,7 +247,6 @@ public class GraphqlWiring {
                 add("Boolean");
             }};
 
-//      if (targetDataTypeName.equals("String") || targetDataTypeName.equals("Int") || targetDataTypeName.equals("ID") || targetDataTypeName.equals("Boolean")) {
             if (allowedTypes.contains(targetDataTypeName)) {
                 return getBuiltField(isQueryType, fieldDef, refType, literalFetchers.get(refType.isList));
             } else {
@@ -255,6 +255,7 @@ public class GraphqlWiring {
         }
 
         return null;
+
     }
 
     private GraphQLFieldDefinition getBuiltField(Boolean isQueryType, JsonNode fieldDef, OutputTypeSpecification refType, DataFetcher fetcher) {
@@ -271,12 +272,10 @@ public class GraphqlWiring {
         }
 
         String description;
-        JsonNode predicate = config.context().get("@predicates").get(fieldDef.get("name").asText());
-        String uri = predicate.get("@id").asText();
-        String graph = predicate.get("@namedGraph").asText();
-        String graphName = config.context().get("@namedGraphs").get(graph).get("@id").asText();
-        String endpoint = config.context().get("@namedGraphs").get(graph).get("@endpoint").asText();
-        String endpointURI = config.context().get("@endpoints").get(endpoint).get("@id").asText();
+        String fieldName = fieldDef.get("name").asText();
+        String uri = config.predicateURI(fieldName);
+        String graphName = config.predicateGraph(fieldName);
+        String endpointURI = config.predicateEndpoint(fieldName);
         String descString = uri + " (graph: " + graphName + "; endpoint: " + endpointURI + ")";
 
         if (isQueryType) {

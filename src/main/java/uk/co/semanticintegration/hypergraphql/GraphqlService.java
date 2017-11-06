@@ -71,5 +71,4 @@ public class GraphqlService {
 
         return result;
     }
-
 }

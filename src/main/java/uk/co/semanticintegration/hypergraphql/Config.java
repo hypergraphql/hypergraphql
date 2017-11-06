@@ -93,9 +93,35 @@ public class Config {
             logger.error(e);
         }
     }
+    
+    public Boolean containsPredicate(String fieldName) {
 
-    public JsonNode context() {
-        return context;
+        return (context.get("@predicates").has(fieldName));
+
+    }
+
+    public String predicateURI(String fieldName) {
+
+        return context.get("@predicates").get(fieldName).get("@id").asText();
+
+    }
+
+    public String predicateGraph(String fieldName) {
+
+        String gName = context.get("@predicates").get(fieldName).get("@namedGraph").asText();
+
+        return context.get("@namedGraphs").get(gName).get("@id").asText();
+
+    }
+
+    public String predicateEndpoint(String fieldName) {
+
+        String gName = context.get("@predicates").get(fieldName).get("@namedGraph").asText();
+
+        String eName = context.get("@namedGraphs").get(gName).get("@endpoint").asText();
+
+        return context.get("@endpoints").get(eName).get("@id").asText();
+
     }
 
     public GraphqlConfig graphql() {

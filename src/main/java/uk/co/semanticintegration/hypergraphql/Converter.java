@@ -19,10 +19,11 @@ import java.util.regex.Pattern;
  * <p>
  * This class contains jsonRewrite methods between different query/response formats
  */
+
 public class Converter {
     static Logger logger = Logger.getLogger(Converter.class);
 
-    private JsonNode globalContext;
+    private Config config;
     private Map<String, String> JSONLD_VOC = new HashMap<String, String>() {{
         put("_context", "@context");
         put("_id", "@id");
@@ -36,14 +37,8 @@ public class Converter {
 
 
     public Converter(Config config) {
-        this.globalContext = config.context();
+        this.config = config;
     }
-
-
-//    private class Traversal {
-//        Object data;
-//        Map<String, String> context;
-//    }
 
     private class QueryInQueue {
         JsonNode query;
@@ -83,8 +78,8 @@ public class Converter {
                 if (JSONLD_VOC.containsKey(find)) {
                     ldContext.put(find, JSONLD_VOC.get(find));
                 } else {
-                    if (globalContext.get("@predicates").has(find)) {
-                        ldContext.put(find, globalContext.get("@predicates").get(find).get("@id"));
+                    if (config.containsPredicate(find)) {
+                        ldContext.put(find, config.predicateURI(find));
                     }
                 }
             }
@@ -125,27 +120,16 @@ public class Converter {
 
     public String getConstructQuery(QueryInQueue jsonQuery) {
 
-
         //this method will convert a given graphql query field into a SPARQL construct query
         // that will retrieve all relevant data in one go and put it into an in-memory jena store
 
         JsonNode root = jsonQuery.query;
         JsonNode args = root.get("args");
-        String graphName = globalContext.get("@predicates").get(root.get("name").asText()).get("@namedGraph").asText();
-        String graphId;
-        if (!args.has("graph")) {
-            graphId = globalContext.get("@namedGraphs").get(graphName).get("@id").asText();
-        } else {
-            graphId = args.get("graph").asText();
-        }
-        String endpointName = globalContext.get("@namedGraphs").get(graphName).get("@endpoint").asText();
-        String endpointId;
-        if (!args.has("endpoint")) {
-            endpointId = globalContext.get("@endpoints").get(endpointName).get("@id").asText();
-        } else {
-            endpointId = args.get("endpoint").asText();
-        }
-        String uri_ref = String.format("<%s>", globalContext.get("@predicates").get(root.get("name").asText()).get("@id").asText());
+        String fieldName = root.get("name").asText();
+        String graphId = (!args.has("graph")) ? config.predicateGraph(fieldName) : args.get("graph").asText();
+        String endpointId = (!args.has("endpoint")) ? config.predicateEndpoint(fieldName) : args.get("endpoint").asText();
+
+        String uri_ref = String.format("<%s>", config.predicateURI(fieldName));
         String parentNode = jsonQuery.rootNode;
         String selfNode = jsonQuery.childNode;
         String selfVar = "?" + selfNode;
@@ -220,21 +204,9 @@ public class Converter {
 
                     JsonNode args = field.get("args");
 
-                    String graphName = globalContext.get("@predicates").get(field.get("name").asText()).get("@namedGraph").asText();
-                    String graphId;
-                    if (!args.has("graph")) {
-                        graphId = globalContext.get("@namedGraphs").get(graphName).get("@id").asText();
-                    } else {
-                        graphId = args.get("graph").asText();
-                    }
-
-                    String endpointName = globalContext.get("@namedGraphs").get(graphName).get("@endpoint").asText();
-                    String endpointId;
-                    if (!args.has("endpoint")) {
-                        endpointId = globalContext.get("@endpoints").get(endpointName).get("@id").asText();
-                    } else {
-                        endpointId = args.get("endpoint").asText();
-                    }
+                    String fieldName = field.get("name").asText();
+                    String graphId = (!args.has("graph")) ? config.predicateGraph(fieldName) : args.get("graph").asText();
+                    String endpointId = (!args.has("endpoint")) ? config.predicateEndpoint(fieldName) : args.get("endpoint").asText();
 
                     n++;
 
@@ -242,7 +214,6 @@ public class Converter {
                     String childVar = "?" + childNode;
 
                     if (!endpointId.equals(parentEndpointId)) {
-                        //  System.out.println("Adding new query to queue");
                         QueryInQueue newQuery = new QueryInQueue(field, parentNode, childNode);
                         queryQueue.addLast(newQuery);
 
@@ -256,7 +227,7 @@ public class Converter {
 
                         String childConstructPattern = String.format(constructPattern,
                                 parentVar,
-                                globalContext.get("@predicates").get(field.get("name").asText()).get("@id").asText(),
+                                config.predicateURI(fieldName),
                                 childVar
                         );
 
@@ -267,7 +238,7 @@ public class Converter {
 
                         String childOptionalPattern = String.format(triplePattern,
                                 parentVar,
-                                globalContext.get("@predicates").get(field.get("name").asText()).get("@id").asText(),
+                                config.predicateURI(fieldName),
                                 childVar,
                                 grandChildPatterns[1],
                                 langFilter
