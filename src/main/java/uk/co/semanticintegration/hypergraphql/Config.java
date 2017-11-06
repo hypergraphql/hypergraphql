@@ -94,29 +94,29 @@ public class Config {
         }
     }
 
-    public Boolean containsPredicate(String fieldName) {
+    public Boolean containsPredicate(String name) {
 
-        return (context.get("@predicates").has(fieldName));
-
-    }
-
-    public String predicateURI(String fieldName) {
-
-        return context.get("@predicates").get(fieldName).get("@id").asText();
+        return (context.get("@predicates").has(name));
 
     }
 
-    public String predicateGraph(String fieldName) {
+    public String predicateURI(String name) {
 
-        String gName = context.get("@predicates").get(fieldName).get("@namedGraph").asText();
+        return context.get("@predicates").get(name).get("@id").asText();
+
+    }
+
+    public String predicateGraph(String name) {
+
+        String gName = context.get("@predicates").get(name).get("@namedGraph").asText();
 
         return context.get("@namedGraphs").get(gName).get("@id").asText();
 
     }
 
-    public String predicateEndpoint(String fieldName) {
+    public String predicateEndpoint(String name) {
 
-        String gName = context.get("@predicates").get(fieldName).get("@namedGraph").asText();
+        String gName = context.get("@predicates").get(name).get("@namedGraph").asText();
 
         String eName = context.get("@namedGraphs").get(gName).get("@endpoint").asText();
 
