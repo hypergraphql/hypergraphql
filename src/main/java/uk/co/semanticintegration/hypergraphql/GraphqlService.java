@@ -19,7 +19,6 @@ public class GraphqlService {
     static Logger logger = Logger.getLogger(GraphqlService.class);
 
 
-
     public GraphqlService(Config config, GraphQL graphQL) {
         this.graphQL = graphQL;
         this.config = config;

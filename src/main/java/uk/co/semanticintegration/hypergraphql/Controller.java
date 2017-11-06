@@ -22,8 +22,6 @@ public class Controller {
 
     public static void start(Config config, GraphQL graphQL) {
 
-        GraphqlService service  = new GraphqlService(config, graphQL);
-
 
         port(config.graphql().port());
 
@@ -42,11 +40,14 @@ public class Controller {
         });
 
 
+
+        ObjectMapper mapper = new ObjectMapper();
+        GraphqlService service  = new GraphqlService(config, graphQL);
+
         // post method for accessing the GraphQL service
 
         post(config.graphql().path(), (req, res) -> {
 
-            ObjectMapper mapper = new ObjectMapper();
             JsonNode requestObject = mapper.readTree(req.body().toString());
 
             String query = requestObject.get("query").asText();

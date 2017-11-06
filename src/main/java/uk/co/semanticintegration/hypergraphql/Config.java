@@ -84,7 +84,6 @@ public class Config {
             SchemaParser schemaParser = new SchemaParser();
             this.schema = schemaParser.parse(new File(config.schemaFile));
 
-
             this.schemaFile = config.schemaFile;
             this.contextFile = config.contextFile;
             this.graphql = config.graphql;
@@ -93,6 +92,7 @@ public class Config {
             logger.error(e);
         }
     }
+
 
     public Boolean containsPredicate(String name) {
 

@@ -285,7 +285,7 @@ public class GraphqlWiring {
         }
 
         GraphQLFieldDefinition field = newFieldDefinition()
-                .name(fieldDef.get("name").asText())
+                .name(fieldName)
                 .argument(args)
                 .description(description)
                 .type(refType.graphQLType)
