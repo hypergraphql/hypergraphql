@@ -6,11 +6,7 @@ import graphql.language.TypeDefinition;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,9 +54,7 @@ public class Converter {
     }
 
 
-    public Map<String,Object> jsonLDdata(String query, Map<String, Object> data) throws IOException {
-
-        JsonNode jsonQuery = query2json(query);
+    public Map<String,Object> jsonLDdata(Map<String, Object> data, JsonNode jsonQuery) throws IOException {
 
         Map<String, Object> ldContext = new HashMap<>();
         Map<String, Object> output = new HashMap<>();
@@ -91,9 +85,7 @@ public class Converter {
         return output;
     }
 
-    public List<String> graphql2sparql(String query) {
-
-        JsonNode jsonQuery = query2json(query);
+    public List<String> graphql2sparql(JsonNode jsonQuery) {
 
         for (JsonNode topQuery : jsonQuery) {
             QueryInQueue root = new QueryInQueue(topQuery);
@@ -268,7 +260,6 @@ public class Converter {
 
     public JsonNode query2json(String query) {
 
-
         query = query
                 .replaceAll(",", " ")
                 .replaceAll("\\s*:\\s*", ":")
@@ -327,13 +318,48 @@ public class Converter {
 
             logger.debug("Generated query JSON: " + object.toString()); //debug message
 
-            return object;
+            TypeDefinition queryType = config.schema().types().get("Query");
+            JsonNode result = includeTypes(object, queryType);
+
+            return result;
         } catch (IOException e) {
 
             logger.error(e);
 
             return null;
         }
+    }
+
+    private JsonNode includeTypes(JsonNode object, TypeDefinition type) {
+
+        JsonNode result = object;
+
+        System.out.println("Method: includeTypes: ");
+
+
+        System.out.println(type.getChildren().toString());
+
+        object.elements().forEachRemaining(subquery -> {
+            System.out.println(subquery.get("name"));
+
+            ObjectMapper mappers = new ObjectMapper();
+            try {
+                JsonNode resultJson = mappers.readTree(new ObjectMapper().writeValueAsString(type));
+                System.out.println(resultJson.toString());
+                resultJson.get("fieldDefinitions").elements().forEachRemaining(el ->
+                {
+                    if (el.get("name").equals(subquery.get("name"))) {
+                        System.out.println(el.toString());
+                        System.out.println(el.get("type").get("type").get("name").asText());
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        });
+
+        return result;
     }
 
     public JsonNode definitionToJson(TypeDefinition type) {

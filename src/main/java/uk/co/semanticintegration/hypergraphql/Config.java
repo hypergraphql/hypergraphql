@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 
@@ -28,6 +29,7 @@ public class Config {
     private GraphqlConfig graphql;
 
     private JsonNode context;
+    private ObjectNode mapping;
     private Map<String, Context> sparqlEndpointsContext;
     private TypeDefinitionRegistry schema;
 
@@ -84,12 +86,72 @@ public class Config {
             SchemaParser schemaParser = new SchemaParser();
             this.schema = schemaParser.parse(new File(config.schemaFile));
 
+            this.mapping = getMapping();
+
+
+
+
             this.schemaFile = config.schemaFile;
             this.contextFile = config.contextFile;
             this.graphql = config.graphql;
 
         } catch (IOException e) {
             logger.error(e);
+        }
+    }
+
+    private ObjectNode getMapping() {
+        ObjectMapper mapper = new ObjectMapper();
+
+        ObjectNode result = mapper.createObjectNode();
+
+        schema.types().forEach((typeName, typeDef) -> {
+
+            ObjectNode typeObject = mapper.createObjectNode();
+
+            if (containsPredicate(typeName)) typeObject.put("@id", predicateURI(typeName));
+
+            try {
+                JsonNode typeJson = mapper.readTree(new ObjectMapper().writeValueAsString(typeDef));
+
+                typeJson.get("fieldDefinitions").elements().forEachRemaining(fieldDef ->
+                {
+                    ObjectNode fieldObject = mapper.createObjectNode();
+                    String field = fieldDef.get("name").asText();
+                    if (containsPredicate(getTarget(fieldDef))) {
+                        fieldObject.put("targetURI", predicateURI(getTarget(fieldDef)));
+                    } else {
+                        fieldObject.put("targetScalar", getTarget(fieldDef));
+                    }
+                    if (containsPredicate(field)) fieldObject.put("uri", predicateURI(field));
+                    if (containsPredicate(field)) fieldObject.put("graph", predicateGraph(field));
+                    if (containsPredicate(field)) fieldObject.put("endpoint", predicateEndpoint(field));
+
+                    typeObject.put(field, fieldObject);
+
+                });
+
+                result.put(typeName, typeObject);
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            result.put(typeName, typeObject);
+        });
+        System.out.println("Printing mapping");
+        System.out.println(result.toString());
+
+        return result;
+    }
+
+    private String getTarget(JsonNode fieldDef) {
+        JsonNode type = fieldDef.get("type");
+        if (type.has("name")) {
+            return type.get("name").asText();
+        } else {
+            return getTarget(type);
         }
     }
 

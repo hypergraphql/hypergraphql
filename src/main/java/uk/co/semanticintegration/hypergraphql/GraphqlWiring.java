@@ -25,6 +25,11 @@ import graphql.schema.GraphQLTypeReference;
 
 import java.util.*;
 
+import static graphql.schema.idl.RuntimeWiring.newRuntimeWiring;
+
+
+import graphql.schema.idl.RuntimeWiring;
+import graphql.schema.idl.SchemaGenerator;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.log4j.Logger;
 
@@ -79,7 +84,6 @@ public class GraphqlWiring {
         Set<GraphQLType> schemaTypes = new HashSet<>();
         GraphQLObjectType schemaQuery = null;
 
-
         Map<String, TypeDefinition> typeMap = config.schema().types();
 
         Set<String> typeDefs = typeMap.keySet();
@@ -133,8 +137,10 @@ public class GraphqlWiring {
 
     private DataFetcher<String> typeFetcher = environment -> {
 
-        SparqlClient client = environment.getContext();
-        String type = client.getRootTypeOfResource(environment.getSource());
+      //  SparqlClient client = environment.getContext();
+        String typeName = environment.getParentType().getName();
+        String type = (config.containsPredicate(typeName))? config.predicateURI(typeName) : null;
+     //   String type = client.getRootTypeOfResource(environment.getSource());
         return type;
 
     };
@@ -190,9 +196,7 @@ public class GraphqlWiring {
     private GraphQLFieldDefinition _typeField = newFieldDefinition()
             .type(GraphQLID)
             .name("_type")
-            .description("The rdf:type of this resource via which it was retrieved from the SPARQL endpoint. " +
-                    "Note that this field is applicable only to root resources. For all others it will be set to null," +
-                    "which might result in errors when processing the JSON-LD response.")
+            .description("The rdf:type of this resource that was used as a filter when querying SPARQL endpoint. ")
             .dataFetcher(typeFetcher).build();
 
 
@@ -212,8 +216,9 @@ public class GraphqlWiring {
 
         if (!isQueryType) {
             builtFields.add(_idField);
-            builtFields.add(_typeField);
         }
+
+        if (config.containsPredicate(type.getName())) builtFields.add(_typeField);
 
 
         GraphQLObjectType newObjectType = newObject()

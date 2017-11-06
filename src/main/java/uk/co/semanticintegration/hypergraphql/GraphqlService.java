@@ -1,5 +1,6 @@
 package uk.co.semanticintegration.hypergraphql;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import graphql.*;
 import graphql.language.SourceLocation;
 import org.apache.log4j.Logger;
@@ -41,7 +42,9 @@ public class GraphqlService {
 
             Converter converter = new Converter(config);
 
-            sparqlQueries = converter.graphql2sparql(query);
+            JsonNode jsonQuery = converter.query2json(query);
+
+            sparqlQueries = converter.graphql2sparql(jsonQuery);
 
             SparqlClient client = new SparqlClient(sparqlQueries, config.sparqlEndpointsContext());
 
@@ -52,7 +55,7 @@ public class GraphqlService {
 
             qlResult = graphQL.execute(executionInput);
             try {
-                data = converter.jsonLDdata(query, qlResult.getData());
+                data = converter.jsonLDdata(qlResult.getData(), jsonQuery);
             } catch (IOException e) {
                 logger.error(e);
             }
