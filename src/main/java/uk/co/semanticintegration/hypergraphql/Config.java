@@ -93,7 +93,7 @@ public class Config {
             logger.error(e);
         }
     }
-    
+
     public Boolean containsPredicate(String fieldName) {
 
         return (context.get("@predicates").has(fieldName));

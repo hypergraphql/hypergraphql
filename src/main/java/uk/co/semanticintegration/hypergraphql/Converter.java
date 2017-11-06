@@ -126,8 +126,8 @@ public class Converter {
         JsonNode root = jsonQuery.query;
         JsonNode args = root.get("args");
         String fieldName = root.get("name").asText();
-        String graphId = (!args.has("graph")) ? config.predicateGraph(fieldName) : args.get("graph").asText();
-        String endpointId = (!args.has("endpoint")) ? config.predicateEndpoint(fieldName) : args.get("endpoint").asText();
+        String graphId = (args.has("graph")) ? args.get("graph").asText() : config.predicateGraph(fieldName);
+        String endpointId = (args.has("endpoint")) ? args.get("endpoint").asText() : config.predicateEndpoint(fieldName);
 
         String uri_ref = String.format("<%s>", config.predicateURI(fieldName));
         String parentNode = jsonQuery.rootNode;
@@ -205,8 +205,8 @@ public class Converter {
                     JsonNode args = field.get("args");
 
                     String fieldName = field.get("name").asText();
-                    String graphId = (!args.has("graph")) ? config.predicateGraph(fieldName) : args.get("graph").asText();
-                    String endpointId = (!args.has("endpoint")) ? config.predicateEndpoint(fieldName) : args.get("endpoint").asText();
+                    String graphId = (args.has("graph")) ? args.get("graph").asText() : config.predicateGraph(fieldName);
+                    String endpointId = (args.has("endpoint")) ? args.get("endpoint").asText() : config.predicateEndpoint(fieldName);
 
                     n++;
 
