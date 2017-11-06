@@ -149,12 +149,7 @@ public class SparqlClient {
 
         ResultSet queryResults = sparqlSelect(queryString);
 
-        String result = null;
-
-        if (queryResults != null && queryResults.hasNext()) {
-
-            result = queryResults.next().get("?object").toString();
-        }
+        String result = (queryResults != null && queryResults.hasNext()) ? queryResults.next().get("?object").toString() : null;
 
         return result;
 
