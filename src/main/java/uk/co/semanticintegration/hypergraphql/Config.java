@@ -5,7 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import graphql.ExecutionInput;
+import graphql.ExecutionResult;
+import graphql.GraphQL;
 import graphql.language.TypeDefinition;
+import graphql.schema.GraphQLSchema;
+import graphql.schema.idl.RuntimeWiring;
+import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 
@@ -87,10 +93,7 @@ public class Config {
             SchemaParser schemaParser = new SchemaParser();
             this.schema = schemaParser.parse(new File(config.schemaFile));
 
-            this.mapping = getMapping();
-
-            test(schema);
-
+            this.mapping = mapping(schema);
 
             this.schemaFile = config.schemaFile;
             this.contextFile = config.contextFile;
@@ -101,99 +104,139 @@ public class Config {
         }
     }
 
-    private JsonNode test(TypeDefinitionRegistry registry) {
+    private ObjectNode mapping(TypeDefinitionRegistry registry) throws IOException {
+
+        SchemaGenerator schemaGenerator = new SchemaGenerator();
+        RuntimeWiring wiring = RuntimeWiring.newRuntimeWiring().build();
+        GraphQLSchema baseSchema = schemaGenerator.makeExecutableSchema(registry, wiring);
+        GraphQL graphQL = GraphQL.newGraphQL(baseSchema).build();
+
+        String query = "{\n" +
+                "  __schema {\n" +
+                "    types {\n" +
+                "      name\n" +
+                "      kind\n" +
+                "      fields {\n" +
+                "        name\n" +
+                "        type {\n" +
+                "          kind\n" +
+                "          name\n" +
+                "          ofType {\n" +
+                "            kind\n" +
+                "            name\n" +
+                "            ofType {\n" +
+                "              kind\n" +
+                "              name\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n";
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                .query(query)
+                .build();
+
+        ExecutionResult qlResult = graphQL.execute(executionInput);
+
+        Map<String, TypeDefinition> registered = registry.types();
+
         ObjectMapper mapper = new ObjectMapper();
 
-        ObjectNode jschema = mapper.createObjectNode();
-
-        registry.types().forEach((type, def) -> {
-
-            try {
-                ObjectNode typeJson = (ObjectNode) mapper.readTree(new ObjectMapper().writeValueAsString(registry.types()));
-
-                typeJson = (ObjectNode)  typeJson.get(type);
-
-                JsonNode fields = typeJson.get("children");
-
-                typeJson.remove("children");
-
-                ObjectNode newFields = mapper.createObjectNode();
-
-                fields.elements().forEachRemaining(field -> {
-                    newFields.put(field.get("name").asText(), field);
-                });
-
-                typeJson.put("fields", newFields);
-
-                jschema.put(type, typeJson);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        });
-
-        System.out.println("Printing :" + jschema.toString());
-
-
-        return null;
-    }
-
-    private ObjectNode getMapping() {
-        ObjectMapper mapper = new ObjectMapper();
+        JsonNode introspectionResult = mapper.readTree(new ObjectMapper().writeValueAsString(qlResult.getData())).get("__schema").get("types");
 
         ObjectNode result = mapper.createObjectNode();
 
-        schema.types().forEach((typeName, typeDef) -> {
+        introspectionResult.elements().forEachRemaining(type -> {
 
-            ObjectNode typeObject = mapper.createObjectNode();
+            String typeName = type.get("name").asText();
 
-            if (containsPredicate(typeName)) typeObject.put("@id", predicateURI(typeName));
+            if (registered.containsKey(typeName)) {
+                ObjectNode typeObject = mapper.createObjectNode();
+                if (containsPredicate(typeName)) {
+                    typeObject.put("uri", predicateURI(typeName));
+                    typeObject.put("graph", predicateGraph(typeName));
+                    typeObject.put("endpoint", predicateGraph(typeName));
+                }
 
-            try {
-                JsonNode typeJson = mapper.readTree(new ObjectMapper().writeValueAsString(typeDef));
+                if (type.has("fields")) {
+                    JsonNode oldFields = type.get("fields");
+                    ObjectNode fieldsObject = mapper.createObjectNode();
 
-                typeJson.get("fieldDefinitions").elements().forEachRemaining(fieldDef ->
-                {
-                    ObjectNode fieldObject = mapper.createObjectNode();
-                    String field = fieldDef.get("name").asText();
-                    if (containsPredicate(getTarget(fieldDef))) {
-                        fieldObject.put("targetURI", predicateURI(getTarget(fieldDef)));
-                    } else {
-                        fieldObject.put("targetScalar", getTarget(fieldDef));
-                    }
-                    if (containsPredicate(field)) fieldObject.put("uri", predicateURI(field));
-                    if (containsPredicate(field)) fieldObject.put("graph", predicateGraph(field));
-                    if (containsPredicate(field)) fieldObject.put("endpoint", predicateEndpoint(field));
+                    oldFields.elements().forEachRemaining(field -> {
+                        String fieldName = field.get("name").asText();
 
-                    typeObject.put(field, fieldObject);
+                        ObjectNode fieldObject = mapper.createObjectNode();
 
-                });
+                       // ObjectNode fieldObject = (ObjectNode) field;
+
+                        if (containsPredicate(fieldName)) {
+                            fieldObject.put("uri", predicateURI(fieldName));
+                            fieldObject.put("graph", predicateGraph(fieldName));
+                            fieldObject.put("endpoint", predicateGraph(fieldName));
+                        }
+
+                        Map <String, Object> targetInfoMap = new HashMap<>();
+                        targetInfoMap.put("name", null);
+                        targetInfoMap.put("kind", null);
+                        targetInfoMap.put("inList", false);
+
+                        Map<String, Object> targetTypeInfo = getTargetTypeInfo(field.get("type"), targetInfoMap);
+
+                        String targetTypeName = (String) targetTypeInfo.get("name");
+                        if (containsPredicate(targetTypeName)) {
+                            fieldObject.put("targetUri", predicateURI(targetTypeName));
+                            fieldObject.put("targetGraph", predicateGraph(targetTypeName));
+                            fieldObject.put("targetEndpoint", predicateGraph(targetTypeName));
+                        }
+                        fieldObject.put("targetName", targetTypeName);
+
+                        Boolean targetIsList = (Boolean) targetTypeInfo.get("inList");
+                        fieldObject.put("targetInList", targetIsList);
+
+                        String targetTypeKind = (String) targetTypeInfo.get("kind");
+                        fieldObject.put("targetKind", targetTypeKind);
+
+                        fieldsObject.put(fieldName, fieldObject);
+                    });
+
+                    typeObject.put("fields", fieldsObject);
+
+                }
+
 
                 result.put(typeName, typeObject);
-
-
-            } catch (IOException e) {
-                e.printStackTrace();
             }
 
-            result.put(typeName, typeObject);
         });
-      //  System.out.println("Printing mapping");
-      //  System.out.println(result.toString());
 
         return result;
     }
 
-    private String getTarget(JsonNode fieldDef) {
-        JsonNode type = fieldDef.get("type");
-        if (type.has("name")) {
-            return type.get("name").asText();
+    private Map<String,Object> getTargetTypeInfo(JsonNode type, Map<String, Object> targetInfoMap) {
+
+        if (!type.get("name").isNull()) {
+            targetInfoMap.put("name", type.get("name").asText());
+            targetInfoMap.put("kind", type.get("kind").asText());
+        }
+
+        if (type.get("kind").asText().equals("LIST")) {
+
+                targetInfoMap.put("inList", true);
+        }
+
+        if (type.has("ofType") && !type.get("ofType").isNull()) {
+            return getTargetTypeInfo(type.get("ofType"), targetInfoMap);
         } else {
-            return getTarget(type);
+            return targetInfoMap;
         }
     }
 
+    public ObjectNode mapping() {
+        return this.mapping;
+    }
 
     public Boolean containsPredicate(String name) {
 
