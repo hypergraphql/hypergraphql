@@ -1,6 +1,5 @@
 package uk.co.semanticintegration.hypergraphql;
 
-import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLID;
 import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
@@ -9,25 +8,19 @@ import static graphql.schema.GraphQLObjectType.newObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import graphql.language.Field;
-import graphql.language.ObjectTypeDefinition;
-import graphql.language.TypeDefinition;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
-import graphql.schema.GraphQLTypeReference;
 
 import java.util.*;
 
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.log4j.Logger;
-import org.json.JSONObject;
 
 /**
  * Created by szymon on 24/08/2017.
@@ -52,7 +45,6 @@ public class GraphqlWiring {
         // put("endpoint", new GraphQLArgument("endpoint", GraphQLString));
         put("lang", new GraphQLArgument("lang", GraphQLString));
     }};
-
     private List<GraphQLArgument> queryArgs = new ArrayList<GraphQLArgument>() {{
         add(defaultArguments.get("limit"));
         add(defaultArguments.get("offset"));
@@ -66,11 +58,6 @@ public class GraphqlWiring {
 //    add(defaultArguments.get("endpoint"));
     }};
 
-//    private class OutputTypeSpecification {
-//        GraphQLOutputType graphQLType;
-//        String dataType = null;
-//        Boolean isList = false;
-//    }
 
     public GraphqlWiring(Config config) {
 
@@ -130,11 +117,8 @@ public class GraphqlWiring {
     };
 
     private DataFetcher<String> typeFetcher = environment -> {
-
-      //  SparqlClient client = environment.getContext();
         String typeName = environment.getParentType().getName();
         String type = (config.containsPredicate(typeName))? config.predicateURI(typeName) : null;
-     //   String type = client.getRootTypeOfResource(environment.getSource());
         return type;
 
     };
@@ -288,58 +272,6 @@ public class GraphqlWiring {
 
         return field;
     }
-
-//    private OutputTypeSpecification outputType(JsonNode outputTypeDef) {
-//
-//        String outputType = outputTypeDef.get("_type").asText();
-//
-//        OutputTypeSpecification outputSpec = new OutputTypeSpecification();
-//
-//        if (outputType.equals("ListType")) {
-//            OutputTypeSpecification innerSpec = outputType(outputTypeDef.get("type"));
-//            outputSpec.graphQLType = new GraphQLList(innerSpec.graphQLType);
-//            outputSpec.dataType = innerSpec.dataType;
-//            outputSpec.isList = true;
-//            return outputSpec;
-//        }
-//
-//        if (outputType.equals("NonNullType")) {
-//            OutputTypeSpecification innerSpec = outputType(outputTypeDef.get("type"));
-//            outputSpec.graphQLType = new GraphQLNonNull(innerSpec.graphQLType);
-//            outputSpec.dataType = innerSpec.dataType;
-//            return outputSpec;
-//        }
-//
-//        if (outputType.equals("TypeName")) {
-//            String typeName = outputTypeDef.get("name").asText();
-//
-//            switch (typeName) {
-//                case "String": {
-//                    outputSpec.dataType = "String";
-//                    outputSpec.graphQLType = GraphQLString;
-//                }
-//                case "ID": {
-//                    outputSpec.dataType = "ID";
-//                    outputSpec.graphQLType = GraphQLID;
-//                }
-//                case "Int": {
-//                    outputSpec.dataType = "Int";
-//                    outputSpec.graphQLType = GraphQLInt;
-//                }
-//                case "Boolean": {
-//                    outputSpec.dataType = "Boolean";
-//                    outputSpec.graphQLType = GraphQLBoolean;
-//                }
-//                default: {
-//                    outputSpec.dataType = typeName;
-//                    outputSpec.graphQLType = new GraphQLTypeReference(typeName);
-//                }
-//            }
-//
-//            return outputSpec;
-//        }
-//        return null;
-//    }
 
     public GraphQLSchema schema() {
         return schema;

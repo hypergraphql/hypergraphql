@@ -334,11 +334,6 @@ public class Converter {
 
         JsonNode result = object;
 
-        //System.out.println("Method: includeTypes: ");
-
-
-        //System.out.println(type.getChildren().toString());
-
         object.elements().forEachRemaining(subquery -> {
             // System.out.println(subquery.get("name"));
 
@@ -361,38 +356,5 @@ public class Converter {
 
         return result;
     }
-
-//    public JsonNode definitionToJson(TypeDefinition type) {
-//
-//        String typeData = type.toString();
-//        Pattern namePtrn = Pattern.compile("(\\w+)\\{");
-//        Matcher nameMtchr = namePtrn.matcher(typeData);
-//
-//        while (nameMtchr.find()) {
-//            String find = nameMtchr.group(1);
-//            typeData = typeData.replace(find + "{", "{\'_type\':\'" + find + "\', ");
-//        }
-//
-//        namePtrn = Pattern.compile("(\\w+)=");
-//        nameMtchr = namePtrn.matcher(typeData);
-//
-//        while (nameMtchr.find()) {
-//            String find = nameMtchr.group(1);
-//            typeData = typeData.replace(" " + find + "=", "\'" + find + "\':");
-//        }
-//
-//        typeData = typeData.replace("'", "\"");
-//
-//        ObjectMapper mapper = new ObjectMapper();
-//        try {
-//            JsonNode object = mapper.readTree(typeData);
-//
-//            return object;
-//        } catch (IOException e) {
-//            logger.error(e);
-//        }
-//
-//        return null;
-//    }
 
 }
