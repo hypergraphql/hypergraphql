@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import graphql.language.TypeDefinition;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 
@@ -88,7 +89,7 @@ public class Config {
 
             this.mapping = getMapping();
 
-
+            test(schema);
 
 
             this.schemaFile = config.schemaFile;
@@ -98,6 +99,44 @@ public class Config {
         } catch (IOException e) {
             logger.error(e);
         }
+    }
+
+    private JsonNode test(TypeDefinitionRegistry registry) {
+        ObjectMapper mapper = new ObjectMapper();
+
+        ObjectNode jschema = mapper.createObjectNode();
+
+        registry.types().forEach((type, def) -> {
+
+            try {
+                ObjectNode typeJson = (ObjectNode) mapper.readTree(new ObjectMapper().writeValueAsString(registry.types()));
+
+                typeJson = (ObjectNode)  typeJson.get(type);
+
+                JsonNode fields = typeJson.get("children");
+
+                typeJson.remove("children");
+
+                ObjectNode newFields = mapper.createObjectNode();
+
+                fields.elements().forEachRemaining(field -> {
+                    newFields.put(field.get("name").asText(), field);
+                });
+
+                typeJson.put("fields", newFields);
+
+                jschema.put(type, typeJson);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        });
+
+        System.out.println("Printing :" + jschema.toString());
+
+
+        return null;
     }
 
     private ObjectNode getMapping() {
@@ -140,8 +179,8 @@ public class Config {
 
             result.put(typeName, typeObject);
         });
-        System.out.println("Printing mapping");
-        System.out.println(result.toString());
+      //  System.out.println("Printing mapping");
+      //  System.out.println(result.toString());
 
         return result;
     }
