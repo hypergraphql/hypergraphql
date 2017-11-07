@@ -4,6 +4,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import graphql.ExecutionInput;
+import graphql.ExecutionResult;
+import graphql.GraphQL;
+import graphql.language.TypeDefinition;
+import graphql.schema.*;
+import graphql.schema.idl.RuntimeWiring;
+import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 
@@ -11,11 +19,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
 import org.apache.log4j.Logger;
+
+import static graphql.Scalars.*;
 
 /**
  * Created by szymon on 05/09/2017.
@@ -28,6 +39,8 @@ public class Config {
     private GraphqlConfig graphql;
 
     private JsonNode context;
+    private ObjectNode mapping;
+    private Map<String, GraphQLOutputType> outputTypes = new HashMap<>();
     private Map<String, Context> sparqlEndpointsContext;
     private TypeDefinitionRegistry schema;
 
@@ -84,6 +97,8 @@ public class Config {
             SchemaParser schemaParser = new SchemaParser();
             this.schema = schemaParser.parse(new File(config.schemaFile));
 
+            this.mapping = mapping(schema);
+
             this.schemaFile = config.schemaFile;
             this.contextFile = config.contextFile;
             this.graphql = config.graphql;
@@ -93,6 +108,197 @@ public class Config {
         }
     }
 
+    private ObjectNode mapping(TypeDefinitionRegistry registry) throws IOException {
+
+        SchemaGenerator schemaGenerator = new SchemaGenerator();
+        RuntimeWiring wiring = RuntimeWiring.newRuntimeWiring().build();
+        GraphQLSchema baseSchema = schemaGenerator.makeExecutableSchema(registry, wiring);
+        GraphQL graphQL = GraphQL.newGraphQL(baseSchema).build();
+
+        String query = "{\n" +
+                "  __schema {\n" +
+                "    types {\n" +
+                "      name\n" +
+                "      kind\n" +
+                "      fields {\n" +
+                "        name\n" +
+                "        type {\n" +
+                "          kind\n" +
+                "          name\n" +
+                "          ofType {\n" +
+                "            kind\n" +
+                "            name\n" +
+                "            ofType {\n" +
+                "              kind\n" +
+                "              name\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n";
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                .query(query)
+                .build();
+
+        ExecutionResult qlResult = graphQL.execute(executionInput);
+
+        Map<String, TypeDefinition> registered = registry.types();
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        JsonNode introspectionResult = mapper.readTree(new ObjectMapper().writeValueAsString(qlResult.getData())).get("__schema").get("types");
+
+        ObjectNode result = mapper.createObjectNode();
+
+        introspectionResult.elements().forEachRemaining(type -> {
+
+            String typeName = type.get("name").asText();
+
+            if (registered.containsKey(typeName)) {
+                ObjectNode typeObject = mapper.createObjectNode();
+                typeObject.put("name", typeName);
+                if (containsPredicate(typeName)) {
+                    typeObject.put("uri", predicateURI(typeName));
+                    typeObject.put("graph", predicateGraph(typeName));
+                    typeObject.put("endpoint", predicateGraph(typeName));
+                }
+
+                if (type.has("fields")) {
+                    JsonNode oldFields = type.get("fields");
+                    ObjectNode fieldsObject = mapper.createObjectNode();
+
+                    oldFields.elements().forEachRemaining(field -> {
+                        String fieldName = field.get("name").asText();
+
+                        ObjectNode fieldObject = mapper.createObjectNode();
+
+                        fieldObject.put("name", fieldName);
+                       // ObjectNode fieldObject = (ObjectNode) field;
+
+                        if (containsPredicate(fieldName)) {
+                            fieldObject.put("uri", predicateURI(fieldName));
+                            fieldObject.put("graph", predicateGraph(fieldName));
+                            fieldObject.put("endpoint", predicateGraph(fieldName));
+                        }
+
+                        Map <String, Object> targetInfoMap = new HashMap<>();
+                        targetInfoMap.put("name", null);
+                        targetInfoMap.put("kind", null);
+                        targetInfoMap.put("inList", false);
+                        targetInfoMap.put("output", null);
+
+                        Map<String, Object> targetTypeInfo = getTargetTypeInfo(field.get("type"), targetInfoMap);
+
+                        String targetTypeName = (String) targetTypeInfo.get("name");
+                        if (containsPredicate(targetTypeName)) {
+                            fieldObject.put("targetUri", predicateURI(targetTypeName));
+                            fieldObject.put("targetGraph", predicateGraph(targetTypeName));
+                            fieldObject.put("targetEndpoint", predicateGraph(targetTypeName));
+                        }
+                        fieldObject.put("targetName", targetTypeName);
+
+                        Boolean targetIsList = (Boolean) targetTypeInfo.get("inList");
+                        fieldObject.put("targetInList", targetIsList);
+
+                        String targetTypeKind = (String) targetTypeInfo.get("kind");
+                        fieldObject.put("targetKind", targetTypeKind);
+
+                        GraphQLOutputType outputType = (GraphQLOutputType) targetTypeInfo.get("output");
+                        String id = UUID.randomUUID().toString();
+                        outputTypes.put(id, outputType);
+                        fieldObject.put("targetTypeId", id);
+
+                        fieldsObject.put(fieldName, fieldObject);
+
+                    });
+
+                    typeObject.put("fields", fieldsObject);
+
+                }
+
+                result.put(typeName, typeObject);
+            }
+
+        });
+
+        logger.debug(result.toString());
+     //   System.out.println(result.toString());
+
+        return result;
+    }
+
+    private Map<String, Object> getTargetTypeInfo(JsonNode type, Map<String, Object> targetInfoMap) {
+
+        if (!type.get("name").isNull()) {
+            targetInfoMap.put("name", type.get("name").asText());
+            targetInfoMap.put("kind", type.get("kind").asText());
+        }
+
+        if (type.get("kind").asText().equals("LIST")) {
+
+            targetInfoMap.put("inList", true);
+        }
+
+        if (type.has("ofType") && !type.get("ofType").isNull()) {
+
+            Map<String, Object> nestedInfo = getTargetTypeInfo(type.get("ofType"), targetInfoMap);
+            GraphQLOutputType nestedOutputType = (GraphQLOutputType) nestedInfo.get("output");
+
+            if (type.get("kind").asText().equals("LIST")) {
+                nestedInfo.put("output", new GraphQLList(nestedOutputType));
+            }
+
+            if (type.get("kind").asText().equals("NON_NULL")) {
+                nestedInfo.put("output", new GraphQLNonNull(nestedOutputType));
+            }
+
+            return nestedInfo;
+
+        } else {
+
+            String kind = type.get("kind").asText();
+            String name = type.get("name").asText();
+
+            if (kind.equals("OBJECT")) {
+                targetInfoMap.put("output", new GraphQLTypeReference(name));
+            }
+
+            if (kind.equals("SCALAR")) {
+
+                switch (name) {
+                    case "String": {
+                        targetInfoMap.put("output", GraphQLString);
+                        break;
+                    }
+                    case "ID": {
+                        targetInfoMap.put("output", GraphQLID);
+                        break;
+                    }
+                    case "Int": {
+                        targetInfoMap.put("output", GraphQLInt);
+                        break;
+                    }
+                    case "Boolean": {
+                        targetInfoMap.put("output", GraphQLBoolean);
+                        break;
+                    }
+                }
+            }
+
+            return targetInfoMap;
+        }
+    }
+
+    public ObjectNode mapping() {
+        return this.mapping;
+    }
+
+    public GraphQLOutputType outputType(String id) {
+        return outputTypes.get(id);
+    }
 
     public Boolean containsPredicate(String name) {
 

@@ -4,6 +4,10 @@
       "@id": "http://dbpedia.org/ontology/Person",
       "@namedGraph": "dbpedia"
     },
+    "Person": {
+      "@id": "http://dbpedia.org/ontology/Person",
+      "@namedGraph": "dbpedia"
+    },
     "mountain": {
       "@id": "http://dbpedia.org/ontology/Mountain",
       "@namedGraph": "dbpedia"
@@ -13,6 +17,18 @@
       "@namedGraph": "dbpedia"
     },
     "city": {
+      "@id": "http://dbpedia.org/ontology/City",
+      "@namedGraph": "dbpedia"
+    },
+    "Mountain": {
+      "@id": "http://dbpedia.org/ontology/Mountain",
+      "@namedGraph": "dbpedia"
+    },
+    "Company": {
+      "@id": "http://dbpedia.org/ontology/Company",
+      "@namedGraph": "dbpedia"
+    },
+    "City": {
       "@id": "http://dbpedia.org/ontology/City",
       "@namedGraph": "dbpedia"
     },
