@@ -43,6 +43,12 @@ public class GraphqlService {
 
             sparqlQueries = converter.graphql2sparql(query);
 
+            // uncomment this line if you want to include the generated SPARQL queries in the GraphQL response for debugging purposes
+            // extensions.put("sparqlQueries", sparqlQueries);
+
+            logger.info("Generated SPARQL queries:");
+            logger.info(sparqlQueries.toString());
+
             SparqlClient client = new SparqlClient(sparqlQueries, config.sparqlEndpointsContext());
 
             executionInput = ExecutionInput.newExecutionInput()
