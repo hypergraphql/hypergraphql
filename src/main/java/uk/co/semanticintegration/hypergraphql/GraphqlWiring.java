@@ -25,11 +25,6 @@ import graphql.schema.GraphQLTypeReference;
 
 import java.util.*;
 
-import static graphql.schema.idl.RuntimeWiring.newRuntimeWiring;
-
-
-import graphql.schema.idl.RuntimeWiring;
-import graphql.schema.idl.SchemaGenerator;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.log4j.Logger;
 

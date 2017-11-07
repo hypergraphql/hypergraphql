@@ -9,7 +9,7 @@ import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.language.TypeDefinition;
-import graphql.schema.GraphQLSchema;
+import graphql.schema.*;
 import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
@@ -19,11 +19,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
 import org.apache.log4j.Logger;
+
+import static graphql.Scalars.*;
 
 /**
  * Created by szymon on 05/09/2017.
@@ -37,6 +40,7 @@ public class Config {
 
     private JsonNode context;
     private ObjectNode mapping;
+    private Map<String, GraphQLOutputType> outputTypes = new HashMap<>();
     private Map<String, Context> sparqlEndpointsContext;
     private TypeDefinitionRegistry schema;
 
@@ -182,6 +186,7 @@ public class Config {
                         targetInfoMap.put("name", null);
                         targetInfoMap.put("kind", null);
                         targetInfoMap.put("inList", false);
+                        targetInfoMap.put("output", null);
 
                         Map<String, Object> targetTypeInfo = getTargetTypeInfo(field.get("type"), targetInfoMap);
 
@@ -199,7 +204,13 @@ public class Config {
                         String targetTypeKind = (String) targetTypeInfo.get("kind");
                         fieldObject.put("targetKind", targetTypeKind);
 
+                        GraphQLOutputType outputType = (GraphQLOutputType) targetTypeInfo.get("output");
+                        String id = UUID.randomUUID().toString();
+                        outputTypes.put(id, outputType);
+                        fieldObject.put("targetTypeId", id);
+
                         fieldsObject.put(fieldName, fieldObject);
+
                     });
 
                     typeObject.put("fields", fieldsObject);
@@ -212,10 +223,13 @@ public class Config {
 
         });
 
+        logger.debug(result.toString());
+        System.out.println(result.toString());
+
         return result;
     }
 
-    private Map<String,Object> getTargetTypeInfo(JsonNode type, Map<String, Object> targetInfoMap) {
+    private Map<String, Object> getTargetTypeInfo(JsonNode type, Map<String, Object> targetInfoMap) {
 
         if (!type.get("name").isNull()) {
             targetInfoMap.put("name", type.get("name").asText());
@@ -224,18 +238,60 @@ public class Config {
 
         if (type.get("kind").asText().equals("LIST")) {
 
-                targetInfoMap.put("inList", true);
+            targetInfoMap.put("inList", true);
         }
 
         if (type.has("ofType") && !type.get("ofType").isNull()) {
-            return getTargetTypeInfo(type.get("ofType"), targetInfoMap);
+
+            Map<String, Object> nestedInfo = getTargetTypeInfo(type.get("ofType"), targetInfoMap);
+            GraphQLOutputType nestedOutputType = (GraphQLOutputType) nestedInfo.get("output");
+
+            if (type.get("kind").asText().equals("LIST")) {
+                nestedInfo.put("output", new GraphQLList(nestedOutputType));
+            }
+
+            if (type.get("kind").asText().equals("NON_NULL")) {
+                nestedInfo.put("output", new GraphQLNonNull(nestedOutputType));
+            }
+
+            return nestedInfo;
+
         } else {
+
+            String kind = type.get("kind").asText();
+            String name = type.get("name").asText();
+
+            if (kind.equals("OBJECT")) {
+                targetInfoMap.put("output", new GraphQLTypeReference(name));
+            }
+
+            if (kind.equals("SCALAR")) {
+                switch (name) {
+                    case "String": {
+                        targetInfoMap.put("output", GraphQLString);
+                    }
+                    case "ID": {
+                        targetInfoMap.put("output", GraphQLID);
+                    }
+                    case "Int": {
+                        targetInfoMap.put("output", GraphQLInt);
+                    }
+                    case "Boolean": {
+                        targetInfoMap.put("output", GraphQLBoolean);
+                    }
+                }
+            }
+
             return targetInfoMap;
         }
     }
 
     public ObjectNode mapping() {
         return this.mapping;
+    }
+
+    public GraphQLOutputType outputType(String id) {
+        return outputTypes.get(id);
     }
 
     public Boolean containsPredicate(String name) {
