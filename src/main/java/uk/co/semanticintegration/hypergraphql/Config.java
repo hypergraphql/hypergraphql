@@ -159,6 +159,7 @@ public class Config {
 
             if (registered.containsKey(typeName)) {
                 ObjectNode typeObject = mapper.createObjectNode();
+                typeObject.put("name", typeName);
                 if (containsPredicate(typeName)) {
                     typeObject.put("uri", predicateURI(typeName));
                     typeObject.put("graph", predicateGraph(typeName));
@@ -174,6 +175,7 @@ public class Config {
 
                         ObjectNode fieldObject = mapper.createObjectNode();
 
+                        fieldObject.put("name", fieldName);
                        // ObjectNode fieldObject = (ObjectNode) field;
 
                         if (containsPredicate(fieldName)) {
@@ -217,14 +219,13 @@ public class Config {
 
                 }
 
-
                 result.put(typeName, typeObject);
             }
 
         });
 
         logger.debug(result.toString());
-        System.out.println(result.toString());
+        //System.out.println(result.toString());
 
         return result;
     }

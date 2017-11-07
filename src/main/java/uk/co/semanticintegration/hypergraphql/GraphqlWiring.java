@@ -27,6 +27,7 @@ import java.util.*;
 
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 
 /**
  * Created by szymon on 24/08/2017.
@@ -76,28 +77,26 @@ public class GraphqlWiring {
         this.config = config;
         this.converter = new Converter(config);
 
-        Set<GraphQLType> schemaTypes = new HashSet<>();
-        GraphQLObjectType schemaQuery = null;
+        Set<GraphQLType> types = new HashSet<>();
+        Map<String, GraphQLObjectType> queryType = new HashMap<>();
 
-        Map<String, TypeDefinition> typeMap = config.schema().types();
+        JsonNode mapping = config.mapping();
 
-        Set<String> typeDefs = typeMap.keySet();
+        mapping.fieldNames().forEachRemaining(type -> {
 
-        for (String name : typeDefs) {
+            GraphQLObjectType typeDef = registerGraphQLType(mapping.get(type));
 
-            TypeDefinition type = typeMap.get(name);
+            if (type.equals("Query")) {
+                queryType.put("type", typeDef);
+            } else {
+                types.add(registerGraphQLType(mapping.get(type)));
+            }
 
-            if (type.getClass() == ObjectTypeDefinition.class)
-                if (name.equals("Query")) {
-                    schemaQuery = registerGraphQLType(type);
-                } else {
-                    schemaTypes.add(registerGraphQLType(type));
-                }
-        }
+        });
 
         this.schema = GraphQLSchema.newSchema()
-                .query(schemaQuery)
-                .build(schemaTypes);
+                .query(queryType.get("type"))
+                .build(types);
 
     }
 
@@ -195,29 +194,29 @@ public class GraphqlWiring {
             .dataFetcher(typeFetcher).build();
 
 
-    public GraphQLObjectType registerGraphQLType(TypeDefinition type) {
+    public GraphQLObjectType registerGraphQLType(JsonNode type) {
 
-        JsonNode typeJson = converter.definitionToJson(type);
-
-        JsonNode fieldDefs = typeJson.get("fieldDefinitions");
+        JsonNode fields = type.get("fields");
 
         List<GraphQLFieldDefinition> builtFields = new ArrayList<>();
 
-        Boolean isQueryType = type.getName().equals("Query");
+        String typeName = type.get("name").asText();
 
-        for (JsonNode fieldDef : fieldDefs) {
-            builtFields.add(registerGraphQLField(isQueryType, fieldDef));
+        Boolean isQueryType = typeName.equals("Query");
+
+        for (JsonNode field : fields) {
+            builtFields.add(registerGraphQLField(isQueryType, field));
         }
 
         if (!isQueryType) {
             builtFields.add(_idField);
         }
 
-        if (config.containsPredicate(type.getName())) builtFields.add(_typeField);
+        if (type.has("uri")) builtFields.add(_typeField);
 
 
         GraphQLObjectType newObjectType = newObject()
-                .name(type.getName())
+                .name(typeName)
                 .fields(builtFields)
                 .build();
 
@@ -227,10 +226,11 @@ public class GraphqlWiring {
 
     public GraphQLFieldDefinition registerGraphQLField(Boolean isQueryType, JsonNode fieldDef) {
 
-        OutputTypeSpecification refType = outputType(fieldDef.get("type"));
+        GraphQLOutputType refType = config.outputType(fieldDef.get("targetTypeId").asText());
 
+        Boolean isList = fieldDef.get("targetInList").asBoolean();
         if (isQueryType) {
-            if (refType.isList) {
+            if (isList) {
                 return getBuiltField(isQueryType, fieldDef, refType, instancesOfTypeFetcher);
             } else {
                 logger.error("Wrong schema: all fields in the Query type must return array types. This is not the case for: " + fieldDef.get("name"));
@@ -238,19 +238,10 @@ public class GraphqlWiring {
             }
         } else {
 
-            String targetDataTypeName = refType.dataType;
-
-            final Set<String> allowedTypes = new HashSet<String>() {{
-                add("String");
-                add("Int");
-                add("ID");
-                add("Boolean");
-            }};
-
-            if (allowedTypes.contains(targetDataTypeName)) {
-                return getBuiltField(isQueryType, fieldDef, refType, literalFetchers.get(refType.isList));
+            if (fieldDef.get("targetKind").asText().equals("SCALAR")) {
+                return getBuiltField(isQueryType, fieldDef, refType, literalFetchers.get(isList));
             } else {
-                return getBuiltField(isQueryType, fieldDef, refType, objectFetchers.get(refType.isList));
+                return getBuiltField(isQueryType, fieldDef, refType, objectFetchers.get(isList));
             }
         }
 
@@ -258,7 +249,7 @@ public class GraphqlWiring {
 
     }
 
-    private GraphQLFieldDefinition getBuiltField(Boolean isQueryType, JsonNode fieldDef, OutputTypeSpecification refType, DataFetcher fetcher) {
+    private GraphQLFieldDefinition getBuiltField(Boolean isQueryType, JsonNode fieldDef, GraphQLOutputType refType, DataFetcher fetcher) {
 
         List<GraphQLArgument> args = new ArrayList<>();
 
@@ -266,16 +257,16 @@ public class GraphqlWiring {
             args.addAll(queryArgs);
         } else {
             args.addAll(nonQueryArgs);
-            if (refType.dataType.equals("String")) {
+            if (fieldDef.get("name").asText().equals("String")) {
                 args.add(defaultArguments.get("lang"));
             }
         }
 
         String description;
         String fieldName = fieldDef.get("name").asText();
-        String uri = config.predicateURI(fieldName);
-        String graphName = config.predicateGraph(fieldName);
-        String endpointURI = config.predicateEndpoint(fieldName);
+        String uri = fieldDef.get("uri").asText();
+        String graphName = fieldDef.get("graph").asText();
+        String endpointURI = fieldDef.get("endpoint").asText();
         String descString = uri + " (graph: " + graphName + "; endpoint: " + endpointURI + ")";
 
         if (isQueryType) {
@@ -288,63 +279,63 @@ public class GraphqlWiring {
                 .name(fieldName)
                 .argument(args)
                 .description(description)
-                .type(refType.graphQLType)
+                .type(refType)
                 .dataFetcher(fetcher).build();
 
         return field;
     }
 
-    private OutputTypeSpecification outputType(JsonNode outputTypeDef) {
-
-        String outputType = outputTypeDef.get("_type").asText();
-
-        OutputTypeSpecification outputSpec = new OutputTypeSpecification();
-
-        if (outputType.equals("ListType")) {
-            OutputTypeSpecification innerSpec = outputType(outputTypeDef.get("type"));
-            outputSpec.graphQLType = new GraphQLList(innerSpec.graphQLType);
-            outputSpec.dataType = innerSpec.dataType;
-            outputSpec.isList = true;
-            return outputSpec;
-        }
-
-        if (outputType.equals("NonNullType")) {
-            OutputTypeSpecification innerSpec = outputType(outputTypeDef.get("type"));
-            outputSpec.graphQLType = new GraphQLNonNull(innerSpec.graphQLType);
-            outputSpec.dataType = innerSpec.dataType;
-            return outputSpec;
-        }
-
-        if (outputType.equals("TypeName")) {
-            String typeName = outputTypeDef.get("name").asText();
-
-            switch (typeName) {
-                case "String": {
-                    outputSpec.dataType = "String";
-                    outputSpec.graphQLType = GraphQLString;
-                }
-                case "ID": {
-                    outputSpec.dataType = "ID";
-                    outputSpec.graphQLType = GraphQLID;
-                }
-                case "Int": {
-                    outputSpec.dataType = "Int";
-                    outputSpec.graphQLType = GraphQLInt;
-                }
-                case "Boolean": {
-                    outputSpec.dataType = "Boolean";
-                    outputSpec.graphQLType = GraphQLBoolean;
-                }
-                default: {
-                    outputSpec.dataType = typeName;
-                    outputSpec.graphQLType = new GraphQLTypeReference(typeName);
-                }
-            }
-
-            return outputSpec;
-        }
-        return null;
-    }
+//    private OutputTypeSpecification outputType(JsonNode outputTypeDef) {
+//
+//        String outputType = outputTypeDef.get("_type").asText();
+//
+//        OutputTypeSpecification outputSpec = new OutputTypeSpecification();
+//
+//        if (outputType.equals("ListType")) {
+//            OutputTypeSpecification innerSpec = outputType(outputTypeDef.get("type"));
+//            outputSpec.graphQLType = new GraphQLList(innerSpec.graphQLType);
+//            outputSpec.dataType = innerSpec.dataType;
+//            outputSpec.isList = true;
+//            return outputSpec;
+//        }
+//
+//        if (outputType.equals("NonNullType")) {
+//            OutputTypeSpecification innerSpec = outputType(outputTypeDef.get("type"));
+//            outputSpec.graphQLType = new GraphQLNonNull(innerSpec.graphQLType);
+//            outputSpec.dataType = innerSpec.dataType;
+//            return outputSpec;
+//        }
+//
+//        if (outputType.equals("TypeName")) {
+//            String typeName = outputTypeDef.get("name").asText();
+//
+//            switch (typeName) {
+//                case "String": {
+//                    outputSpec.dataType = "String";
+//                    outputSpec.graphQLType = GraphQLString;
+//                }
+//                case "ID": {
+//                    outputSpec.dataType = "ID";
+//                    outputSpec.graphQLType = GraphQLID;
+//                }
+//                case "Int": {
+//                    outputSpec.dataType = "Int";
+//                    outputSpec.graphQLType = GraphQLInt;
+//                }
+//                case "Boolean": {
+//                    outputSpec.dataType = "Boolean";
+//                    outputSpec.graphQLType = GraphQLBoolean;
+//                }
+//                default: {
+//                    outputSpec.dataType = typeName;
+//                    outputSpec.graphQLType = new GraphQLTypeReference(typeName);
+//                }
+//            }
+//
+//            return outputSpec;
+//        }
+//        return null;
+//    }
 
     public GraphQLSchema schema() {
         return schema;
