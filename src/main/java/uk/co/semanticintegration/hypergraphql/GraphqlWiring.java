@@ -66,11 +66,11 @@ public class GraphqlWiring {
 //    add(defaultArguments.get("endpoint"));
     }};
 
-    private class OutputTypeSpecification {
-        GraphQLOutputType graphQLType;
-        String dataType = null;
-        Boolean isList = false;
-    }
+//    private class OutputTypeSpecification {
+//        GraphQLOutputType graphQLType;
+//        String dataType = null;
+//        Boolean isList = false;
+//    }
 
     public GraphqlWiring(Config config) {
 
@@ -204,6 +204,15 @@ public class GraphqlWiring {
 
         Boolean isQueryType = typeName.equals("Query");
 
+        String description = "An auxiliary type, not mapped to RDF.";
+
+        if (type.has("uri")) {
+            String uri = type.get("uri").asText();
+            String graphName = type.get("graph").asText();
+            String endpointURI = type.get("endpoint").asText();
+            description = uri + " (graph: " + graphName + "; endpoint: " + endpointURI + ")";
+        }
+
         for (JsonNode field : fields) {
             builtFields.add(registerGraphQLField(isQueryType, field));
         }
@@ -217,6 +226,7 @@ public class GraphqlWiring {
 
         GraphQLObjectType newObjectType = newObject()
                 .name(typeName)
+                .description(description)
                 .fields(builtFields)
                 .build();
 
@@ -226,12 +236,10 @@ public class GraphqlWiring {
 
     public GraphQLFieldDefinition registerGraphQLField(Boolean isQueryType, JsonNode fieldDef) {
 
-        GraphQLOutputType refType = config.outputType(fieldDef.get("targetTypeId").asText());
-
         Boolean isList = fieldDef.get("targetInList").asBoolean();
         if (isQueryType) {
             if (isList) {
-                return getBuiltField(isQueryType, fieldDef, refType, instancesOfTypeFetcher);
+                return getBuiltField(isQueryType, fieldDef, instancesOfTypeFetcher);
             } else {
                 logger.error("Wrong schema: all fields in the Query type must return array types. This is not the case for: " + fieldDef.get("name"));
                 System.exit(1);
@@ -239,9 +247,9 @@ public class GraphqlWiring {
         } else {
 
             if (fieldDef.get("targetKind").asText().equals("SCALAR")) {
-                return getBuiltField(isQueryType, fieldDef, refType, literalFetchers.get(isList));
+                return getBuiltField(isQueryType, fieldDef, literalFetchers.get(isList));
             } else {
-                return getBuiltField(isQueryType, fieldDef, refType, objectFetchers.get(isList));
+                return getBuiltField(isQueryType, fieldDef, objectFetchers.get(isList));
             }
         }
 
@@ -249,7 +257,9 @@ public class GraphqlWiring {
 
     }
 
-    private GraphQLFieldDefinition getBuiltField(Boolean isQueryType, JsonNode fieldDef, GraphQLOutputType refType, DataFetcher fetcher) {
+    private GraphQLFieldDefinition getBuiltField(Boolean isQueryType, JsonNode fieldDef, DataFetcher fetcher) {
+
+        GraphQLOutputType refType = config.outputType(fieldDef.get("targetTypeId").asText());
 
         List<GraphQLArgument> args = new ArrayList<>();
 
@@ -257,23 +267,17 @@ public class GraphqlWiring {
             args.addAll(queryArgs);
         } else {
             args.addAll(nonQueryArgs);
-            if (fieldDef.get("name").asText().equals("String")) {
+            if (fieldDef.get("targetName").asText().equals("String")) {
                 args.add(defaultArguments.get("lang"));
             }
         }
 
-        String description;
         String fieldName = fieldDef.get("name").asText();
         String uri = fieldDef.get("uri").asText();
         String graphName = fieldDef.get("graph").asText();
         String endpointURI = fieldDef.get("endpoint").asText();
-        String descString = uri + " (graph: " + graphName + "; endpoint: " + endpointURI + ")";
+        String description = uri + " (graph: " + graphName + "; endpoint: " + endpointURI + ")";
 
-        if (isQueryType) {
-            description = "Instances of " + descString;
-        } else {
-            description = "Values of " + descString;
-        }
 
         GraphQLFieldDefinition field = newFieldDefinition()
                 .name(fieldName)

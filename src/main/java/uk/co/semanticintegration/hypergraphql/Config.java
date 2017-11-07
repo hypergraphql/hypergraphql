@@ -225,7 +225,7 @@ public class Config {
         });
 
         logger.debug(result.toString());
-        //System.out.println(result.toString());
+     //   System.out.println(result.toString());
 
         return result;
     }
@@ -267,18 +267,23 @@ public class Config {
             }
 
             if (kind.equals("SCALAR")) {
+
                 switch (name) {
                     case "String": {
                         targetInfoMap.put("output", GraphQLString);
+                        break;
                     }
                     case "ID": {
                         targetInfoMap.put("output", GraphQLID);
+                        break;
                     }
                     case "Int": {
                         targetInfoMap.put("output", GraphQLInt);
+                        break;
                     }
                     case "Boolean": {
                         targetInfoMap.put("output", GraphQLBoolean);
+                        break;
                     }
                 }
             }
