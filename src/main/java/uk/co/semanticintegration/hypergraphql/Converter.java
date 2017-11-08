@@ -2,8 +2,11 @@ package uk.co.semanticintegration.hypergraphql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.language.TypeDefinition;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.*;
@@ -313,21 +316,22 @@ public class Converter {
 
         ObjectMapper mapper = new ObjectMapper();
 
-
         try {
             JsonNode object = mapper.readTree(query);
 
-         //   System.out.println(object.toString());
+        //    System.out.println(object.toString());
 
             logger.debug("Generated query JSON: " + object.toString()); //debug message
 
+    //        return object;
+
+
+           JsonNode queryType = config.mapping().get("Query");
+           JsonNode result = includeQueryContext(object, queryType, null);
+
+        //   System.out.println("Finally: " + result.toString());
+
             return object;
-
-
-     //       TypeDefinition queryType = config.schema().types().get("Query");
-      //      JsonNode result = includeTypes(object, queryType);
-
-        //    return result;
         } catch (IOException e) {
 
             logger.error(e);
@@ -336,31 +340,60 @@ public class Converter {
         }
     }
 
-    private JsonNode includeTypes(JsonNode object, TypeDefinition type) {
+    private JsonNode includeQueryContext(JsonNode object, JsonNode type, String parentId) {
 
-        JsonNode result = object;
+        ObjectMapper mapper = new ObjectMapper();
 
-        object.elements().forEachRemaining(subquery -> {
-            // System.out.println(subquery.get("name"));
+        ObjectNode result = mapper.createObjectNode();
 
-            ObjectMapper mappers = new ObjectMapper();
-            try {
-                JsonNode resultJson = mappers.readTree(new ObjectMapper().writeValueAsString(type));
-               // System.out.println(resultJson.toString());
-                resultJson.get("fieldDefinitions").elements().forEachRemaining(el ->
-                {
-                    if (el.get("name").equals(subquery.get("name"))) {
-                     //   System.out.println(el.toString());
-                     //   System.out.println(el.get("type").get("type").get("name").asText());
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
+        Iterator<JsonNode> fields = object.elements();
+
+        int i = 0;
+
+        while (fields.hasNext()) {
+
+            JsonNode subquery = fields.next();
+
+            ObjectNode revisedSubquery = subquery.deepCopy();
+
+            if (parentId!=null) {
+                revisedSubquery.put("parentId", parentId);
             }
 
-        });
+            i++;
+            String nodeId = (parentId==null) ? "x" + "_" + i : parentId + "_" + i;
+
+
+            revisedSubquery.put("nodeId", nodeId);
+
+            String name = subquery.get("name").asText();
+            String targetName = (type.get("fields").has(name))? type.get("fields").get(name).get("targetName").asText() : null;
+
+
+
+            if (revisedSubquery.has("fields")) {
+                JsonNode revisedFields = includeQueryContext(revisedSubquery.get("fields"), config.mapping().get(targetName), nodeId);
+                if (revisedFields.size()>0) {
+                    revisedSubquery.put("fields", revisedFields);
+                }
+            }
+
+            if (config.containsPredicate(targetName)) revisedSubquery.put("targetURI", config.predicateURI(targetName));
+
+            if (config.containsPredicate(name)) {
+                revisedSubquery.put("uri", config.predicateURI(name));
+                revisedSubquery.put("graph", config.predicateGraph(name));
+                String endpoint = config.predicateEndpoint(name);
+                ArrayNode subfields = (result.has(endpoint)) ? (ArrayNode) result.get(endpoint): mapper.createArrayNode();
+                subfields.add(revisedSubquery);
+                if (subfields.size()>0) {
+                    result.put(endpoint, subfields);
+                }
+            }
+        }
 
         return result;
     }
+
 
 }
