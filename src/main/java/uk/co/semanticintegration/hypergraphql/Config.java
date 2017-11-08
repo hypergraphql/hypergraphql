@@ -160,29 +160,17 @@ public class Config {
             if (registered.containsKey(typeName)) {
                 ObjectNode typeObject = mapper.createObjectNode();
                 typeObject.put("name", typeName);
-                if (containsPredicate(typeName)) {
-                    typeObject.put("uri", predicateURI(typeName));
-                    typeObject.put("graph", predicateGraph(typeName));
-                    typeObject.put("endpoint", predicateGraph(typeName));
-                }
-
                 if (type.has("fields")) {
                     JsonNode oldFields = type.get("fields");
                     ObjectNode fieldsObject = mapper.createObjectNode();
 
                     oldFields.elements().forEachRemaining(field -> {
+
                         String fieldName = field.get("name").asText();
 
                         ObjectNode fieldObject = mapper.createObjectNode();
 
                         fieldObject.put("name", fieldName);
-                       // ObjectNode fieldObject = (ObjectNode) field;
-
-                        if (containsPredicate(fieldName)) {
-                            fieldObject.put("uri", predicateURI(fieldName));
-                            fieldObject.put("graph", predicateGraph(fieldName));
-                            fieldObject.put("endpoint", predicateGraph(fieldName));
-                        }
 
                         Map <String, Object> targetInfoMap = new HashMap<>();
                         targetInfoMap.put("name", null);
@@ -193,11 +181,6 @@ public class Config {
                         Map<String, Object> targetTypeInfo = getTargetTypeInfo(field.get("type"), targetInfoMap);
 
                         String targetTypeName = (String) targetTypeInfo.get("name");
-                        if (containsPredicate(targetTypeName)) {
-                            fieldObject.put("targetUri", predicateURI(targetTypeName));
-                            fieldObject.put("targetGraph", predicateGraph(targetTypeName));
-                            fieldObject.put("targetEndpoint", predicateGraph(targetTypeName));
-                        }
                         fieldObject.put("targetName", targetTypeName);
 
                         Boolean targetIsList = (Boolean) targetTypeInfo.get("inList");
@@ -225,7 +208,7 @@ public class Config {
         });
 
         logger.debug(result.toString());
-     //   System.out.println(result.toString());
+        //System.out.println(result.toString());
 
         return result;
     }

@@ -60,7 +60,7 @@ public class Converter {
         Map<String, Object> output = new HashMap<>();
 
         jsonQuery.elements().forEachRemaining(elem ->
-                ldContext.put(elem.get("name").asText(), "http://hypergraphql/"+elem.get("name").asText()));
+                ldContext.put(elem.get("name").asText(), "http://hypergraphql/" + elem.get("name").asText()));
 
         Pattern namePtrn = Pattern.compile("\"name\":\"([^\"]*)\"");
         Matcher nameMtchr = namePtrn.matcher(jsonQuery.toString());
@@ -313,15 +313,21 @@ public class Converter {
 
         ObjectMapper mapper = new ObjectMapper();
 
+
         try {
             JsonNode object = mapper.readTree(query);
 
+         //   System.out.println(object.toString());
+
             logger.debug("Generated query JSON: " + object.toString()); //debug message
 
-            TypeDefinition queryType = config.schema().types().get("Query");
-            JsonNode result = includeTypes(object, queryType);
+            return object;
 
-            return result;
+
+     //       TypeDefinition queryType = config.schema().types().get("Query");
+      //      JsonNode result = includeTypes(object, queryType);
+
+        //    return result;
         } catch (IOException e) {
 
             logger.error(e);

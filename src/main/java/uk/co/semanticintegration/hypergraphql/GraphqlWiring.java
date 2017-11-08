@@ -65,24 +65,25 @@ public class GraphqlWiring {
         this.converter = new Converter(config);
 
         Set<GraphQLType> types = new HashSet<>();
-        Map<String, GraphQLObjectType> queryType = new HashMap<>();
+        GraphQLObjectType queryType = null;
 
         JsonNode mapping = config.mapping();
 
-        mapping.fieldNames().forEachRemaining(type -> {
+        Iterator<String> typeNames = mapping.fieldNames();
 
-            GraphQLObjectType typeDef = registerGraphQLType(mapping.get(type));
+        while(typeNames.hasNext()) {
+            String typeName = typeNames.next();
+            GraphQLObjectType typeDef = registerGraphQLType(mapping.get(typeName));
 
-            if (type.equals("Query")) {
-                queryType.put("type", typeDef);
+            if (typeName.equals("Query")) {
+                queryType = typeDef;
             } else {
-                types.add(registerGraphQLType(mapping.get(type)));
+                types.add(typeDef);
             }
-
-        });
+        }
 
         this.schema = GraphQLSchema.newSchema()
-                .query(queryType.get("type"))
+                .query(queryType)
                 .build(types);
 
     }
@@ -182,20 +183,22 @@ public class GraphqlWiring {
 
         JsonNode fields = type.get("fields");
 
-        List<GraphQLFieldDefinition> builtFields = new ArrayList<>();
-
         String typeName = type.get("name").asText();
 
         Boolean isQueryType = typeName.equals("Query");
 
-        String description = "An auxiliary type, not mapped to RDF.";
+        String description;
 
-        if (type.has("uri")) {
-            String uri = type.get("uri").asText();
-            String graphName = type.get("graph").asText();
-            String endpointURI = type.get("endpoint").asText();
+        if (config.containsPredicate(typeName)) {
+            String uri = config.predicateURI(typeName);
+            String graphName = config.predicateGraph(typeName);
+            String endpointURI = config.predicateEndpoint(typeName);
             description = uri + " (graph: " + graphName + "; endpoint: " + endpointURI + ")";
+        } else {
+            description = "An auxiliary type, not mapped to RDF.";
         }
+
+        List<GraphQLFieldDefinition> builtFields = new ArrayList<>();
 
         for (JsonNode field : fields) {
             builtFields.add(registerGraphQLField(isQueryType, field));
@@ -205,7 +208,7 @@ public class GraphqlWiring {
             builtFields.add(_idField);
         }
 
-        if (type.has("uri")) builtFields.add(_typeField);
+        if (config.containsPredicate(typeName)) builtFields.add(_typeField);
 
 
         GraphQLObjectType newObjectType = newObject()
@@ -257,9 +260,9 @@ public class GraphqlWiring {
         }
 
         String fieldName = fieldDef.get("name").asText();
-        String uri = fieldDef.get("uri").asText();
-        String graphName = fieldDef.get("graph").asText();
-        String endpointURI = fieldDef.get("endpoint").asText();
+        String uri = config.predicateURI(fieldName);
+        String graphName = config.predicateGraph(fieldName);
+        String endpointURI = config.predicateEndpoint(fieldName);
         String description = uri + " (graph: " + graphName + "; endpoint: " + endpointURI + ")";
 
 

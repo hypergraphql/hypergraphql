@@ -2,7 +2,6 @@ package uk.co.semanticintegration.hypergraphql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import graphql.*;
-import graphql.language.SourceLocation;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -28,7 +27,6 @@ public class GraphqlService {
     public Map<String, Object> results(String query) {
 
         Map<String, Object> result = new HashMap<>();
-
         Map<String, Object> data = new HashMap<>();
         Map<Object, Object> extensions = new HashMap<>();
         List<GraphQLError> errors = new ArrayList<>();
