@@ -1,6 +1,8 @@
 ![HyperGraphQL](HyperGraphQL.png)  HyperGraphQL
 ======
 
+## Short description
+
 HyperGraphQL is a [GraphQL](http://graphql.org) query interface for RDF triple stores. It enables  querying of RDF stores via SPARQL endpoints using GraphQL query language and schemas mapped onto the target RDF vocabularies. 
 
 HyperGraphQL serves two key objectives:
@@ -28,7 +30,31 @@ Clone the Git repository into a local directory. Then in the root of the project
 1) **gradle build**
 2) **gradle execute**
 
+## Properties
+
+Basic settings are defined in the *properties.json* file. The defaults are:
+
+```js
+{
+    "schemaFile": "schema.graphql",
+    "contextFile": "context.json",
+    "graphql": {
+        "port": 8009,
+        "path": "/",
+        "graphiql": "/graphiql"
+    }
+}
+```
+
+- *schemaFile*: the file containing GraphQL schema definition
+- *contextFile*: the file containing mapping from the schema file to RDF vocabularies and respective SPARQL endpoints to be used for resolving GraphQL fields
+- *graphql.port*: the port at thich the GraphQL server and GraphiQL interface are initiated
+- *graphql.path*: the URL path of the GraphQL server
+- *graphql.graphiql*: the URL path of the [GraphiQL UI](https://github.com/graphql/graphiql)
+
 ## Example
+
+The following query requests a single person instance with its URI (_id) and RDF type (_type), its name, birthdate, birthplace with its URI english label and the country of the birthplace, with its URI and an english label. 
 
 ### HyperGraphQL query:
 ```
@@ -49,6 +75,8 @@ Clone the Git repository into a local directory. Then in the root of the project
   }
 }
 ```
+
+The response of HyperGraphQL server consists of the usual GraphQL JSON object, further augmented with a JSON-LD context, included as the value of the property "@context" on the "data" object.
 
 ### HyperGraphQL response:
 ```js
@@ -90,27 +118,18 @@ Clone the Git repository into a local directory. Then in the root of the project
 }
 ```
 
-## Properties
+It's easy to find out, using e.g. [JSON-LD playground](https://json-ld.org/playground/), that the "data" object is in fact a valid JSON-LD object, which corresponds to the following RDF graph (in NTRIPLE notation):
 
-Basic settings are defined in the *properties.json* file. The defaults are:
-
-```js
-{
-    "schemaFile": "schema.graphql",
-    "contextFile": "context.json",
-    "graphql": {
-        "port": 8009,
-        "path": "/",
-        "graphiql": "/graphiql"
-    }
-}
 ```
-
-- *schemaFile*: the file containing GraphQL schema definition
-- *contextFile*: the file containing mapping from the schema file to RDF vocabularies and respective SPARQL endpoints to be used for resolving GraphQL fields
-- *graphql.port*: the port number at thich the GraphQL server and GraphiQL interface are initiated
-- *graphql.path*: the relative URL of the GraphQL server
-- *graphql.graphiql*: the relative URL of the [GraphiQL UI](https://github.com/graphql/graphiql)
+_:b0 <http://hypergraphql/people> <http://dbpedia.org/resource/Sani_ol_molk> .
+<http://dbpedia.org/resource/Sani_ol_molk> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Person> .
+<http://dbpedia.org/resource/Sani_ol_molk> <http://xmlns.com/foaf/0.1/name> "Mirza Abolhassan Khan Ghaffari" .
+<http://dbpedia.org/resource/Sani_ol_molk> <http://dbpedia.org/ontology/birthDate> "1814-1-1" .
+<http://dbpedia.org/resource/Sani_ol_molk> <http://dbpedia.org/ontology/birthPlace> <http://dbpedia.org/resource/Kashan> .
+<http://dbpedia.org/resource/Kashan> <http://www.w3.org/2000/01/rdf-schema#label> "Kashan" .
+<http://dbpedia.org/resource/Kashan> <http://dbpedia.org/ontology/country> <http://dbpedia.org/resource/Iran> .
+<http://dbpedia.org/resource/Iran> <http://www.w3.org/2000/01/rdf-schema#label> "Iran" .
+```
 
 ## Schema
 
@@ -141,27 +160,9 @@ type Country {
 }
 ```
 
-All fields of the **Query** type are effectively translated into instance queries of the form:
-```
-SELECT ?subject 
-WHERE {
-    ?subject a <URI(field)> .
-}
-```
-where *URI(field)* denotes the URI associated with the *field* name.
+## RDF mapping
 
-All other fields are translated into object queries where the field name is associated with the URI of a predicate in the triple pattern, i.e.:
-
-```
-SELECT ?object 
-WHERE {
-    ?parent <URI(field)> ?object .
-}
-```
-
-## Context
-
-The context specification consists of three components:
+The RDF mapping consists of three components:
 
 - *@predicates*: defining the URI associated with every field name and the RDF graph id where the data is to be fetched;
 - *@namedGraphs*: defining the RDF graph ids are associated with their full names and the SPARQL endpoints in which they are located;
@@ -225,7 +226,36 @@ The following example presents a possible context associated with the schema abo
 }
 ```
 
-Note that HyperGraphQL supports also federated querying over a collection of SPARQL endpoints, although the current prototype implementation requires further optimizations. The federation is achieved by associating predicates with different SPARQL endpoints.  
+Note that: 
+1) query fields (here: *people* and *cities*) are not mapped to URIs, but are nevertheless associated with some named graph;
+2) object types, at least those that are output types of the query fields (here *Person* and *City*), must be associated with the URI, but not with the named graphs, as they will always be associated with the same endpoint as the preceding field;
+3) each field of every object type must be associated with a URI and a named graph;
+4) each named graph must be assoicated with a SPARQL endpoint;
+5) each SPARQL endpoint must be accompanied by the authentication details. Whenever these are superfluous, they are asserted as empty strings.
+
+HyperGraphQL supports also federated querying over a collection of SPARQL endpoints, although the current prototype implementation requires further optimizations. The federation is achieved by associating predicates with different SPARQL endpoints.  
+
+## Query rewriting 
+
+GraphQL queries are rewritten into SPARQL construct queries and executed against the designated SPARQL endpoints. 
+
+All fields of the **Query** type are rewritten into instance queries of the form:
+```
+SELECT ?subject 
+WHERE {
+    ?subject a <URI(field)> .
+}
+```
+where *URI(field)* denotes the URI associated with the *field* name.
+
+All other fields are translated into object queries where the field name is associated with the URI of a predicate in the triple pattern, i.e.:
+
+```
+SELECT ?object 
+WHERE {
+    ?parent <URI(field)> ?object .
+}
+```
 
 ## Execution
 
