@@ -35,6 +35,19 @@ Clone the Git repository into a local directory. Then in the root of the project
 1) **gradle build**
 2) **gradle execute**
 
+By deafault, the HyperGraphQL server starts at: 
+
+```
+http://localhost:8009
+```
+
+The [GraphiQL](https://github.com/graphql/graphiql) UI is initiated at:
+
+```
+http://localhost:8009/graphiql
+```
+
+
 ## Properties
 
 Basic settings are defined in the *properties.json* file. The defaults are:
