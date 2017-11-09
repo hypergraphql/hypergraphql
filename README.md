@@ -21,7 +21,7 @@ The responses of HyperGraphQL are [JSON-LD](http://json-ld.org) objects that con
 
 ## GraphQL schema + RDF mapping = HyperGraphQL server
 
-To set up a HyperGraphQL server you only need to provide your chosen GraphQL type schema and its mapping to the target RDF vocabulary and SPARQL endpoints. The complete GraphQL wiring is conducted automatically on initiating the server. 
+To set up a HyperGraphQL server you only need to provide your GraphQL type schema and its mapping to the target RDF vocabulary and SPARQL endpoints. The complete GraphQL wiring is conducted automatically on initiating the server. 
 
 ## Running
 
