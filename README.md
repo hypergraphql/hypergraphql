@@ -15,7 +15,7 @@ HyperGraphQL serves two key objectives:
 
 The responses of HyperGraphQL are [JSON-LD](http://json-ld.org) objects that convey full semantic context of the fetched data. This makes HyperGraphQL a natural [Linked Data Fragment](http://linkeddatafragments.org) interface for hypermedia-driven Web APIs backed by RDF stores. 
 
-[HyperGraphQL-screenshot](screenshot.png) 
+![HyperGraphQL-screenshot](screenshot.png) 
 
 ## GraphQL schema + RDF mapping = HyperGraphQL server
 
