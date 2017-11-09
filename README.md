@@ -1,7 +1,7 @@
 ![HyperGraphQL](HyperGraphQL.png)  HyperGraphQL
 ======
 
-This software has been developed by [Semantic Integration Ltd.](semanticintegration.co.uk) and is released under Apache License 2.0. See [LICENSE.TXT](LICENSE.TXT) for license infromation. 
+This software has been developed by [Semantic Integration Ltd.](http://semanticintegration.co.uk) and is released under Apache License 2.0. See [LICENSE.TXT](LICENSE.TXT) for license infromation. 
 
 
 ## Summary
@@ -14,6 +14,8 @@ HyperGraphQL serves two key objectives:
 - providing a flexible mechanism for restricting access to RDF stores down to naturally definable subsets of (tree-shaped) queries, which can be efficiently handled by the RDF stores, thus minimising the impact on the stores' availability. 
 
 The responses of HyperGraphQL are [JSON-LD](http://json-ld.org) objects that convey full semantic context of the fetched data. This makes HyperGraphQL a natural [Linked Data Fragment](http://linkeddatafragments.org) interface for hypermedia-driven Web APIs backed by RDF stores. 
+
+[HyperGraphQL-screenshot](screenshot.png) 
 
 ## GraphQL schema + RDF mapping = HyperGraphQL server
 
@@ -274,6 +276,7 @@ Fields are translated into optional SPARQL triple patterns, additionally filtere
 is rewritten:
 
 ```
+...
 OPTIONAL {
     ?subject <http://dbpedia.org/ontology/birthPlace> ?object .
     ?object a <http://dbpedia.org/ontology/City> .
