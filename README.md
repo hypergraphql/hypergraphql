@@ -4,7 +4,7 @@
 This software has been developed by [Semantic Integration Ltd.](semanticintegration.co.uk) and is released under Apache License 2.0. See [LICENSE.TXT](LICENSE.TXT) for license infromation. 
 
 
-## Short description
+## Summary
 
 HyperGraphQL is a [GraphQL](http://graphql.org) query interface for RDF triple stores. It enables  querying of RDF stores via SPARQL endpoints using GraphQL query language and schemas mapped onto the target RDF vocabularies. 
 
@@ -259,6 +259,7 @@ is rewritten into:
     ?subject a <http://dbpedia.org/ontology/Person> .
   } LIMIT 1 OFFSET 6
 }
+...
 ```
 
 Fields are translated into optional SPARQL triple patterns, additionally filtered with the RDF type associated with the output type of the field, provided such URI is specified in the mapping, for instance:
@@ -266,6 +267,7 @@ Fields are translated into optional SPARQL triple patterns, additionally filtere
 {
 ... {
   birthplace 
+  ...
 }
 }
 ```
