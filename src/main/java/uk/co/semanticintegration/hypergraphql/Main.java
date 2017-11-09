@@ -1,20 +1,8 @@
 package uk.co.semanticintegration.hypergraphql;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import graphql.ExecutionInput;
-import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.schema.GraphQLSchema;
-import graphql.schema.idl.RuntimeWiring;
-import graphql.schema.idl.SchemaGenerator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-
-import java.io.IOException;
-import java.util.Map;
-
-import static org.apache.jena.sparql.vocabulary.VocabTestQuery.query;
 
 public class Main {
 
@@ -26,9 +14,7 @@ public class Main {
         PropertyConfigurator.configure("log4j.properties");
 
         Config config = new Config("properties.json");
-
         GraphqlWiring wiring = new GraphqlWiring(config);
-
         GraphQL graphQL = GraphQL.newGraphQL(wiring.schema()).build();
 
         System.out.println("GraphQL server started at: http://localhost:" + config.graphql().port() + config.graphql().path());
