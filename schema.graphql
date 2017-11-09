@@ -22,7 +22,7 @@ type Person {
 type Company {
     name: [String]
     label: [String]
-    locationCity: [City]
+    locationCity: City
     owner: [Person]
 }
 
