@@ -1,8 +1,8 @@
 type Query {
-    mountain: [Mountain]
-    person: [Person]
-    company: [Company]
-    city: [City]
+    mountains: [Mountain]
+    people: [Person]
+    companies: [Company]
+    cities: [City]
 }
 
 type Mountain {

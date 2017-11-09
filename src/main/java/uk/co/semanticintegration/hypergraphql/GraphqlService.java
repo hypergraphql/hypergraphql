@@ -42,7 +42,7 @@ public class GraphqlService {
 
             JsonNode jsonQuery = converter.query2json(query);
 
-            sparqlQueries = converter.graphql2sparql(jsonQuery);
+            sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
 
             // uncomment this line if you want to include the generated SPARQL queries in the GraphQL response for debugging purposes
             // extensions.put("sparqlQueries", sparqlQueries);

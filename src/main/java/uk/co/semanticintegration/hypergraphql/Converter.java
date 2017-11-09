@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import graphql.language.TypeDefinition;
 import org.apache.log4j.Logger;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.*;
@@ -32,78 +30,114 @@ public class Converter {
         put("_graph", "@graph");
     }}; //from graphql names to jsonld reserved names
 
-    private LinkedList<QueryInQueue> queryQueue = new LinkedList<>();
+    private LinkedList<JsonNode> queue = new LinkedList<>();
 
 
     public Converter(Config config) {
         this.config = config;
     }
 
-    private class QueryInQueue {
-        JsonNode query;
-        String rootNode;
-        String childNode;
+    private final String RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+    private final String HGQL_TYPE_URI = "<http://hypergraphql/type>";
 
-        QueryInQueue(JsonNode query) {
-            this.query = query;
-            this.childNode = "x";
-        }
-
-        QueryInQueue(JsonNode query, String rootNode, String childNode) {
-            this.query = query;
-            this.rootNode = rootNode;
-            this.childNode = childNode;
-        }
+    private String serviceSTR(String service, String sparqlPattern) {
+        final String PATTERN = "SERVICE <%s> { %s }";
+        return String.format(PATTERN, service, sparqlPattern );
+    }
+    private String graphSTR(String graph, String triple) {
+        final String PATTERN = "{ GRAPH <%s> { %s } }";
+        return (graph.equals("")) ? triple : String.format(PATTERN, graph, triple);
+    }
+    private String optionalSTR(String triple, String sparqlPattern) {
+        final String PATTERN = " OPTIONAL { %s %s } ";
+        return String.format(PATTERN, triple, sparqlPattern);
+    }
+    private String selectSTR(String id, String sparqlPattern, String limit, String offset) {
+        final String PATTERN = "{ SELECT "+varSTR(id) +" WHERE { %s } %s %s }";
+        return String.format(PATTERN, sparqlPattern, limit, offset);
+    }
+    private String limitSTR(int no) {
+        final String PATTERN = "LIMIT %s ";
+        return String.format(PATTERN, no);
+    }
+    private String offsetSTR(int no) {
+        final String PATTERN = "OFFSET %s ";
+        return String.format(PATTERN, no);
+    }
+    private String uriSTR(String uri) {
+        final String PATTERN = "<%s>";
+        return String.format(PATTERN, uri);
+    }
+    private String varSTR(String id) {
+        final String PATTERN = "?%s";
+        return String.format(PATTERN, id);
+    }
+    private String tripleSTR(String subject, String predicate, String object) {
+        final String PATTERN = "%s %s %s . ";
+        return String.format(PATTERN, subject, predicate, object);
+    }
+    private String langFilterSTR(JsonNode field) {
+        final String PATTERN = "FILTER (lang(%s) = \"%s\") . ";
+        String nodeVar = varSTR(field.get("nodeId").asText());
+        JsonNode args = field.get("args");
+        String langPattern = (args.has("lang")) ? String.format(PATTERN, nodeVar, args.get("lang").asText()) : "";
+        return langPattern;
+    }
+    private String constructSTR(String constructPattern, String wherePattern) {
+        final String PATTERN = "CONSTRUCT { %s } WHERE { %s }";
+        return String.format(PATTERN, constructPattern, wherePattern);
+    }
+    private String markTripleSTR(String id) {
+        String markTriple = (id.equals("")) ? "" : tripleSTR(varSTR(id), HGQL_TYPE_URI, "<http://hypergraphql/node_"+ id +">");
+        return markTriple;
+    }
+    private String rootTripleSTR(String id, String root) {
+        return tripleSTR(varSTR(id), HGQL_TYPE_URI, "<http://hypergraphql/" + root + ">");
+    }
+    private String fieldPattern(String parentId, String nodeId, String predicateURI, String typeURI) {
+        String predicateTriple = (parentId.equals("")) ? "" : tripleSTR(varSTR(parentId), uriSTR(predicateURI), varSTR(nodeId));
+        String typeTriple = (typeURI.equals("")) ? "" : tripleSTR(varSTR(nodeId), RDF_TYPE_URI, uriSTR(typeURI));
+        return predicateTriple + typeTriple;
+    }
+    private String fieldPattern(JsonNode field) {
+        String nodeId = field.get("nodeId").asText();
+        String parentId = (field.has("parentId")) ? field.get("parentId").asText() : "";
+        String predicateURI = (field.has("uri")) ? field.get("uri").asText() : "";
+        String typeURI = (field.has("targetURI")) ? field.get("targetURI").asText() : "";
+        return fieldPattern(parentId, nodeId, predicateURI, typeURI);
+    }
+    private String graphPattern(String fieldPattern, JsonNode field) {
+        JsonNode args = field.get("args");
+        String graphName = (args.has("graph")) ? args.get("graph").asText() : field.get("graph").asText();
+        String graphPattern = graphSTR(graphName, fieldPattern);
+        return graphPattern;
     }
 
-
-    public Map<String,Object> jsonLDdata(Map<String, Object> data, JsonNode jsonQuery) throws IOException {
-
-        Map<String, Object> ldContext = new HashMap<>();
-        Map<String, Object> output = new HashMap<>();
-
-        jsonQuery.elements().forEachRemaining(elem ->
-                ldContext.put(elem.get("name").asText(), "http://hypergraphql/" + elem.get("name").asText()));
-
-        Pattern namePtrn = Pattern.compile("\"name\":\"([^\"]*)\"");
-        Matcher nameMtchr = namePtrn.matcher(jsonQuery.toString());
-
-        while(nameMtchr.find())
-        {
-            String find = nameMtchr.group(1);
-            if (!ldContext.containsKey(find)) {
-                if (JSONLD_VOC.containsKey(find)) {
-                    ldContext.put(find, JSONLD_VOC.get(find));
-                } else {
-                    if (config.containsPredicate(find)) {
-                        ldContext.put(find, config.predicateURI(find));
-                    }
-                }
-            }
-        }
-
-        output.putAll(data);
-        output.put("@context", ldContext);
-
-        return output;
-    }
 
     public List<String> graphql2sparql(JsonNode jsonQuery) {
 
-        for (JsonNode topQuery : jsonQuery) {
-            QueryInQueue root = new QueryInQueue(topQuery);
-            queryQueue.addLast(root);
-        }
-
         List<String> output = new ArrayList<>();
 
-        while (queryQueue.size() > 0) {
+        jsonQuery.fieldNames().forEachRemaining(service ->
+                    jsonQuery.get(service).elements().forEachRemaining(query -> {
 
-            QueryInQueue nextQuery = queryQueue.getFirst();
-            queryQueue.removeFirst();
+                        ObjectMapper mapper = new ObjectMapper();
+                        ObjectNode topQuery = mapper.createObjectNode();
+                        ArrayNode array = mapper.createArrayNode();
+                        array.add(query);
+                        topQuery.put(service, array);
+                        String constructQuery = getConstructQuery(topQuery, true);
+                        output.add(constructQuery);
+                    })
+        );
+
+        while (queue.size() > 0) {
+
+            JsonNode nextQuery = queue.getFirst();
+            queue.removeFirst();
 
             try {
-                String constructQuery = getConstructQuery(nextQuery);
+                String constructQuery = getConstructQuery(nextQuery, false);
                 output.add(constructQuery);
             } catch (Exception e) {
                 logger.error(e);
@@ -113,151 +147,113 @@ public class Converter {
         return output;
     }
 
-    public String getConstructQuery(QueryInQueue jsonQuery) {
+    private String getConstructQuery(JsonNode query, Boolean rootQuery) {
 
-        //this method will convert a given graphql query field into a SPARQL construct query
-        // that will retrieve all relevant data in one go and put it into an in-memory jena store
 
-        JsonNode root = jsonQuery.query;
-        JsonNode args = root.get("args");
-        String fieldName = root.get("name").asText();
-        String graphId = (args.has("graph")) ? args.get("graph").asText() : config.predicateGraph(fieldName);
-        String endpointId = (args.has("endpoint")) ? args.get("endpoint").asText() : config.predicateEndpoint(fieldName);
+        String service = query.fieldNames().next();
 
-        String uri_ref = String.format("<%s>", config.predicateURI(fieldName));
-        String parentNode = jsonQuery.rootNode;
-        String selfNode = jsonQuery.childNode;
-        String selfVar = "?" + selfNode;
-        String parentVar = "?" + parentNode;
-        String constructedTriple;
-        String selectedTriple;
-        String rootMatch = "";
-        String nodeMark = "";
-        String innerPattern;
+        Iterator<JsonNode> fields = query.get(service).elements();
 
-        if (parentNode == null) {
-            String limitParams = "";
-            if (args.has("limit")) {
-                limitParams = "LIMIT " + args.get("limit");
-                if (args.has("offset")) {
-                    limitParams = limitParams + " OFFSET " + args.get("offset");
-                }
-            }
-            nodeMark = String.format("?%1$s <http://hgql/root> <http://hgql/node_%1$s> . ", selfNode );
-            constructedTriple = String.format(" %1$s <http://hgql/root> %2$s . ", selfVar, uri_ref);
-            selectedTriple = String.format(" %1$s a %2$s . ", selfVar, uri_ref);
-            innerPattern = String.format(" { SELECT %s WHERE { %s } %s } ", selfVar, selectedTriple, limitParams);
-        } else {
-            rootMatch = String.format(" %s <http://hgql/root> <http://hgql/node_%s> . ", parentVar, parentNode);
-            constructedTriple = String.format(" %s %s %s . ", parentVar, uri_ref, selfVar);
-            innerPattern = constructedTriple;
+        String constructPattern = "";
+        String wherePattern = "";
+
+        String matchParent = "";
+
+        while(fields.hasNext()) {
+            JsonNode field = fields.next();
+
+            JsonNode args = field.get("args");
+            String nodeId = field.get("nodeId").asText();
+            String parentId = (field.has("parentId")) ? field.get("parentId").asText() : "";
+            String fieldPattern = fieldPattern(field);
+
+            String graphPattern = graphPattern(fieldPattern, field);
+            matchParent = markTripleSTR(parentId);
+            String rootTriple = (rootQuery) ? rootTripleSTR(nodeId, field.get("name").asText()) : "";
+            String markTriple = markTripleSTR(nodeId);
+
+            String limit = (args.has("limit")) ? limitSTR(args.get("limit").asInt()) : "";
+            String offset = (args.has("offset")) ? offsetSTR(args.get("offset").asInt()) : "";
+
+            String matchPattern = (rootQuery) ? selectSTR(nodeId, graphPattern, limit, offset) : graphPattern;
+
+            Map<String, String> subqueries = getSubqueries(service, field);
+
+            String subConstruct = (subqueries.containsKey("construct")) ? subqueries.get("construct") : "";
+            String subWhere = (subqueries.containsKey("where")) ? subqueries.get("where") : "";
+
+            wherePattern = matchPattern + subWhere + wherePattern;
+            constructPattern = fieldPattern + rootTriple + markTriple + subConstruct + constructPattern;
+
         }
 
-        String topConstructTemplate = "CONSTRUCT { " + nodeMark + " %1$s } WHERE { " + rootMatch + " SERVICE <%2$s> { %3$s } } ";
+        String servicePattern = serviceSTR(service, wherePattern);
+        String constructQuery = constructSTR(constructPattern, matchParent + servicePattern);
 
-        String[] triplePatterns = getSubquery(root, selfNode, graphId, endpointId);
-
-        constructedTriple = constructedTriple + triplePatterns[0];
-        innerPattern = innerPattern + triplePatterns[1];
-        String graphPattern = "GRAPH <%1$s> { %2$s }";
-
-        if (!graphId.isEmpty()) {
-            innerPattern = String.format(graphPattern, graphId, innerPattern);
-        }
-
-        return String.format(topConstructTemplate,
-                constructedTriple,
-                endpointId,
-                innerPattern);
+        return constructQuery;
     }
 
-    private String[] getSubquery(JsonNode node, String parentNode, String parentGraphId, String parentEndpointId) {
 
-        String parentVar = "?" + parentNode;
-        String constructPattern = "%1$s <%2$s> %3$s . ";
-        String optionalPattern = "OPTIONAL { %1$s } ";
-        String triplePattern = "%1$s <%2$s> %3$s %4$s. %5$s";
-        String graphPattern = "GRAPH <%1$s> { %2$s }";
+    private Map<String, String> getSubqueries(String service, JsonNode query) {
 
-        String[] output = new String[2];
+        Map<String, String> output = new HashMap<>();
 
-        JsonNode fields = node.get("fields");
+        if (query.has("fields")) {
+            Iterator<String> serviceNames = query.get("fields").fieldNames();
 
-        if (fields == null) {
-            output[0] = "";
-            output[1] = "";
-        } else {
+            while (serviceNames.hasNext()) {
 
-            int n = 0;
+                String serviceName = serviceNames.next();
 
-            List<String> childConstruct = new ArrayList<>();
-            List<String> childOptional = new ArrayList<>();
+                if (serviceName.equals(service)) {
 
-            for (JsonNode field : fields) {
+                    Iterator<JsonNode> fields = query.get("fields").get(serviceName).elements();
 
-                if (!JSONLD_VOC.containsKey(field.get("name").asText())) {
+                    String constructPattern = "";
+                    String wherePattern = "";
 
-                    JsonNode args = field.get("args");
-
-                    String fieldName = field.get("name").asText();
-                    String graphId = (args.has("graph")) ? args.get("graph").asText() : config.predicateGraph(fieldName);
-                    String endpointId = (args.has("endpoint")) ? args.get("endpoint").asText() : config.predicateEndpoint(fieldName);
-
-                    n++;
-
-                    String childNode = parentNode + "_" + n;
-                    String childVar = "?" + childNode;
-
-                    if (!endpointId.equals(parentEndpointId)) {
-                        QueryInQueue newQuery = new QueryInQueue(field, parentNode, childNode);
-                        queryQueue.addLast(newQuery);
-
-                        String nodeMark = String.format("?%1$s <http://hgql/root> <http://hgql/node_%1$s> .", parentNode);
-
-                        childConstruct.add(nodeMark);
-
-                    } else {
-
-                        String[] grandChildPatterns = getSubquery(field, childNode, graphId, endpointId);
-
-                        String childConstructPattern = String.format(constructPattern,
-                                parentVar,
-                                config.predicateURI(fieldName),
-                                childVar
-                        );
-
-                        String langFilter = "";
-
-                        if (args.has("lang"))
-                            langFilter = "FILTER (lang(" + childVar + ")=" + "\"" + args.get("lang").asText() + "\") ";
-
-                        String childOptionalPattern = String.format(triplePattern,
-                                parentVar,
-                                config.predicateURI(fieldName),
-                                childVar,
-                                grandChildPatterns[1],
-                                langFilter
-                        );
-
-                        if (!graphId.equals(""))
-                            if (!graphId.equals(parentGraphId) || !endpointId.equals(parentEndpointId)) {
-                                childOptionalPattern = String.format(graphPattern, graphId, childOptionalPattern);
-                            }
-
-                        childOptionalPattern = String.format(optionalPattern, childOptionalPattern);
-
-                        childConstruct.add(childConstructPattern);
-                        childConstruct.add(grandChildPatterns[0]);
-
-                        childOptional.add(childOptionalPattern);
+                    while (fields.hasNext()) {
+                        Map<String, String> fieldPatterns = getSubquery(service, fields.next());
+                        constructPattern = constructPattern + fieldPatterns.get("construct");
+                        wherePattern = wherePattern + fieldPatterns.get("where");
                     }
+
+                    output.put("construct", constructPattern);
+                    output.put("where", wherePattern);
+
+                } else {
+                    ObjectMapper mapper = new ObjectMapper();
+                    ObjectNode queueQuery = mapper.createObjectNode();
+                    queueQuery.put(serviceName, queueQuery);
+                    queue.add(queueQuery);
                 }
             }
-
-            output[0] = String.join(" ", childConstruct);
-            output[1] = String.join(" ", childOptional);
-
         }
+
+        return output;
+    }
+
+
+    private Map<String,String> getSubquery(String service, JsonNode field) {
+        Map<String, String> output = new HashMap<>();
+
+        String langFilter = langFilterSTR(field);
+        String fieldPattern = fieldPattern(field);
+        String nodeId = field.get("nodeId").asText();
+        String markTriple = (field.has("fields")) ? markTripleSTR(nodeId) : "";
+        String graphPattern = graphPattern(fieldPattern + langFilter, field);
+
+        Map<String, String> subqueries = getSubqueries(service, field);
+
+        String subConstruct = (subqueries.containsKey("construct")) ? subqueries.get("construct") : "";
+        String subWhere = (subqueries.containsKey("where")) ? subqueries.get("where") : "";
+
+        String constructPattern =  fieldPattern + markTriple + subConstruct;
+        String wherePattern = optionalSTR(graphPattern, subWhere);
+
+        output.put("construct", constructPattern);
+        output.put("where", wherePattern);
+
         return output;
     }
 
@@ -319,17 +315,7 @@ public class Converter {
         try {
             JsonNode object = mapper.readTree(query);
 
-        //    System.out.println(object.toString());
-
             logger.debug("Generated query JSON: " + object.toString()); //debug message
-
-    //        return object;
-
-
-           JsonNode queryType = config.mapping().get("Query");
-           JsonNode result = includeQueryContext(object, queryType, null);
-
-        //   System.out.println("Finally: " + result.toString());
 
             return object;
         } catch (IOException e) {
@@ -340,7 +326,16 @@ public class Converter {
         }
     }
 
-    private JsonNode includeQueryContext(JsonNode object, JsonNode type, String parentId) {
+    public JsonNode includeContextInQuery (JsonNode object) {
+
+        JsonNode queryType = config.mapping().get("Query");
+
+        JsonNode result = addContext(object.deepCopy(), queryType, null);
+
+        return result;
+    }
+
+    private JsonNode addContext(JsonNode object, JsonNode type, String parentId) {
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -352,41 +347,41 @@ public class Converter {
 
         while (fields.hasNext()) {
 
-            JsonNode subquery = fields.next();
+            ObjectNode subquery = (ObjectNode) fields.next();
 
-            ObjectNode revisedSubquery = subquery.deepCopy();
-
-            if (parentId!=null) {
-                revisedSubquery.put("parentId", parentId);
+            if (parentId != null) {
+                subquery.put("parentId", parentId);
             }
 
             i++;
-            String nodeId = (parentId==null) ? "x" + "_" + i : parentId + "_" + i;
+            String nodeId = (parentId == null) ? "x" + "_" + i : parentId + "_" + i;
 
-
-            revisedSubquery.put("nodeId", nodeId);
+            subquery.put("nodeId", nodeId);
 
             String name = subquery.get("name").asText();
-            String targetName = (type.get("fields").has(name))? type.get("fields").get(name).get("targetName").asText() : null;
+            String targetName = (type.get("fields").has(name)) ? type.get("fields").get(name).get("targetName").asText() : null;
 
-
-
-            if (revisedSubquery.has("fields")) {
-                JsonNode revisedFields = includeQueryContext(revisedSubquery.get("fields"), config.mapping().get(targetName), nodeId);
-                if (revisedFields.size()>0) {
-                    revisedSubquery.put("fields", revisedFields);
+            if (subquery.has("fields")) {
+                JsonNode revisedFields = addContext(subquery.get("fields"), config.mapping().get(targetName), nodeId);
+                if (revisedFields.size() > 0) {
+                    subquery.put("fields", revisedFields);
                 }
             }
 
-            if (config.containsPredicate(targetName)) revisedSubquery.put("targetURI", config.predicateURI(targetName));
+            if (config.containsPredicate(targetName)) {
+                subquery.put("targetURI", config.predicateURI(targetName));
+            }
 
             if (config.containsPredicate(name)) {
-                revisedSubquery.put("uri", config.predicateURI(name));
-                revisedSubquery.put("graph", config.predicateGraph(name));
+                subquery.put("uri", config.predicateURI(name));
+            }
+
+            if (!JSONLD_VOC.containsKey(name)) {
+                subquery.put("graph", config.predicateGraph(name));
                 String endpoint = config.predicateEndpoint(name);
-                ArrayNode subfields = (result.has(endpoint)) ? (ArrayNode) result.get(endpoint): mapper.createArrayNode();
-                subfields.add(revisedSubquery);
-                if (subfields.size()>0) {
+                ArrayNode subfields = (result.has(endpoint)) ? (ArrayNode) result.get(endpoint) : mapper.createArrayNode();
+                subfields.add(subquery);
+                if (subfields.size() > 0) {
                     result.put(endpoint, subfields);
                 }
             }
@@ -396,4 +391,36 @@ public class Converter {
     }
 
 
+    public Map<String, Object> jsonLDdata(Map<String, Object> data, JsonNode jsonQuery) throws IOException {
+
+        Map<String, Object> ldContext = new HashMap<>();
+        Map<String, Object> output = new HashMap<>();
+
+        jsonQuery.elements().forEachRemaining(elem ->
+                ldContext.put(elem.get("name").asText(), "http://hypergraphql/" + elem.get("name").asText())
+        );
+
+        Pattern namePtrn = Pattern.compile("\"name\":\"([^\"]*)\"");
+        Matcher nameMtchr = namePtrn.matcher(jsonQuery.toString());
+
+        while (nameMtchr.find()) {
+            String find = nameMtchr.group(1);
+            if (!ldContext.containsKey(find)) {
+                if (JSONLD_VOC.containsKey(find)) {
+                    ldContext.put(find, JSONLD_VOC.get(find));
+                } else {
+                    if (config.containsPredicate(find)) {
+                        ldContext.put(find, config.predicateURI(find));
+                    }
+                }
+            }
+        }
+
+        output.putAll(data);
+        output.put("@context", ldContext);
+
+        return output;
+    }
+
 }
+

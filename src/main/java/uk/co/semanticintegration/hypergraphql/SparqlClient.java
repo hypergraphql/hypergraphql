@@ -21,7 +21,7 @@ public class SparqlClient {
 
     private static String queryValuesOfObjectPropertyTemp = "SELECT distinct ?object WHERE {<%s> <%s> ?object FILTER (!isLiteral(?object)) . }";
     private static String queryValuesOfDataPropertyTemp = "SELECT distinct (str(?object) as ?value) WHERE {<%1$s> <%2$s> ?object  FILTER isLiteral(?object) . %3$s }";
-    private static String querySubjectsOfObjectPropertyFilterTemp = "SELECT distinct ?subject WHERE { ?subject <http://hgql/root> <http://hgql/node_x> . ?subject <%1$s> <%2$s> . } ";
+    private static String querySubjectsOfObjectPropertyFilterTemp = "SELECT ?subject WHERE { ?subject <%1$s> <%2$s> . } ";
 
     private Model model;
 
@@ -50,7 +50,7 @@ public class SparqlClient {
             }
         }
 
-         // model.write(System.out);
+        //  model.write(System.out);
     }
 
     public ResultSet sparqlSelect(String queryString) {
