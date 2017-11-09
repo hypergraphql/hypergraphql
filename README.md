@@ -75,7 +75,7 @@ Basic settings are defined in the *properties.json* file. The defaults are:
 
 ## Example
 
-The following query requests for a single person instance with its URI (_id) and RDF type (_type), its name, birthdate, and  birthplace with its URI, an english label, and the country in which it is located, also including its URI and an english label. 
+The following query requests a single person instance with its URI (*_id*) and RDF type (*_type*), its name, birth date; further its birth place with the URI, an english label, and the country in which it is located, also including its URI and an english label. 
 
 ### HyperGraphQL query:
 ```
