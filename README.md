@@ -139,7 +139,7 @@ The response of HyperGraphQL server to this query consists of the usual GraphQL 
 }
 ```
 
-It's easy to find out, using e.g. [JSON-LD playground](https://json-ld.org/playground/), that the "data" element in this response is in fact a valid JSON-LD object encoding the following RDF graph (in NTRIPLE notation):
+It's easy to find out, using e.g. [JSON-LD playground](https://json-ld.org/playground/), that the "data" element in this response is in fact a valid JSON-LD object encoding the following RDF graph (in N-TRIPLE notation):
 
 ```
 _:b0 <http://hypergraphql/people> <http://dbpedia.org/resource/Sani_ol_molk> .
@@ -151,7 +151,7 @@ _:b0 <http://hypergraphql/people> <http://dbpedia.org/resource/Sani_ol_molk> .
 <http://dbpedia.org/resource/Kashan> <http://dbpedia.org/ontology/country> <http://dbpedia.org/resource/Iran> .
 <http://dbpedia.org/resource/Iran> <http://www.w3.org/2000/01/rdf-schema#label> "Iran" .
 ```
-This graph (except for the first triple, added by the HyperGraphQL service) is a subset of the DBpedia dataset. 
+This graph (except for the first triple, added by the HyperGraphQL server) is a subset of the DBpedia dataset. 
 
 ## Schema
 
