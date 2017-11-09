@@ -290,7 +290,7 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
 
 ## Demo
 
-A live demo of the HyperGraphQL server configured as in this repository is available at: [http://hypergraphql-demo/graphiql](http://104.154.59.211:8009/graphiql)
+A live demo of the HyperGraphQL server configured as in this repository is available at: [hypergraphql-dbpedia](http://104.154.59.211:8009/graphiql)
 
 ## Contact
 
