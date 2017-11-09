@@ -10,20 +10,30 @@ HyperGraphQL serves two key objectives:
 
 The responses of HyperGraphQL are [JSON-LD](http://json-ld.org) objects that convey full semantic context of the fetched data. This makes HyperGraphQL a natural [Linked Data Fragment](http://linkeddatafragments.org) interface for hypermedia-driven Web APIs backed by RDF stores. 
 
-## Schema and context
+## GraphQL schema + RDF mapping = HyperGraphQL server
 
-To configure a HyperGraphQL server one needs to provide only a basic GraphQL type schema and its mapping to the RDF vocabulary of the target SPARQL endpoints. The complete GraphQL wiring is done automatically on initiating the server. 
+To configure a HyperGraphQL server one needs to provide only a basic GraphQL type schema and its mapping to the target RDF vocabulary and SPARQL endpoints. The complete GraphQL wiring is done automatically on initiating the server. 
 
-## Execution
+## Running
 
-To minimise the number of return trips between HyperGraphQL server and RDF stores, the original GraphQL query is translated into possibly few SPARQL CONSTRUCT queries necessary to fetch all the relevant RDF data. The further transformation of the data into  HyperGraphQL responses is done locally by the HyperGraphQL server. When the query requests data from a single SPARQL endpoint, only one SPARQL CONSTRUCT query is issued. 
+Clone the Git repository into a local directory. Then in the root of the project execute the following: 
+
+**Maven**: 
+1) **mvn install**
+2) **mvn exec:java**
+
+(*Note*: in Windows these must be executed in a *cmd* terminal, not *PowerShell*).
+
+**Gradle**: 
+1) **gradle build**
+2) **gradle execute**
 
 ## Example
 
 ### HyperGraphQL query:
 ```
 {
-  person(limit: 1, offset: 4) {
+  people(limit: 1, offset: 6) {
     _id
     _type
     name
@@ -45,54 +55,40 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
 {
   "extensions": {},
   "data": {
-    "@context": {
-      "person": "http://hypergraphql/person",
-      "_id": "@id",
-      "_type": "@type",
-      "birthPlace": "http://dbpedia.org/ontology/birthPlace",
-      "country": "http://dbpedia.org/ontology/country",
-      "name": "http://xmlns.com/foaf/0.1/name",
-      "label": "http://www.w3.org/2000/01/rdf-schema#label",
-      "birthDate": "http://dbpedia.org/ontology/birthDate"
-    },
-    "person": [
+    "people": [
       {
-        "_id": "http://dbpedia.org/resource/Nikolaos_Ventouras",
+        "_id": "http://dbpedia.org/resource/Sani_ol_molk",
         "_type": "http://dbpedia.org/ontology/Person",
-        "name": "Nikolaos Ventouras",
-        "birthDate": "1899-1-1",
+        "name": "Mirza Abolhassan Khan Ghaffari",
+        "birthDate": "1814-1-1",
         "birthPlace": {
-          "_id": "http://dbpedia.org/resource/Corfu",
+          "_id": "http://dbpedia.org/resource/Kashan",
           "label": [
-            "Corfu"
+            "Kashan"
           ],
           "country": {
-            "_id": "http://dbpedia.org/resource/Greece",
+            "_id": "http://dbpedia.org/resource/Iran",
             "label": [
-              "Greece"
+              "Iran"
             ]
           }
         }
       }
-    ]
+    ],
+    "@context": {
+      "birthPlace": "http://dbpedia.org/ontology/birthPlace",
+      "country": "http://dbpedia.org/ontology/country",
+      "_type": "@type",
+      "name": "http://xmlns.com/foaf/0.1/name",
+      "_id": "@id",
+      "label": "http://www.w3.org/2000/01/rdf-schema#label",
+      "people": "http://hypergraphql/people",
+      "birthDate": "http://dbpedia.org/ontology/birthDate"
+    }
   },
   "errors": []
 }
 ```
- 
-## Running
-
-Clone the Git repository into a local directory. Then in the root of the project execute the following: 
-
-**Maven**: 
-1) **mvn install**
-2) **mvn exec:java**
-
-(*Note*: in Windows these must be executed in a *cmd* terminal, not *PowerShell*).
-
-**Gradle**: 
-1) **gradle build**
-2) **gradle execute**
 
 ## Properties
 
@@ -123,8 +119,8 @@ The schema definition complies with the GraphQL spec (see: 	[http://graphql.org/
 
 ```
 type Query {
-    person: [Person]
-    city: [City]
+    people: [Person]
+    cities: [City]
 }
 
 type Person {
@@ -176,13 +172,17 @@ The following example presents a possible context associated with the schema abo
 ```js
 {
   "@predicates": {
-    "person": {
-      "@id": "http://dbpedia.org/ontology/Person",
+    "people": {
       "@namedGraph": "dbpedia"
     },
-    "city": {
-      "@id": "http://dbpedia.org/ontology/City",
+    "cities": {
       "@namedGraph": "dbpedia"
+    },
+    "Person": {
+      "@id": "http://dbpedia.org/ontology/Person"
+    },
+    "City": {
+      "@id": "http://dbpedia.org/ontology/City"
     },
     "name": {
       "@id": "http://xmlns.com/foaf/0.1/name",
@@ -227,10 +227,17 @@ The following example presents a possible context associated with the schema abo
 
 Note that HyperGraphQL supports also federated querying over a collection of SPARQL endpoints, although the current prototype implementation requires further optimizations. The federation is achieved by associating predicates with different SPARQL endpoints.  
 
+## Execution
+
+To minimise the number of return trips between HyperGraphQL server and RDF stores, the original GraphQL query is translated into possibly few SPARQL CONSTRUCT queries necessary to fetch all the relevant RDF data. The further transformation of the data into  HyperGraphQL responses is done locally by the HyperGraphQL server. When the query requests data from a single SPARQL endpoint, only one SPARQL CONSTRUCT query is issued. 
+
 ## Demo
 
 A live demo of the HyperGraphQL server configured as in this repository is available at: [http://hypergraphql-demo/graphiql](http://104.154.59.211:8009/graphiql)
 
+## License
+
+This software is released under the Apache 2.0 license. See [LICENSE.TXT](LICENSE.TXT) for license details. 
 
 
 ## Contact

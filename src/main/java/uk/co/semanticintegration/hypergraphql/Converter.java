@@ -42,40 +42,49 @@ public class Converter {
 
     private String serviceSTR(String service, String sparqlPattern) {
         final String PATTERN = "SERVICE <%s> { %s }";
-        return String.format(PATTERN, service, sparqlPattern );
+        return String.format(PATTERN, service, sparqlPattern);
     }
+
     private String graphSTR(String graph, String triple) {
         final String PATTERN = "{ GRAPH <%s> { %s } }";
         return (graph.equals("")) ? triple : String.format(PATTERN, graph, triple);
     }
+
     private String optionalSTR(String triple, String sparqlPattern) {
         final String PATTERN = " OPTIONAL { %s %s } ";
         return String.format(PATTERN, triple, sparqlPattern);
     }
+
     private String selectSTR(String id, String sparqlPattern, String limit, String offset) {
-        final String PATTERN = "{ SELECT "+varSTR(id) +" WHERE { %s } %s %s }";
+        final String PATTERN = "{ SELECT " + varSTR(id) + " WHERE { %s } %s %s }";
         return String.format(PATTERN, sparqlPattern, limit, offset);
     }
+
     private String limitSTR(int no) {
         final String PATTERN = "LIMIT %s ";
         return String.format(PATTERN, no);
     }
+
     private String offsetSTR(int no) {
         final String PATTERN = "OFFSET %s ";
         return String.format(PATTERN, no);
     }
+
     private String uriSTR(String uri) {
         final String PATTERN = "<%s>";
         return String.format(PATTERN, uri);
     }
+
     private String varSTR(String id) {
         final String PATTERN = "?%s";
         return String.format(PATTERN, id);
     }
+
     private String tripleSTR(String subject, String predicate, String object) {
         final String PATTERN = "%s %s %s . ";
         return String.format(PATTERN, subject, predicate, object);
     }
+
     private String langFilterSTR(JsonNode field) {
         final String PATTERN = "FILTER (lang(%s) = \"%s\") . ";
         String nodeVar = varSTR(field.get("nodeId").asText());
@@ -83,22 +92,27 @@ public class Converter {
         String langPattern = (args.has("lang")) ? String.format(PATTERN, nodeVar, args.get("lang").asText()) : "";
         return langPattern;
     }
+
     private String constructSTR(String constructPattern, String wherePattern) {
         final String PATTERN = "CONSTRUCT { %s } WHERE { %s }";
         return String.format(PATTERN, constructPattern, wherePattern);
     }
+
     private String markTripleSTR(String id) {
-        String markTriple = (id.equals("")) ? "" : tripleSTR(varSTR(id), HGQL_TYPE_URI, "<http://hypergraphql/node_"+ id +">");
+        String markTriple = (id.equals("")) ? "" : tripleSTR(varSTR(id), HGQL_TYPE_URI, "<http://hypergraphql/node_" + id + ">");
         return markTriple;
     }
+
     private String rootTripleSTR(String id, String root) {
         return tripleSTR(varSTR(id), HGQL_TYPE_URI, "<http://hypergraphql/" + root + ">");
     }
+
     private String fieldPattern(String parentId, String nodeId, String predicateURI, String typeURI) {
         String predicateTriple = (parentId.equals("")) ? "" : tripleSTR(varSTR(parentId), uriSTR(predicateURI), varSTR(nodeId));
         String typeTriple = (typeURI.equals("")) ? "" : tripleSTR(varSTR(nodeId), RDF_TYPE_URI, uriSTR(typeURI));
         return predicateTriple + typeTriple;
     }
+
     private String fieldPattern(JsonNode field) {
         String nodeId = field.get("nodeId").asText();
         String parentId = (field.has("parentId")) ? field.get("parentId").asText() : "";
@@ -106,6 +120,7 @@ public class Converter {
         String typeURI = (field.has("targetURI")) ? field.get("targetURI").asText() : "";
         return fieldPattern(parentId, nodeId, predicateURI, typeURI);
     }
+
     private String graphPattern(String fieldPattern, JsonNode field) {
         JsonNode args = field.get("args");
         String graphName = (args.has("graph")) ? args.get("graph").asText() : field.get("graph").asText();
@@ -119,16 +134,16 @@ public class Converter {
         List<String> output = new ArrayList<>();
 
         jsonQuery.fieldNames().forEachRemaining(service ->
-                    jsonQuery.get(service).elements().forEachRemaining(query -> {
+                jsonQuery.get(service).elements().forEachRemaining(query -> {
 
-                        ObjectMapper mapper = new ObjectMapper();
-                        ObjectNode topQuery = mapper.createObjectNode();
-                        ArrayNode array = mapper.createArrayNode();
-                        array.add(query);
-                        topQuery.put(service, array);
-                        String constructQuery = getConstructQuery(topQuery, true);
-                        output.add(constructQuery);
-                    })
+                    ObjectMapper mapper = new ObjectMapper();
+                    ObjectNode topQuery = mapper.createObjectNode();
+                    ArrayNode array = mapper.createArrayNode();
+                    array.add(query);
+                    topQuery.put(service, array);
+                    String constructQuery = getConstructQuery(topQuery, true);
+                    output.add(constructQuery);
+                })
         );
 
         while (queue.size() > 0) {
@@ -159,7 +174,7 @@ public class Converter {
 
         String matchParent = "";
 
-        while(fields.hasNext()) {
+        while (fields.hasNext()) {
             JsonNode field = fields.next();
 
             JsonNode args = field.get("args");
@@ -234,7 +249,7 @@ public class Converter {
     }
 
 
-    private Map<String,String> getSubquery(String service, JsonNode field) {
+    private Map<String, String> getSubquery(String service, JsonNode field) {
         Map<String, String> output = new HashMap<>();
 
         String langFilter = langFilterSTR(field);
@@ -248,7 +263,7 @@ public class Converter {
         String subConstruct = (subqueries.containsKey("construct")) ? subqueries.get("construct") : "";
         String subWhere = (subqueries.containsKey("where")) ? subqueries.get("where") : "";
 
-        String constructPattern =  fieldPattern + markTriple + subConstruct;
+        String constructPattern = fieldPattern + markTriple + subConstruct;
         String wherePattern = optionalSTR(graphPattern, subWhere);
 
         output.put("construct", constructPattern);
@@ -326,7 +341,7 @@ public class Converter {
         }
     }
 
-    public JsonNode includeContextInQuery (JsonNode object) {
+    public JsonNode includeContextInQuery(JsonNode object) {
 
         JsonNode queryType = config.mapping().get("Query");
 
