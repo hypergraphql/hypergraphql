@@ -1,6 +1,9 @@
 ![HyperGraphQL](HyperGraphQL.png)  HyperGraphQL
 ======
 
+This software has been developed by [Semantic Integration Ltd.](semanticintegration.co.uk) and is released under Apache License 2.0. See [LICENSE.TXT](LICENSE.TXT) for license infromation. 
+
+
 ## Short description
 
 HyperGraphQL is a [GraphQL](http://graphql.org) query interface for RDF triple stores. It enables  querying of RDF stores via SPARQL endpoints using GraphQL query language and schemas mapped onto the target RDF vocabularies. 
@@ -164,11 +167,11 @@ type Country {
 
 The RDF mapping consists of three components:
 
-- *@predicates*: defining the URI associated with every field name and the RDF graph id where the data is to be fetched;
-- *@namedGraphs*: defining the RDF graph ids are associated with their full names and the SPARQL endpoints in which they are located;
-- *@endpoints*: defining the URL associated with each endpoint and possibly the authentication details. 
+- *@predicates*: defining the URIs associated with the GraphQL vocabulary and the named graphs from which the data is to be fetched;
+- *@namedGraphs*: defining the SPARQL endpoints where the named graphs are located;
+- *@endpoints*: defining the URLs of the SPARQL endpoints and their authentication details. 
 
-The following example presents a possible context associated with the schema above, where all predicates are associated with the *http://dbpedia.org* graph.
+The following example presents a possible mapping for the schema above, where all predicates are associated with the *http://dbpedia.org* graph.
 
 ```js
 {
@@ -228,7 +231,7 @@ The following example presents a possible context associated with the schema abo
 
 Note that: 
 1) query fields (here: *people* and *cities*) are not mapped to URIs, but are nevertheless associated with some named graph;
-2) object types, at least those that are output types of the query fields (here *Person* and *City*), must be associated with the URI, but not with the named graphs, as they will always be associated with the same endpoint as the preceding field;
+2) object types, at least those that serve as output types of the query fields (here *Person* and *City*), must be associated with URIs, but not with the named graphs, as they will always be associated with the endpoint of the field;
 3) each field of every object type must be associated with a URI and a named graph;
 4) each named graph must be assoicated with a SPARQL endpoint;
 5) each SPARQL endpoint must be accompanied by the authentication details. Whenever these are superfluous, they are asserted as empty strings.
@@ -239,21 +242,40 @@ HyperGraphQL supports also federated querying over a collection of SPARQL endpoi
 
 GraphQL queries are rewritten into SPARQL construct queries and executed against the designated SPARQL endpoints. 
 
-All fields of the **Query** type are rewritten into instance queries of the form:
+All fields of the **Query** type are rewritten into instance subqueries, for intance:
+
 ```
-SELECT ?subject 
-WHERE {
-    ?subject a <URI(field)> .
+{
+people (limit:1, offset:6) {
+  ...
+}
 }
 ```
-where *URI(field)* denotes the URI associated with the *field* name.
+is rewritten into:
+```
+{
+  SELECT ?subject 
+  WHERE {
+    ?subject a <http://dbpedia.org/ontology/Person> .
+  } LIMIT 1 OFFSET 6
+}
+```
 
-All other fields are translated into object queries where the field name is associated with the URI of a predicate in the triple pattern, i.e.:
+Fields are translated into optional SPARQL triple patterns, additionally filtered with the RDF type associated with the output type of the field, provided such URI is specified in the mapping, for instance:
+```
+{
+... {
+  birthplace 
+}
+}
+```
+is rewritten:
 
 ```
-SELECT ?object 
-WHERE {
-    ?parent <URI(field)> ?object .
+OPTIONAL {
+    ?subject <http://dbpedia.org/ontology/birthPlace> ?object .
+    ?object a <http://dbpedia.org/ontology/City> .
+    ...
 }
 ```
 
@@ -264,11 +286,6 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
 ## Demo
 
 A live demo of the HyperGraphQL server configured as in this repository is available at: [http://hypergraphql-demo/graphiql](http://104.154.59.211:8009/graphiql)
-
-## License
-
-This software is released under Apache License 2.0. See [LICENSE.TXT](LICENSE.TXT) for more details. 
-
 
 ## Contact
 
