@@ -237,7 +237,7 @@ A live demo of the HyperGraphQL server configured as in this repository is avail
 
 ## License
 
-This software is released under the Apache 2.0 license. See [LICENSE.TXT](LICENSE.TXT) for license details. 
+This software is released under Apache License 2.0. See [LICENSE.TXT](LICENSE.TXT) for more details. 
 
 
 ## Contact
