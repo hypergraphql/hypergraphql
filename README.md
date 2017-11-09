@@ -15,7 +15,9 @@ HyperGraphQL serves two key objectives:
 
 The responses of HyperGraphQL are [JSON-LD](http://json-ld.org) objects that convey full semantic context of the fetched data. This makes HyperGraphQL a natural [Linked Data Fragment](http://linkeddatafragments.org) interface for hypermedia-driven Web APIs backed by RDF stores. 
 
+
 ![HyperGraphQL-screenshot](screenshot.png) 
+
 
 ## GraphQL schema + RDF mapping = HyperGraphQL server
 
@@ -34,6 +36,7 @@ Clone the Git repository into a local directory. Then in the root of the project
 **Gradle**: 
 1) **gradle build**
 2) **gradle execute**
+
 
 By deafault, the HyperGraphQL server starts at: 
 
@@ -64,15 +67,15 @@ Basic settings are defined in the *properties.json* file. The defaults are:
 }
 ```
 
-- *schemaFile*: the file containing GraphQL schema definition
-- *contextFile*: the file containing mapping from the schema file to RDF vocabularies and respective SPARQL endpoints to be used for resolving GraphQL fields
-- *graphql.port*: the port at thich the GraphQL server and GraphiQL interface are initiated
-- *graphql.path*: the URL path of the GraphQL server
-- *graphql.graphiql*: the URL path of the [GraphiQL UI](https://github.com/graphql/graphiql)
+- *schemaFile*: the file containing GraphQL schema definition;
+- *contextFile*: the file containing mapping from the schema file to RDF vocabularies and respective SPARQL endpoints to be used for resolving GraphQL fields;
+- *graphql.port*: the port at thich the GraphQL server and GraphiQL interface are initiated;
+- *graphql.path*: the URL path of the GraphQL server;
+- *graphql.graphiql*: the URL path of the GraphiQL UI.
 
 ## Example
 
-The following query requests a single person instance with its URI (_id) and RDF type (_type), its name, birthdate, birthplace with its URI english label and the country of the birthplace, with its URI and an english label. 
+The following query requests for a single person instance with its URI (_id) and RDF type (_type), its name, birthdate, and  birthplace with its URI, an english label, and the country in which it is located, also including its URI and an english label. 
 
 ### HyperGraphQL query:
 ```
@@ -94,7 +97,7 @@ The following query requests a single person instance with its URI (_id) and RDF
 }
 ```
 
-The response of HyperGraphQL server consists of the usual GraphQL JSON object, further augmented with a JSON-LD context, included as the value of the property "@context" on the "data" object.
+The response of HyperGraphQL server to this query consists of the usual GraphQL JSON object, further augmented with a JSON-LD context, included as the value of the property "@context" on the "data" object.
 
 ### HyperGraphQL response:
 ```js
@@ -136,7 +139,7 @@ The response of HyperGraphQL server consists of the usual GraphQL JSON object, f
 }
 ```
 
-It's easy to find out, using e.g. [JSON-LD playground](https://json-ld.org/playground/), that the "data" object is in fact a valid JSON-LD object, which corresponds to the following RDF graph (in NTRIPLE notation):
+It's easy to find out, using e.g. [JSON-LD playground](https://json-ld.org/playground/), that the "data" element in this response is in fact a valid JSON-LD object encoding the following RDF graph (in NTRIPLE notation):
 
 ```
 _:b0 <http://hypergraphql/people> <http://dbpedia.org/resource/Sani_ol_molk> .
@@ -148,6 +151,7 @@ _:b0 <http://hypergraphql/people> <http://dbpedia.org/resource/Sani_ol_molk> .
 <http://dbpedia.org/resource/Kashan> <http://dbpedia.org/ontology/country> <http://dbpedia.org/resource/Iran> .
 <http://dbpedia.org/resource/Iran> <http://www.w3.org/2000/01/rdf-schema#label> "Iran" .
 ```
+This graph (except for the first triple, added by the HyperGraphQL service) is a subset of the DBpedia dataset. 
 
 ## Schema
 
