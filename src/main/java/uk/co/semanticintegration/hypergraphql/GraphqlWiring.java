@@ -126,9 +126,9 @@ public class GraphqlWiring {
 
     private DataFetcher<List<RDFNode>> instancesOfTypeFetcher = environment -> {
         String type = ((Field) environment.getFields().toArray()[0]).getName();
-        String typeURI = config.predicateURI(type);
+        //String typeURI = config.predicateURI(type);
         SparqlClient client = environment.getContext();
-        List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter("http://hgql/root", typeURI);
+        List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter("http://hypergraphql/type", "http://hypergraphql/" + type);
         return subjects;
     };
 
@@ -191,9 +191,7 @@ public class GraphqlWiring {
 
         if (config.containsPredicate(typeName)) {
             String uri = config.predicateURI(typeName);
-            String graphName = config.predicateGraph(typeName);
-            String endpointURI = config.predicateEndpoint(typeName);
-            description = uri + " (graph: " + graphName + "; endpoint: " + endpointURI + ")";
+            description = uri;
         } else {
             description = "An auxiliary type, not mapped to RDF.";
         }
@@ -210,7 +208,6 @@ public class GraphqlWiring {
 
         if (config.containsPredicate(typeName)) builtFields.add(_typeField);
 
-
         GraphQLObjectType newObjectType = newObject()
                 .name(typeName)
                 .description(description)
@@ -219,7 +216,6 @@ public class GraphqlWiring {
 
         return newObjectType;
     }
-
 
     public GraphQLFieldDefinition registerGraphQLField(Boolean isQueryType, JsonNode fieldDef) {
 
@@ -260,9 +256,9 @@ public class GraphqlWiring {
         }
 
         String fieldName = fieldDef.get("name").asText();
-        String uri = config.predicateURI(fieldName);
         String graphName = config.predicateGraph(fieldName);
         String endpointURI = config.predicateEndpoint(fieldName);
+        String uri = (config.containsPredicate(fieldName)) ? config.predicateURI(fieldName) : "";
         String description = uri + " (graph: " + graphName + "; endpoint: " + endpointURI + ")";
 
 

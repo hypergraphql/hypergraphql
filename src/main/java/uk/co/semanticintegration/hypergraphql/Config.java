@@ -285,7 +285,7 @@ public class Config {
 
     public Boolean containsPredicate(String name) {
 
-        return (context.get("@predicates").has(name));
+        return (context.get("@predicates").has(name) && context.get("@predicates").get(name).has("@id"));
 
     }
 

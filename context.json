@@ -1,36 +1,28 @@
 {
   "@predicates": {
-    "person": {
-      "@id": "http://dbpedia.org/ontology/Person",
+    "people": {
+      "@namedGraph": "dbpedia"
+    },
+    "mountains": {
+      "@namedGraph": "dbpedia"
+    },
+    "companies": {
+      "@namedGraph": "dbpedia"
+    },
+    "cities": {
       "@namedGraph": "dbpedia"
     },
     "Person": {
-      "@id": "http://dbpedia.org/ontology/Person",
-      "@namedGraph": "dbpedia"
-    },
-    "mountain": {
-      "@id": "http://dbpedia.org/ontology/Mountain",
-      "@namedGraph": "dbpedia"
-    },
-    "company": {
-      "@id": "http://dbpedia.org/ontology/Company",
-      "@namedGraph": "dbpedia"
-    },
-    "city": {
-      "@id": "http://dbpedia.org/ontology/City",
-      "@namedGraph": "dbpedia"
+      "@id": "http://dbpedia.org/ontology/Person"
     },
     "Mountain": {
-      "@id": "http://dbpedia.org/ontology/Mountain",
-      "@namedGraph": "dbpedia"
+      "@id": "http://dbpedia.org/ontology/Mountain"
     },
     "Company": {
-      "@id": "http://dbpedia.org/ontology/Company",
-      "@namedGraph": "dbpedia"
+      "@id": "http://dbpedia.org/ontology/Company"
     },
     "City": {
-      "@id": "http://dbpedia.org/ontology/City",
-      "@namedGraph": "dbpedia"
+      "@id": "http://dbpedia.org/ontology/City"
     },
     "name": {
       "@id": "http://xmlns.com/foaf/0.1/name",
