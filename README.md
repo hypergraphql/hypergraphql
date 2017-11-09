@@ -307,4 +307,4 @@ A live demo of the HyperGraphQL server configured as in this repository is avail
 
 ## Contact
 
-Email: [szymon.klarman@semanticintegration.co.uk](szymon.klarman@semanticintegration.co.uk)
+Email: **szymon.klarman@semanticintegration.co.uk**
