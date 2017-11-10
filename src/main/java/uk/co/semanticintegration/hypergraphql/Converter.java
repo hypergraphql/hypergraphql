@@ -46,7 +46,7 @@ public class Converter {
     }
 
     private String graphSTR(String graph, String triple) {
-        final String PATTERN = "{ GRAPH <%s> { %s } }";
+        final String PATTERN = "GRAPH <%s> { %s } ";
         return (graph.equals("")) ? triple : String.format(PATTERN, graph, triple);
     }
 
@@ -56,7 +56,7 @@ public class Converter {
     }
 
     private String selectSTR(String id, String sparqlPattern, String limit, String offset) {
-        final String PATTERN = "{ SELECT " + varSTR(id) + " WHERE { %s } %s %s }";
+        final String PATTERN = "{ SELECT " + varSTR(id) + " WHERE { %s } %s %s } ";
         return String.format(PATTERN, sparqlPattern, limit, offset);
     }
 
@@ -99,12 +99,12 @@ public class Converter {
     }
 
     private String markTripleSTR(String id) {
-        String markTriple = (id.equals("")) ? "" : tripleSTR(varSTR(id), HGQL_TYPE_URI, "<http://hypergraphql/node_" + id + ">");
+        String markTriple = (id.equals("")) ? "" : tripleSTR(varSTR(id), HGQL_TYPE_URI, "<http://hypergraphql/node/" + id + ">");
         return markTriple;
     }
 
     private String rootTripleSTR(String id, String root) {
-        return tripleSTR(varSTR(id), HGQL_TYPE_URI, "<http://hypergraphql/" + root + ">");
+        return tripleSTR(varSTR(id), HGQL_TYPE_URI, "<http://hypergraphql/query/" + root + ">");
     }
 
     private String fieldPattern(String parentId, String nodeId, String predicateURI, String typeURI) {
@@ -121,10 +121,18 @@ public class Converter {
         return fieldPattern(parentId, nodeId, predicateURI, typeURI);
     }
 
-    private String graphPattern(String fieldPattern, JsonNode field) {
+    private String graphPattern(String fieldPattern, JsonNode field, JsonNode parentField) {
         JsonNode args = field.get("args");
         String graphName = (args.has("graph")) ? args.get("graph").asText() : field.get("graph").asText();
-        String graphPattern = graphSTR(graphName, fieldPattern);
+
+        String graphPattern;
+        if (parentField!=null) {
+            JsonNode parentArgs = parentField.get("args");
+            String parentGraphName = (parentArgs.has("graph")) ? parentArgs.get("graph").asText() : parentField.get("graph").asText();
+            graphPattern = (parentGraphName.equals(graphName)) ? fieldPattern : graphSTR(graphName, fieldPattern);
+        } else {
+            graphPattern = graphSTR(graphName, fieldPattern);
+        }
         return graphPattern;
     }
 
@@ -182,7 +190,6 @@ public class Converter {
             String parentId = (field.has("parentId")) ? field.get("parentId").asText() : "";
             String fieldPattern = fieldPattern(field);
 
-            String graphPattern = graphPattern(fieldPattern, field);
             matchParent = markTripleSTR(parentId);
             String rootTriple = (rootQuery) ? rootTripleSTR(nodeId, field.get("name").asText()) : "";
             String markTriple = markTripleSTR(nodeId);
@@ -190,15 +197,16 @@ public class Converter {
             String limit = (args.has("limit")) ? limitSTR(args.get("limit").asInt()) : "";
             String offset = (args.has("offset")) ? offsetSTR(args.get("offset").asInt()) : "";
 
-            String matchPattern = (rootQuery) ? selectSTR(nodeId, graphPattern, limit, offset) : graphPattern;
-
             Map<String, String> subqueries = getSubqueries(service, field);
 
             String subConstruct = (subqueries.containsKey("construct")) ? subqueries.get("construct") : "";
             String subWhere = (subqueries.containsKey("where")) ? subqueries.get("where") : "";
 
-            wherePattern = matchPattern + subWhere + wherePattern;
+            String matchPattern = (rootQuery) ? selectSTR(nodeId, fieldPattern, limit, offset) + subWhere + wherePattern : fieldPattern;
+
             constructPattern = fieldPattern + rootTriple + markTriple + subConstruct + constructPattern;
+            wherePattern = graphPattern(matchPattern, field, null);
+
 
         }
 
@@ -228,7 +236,7 @@ public class Converter {
                     String wherePattern = "";
 
                     while (fields.hasNext()) {
-                        Map<String, String> fieldPatterns = getSubquery(service, fields.next());
+                        Map<String, String> fieldPatterns = getSubquery(service, query, fields.next());
                         constructPattern = constructPattern + fieldPatterns.get("construct");
                         wherePattern = wherePattern + fieldPatterns.get("where");
                     }
@@ -249,14 +257,13 @@ public class Converter {
     }
 
 
-    private Map<String, String> getSubquery(String service, JsonNode field) {
+    private Map<String, String> getSubquery(String service, JsonNode parentField, JsonNode field) {
         Map<String, String> output = new HashMap<>();
 
         String langFilter = langFilterSTR(field);
         String fieldPattern = fieldPattern(field);
         String nodeId = field.get("nodeId").asText();
         String markTriple = (field.has("fields")) ? markTripleSTR(nodeId) : "";
-        String graphPattern = graphPattern(fieldPattern + langFilter, field);
 
         Map<String, String> subqueries = getSubqueries(service, field);
 
@@ -264,7 +271,7 @@ public class Converter {
         String subWhere = (subqueries.containsKey("where")) ? subqueries.get("where") : "";
 
         String constructPattern = fieldPattern + markTriple + subConstruct;
-        String wherePattern = optionalSTR(graphPattern, subWhere);
+        String wherePattern = graphPattern(optionalSTR(fieldPattern + langFilter, subWhere), field, parentField);
 
         output.put("construct", constructPattern);
         output.put("where", wherePattern);
