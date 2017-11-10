@@ -1,4 +1,4 @@
-package uk.co.semanticintegration.hypergraphql;
+package org.hypergraphql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

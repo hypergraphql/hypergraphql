@@ -1,4 +1,4 @@
-package uk.co.semanticintegration.hypergraphql;
+package org.hypergraphql;
 
 /**
  * Created by szymon on 01/11/2017.

@@ -1,4 +1,4 @@
-package uk.co.semanticintegration.hypergraphql;
+package org.hypergraphql;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

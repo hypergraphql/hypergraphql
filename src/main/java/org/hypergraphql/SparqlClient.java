@@ -1,4 +1,4 @@
-package uk.co.semanticintegration.hypergraphql;
+package org.hypergraphql;
 
 import java.io.InputStream;
 import java.util.ArrayList;

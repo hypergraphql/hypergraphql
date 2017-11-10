@@ -1,4 +1,4 @@
-![HyperGraphQL](HyperGraphQL.png)  HyperGraphQL
+![HyperGraphQL](docs/HyperGraphQL.png)  HyperGraphQL
 ======
 
 This software has been developed by [Semantic Integration Ltd.](http://semanticintegration.co.uk) and is released under Apache License 2.0. See [LICENSE.TXT](LICENSE.TXT) for license infromation. 
@@ -16,7 +16,7 @@ HyperGraphQL serves two key objectives:
 The responses of HyperGraphQL are [JSON-LD](http://json-ld.org) objects that convey full semantic context of the fetched data. This makes HyperGraphQL a natural [Linked Data Fragment](http://linkeddatafragments.org) interface for hypermedia-enabled Web APIs, backed by RDF stores. 
 
 
-![HyperGraphQL-screenshot](screenshot.png) 
+![HyperGraphQL-screenshot](docs/screenshot.png)
 
 
 ## GraphQL schema + RDF mapping = HyperGraphQL server
@@ -131,7 +131,7 @@ The response of HyperGraphQL server to this query consists of the usual GraphQL 
       "name": "http://xmlns.com/foaf/0.1/name",
       "_id": "@id",
       "label": "http://www.w3.org/2000/01/rdf-schema#label",
-      "people": "http://hypergraphql/people",
+      "people": "http://hypergraphql/query/people",
       "birthDate": "http://dbpedia.org/ontology/birthDate"
     }
   },
@@ -142,7 +142,7 @@ The response of HyperGraphQL server to this query consists of the usual GraphQL 
 It's easy to find out, using e.g. [JSON-LD playground](https://json-ld.org/playground/), that the "data" element in this response is in fact a valid JSON-LD object encoding the following RDF graph (in N-TRIPLE notation):
 
 ```
-_:b0 <http://hypergraphql/people> <http://dbpedia.org/resource/Sani_ol_molk> .
+_:b0 <http://hypergraphql/query/people> <http://dbpedia.org/resource/Sani_ol_molk> .
 <http://dbpedia.org/resource/Sani_ol_molk> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Person> .
 <http://dbpedia.org/resource/Sani_ol_molk> <http://xmlns.com/foaf/0.1/name> "Mirza Abolhassan Khan Ghaffari" .
 <http://dbpedia.org/resource/Sani_ol_molk> <http://dbpedia.org/ontology/birthDate> "1814-1-1" .

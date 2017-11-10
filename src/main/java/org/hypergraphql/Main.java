@@ -1,4 +1,4 @@
-package uk.co.semanticintegration.hypergraphql;
+package org.hypergraphql;
 
 import graphql.GraphQL;
 import org.apache.log4j.Logger;

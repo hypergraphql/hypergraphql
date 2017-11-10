@@ -1,4 +1,4 @@
-package uk.co.semanticintegration.hypergraphql;
+package org.hypergraphql;
 
 import static spark.Spark.get;
 import static spark.Spark.port;
