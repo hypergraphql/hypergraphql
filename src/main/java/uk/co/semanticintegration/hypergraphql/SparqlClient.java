@@ -1,17 +1,18 @@
 package uk.co.semanticintegration.hypergraphql;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.*;
-import org.apache.jena.sparql.ARQConstants;
-import org.apache.jena.sparql.util.Context;
-import org.apache.jena.sparql.util.Symbol;
 import org.apache.log4j.Logger;
 
 /**
@@ -28,28 +29,51 @@ public class SparqlClient {
     private static Logger logger = Logger.getLogger(SparqlClient.class);
 
 
+    public SparqlClient(List<Map<String, String>> queryRequests, Config config) {
 
-    public SparqlClient(List<String> queries, Map<String, Context> sparqlEndpointsContext) {
-
+        final String MATCH_PARENT = "SELECT (GROUP_CONCAT(CONCAT(\"<\",str(%s),\">\");separator=\" \") as ?uris) WHERE { %s }";
+        final String VALUES_PATTERN = "VALUES %s { %s }";
         model = ModelFactory.createDefaultModel();
 
-        for (String constructQuery : queries) {
+        for (Map<String, String> queryRequest : queryRequests) {
 
-            logger.debug("Executing construct query: " + constructQuery);
+            String query = queryRequest.get("query");
+            String service = queryRequest.get("service");
+            String match = queryRequest.get("match");
+            String var = queryRequest.get("var");
 
-            QueryExecution qexec = QueryExecutionFactory.create(constructQuery, model);
+            if (match.equals("")) {
+                query = String.format(query, "");
+            } else {
+                String matchQuery = String.format(MATCH_PARENT, var, match);
 
-            Context mycxt = qexec.getContext();
-            Symbol serviceContext = ARQConstants.allocSymbol("http://jena.hpl.hp.com/Service#", "serviceContext");
-            mycxt.put(serviceContext, sparqlEndpointsContext);
+                ResultSet results = sparqlSelect(matchQuery);
+                String vals = results.next().get("?uris").toString();
+
+                query = String.format(query, String.format(VALUES_PATTERN, var, vals));
+            }
+
+            logger.debug("Executing construct query: " + query);
 
             try {
-                qexec.execConstruct(model);
-            } catch (Exception e) {
+                HttpResponse<InputStream> resp = Unirest.get("http://dbpedia.org/sparql")
+                        .queryString("query", query)
+                        .header("accept", "text/turtle")
+                        .basicAuth(config.serviceUsr(service), config.servicePswd(service))
+                        .asBinary();
+
+                Model next = ModelFactory.createDefaultModel();
+
+                InputStream in = resp.getBody();
+
+                next.read(in, null, "TTL");
+
+                model.add(next);
+
+            } catch (UnirestException e) {
                 logger.error(e);
             }
         }
-
         //  model.write(System.out);
     }
 

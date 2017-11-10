@@ -34,7 +34,7 @@ public class GraphqlService {
         ExecutionInput executionInput;
         ExecutionResult qlResult;
 
-        List<String> sparqlQueries;
+        List<Map<String, String>> sparqlQueries;
 
         if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
@@ -51,7 +51,7 @@ public class GraphqlService {
             logger.info("Generated SPARQL queries:");
             logger.info(sparqlQueries.toString());
 
-            SparqlClient client = new SparqlClient(sparqlQueries, config.sparqlEndpointsContext());
+            SparqlClient client = new SparqlClient(sparqlQueries, config);
 
             executionInput = ExecutionInput.newExecutionInput()
                     .query(query)

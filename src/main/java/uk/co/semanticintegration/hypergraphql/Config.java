@@ -21,9 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.util.Context;
-import org.apache.jena.sparql.util.Symbol;
 import org.apache.log4j.Logger;
 
 import static graphql.Scalars.*;
@@ -41,7 +39,8 @@ public class Config {
     private JsonNode context;
     private ObjectNode mapping;
     private Map<String, GraphQLOutputType> outputTypes = new HashMap<>();
-    private Map<String, Context> sparqlEndpointsContext;
+    private Map<String, String> users = new HashMap<>();
+    private Map<String, String> passwords = new HashMap<>();
     private TypeDefinitionRegistry schema;
 
     static Logger logger = Logger.getLogger(Config.class);
@@ -73,26 +72,18 @@ public class Config {
                 }
             }
 
-
-            String base = "http://jena.hpl.hp.com/Service#";
-            Symbol queryAuthUser = ARQConstants.allocSymbol(base, "queryAuthUser");
-            Symbol queryAuthPwd = ARQConstants.allocSymbol(base, "queryAuthPwd");
-
             Map<String, Context> serviceContexts = new HashMap<>();
 
             context.get("@endpoints").fieldNames().forEachRemaining(endpoint ->
                     {
-                        Context servCont = new Context();
                         String uri = context.get("@endpoints").get(endpoint).get("@id").asText();
                         String user = context.get("@endpoints").get(endpoint).get("@user").asText();
                         String password = context.get("@endpoints").get(endpoint).get("@password").asText();
-                        if (!user.equals("")) servCont.put(queryAuthUser, user);
-                        if (!password.equals("")) servCont.put(queryAuthPwd, password);
-                        serviceContexts.put(uri, servCont);
+
+                        users.put(uri, user);
+                        passwords.put(uri, password);
                     }
             );
-
-            this.sparqlEndpointsContext = serviceContexts;
 
             SchemaParser schemaParser = new SchemaParser();
             this.schema = schemaParser.parse(new File(config.schemaFile));
@@ -313,17 +304,22 @@ public class Config {
 
     }
 
+    public String serviceUsr(String service) {
+        return users.get(service);
+    }
+
+    public String servicePswd(String service) {
+        return passwords.get(service);
+    }
+
     public GraphqlConfig graphql() {
         return graphql;
     }
 
-    public TypeDefinitionRegistry schema() {
-        return schema;
-    }
+//    public TypeDefinitionRegistry schema() {
+//        return schema;
+//    }
 
-    public Map<String, Context> sparqlEndpointsContext() {
-        return sparqlEndpointsContext;
-    }
 }
 
 class GraphqlConfig {

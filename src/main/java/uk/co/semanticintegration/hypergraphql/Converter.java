@@ -137,9 +137,9 @@ public class Converter {
     }
 
 
-    public List<String> graphql2sparql(JsonNode jsonQuery) {
+    public List<Map<String, String>> graphql2sparql(JsonNode jsonQuery) {
 
-        List<String> output = new ArrayList<>();
+        List<Map<String, String>> output = new ArrayList<>();
 
         jsonQuery.fieldNames().forEachRemaining(service ->
                 jsonQuery.get(service).elements().forEachRemaining(query -> {
@@ -149,8 +149,8 @@ public class Converter {
                     ArrayNode array = mapper.createArrayNode();
                     array.add(query);
                     topQuery.put(service, array);
-                    String constructQuery = getConstructQuery(topQuery, true);
-                    output.add(constructQuery);
+                    Map<String, String>  queryRequest = getConstructQuery(topQuery, true);
+                    output.add(queryRequest);
                 })
         );
 
@@ -160,8 +160,8 @@ public class Converter {
             queue.removeFirst();
 
             try {
-                String constructQuery = getConstructQuery(nextQuery, false);
-                output.add(constructQuery);
+                Map<String, String>  queryRequest = getConstructQuery(nextQuery, false);
+                output.add(queryRequest);
             } catch (Exception e) {
                 logger.error(e);
             }
@@ -170,10 +170,14 @@ public class Converter {
         return output;
     }
 
-    private String getConstructQuery(JsonNode query, Boolean rootQuery) {
+    private Map<String, String> getConstructQuery(JsonNode query, Boolean rootQuery) {
 
 
+
+
+        Map<String, String> output = new HashMap<>();
         String service = query.fieldNames().next();
+        output.put("service", service);
 
         Iterator<JsonNode> fields = query.get(service).elements();
 
@@ -207,13 +211,18 @@ public class Converter {
             constructPattern = fieldPattern + rootTriple + markTriple + subConstruct + constructPattern;
             wherePattern = graphPattern(matchPattern, field, null);
 
-
+            output.put("match", matchParent);
+            output.put("var", varSTR(nodeId));
         }
 
-        String servicePattern = serviceSTR(service, wherePattern);
-        String constructQuery = constructSTR(constructPattern, matchParent + servicePattern);
+       // String servicePattern = serviceSTR(service, wherePattern);
+        String constructQuery = constructSTR(constructPattern, wherePattern);
 
-        return constructQuery;
+        output.put("query", constructQuery);
+
+
+
+        return output;
     }
 
 
@@ -419,7 +428,7 @@ public class Converter {
         Map<String, Object> output = new HashMap<>();
 
         jsonQuery.elements().forEachRemaining(elem ->
-                ldContext.put(elem.get("name").asText(), "http://hypergraphql/" + elem.get("name").asText())
+                ldContext.put(elem.get("name").asText(), "http://hypergraphql/query/" + elem.get("name").asText())
         );
 
         Pattern namePtrn = Pattern.compile("\"name\":\"([^\"]*)\"");
