@@ -2,6 +2,7 @@ package org.hypergraphql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import graphql.*;
+import graphql.schema.idl.errors.NotAnOutputTypeError;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;

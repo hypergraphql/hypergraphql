@@ -2,8 +2,8 @@
     "schemaFile": "schema.graphql",
     "contextFile": "context.json",
     "graphql": {
-        "port": 80,
-        "path": "/",
+        "port": 8080,
+        "path": "/graphql",
         "graphiql": "/graphiql"
     }
 }
