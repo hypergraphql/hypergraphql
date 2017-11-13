@@ -32,7 +32,6 @@ public class GraphqlWiring {
 
     private Config config;
     private GraphQLSchema schema;
-    private Converter converter;
 
     static Logger logger = Logger.getLogger(GraphqlWiring.class);
 
@@ -62,7 +61,6 @@ public class GraphqlWiring {
     public GraphqlWiring(Config config) {
 
         this.config = config;
-        this.converter = new Converter(config);
 
         Set<GraphQLType> types = new HashSet<>();
         GraphQLObjectType queryType = null;

@@ -1,9 +1,5 @@
 package org.hypergraphql;
 
-import static spark.Spark.get;
-import static spark.Spark.port;
-import static spark.Spark.post;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.GraphQL;
@@ -11,8 +7,11 @@ import graphql.GraphQL;
 import java.util.HashMap;
 import java.util.Map;
 
+import graphql.schema.GraphQLSchema;
 import spark.ModelAndView;
 import spark.template.velocity.VelocityTemplateEngine;
+
+import static spark.Spark.*;
 
 /**
  * Created by szymon on 05/09/2017.
@@ -20,7 +19,7 @@ import spark.template.velocity.VelocityTemplateEngine;
 public class Controller {
 
 
-    public static void start(Config config, GraphQL graphQL) {
+    public static void start(Config config, GraphQL graphQL, GraphQLSchema schema) {
 
 
         port(config.graphql().port());
@@ -52,14 +51,20 @@ public class Controller {
 
             String query = requestObject.get("query").asText();
 
-            Map<String, Object> result = service.results(query);
+           try {
+                Map<String, Object> result = service.results(query, schema);
 
-            JsonNode resultJson = mapper.readTree(new ObjectMapper().writeValueAsString(result));
-            res.type("application/json");
+                JsonNode resultJson = mapper.readTree(new ObjectMapper().writeValueAsString(result));
+                res.type("application/json");
 
-            return resultJson;
+                return resultJson;
+            } catch (Exception e) {
+                res.status(400);
+                return "Error 400: The requested query contains illegal syntax or is currently unsupported by HyperGraphQL.";
+            }
 
         });
+
     }
 
 }
