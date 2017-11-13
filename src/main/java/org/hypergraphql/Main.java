@@ -22,7 +22,7 @@ public class Main {
 
         logger.info("Server started at http://localhost:" + config.graphql().port() + config.graphql().path());
 
-        Controller.start(config, graphQL);
+        Controller.start(config, graphQL, wiring.schema());
 
     }
 }
