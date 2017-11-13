@@ -65,15 +65,6 @@ public class Controller {
 
         });
 
-
-        before("/", (req, res) -> {
-
-            res.redirect("https://github.com/semantic-integration/hypergraphql");
-            res.status(303);
-
-            System.out.println("redirecting");
-
-        });
     }
 
 }
