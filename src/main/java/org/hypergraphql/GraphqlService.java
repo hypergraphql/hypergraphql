@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import graphql.*;
 import graphql.execution.NonNullableFieldWasNullError;
 import graphql.language.Document;
+import graphql.language.SourceLocation;
 import graphql.parser.Parser;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.errors.NotAnOutputTypeError;
@@ -46,27 +47,43 @@ public class GraphqlService {
 
         List<ValidationError> validationErrors = null;
 
-        try {
+
             Validator validator = new Validator();
             Parser parser = new Parser();
-            Document document = parser.parseDocument(query);
-            validationErrors = validator.validateDocument(schema, document);
-            if (validationErrors.size()>0) throw new Exception();
+         Document document;
+        try {
+             document = parser.parseDocument(query);
         } catch (Exception e) {
-
-            errors.addAll(validationErrors);
+            GraphQLError err = new ValidationError(ValidationErrorType.InvalidSyntax, new SourceLocation(0, 0), "unrecognized symbols");
+            errors.add(err);
             result.put("errors", errors);
             return result;
-
         }
+
+        validationErrors = validator.validateDocument(schema, document);
+            if (validationErrors.size() > 0) {
+                errors.addAll(validationErrors);
+                result.put("errors", errors);
+                return result;
+            }
+
+
 
         if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
             Converter converter = new Converter(config);
+            JsonNode jsonQuery;
+            try {
+                jsonQuery = converter.query2json(query);
 
-            JsonNode jsonQuery = converter.query2json(query);
-
-            sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
+                sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
+            } catch (Exception e) {
+                GraphQLError err = new ValidationError(ValidationErrorType.InvalidSyntax, new SourceLocation(0, 0),
+                        "Queries of this form are not yet supported by HyperGraphQL.");
+                errors.add(err);
+                result.put("errors", errors);
+                return result;
+            }
 
 
             // uncomment this lines if you want to include the generated SPARQL queries in the GraphQL response for debugging purposes
