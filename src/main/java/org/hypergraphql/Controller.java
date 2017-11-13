@@ -1,9 +1,5 @@
 package org.hypergraphql;
 
-import static spark.Spark.get;
-import static spark.Spark.port;
-import static spark.Spark.post;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.GraphQL;
@@ -13,6 +9,8 @@ import java.util.Map;
 
 import spark.ModelAndView;
 import spark.template.velocity.VelocityTemplateEngine;
+
+import static spark.Spark.*;
 
 /**
  * Created by szymon on 05/09/2017.
@@ -39,6 +37,13 @@ public class Controller {
             );
         });
 
+
+        before("/", (req, res) -> {
+
+            res.redirect("https://github.com/semantic-integration/hypergraphql");
+            res.status(303);
+
+        });
 
 
         ObjectMapper mapper = new ObjectMapper();
