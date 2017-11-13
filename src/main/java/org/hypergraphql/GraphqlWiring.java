@@ -61,7 +61,6 @@ public class GraphqlWiring {
     public GraphqlWiring(Config config) {
 
         this.config = config;
-        this.converter = new Converter(config);
 
         Set<GraphQLType> types = new HashSet<>();
         GraphQLObjectType queryType = null;
