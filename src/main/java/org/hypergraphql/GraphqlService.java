@@ -3,9 +3,13 @@ package org.hypergraphql;
 import com.fasterxml.jackson.databind.JsonNode;
 import graphql.*;
 import graphql.execution.NonNullableFieldWasNullError;
+import graphql.language.Document;
+import graphql.parser.Parser;
+import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.errors.NotAnOutputTypeError;
 import graphql.validation.ValidationError;
 import graphql.validation.ValidationErrorType;
+import graphql.validation.Validator;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -28,7 +32,7 @@ public class GraphqlService {
         this.config = config;
     }
 
-    public Map<String, Object> results(String query) {
+    public Map<String, Object> results(String query, GraphQLSchema schema) {
 
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> data = new HashMap<>();
@@ -40,23 +44,27 @@ public class GraphqlService {
 
         List<Map<String, String>> sparqlQueries;
 
+        List<ValidationError> validationErrors = null;
+
+        try {
+            Validator validator = new Validator();
+            Parser parser = new Parser();
+            Document document = parser.parseDocument(query);
+            validationErrors = validator.validateDocument(schema, document);
+            if (validationErrors.size()>0) throw new Exception();
+        } catch (Exception e) {
+
+            errors.addAll(validationErrors);
+            result.put("errors", errors);
+            return result;
+
+        }
+
         if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
             Converter converter = new Converter(config);
-            JsonNode jsonQuery;
-            try {
 
-                jsonQuery = converter.query2json(query);
-
-            } catch (Exception e) {
-
-                System.out.println("Houston...");
-                GraphQLError err = new ValidationError(ValidationErrorType.InvalidSyntax);
-                errors.add(err);
-                result.put("errors", errors);
-                return result;
-
-            }
+            JsonNode jsonQuery = converter.query2json(query);
 
             sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
 

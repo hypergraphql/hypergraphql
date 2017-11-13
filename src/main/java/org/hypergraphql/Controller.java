@@ -2,20 +2,12 @@ package org.hypergraphql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import graphql.ExecutionResultImpl;
 import graphql.GraphQL;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import graphql.language.Document;
-import graphql.parser.Parser;
 import graphql.schema.GraphQLSchema;
-import graphql.validation.ValidationError;
-import graphql.validation.Validator;
 import spark.ModelAndView;
 import spark.template.velocity.VelocityTemplateEngine;
 
@@ -59,41 +51,17 @@ public class Controller {
 
             String query = requestObject.get("query").asText();
 
-//                    System.out.println(
-//                            "Path: " + req.pathInfo().toString() +
-//                                    " Ip: " + req.ip() +
-//                                    " TimeStamp: " + new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(Calendar.getInstance().getTime()));
-//                  //  System.out.println(query.toString());
+           try {
+                Map<String, Object> result = service.results(query, schema);
 
+                JsonNode resultJson = mapper.readTree(new ObjectMapper().writeValueAsString(result));
+                res.type("application/json");
 
-//            Validator validator = new Validator();
-//
-//            Parser parser = new Parser();
-//
-//            try {
-//                Document document = parser.parseDocument(query);
-//                List<ValidationError> validationErrors = validator.validateDocument(schema, document);
-//                validationErrors.forEach(err -> System.out.println(err.getMessage()));
-//            } catch (Exception e) {
-//
-//
-////            if (validationErrors.size() > 0) {
-////                return new ExecutionResultImpl(validationErrors);
-//            }
-
-                   try {
-                        Map<String, Object> result = service.results(query);
-
-                        JsonNode resultJson = mapper.readTree(new ObjectMapper().writeValueAsString(result));
-                        res.type("application/json");
-
-                        return resultJson;
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage());
-                        e.fillInStackTrace();
-                        res.status(400);
-                        return "Error 400: The provided query is either illegal by the GraphQL spec or currently unsupported by HyperGraphQL.";
-                    }
+                return resultJson;
+            } catch (Exception e) {
+                res.status(400);
+                return "Error 400: The requested query contains illegal syntax or is currently unsupported by HyperGraphQL.";
+            }
 
         });
 
