@@ -32,7 +32,6 @@ public class GraphqlWiring {
 
     private Config config;
     private GraphQLSchema schema;
-    private Converter converter;
 
     static Logger logger = Logger.getLogger(GraphqlWiring.class);
 
