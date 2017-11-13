@@ -41,13 +41,13 @@ Clone the Git repository into a local directory. Then in the root of the project
 By deafault, the HyperGraphQL server starts at: 
 
 ```
-http://localhost:8009
+http://localhost:8080/graphql
 ```
 
 The [GraphiQL](https://github.com/graphql/graphiql) UI is initiated at:
 
 ```
-http://localhost:8009/graphiql
+http://localhost:8080/graphiql
 ```
 
 
@@ -60,8 +60,8 @@ Basic settings are defined in the *properties.json* file. The defaults are:
     "schemaFile": "schema.graphql",
     "contextFile": "context.json",
     "graphql": {
-        "port": 8009,
-        "path": "/",
+        "port": 8080,
+        "path": "/graphql",
         "graphiql": "/graphiql"
     }
 }
@@ -307,7 +307,7 @@ To minimise the number of return trips between HyperGraphQL server and RDF store
 
 ## Demo
 
-A live demo of the HyperGraphQL server configured as in this repository is available at: [http://hypergraphql.org/graphiql](http://hypergraphql.org/graphiql)
+A live demo of the HyperGraphQL server, configured as in this repository, is available at: [http://hypergraphql.org/graphiql](http://hypergraphql.org/graphiql)
 
 You can also try the following predefined queries:
 
