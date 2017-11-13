@@ -2,7 +2,10 @@ package org.hypergraphql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import graphql.*;
+import graphql.execution.NonNullableFieldWasNullError;
 import graphql.schema.idl.errors.NotAnOutputTypeError;
+import graphql.validation.ValidationError;
+import graphql.validation.ValidationErrorType;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -40,8 +43,20 @@ public class GraphqlService {
         if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
             Converter converter = new Converter(config);
+            JsonNode jsonQuery;
+            try {
 
-            JsonNode jsonQuery = converter.query2json(query);
+                jsonQuery = converter.query2json(query);
+
+            } catch (Exception e) {
+
+                System.out.println("Houston...");
+                GraphQLError err = new ValidationError(ValidationErrorType.InvalidSyntax);
+                errors.add(err);
+                result.put("errors", errors);
+                return result;
+
+            }
 
             sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
 

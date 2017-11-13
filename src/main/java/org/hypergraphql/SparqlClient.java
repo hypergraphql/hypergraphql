@@ -58,7 +58,7 @@ public class SparqlClient {
             try {
                 HttpResponse<InputStream> resp = Unirest.get("http://dbpedia.org/sparql")
                         .queryString("query", query)
-                        .header("accept", "text/turtle")
+                        .header("accept", "application/rdf+xml")
                         .basicAuth(config.serviceUsr(service), config.servicePswd(service))
                         .asBinary();
 
@@ -66,7 +66,7 @@ public class SparqlClient {
 
                 InputStream in = resp.getBody();
 
-                next.read(in, null, "TTL");
+                next.read(in, null, "RDF/XML");
 
                 model.add(next);
 

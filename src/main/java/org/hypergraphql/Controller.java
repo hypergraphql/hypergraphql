@@ -59,11 +59,11 @@ public class Controller {
 
             String query = requestObject.get("query").asText();
 
-                    System.out.println(
-                            "Path: " + req.pathInfo().toString() +
-                                    " Ip: " + req.ip() +
-                                    " TimeStamp: " + new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(Calendar.getInstance().getTime()));
-                  //  System.out.println(query.toString());
+//                    System.out.println(
+//                            "Path: " + req.pathInfo().toString() +
+//                                    " Ip: " + req.ip() +
+//                                    " TimeStamp: " + new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(Calendar.getInstance().getTime()));
+//                  //  System.out.println(query.toString());
 
 
 //            Validator validator = new Validator();
@@ -81,7 +81,7 @@ public class Controller {
 ////                return new ExecutionResultImpl(validationErrors);
 //            }
 
-                    try {
+                   try {
                         Map<String, Object> result = service.results(query);
 
                         JsonNode resultJson = mapper.readTree(new ObjectMapper().writeValueAsString(result));
@@ -89,6 +89,8 @@ public class Controller {
 
                         return resultJson;
                     } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                        e.fillInStackTrace();
                         res.status(400);
                         return "Error 400: The provided query is either illegal by the GraphQL spec or currently unsupported by HyperGraphQL.";
                     }
