@@ -39,9 +39,8 @@ public class Controller {
         });
 
 
-
         ObjectMapper mapper = new ObjectMapper();
-        GraphqlService service  = new GraphqlService(config, graphQL);
+        GraphqlService service = new GraphqlService(config, graphQL);
 
         // post method for accessing the GraphQL service
 
@@ -51,20 +50,14 @@ public class Controller {
 
             String query = requestObject.get("query").asText();
 
-           try {
-                Map<String, Object> result = service.results(query, schema);
+            Map<String, Object> result = service.results(query, schema);
 
-                JsonNode resultJson = mapper.readTree(new ObjectMapper().writeValueAsString(result));
-                res.type("application/json");
+            JsonNode resultJson = mapper.readTree(new ObjectMapper().writeValueAsString(result));
+            res.type("application/json");
 
-                return resultJson;
-            } catch (Exception e) {
-                res.status(400);
-                return "Error 400: The requested query contains illegal syntax or is currently unsupported by HyperGraphQL.";
-            }
+            return resultJson;
 
         });
-
     }
 
 }
