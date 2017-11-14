@@ -318,4 +318,4 @@ You can also try the following predefined queries:
 
 ## Contact
 
-Email: **szymon.klarman@semanticintegration.co.uk**
+Email: **info@hypergraphql.org**
