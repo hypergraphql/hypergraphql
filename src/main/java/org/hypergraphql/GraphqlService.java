@@ -55,7 +55,7 @@ public class GraphqlService {
         try {
             document = parser.parseDocument(query);
         } catch (Exception e) {
-            GraphQLError err = new ValidationError(ValidationErrorType.InvalidSyntax, new SourceLocation(-1, -1), "unrecognized symbols");
+            GraphQLError err = new ValidationError(ValidationErrorType.InvalidSyntax, new SourceLocation(0, 0), "unrecognized symbols");
             errors.add(err);
             result.put("errors", errors);
             return result;
