@@ -319,4 +319,5 @@ You can also try the following predefined queries:
 ## Contact
 
 Email: **info@hypergraphql.org**
+
 Twitter: **@HyperGraphQL**
