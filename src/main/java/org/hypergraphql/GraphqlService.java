@@ -45,29 +45,28 @@ public class GraphqlService {
 
         List<Map<String, String>> sparqlQueries;
 
-        List<ValidationError> validationErrors = null;
+        List<ValidationError> validationErrors;
 
 
-            Validator validator = new Validator();
-            Parser parser = new Parser();
-         Document document;
+        Validator validator = new Validator();
+        Parser parser = new Parser();
+        Document document;
+
         try {
-             document = parser.parseDocument(query);
+            document = parser.parseDocument(query);
         } catch (Exception e) {
-            GraphQLError err = new ValidationError(ValidationErrorType.InvalidSyntax, new SourceLocation(0, 0), "unrecognized symbols");
+            GraphQLError err = new ValidationError(ValidationErrorType.InvalidSyntax, new SourceLocation(-1, -1), "unrecognized symbols");
             errors.add(err);
             result.put("errors", errors);
             return result;
         }
 
         validationErrors = validator.validateDocument(schema, document);
-            if (validationErrors.size() > 0) {
-                errors.addAll(validationErrors);
-                result.put("errors", errors);
-                return result;
-            }
-
-
+        if (validationErrors.size() > 0) {
+            errors.addAll(validationErrors);
+            result.put("errors", errors);
+            return result;
+        }
 
         if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
