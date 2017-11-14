@@ -320,4 +320,4 @@ You can also try the following predefined queries:
 
 Email: **info@hypergraphql.org**
 
-Twitter: **@HyperGraphQL**
+Twitter: [@HyperGraphQL](https://twitter.com/HyperGraphQL)
