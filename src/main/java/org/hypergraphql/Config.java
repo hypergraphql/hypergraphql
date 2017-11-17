@@ -32,6 +32,31 @@ import static graphql.Scalars.*;
 
 public class Config {
 
+    private final String SCHEMA_QUERY =
+            "{\n" +
+            "  __schema {\n" +
+            "    types {\n" +
+            "      name\n" +
+            "      kind\n" +
+            "      fields {\n" +
+            "        name\n" +
+            "        type {\n" +
+            "          kind\n" +
+            "          name\n" +
+            "          ofType {\n" +
+            "            kind\n" +
+            "            name\n" +
+            "            ofType {\n" +
+            "              kind\n" +
+            "              name\n" +
+            "            }\n" +
+            "          }\n" +
+            "        }\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "}\n";
+
     private String contextFile;
     private String schemaFile;
     private GraphqlConfig graphql;
@@ -72,8 +97,6 @@ public class Config {
                 }
             }
 
-            Map<String, Context> serviceContexts = new HashMap<>();
-
             context.get("@endpoints").fieldNames().forEachRemaining(endpoint ->
                     {
                         String uri = context.get("@endpoints").get(endpoint).get("@id").asText();
@@ -106,32 +129,8 @@ public class Config {
         GraphQLSchema baseSchema = schemaGenerator.makeExecutableSchema(registry, wiring);
         GraphQL graphQL = GraphQL.newGraphQL(baseSchema).build();
 
-        String query = "{\n" +
-                "  __schema {\n" +
-                "    types {\n" +
-                "      name\n" +
-                "      kind\n" +
-                "      fields {\n" +
-                "        name\n" +
-                "        type {\n" +
-                "          kind\n" +
-                "          name\n" +
-                "          ofType {\n" +
-                "            kind\n" +
-                "            name\n" +
-                "            ofType {\n" +
-                "              kind\n" +
-                "              name\n" +
-                "            }\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}\n";
-
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
-                .query(query)
+                .query(SCHEMA_QUERY)
                 .build();
 
         ExecutionResult qlResult = graphQL.execute(executionInput);
@@ -199,7 +198,6 @@ public class Config {
         });
 
         logger.debug(result.toString());
-        //System.out.println(result.toString());
 
         return result;
     }
