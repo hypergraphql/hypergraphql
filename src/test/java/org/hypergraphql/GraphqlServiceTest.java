@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class GraphqlServiceTest {
 
-    private final int LIMIT = 500;
+    private final int LIMIT = 1000;
 
     private final String TEST_QUERY =
                     "{\n" +
@@ -23,27 +23,10 @@ public class GraphqlServiceTest {
                     "    name\n" +
                     "    birthDate\n" +
                     "    deathDate\n" +
-                    "    birthPlace {\n" +
-                    "      _id\n" +
-                    "      label\n" +
-                    "      country {\n" +
-                    "        _id\n" +
-                    "        label\n" +
-                    "      }\n" +
-                    "    }\n" +
-                    "    deathPlace {\n" +
-                    "      _id\n" +
-                    "      label\n" +
-                    "      country {\n" +
-                    "        _id\n" +
-                    "        label\n" +
-                    "      }\n" +
-                    "    }\n" +
-                    "  }\n" +
-                    "}\n";
+                    "}}\n";
 
     @Test
-    public void queryPerformanceTest() {
+    public void rdfFetchersPerformanceTest() {
         Config config = new Config("properties.json");
         GraphqlWiring wiring = new GraphqlWiring(config);
         GraphQL graphQL = GraphQL.newGraphQL(wiring.schema()).build();
@@ -59,7 +42,7 @@ public class GraphqlServiceTest {
 
         SparqlClient client = new SparqlClient(sparqlQueries, config);
 
-        System.out.println("Model size:" + client.model.size());
+     //   System.out.println("Model size:" + client.model.size());
 
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
                 .query(query)
@@ -74,18 +57,20 @@ public class GraphqlServiceTest {
         long tDelta = tEnd - tStart;
         double elapsedSeconds = tDelta / 1000.0;
 
-        System.out.println("Old method: " + elapsedSeconds);
+        System.out.println("SparqlClient fetchers: " + elapsedSeconds);
 
         Map<String, Object> data =  qlResult.getData();
 
         ArrayList people = (ArrayList) data.get("people");
 
+
+      //  System.out.println("No of matches: " + people.size());
         assert(people.size()==LIMIT);
 
 
         SparqlClient clientExt = new SparqlClientExt(sparqlQueries, config);
 
-        System.out.println("Model size: " + clientExt.model.size());
+      //  System.out.println("Model size: " + clientExt.model.size());
 
 
         ExecutionInput executionInputExt = ExecutionInput.newExecutionInput()
@@ -102,11 +87,13 @@ public class GraphqlServiceTest {
         tDelta = tEnd - tStart;
         elapsedSeconds = tDelta / 1000.0;
 
-        System.out.println("New method: " + elapsedSeconds);
+        System.out.println("SparqlClientExt fetchers: " + elapsedSeconds);
 
         data =  qlResultExt.getData();
 
         people = (ArrayList) data.get("people");
+
+    //    System.out.println("No of matches: " + people.size());
 
         assert(people.size()==LIMIT);
 
