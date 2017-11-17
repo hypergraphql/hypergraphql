@@ -24,9 +24,9 @@ public class SparqlClient {
     private static String queryValuesOfDataPropertyTemp = "SELECT distinct (str(?object) as ?value) WHERE {<%1$s> <%2$s> ?object  FILTER isLiteral(?object) . %3$s }";
     private static String querySubjectsOfObjectPropertyFilterTemp = "SELECT ?subject WHERE { ?subject <%1$s> <%2$s> . } ";
 
-    private Model model;
+    protected Model model;
 
-    private static Logger logger = Logger.getLogger(SparqlClient.class);
+    protected static Logger logger = Logger.getLogger(SparqlClient.class);
 
 
     public SparqlClient(List<Map<String, String>> queryRequests, Config config) {
