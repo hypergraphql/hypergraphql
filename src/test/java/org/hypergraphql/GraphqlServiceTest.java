@@ -1,9 +1,13 @@
 package org.hypergraphql;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import graphql.ExecutionInput;
+import graphql.ExecutionResult;
 import graphql.GraphQL;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,23 +48,61 @@ public class GraphqlServiceTest {
         GraphqlWiring wiring = new GraphqlWiring(config);
         GraphQL graphQL = GraphQL.newGraphQL(wiring.schema()).build();
 
-        GraphqlService service = new GraphqlService(config, graphQL);
+        List<Map<String, String>> sparqlQueries;
 
         String query = String.format(TEST_QUERY, LIMIT);
 
+        Converter converter = new Converter(config);
+        JsonNode jsonQuery = converter.query2json(query);
+
+        sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
+
+        SparqlClient client = new SparqlClient(sparqlQueries, config);
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                .query(query)
+                .context(client)
+                .build();
+
         long tStart = System.currentTimeMillis();
 
-        Map<String, Object> results = service.results(query, wiring.schema());
+        ExecutionResult qlResult = graphQL.execute(executionInput);
+
 
         long tEnd = System.currentTimeMillis();
         long tDelta = tEnd - tStart;
         double elapsedSeconds = tDelta / 1000.0;
 
-        System.out.println(elapsedSeconds);
+        System.out.println("Old method: " + elapsedSeconds);
 
-        Map<String, Object> data = (Map<String, Object>) results.get("data");
+        Map<String, Object> data =  qlResult.getData();
 
         ArrayList people = (ArrayList) data.get("people");
+
+        assert(people.size()==LIMIT);
+
+
+        SparqlClient clientExt = new SparqlClientExt(sparqlQueries, config);
+
+        ExecutionInput executionInputExt = ExecutionInput.newExecutionInput()
+                .query(query)
+                .context(clientExt)
+                .build();
+
+
+        tStart = System.currentTimeMillis();
+
+        ExecutionResult qlResultExt = graphQL.execute(executionInputExt);
+
+        tEnd = System.currentTimeMillis();
+        tDelta = tEnd - tStart;
+        elapsedSeconds = tDelta / 1000.0;
+
+        System.out.println("New method: " + elapsedSeconds);
+
+        data =  qlResultExt.getData();
+
+        people = (ArrayList) data.get("people");
 
         assert(people.size()==LIMIT);
 
