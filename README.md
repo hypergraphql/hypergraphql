@@ -165,7 +165,7 @@ type Query {
 }
 
 type Person {
-    name: [String]
+    name: String
     label: [String]
     birthPlace: City
     birthDate: String
