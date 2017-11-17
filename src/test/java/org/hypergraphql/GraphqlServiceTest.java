@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class GraphqlServiceTest {
 
-    private final int LIMIT = 100;
+    private final int LIMIT = 500;
 
     private final String TEST_QUERY =
                     "{\n" +
@@ -59,6 +59,8 @@ public class GraphqlServiceTest {
 
         SparqlClient client = new SparqlClient(sparqlQueries, config);
 
+        System.out.println("Model size:" + client.model.size());
+
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
                 .query(query)
                 .context(client)
@@ -67,7 +69,6 @@ public class GraphqlServiceTest {
         long tStart = System.currentTimeMillis();
 
         ExecutionResult qlResult = graphQL.execute(executionInput);
-
 
         long tEnd = System.currentTimeMillis();
         long tDelta = tEnd - tStart;
@@ -83,6 +84,9 @@ public class GraphqlServiceTest {
 
 
         SparqlClient clientExt = new SparqlClientExt(sparqlQueries, config);
+
+        System.out.println("Model size: " + clientExt.model.size());
+
 
         ExecutionInput executionInputExt = ExecutionInput.newExecutionInput()
                 .query(query)

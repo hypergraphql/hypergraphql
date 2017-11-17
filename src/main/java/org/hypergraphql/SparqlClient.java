@@ -1,5 +1,6 @@
 package org.hypergraphql;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,10 +56,14 @@ public class SparqlClient {
 
             logger.debug("Executing construct query: " + query);
 
+            Unirest.setTimeouts(0, 0);
+
+
             try {
+
                 HttpResponse<InputStream> resp = Unirest.get("http://dbpedia.org/sparql")
                         .queryString("query", query)
-                        .header("accept", "application/rdf+xml")
+                        .header("accept", "text/plain")
                         .basicAuth(config.serviceUsr(service), config.servicePswd(service))
                         .asBinary();
 
@@ -66,7 +71,8 @@ public class SparqlClient {
 
                 InputStream in = resp.getBody();
 
-                next.read(in, null, "RDF/XML");
+
+                next.read(in, null, "N-TRIPLES");
 
                 model.add(next);
 
@@ -74,7 +80,7 @@ public class SparqlClient {
                 logger.error(e);
             }
         }
-        //  model.write(System.out);
+
     }
 
     public ResultSet sparqlSelect(String queryString) {
