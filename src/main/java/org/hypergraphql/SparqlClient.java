@@ -1,5 +1,6 @@
 package org.hypergraphql;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +25,9 @@ public class SparqlClient {
     private static String queryValuesOfDataPropertyTemp = "SELECT distinct (str(?object) as ?value) WHERE {<%1$s> <%2$s> ?object  FILTER isLiteral(?object) . %3$s }";
     private static String querySubjectsOfObjectPropertyFilterTemp = "SELECT ?subject WHERE { ?subject <%1$s> <%2$s> . } ";
 
-    private Model model;
+    protected Model model;
 
-    private static Logger logger = Logger.getLogger(SparqlClient.class);
+    protected static Logger logger = Logger.getLogger(SparqlClient.class);
 
 
     public SparqlClient(List<Map<String, String>> queryRequests, Config config) {
@@ -55,7 +56,11 @@ public class SparqlClient {
 
             logger.debug("Executing construct query: " + query);
 
+            Unirest.setTimeouts(0, 0);
+
+
             try {
+
                 HttpResponse<InputStream> resp = Unirest.get("http://dbpedia.org/sparql")
                         .queryString("query", query)
                         .header("accept", "application/rdf+xml")
@@ -66,6 +71,7 @@ public class SparqlClient {
 
                 InputStream in = resp.getBody();
 
+
                 next.read(in, null, "RDF/XML");
 
                 model.add(next);
@@ -74,7 +80,7 @@ public class SparqlClient {
                 logger.error(e);
             }
         }
-        //  model.write(System.out);
+
     }
 
     public ResultSet sparqlSelect(String queryString) {

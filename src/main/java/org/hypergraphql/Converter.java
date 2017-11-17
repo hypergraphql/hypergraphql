@@ -40,11 +40,6 @@ public class Converter {
     private final String RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
     private final String HGQL_TYPE_URI = "<http://hypergraphql/type>";
 
-    private String serviceSTR(String service, String sparqlPattern) {
-        final String PATTERN = "SERVICE <%s> { %s }";
-        return String.format(PATTERN, service, sparqlPattern);
-    }
-
     private String graphSTR(String graph, String triple) {
         final String PATTERN = "GRAPH <%s> { %s } ";
         return (graph.equals("")) ? triple : String.format(PATTERN, graph, triple);

@@ -91,7 +91,7 @@ public class GraphqlService {
             logger.info("Generated SPARQL queries:");
             logger.info(sparqlQueries.toString());
 
-            SparqlClient client = new SparqlClient(sparqlQueries, config);
+            SparqlClient client = new SparqlClientExt(sparqlQueries, config);
 
             executionInput = ExecutionInput.newExecutionInput()
                     .query(query)
