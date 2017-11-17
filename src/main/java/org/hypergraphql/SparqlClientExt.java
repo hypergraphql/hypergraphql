@@ -84,11 +84,26 @@ public class SparqlClientExt extends SparqlClient {
         while (iterator.hasNext()) {
 
 
+
+
             RDFNode data = iterator.next();
 
-            if (data.isLiteral()&&data.asLiteral().getLanguage().equals(args.get("lang").toString())) {
-                valList.add(data.toString());
-                hasResult=true;
+
+
+            if (data.isLiteral()) {
+                if (args.containsKey("lang"))
+                {  if (data.asLiteral().getLanguage().toString().equals(args.get("lang").toString()))
+                    valList.add(data.toString());
+                    hasResult = true;
+                }
+
+                else {
+
+                    valList.add(data.toString());
+                    hasResult = true;
+
+
+                }
             }
             }
 
@@ -118,8 +133,23 @@ public class SparqlClientExt extends SparqlClient {
 
             RDFNode data = iterator.next();
 
-            if (data.isLiteral()&&data.asLiteral().getLanguage().equals(args.get("lang").toString()))
-                return data.toString();
+           
+
+            if (data.isLiteral()) {
+
+                if (args.containsKey("lang"))
+
+                {   if (data.asLiteral().getLanguage().toString().equals(args.get("lang").toString()))
+                    return data.toString();
+                }
+
+                else
+                {
+
+                    return data.toString();
+            }
+
+            }
 
         }
 
