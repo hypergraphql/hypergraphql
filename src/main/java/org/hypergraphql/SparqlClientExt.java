@@ -150,10 +150,8 @@ public class SparqlClientExt extends SparqlClient {
             nodeList.add(iterator.next());
         }
 
-        if (nodeList.size() > 0) return nodeList;
+        return nodeList;
 
-
-        return null;
     }
 
 }
