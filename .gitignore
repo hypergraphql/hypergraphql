@@ -12,6 +12,7 @@ buildNumber.properties
 
 queryTranslation\.txt
 *.log
+*.log.*
 \.idea/
 =======
 .idea/
