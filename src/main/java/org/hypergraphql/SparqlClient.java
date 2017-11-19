@@ -61,7 +61,7 @@ public class SparqlClient {
 
             try {
 
-                HttpResponse<InputStream> resp = Unirest.get("http://dbpedia.org/sparql")
+                HttpResponse<InputStream> resp = Unirest.get(service)
                         .queryString("query", query)
                         .header("accept", "application/rdf+xml")
                         .basicAuth(config.serviceUsr(service), config.servicePswd(service))
