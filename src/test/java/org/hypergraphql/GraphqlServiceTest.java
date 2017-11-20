@@ -28,15 +28,13 @@ public class GraphqlServiceTest {
     @Test
     public void rdfFetchersPerformanceTest() {
         Config config = new Config("properties.json");
-        GraphqlWiring wiring = new GraphqlWiring(config);
-        GraphQL graphQL = GraphQL.newGraphQL(wiring.schema()).build();
 
         List<Map<String, String>> sparqlQueries;
 
         String query = String.format(TEST_QUERY, LIMIT);
 
         Converter converter = new Converter(config);
-        JsonNode jsonQuery = converter.query2json(query);
+        JsonNode jsonQuery = (JsonNode) converter.gquery2json(query).get("query");
 
         sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
 
@@ -51,7 +49,7 @@ public class GraphqlServiceTest {
 
         long tStart = System.currentTimeMillis();
 
-        ExecutionResult qlResult = graphQL.execute(executionInput);
+        ExecutionResult qlResult = config.graphql().execute(executionInput);
 
         long tEnd = System.currentTimeMillis();
         long tDelta = tEnd - tStart;
@@ -81,7 +79,7 @@ public class GraphqlServiceTest {
 
         tStart = System.currentTimeMillis();
 
-        ExecutionResult qlResultExt = graphQL.execute(executionInputExt);
+        ExecutionResult qlResultExt = config.graphql().execute(executionInputExt);
 
         tEnd = System.currentTimeMillis();
         tDelta = tEnd - tStart;

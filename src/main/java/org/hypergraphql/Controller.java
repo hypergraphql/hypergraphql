@@ -19,19 +19,19 @@ import static spark.Spark.*;
 public class Controller {
 
 
-    public static void start(Config config, GraphQL graphQL, GraphQLSchema schema) {
+    public static void start(Config config) {
 
 
-        port(config.graphql().port());
+        port(config.graphqlConfig().port());
 
 
         // get method for accessing the GraphiQL UI
 
-        get(config.graphql().graphiql(), (req, res) -> {
+        get(config.graphqlConfig().graphiql(), (req, res) -> {
 
             Map<String, String> model = new HashMap<>();
 
-            model.put("template", String.valueOf(config.graphql().path()));
+            model.put("template", String.valueOf(config.graphqlConfig().path()));
 
             return new VelocityTemplateEngine().render(
                     new ModelAndView(model, "graphiql.vtl")
@@ -40,17 +40,17 @@ public class Controller {
 
 
         ObjectMapper mapper = new ObjectMapper();
-        GraphqlService service = new GraphqlService(config, graphQL);
+        GraphqlService service = new GraphqlService(config);
 
         // post method for accessing the GraphQL service
 
-        post(config.graphql().path(), (req, res) -> {
+        post(config.graphqlConfig().path(), (req, res) -> {
 
             JsonNode requestObject = mapper.readTree(req.body().toString());
 
             String query = requestObject.get("query").asText();
 
-            Map<String, Object> result = service.results(query, schema);
+            Map<String, Object> result = service.results(query);
 
             JsonNode resultJson = mapper.readTree(new ObjectMapper().writeValueAsString(result));
             res.type("application/json");

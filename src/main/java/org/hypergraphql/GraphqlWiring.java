@@ -98,7 +98,6 @@ public class GraphqlWiring {
             } else {
                 nodeUri = ((RDFNode) environment.getSource()).asResource().getURI();
             }
-
             String predicate = ((Field) environment.getFields().toArray()[0]).getName();
             predicateURI = config.predicateURI(predicate);
             client = environment.getContext();
