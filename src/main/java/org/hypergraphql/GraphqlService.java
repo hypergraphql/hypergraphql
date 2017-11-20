@@ -1,9 +1,12 @@
 package org.hypergraphql;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.*;
 import graphql.execution.NonNullableFieldWasNullError;
 import graphql.language.Document;
+import graphql.language.Field;
+import graphql.language.OperationDefinition;
 import graphql.language.SourceLocation;
 import graphql.parser.Parser;
 import graphql.schema.GraphQLSchema;
@@ -68,12 +71,43 @@ public class GraphqlService {
             return result;
         }
 
+        System.out.println("\n\n");
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println("document: " + document.toString());
+        System.out.println("\n\n");
+        System.out.println("definitions: " + document.getDefinitions().toString());
+        System.out.println("\n\n");
+        System.out.println("children: " + document.getChildren().toString());
+
+        OperationDefinition opDef = (OperationDefinition) document.getChildren().get(0);
+
+        System.out.println(((Field) opDef.getSelectionSet().getSelections().get(0)).getName());
+
+            document.getChildren().forEach(kid -> {
+                JsonNode docJson;
+
+                try {
+
+                    docJson = mapper.readTree(new ObjectMapper().writeValueAsString(kid));
+                    System.out.println("\n\n");
+                    System.out.println("kid: " + document.toString());
+                    System.out.println("\n\n");
+                    System.out.println("kidjson: " + docJson.toString());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
         if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
             Converter converter = new Converter(config);
             JsonNode jsonQuery;
             try {
                 jsonQuery = converter.query2json(query);
+                System.out.println("\n\n");
+                System.out.println("jsonQuery: " + jsonQuery.toString());
 
                 sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
             } catch (Exception e) {
