@@ -77,7 +77,7 @@
   },
   "@endpoints": {
     "dbpedia-endpoint": {
-      "@id": "http://dbpedia.org/sparql",
+      "@id": "http://dbpedia.org/sparql/",
       "@user": "",
       "@password": ""
     }
