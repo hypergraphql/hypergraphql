@@ -40,7 +40,7 @@ public class GraphqlServiceTest {
 
         sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
 
-        SparqlClient client = new SparqlClientExt(sparqlQueries, config);
+        SparqlClient client = new SparqlClient(sparqlQueries, config);
 
      //   System.out.println("Model size:" + client.model.size());
 
@@ -68,7 +68,7 @@ public class GraphqlServiceTest {
         assert(people.size()==LIMIT);
 
 
-        SparqlClient clientExt = new SparqlClientExt(sparqlQueries, config);
+        SparqlClient clientExt = new SparqlClient(sparqlQueries, config);
 
       //  System.out.println("Model size: " + clientExt.model.size());
 

@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 /**
  * Created by szymon on 22/08/2017.
  */
-public abstract class SparqlClient {
+public class SparqlClient {
 
     private static String queryValuesOfObjectPropertyTemp = "SELECT distinct ?object WHERE {<%s> <%s> ?object FILTER (!isLiteral(?object)) . }";
     private static String queryValuesOfDataPropertyTemp = "SELECT distinct (str(?object) as ?value) WHERE {<%1$s> <%2$s> ?object  FILTER isLiteral(?object) . %3$s }";
@@ -97,81 +97,6 @@ public abstract class SparqlClient {
         }
     }
 
-    public List<RDFNode> getValuesOfObjectProperty(String subject, String predicate, Map<String, Object> args) {
-
-        String queryString = String.format(queryValuesOfObjectPropertyTemp, subject, predicate);
-        ResultSet queryResults = sparqlSelect(queryString);
-
-        if (queryResults != null) {
-
-            List<RDFNode> uriList = new ArrayList<>();
-
-            while (queryResults.hasNext()) {
-                QuerySolution nextSol = queryResults.nextSolution();
-                RDFNode object = nextSol.get("?object");
-                uriList.add(object);
-            }
-            return uriList;
-        }
-        return null;
-    }
-
-    public RDFNode getValueOfObjectProperty(String subject, String predicate, Map<String, Object> args) {
-
-        String queryString = String.format(queryValuesOfObjectPropertyTemp, subject, predicate);
-        ResultSet queryResults = sparqlSelect(queryString);
-
-        if (queryResults != null && queryResults.hasNext()) {
-
-            QuerySolution nextSol = queryResults.nextSolution();
-            return nextSol.get("?object");
-        }
-        return null;
-    }
-
-    public List<Object> getValuesOfDataProperty(String subject, String predicate, Map<String, Object> args) {
-
-        String langFilter = "";
-
-        if (args.containsKey("lang")) langFilter = "FILTER (lang(?object)=\"" + args.get("lang").toString() + "\") ";
-
-        String queryString = String.format(queryValuesOfDataPropertyTemp, subject, predicate, langFilter);
-        ResultSet queryResults = sparqlSelect(queryString);
-
-        if (queryResults != null) {
-
-            List<Object> valList = new ArrayList<>();
-
-            while (queryResults.hasNext()) {
-                QuerySolution nextSol = queryResults.nextSolution();
-                String value = nextSol.get("?value").toString();
-                valList.add(value);
-            }
-            return valList;
-        } else {
-            return null;
-        }
-    }
-
-    public String getValueOfDataProperty(String subject, String predicate, Map<String, Object> args) {
-
-        String langFilter = "";
-
-        if (args.containsKey("lang")) langFilter = "FILTER (lang(?object)=\"" + args.get("lang").toString() + "\") ";
-
-        String queryString = String.format(queryValuesOfDataPropertyTemp, subject, predicate, langFilter);
-        ResultSet queryResults = sparqlSelect(queryString);
-
-        if (queryResults != null && queryResults.hasNext()) {
-
-            QuerySolution nextSol = queryResults.nextSolution();
-            String value = nextSol.get("?value").toString();
-
-            return value;
-        } else {
-            return null;
-        }
-    }
 
 
     public List<RDFNode> getSubjectsOfObjectPropertyFilter(String predicate, String uri) {
@@ -203,13 +128,116 @@ public abstract class SparqlClient {
     }
 
 
-    public abstract List<RDFNode> getSubjectsOfObjectPropertyFilter(Property predicate);
+    public List<RDFNode> getSubjectsOfObjectPropertyFilter(Property predicate) {
 
-    public abstract String getValueOfDataProperty(Resource subject, Property predicate, Map<String, Object> args);
 
-    public abstract List<Object> getValuesOfDataProperty(Resource subject, Property predicate, Map<String, Object> args);
+        ResIterator iterator = this.model.listSubjectsWithProperty(predicate);
+        List<RDFNode> nodeList = new ArrayList<>();
 
-    public abstract List<RDFNode> getValuesOfObjectProperty(Resource subject, Property predicate, Map<String, Object> args);
 
-    public abstract RDFNode getValueOfObjectProperty(Resource subject, Property predicate, Map<String, Object> args);
+        while (iterator.hasNext()) {
+
+            nodeList.add(iterator.next());
+        }
+
+        return nodeList;
+
+    }
+
+    public String getValueOfDataProperty(Resource subject, Property predicate, Map<String, Object> args) {
+
+
+
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject,  predicate);
+
+
+        while (iterator.hasNext()) {
+
+
+            RDFNode data = iterator.next();
+
+
+            if (data.isLiteral()) {
+
+                if (args.containsKey("lang"))
+
+                {
+                    if (data.asLiteral().getLanguage().toString().equals(args.get("lang").toString()))
+                        return data.asLiteral().getString();
+                } else {
+
+                    return data.asLiteral().getString();
+                }
+
+            }
+
+        }
+
+
+        return null;
+    }
+
+    public List<Object> getValuesOfDataProperty(Resource subject, Property predicate, Map<String, Object> args) {
+
+        List<Object> valList = new ArrayList<>();
+
+
+
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject, predicate);
+
+        while (iterator.hasNext()) {
+
+
+            RDFNode data = iterator.next();
+
+
+            if (data.isLiteral()) {
+                if (args.containsKey("lang")) {
+                    if (data.asLiteral().getLanguage().toString().equals(args.get("lang").toString()))
+                        valList.add(data.asLiteral().getString());
+                } else {
+
+                    valList.add(data.asLiteral().getString());
+
+                }
+            }
+        }
+
+        return valList;
+
+
+    }
+
+    public List<RDFNode> getValuesOfObjectProperty(Resource subject, Property predicate, Map<String, Object> args) {
+
+
+
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject, predicate);
+        List<RDFNode> uriList = new ArrayList<>();
+
+
+        while (iterator.hasNext()) {
+
+            RDFNode next = iterator.next();
+
+            if (!next.isLiteral()) uriList.add(next);
+        }
+
+        return uriList;
+
+    }
+
+    public RDFNode getValueOfObjectProperty(Resource subject, Property predicate, Map<String, Object> args) {
+
+
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject, predicate);
+        while (iterator.hasNext()) {
+
+            RDFNode next = iterator.next();
+
+            if (!next.isLiteral()) return next;
+        }
+        return null;
+
+    }
 }
