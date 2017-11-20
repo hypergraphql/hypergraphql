@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 /**
  * Created by szymon on 22/08/2017.
  */
-public class SparqlClient {
+public abstract class SparqlClient {
 
     private static String queryValuesOfObjectPropertyTemp = "SELECT distinct ?object WHERE {<%s> <%s> ?object FILTER (!isLiteral(?object)) . }";
     private static String queryValuesOfDataPropertyTemp = "SELECT distinct (str(?object) as ?value) WHERE {<%1$s> <%2$s> ?object  FILTER isLiteral(?object) . %3$s }";
@@ -194,4 +194,22 @@ public class SparqlClient {
             return null;
         }
     }
+
+
+    public Property getPropertyFromString(String string ) {
+
+        return this.model.getProperty(string);
+
+    }
+
+
+    public abstract List<RDFNode> getSubjectsOfObjectPropertyFilter(Property predicate);
+
+    public abstract String getValueOfDataProperty(Resource subject, Property predicate, Map<String, Object> args);
+
+    public abstract List<Object> getValuesOfDataProperty(Resource subject, Property predicate, Map<String, Object> args);
+
+    public abstract List<RDFNode> getValuesOfObjectProperty(Resource subject, Property predicate, Map<String, Object> args);
+
+    public abstract RDFNode getValueOfObjectProperty(Resource subject, Property predicate, Map<String, Object> args);
 }

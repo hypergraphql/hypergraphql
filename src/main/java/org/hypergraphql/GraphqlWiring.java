@@ -19,7 +19,9 @@ import graphql.schema.GraphQLType;
 
 import java.util.*;
 
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.log4j.Logger;
 
 /**
@@ -87,21 +89,18 @@ public class GraphqlWiring {
     }
 
     class fetchParams {
-        String nodeUri;
-        String predicateURI;
+        Resource nodeUri;
+        Property predicateURI;
         SparqlClient client;
 
         public fetchParams(DataFetchingEnvironment environment) {
-            RDFNode parent = environment.getSource();
-            if (parent.isAnon()) {
-                nodeUri = "_:" + ((RDFNode) environment.getSource()).asResource().getId();
-            } else {
-                nodeUri = ((RDFNode) environment.getSource()).asResource().getURI();
-            }
 
-            String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-            predicateURI = config.predicateURI(predicate);
-            client = environment.getContext();
+                nodeUri = environment.getSource();
+                String predicate = ((Field) environment.getFields().toArray()[0]).getName();
+                String stringpredicateURI = config.predicateURI(predicate);
+                predicateURI = client.getPropertyFromString(stringpredicateURI);
+                client = environment.getContext();
+
         }
     }
 

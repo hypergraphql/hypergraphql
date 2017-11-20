@@ -51,6 +51,26 @@ public class SparqlClientExt extends SparqlClient {
 
     }
 
+
+    public List<RDFNode> getValuesOfObjectProperty(Resource subject, Property predicate, Map<String, Object> args) {
+
+
+
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject, predicate);
+        List<RDFNode> uriList = new ArrayList<>();
+
+
+        while (iterator.hasNext()) {
+
+            RDFNode next = iterator.next();
+
+            if (!next.isLiteral()) uriList.add(next);
+        }
+
+        return uriList;
+
+    }
+
     @Override
     public RDFNode getValueOfObjectProperty(String subject, String predicate, Map<String, Object> args) {
 
@@ -58,6 +78,20 @@ public class SparqlClientExt extends SparqlClient {
         Resource resource = this.model.getResource(subject);
         Property predicateRes = this.model.getProperty(predicate);
         NodeIterator iterator = this.model.listObjectsOfProperty(resource, predicateRes);
+        while (iterator.hasNext()) {
+
+            RDFNode next = iterator.next();
+
+            if (!next.isLiteral()) return next;
+        }
+        return null;
+
+    }
+
+    public RDFNode getValueOfObjectProperty(Resource subject, Property predicate, Map<String, Object> args) {
+
+
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject, predicate);
         while (iterator.hasNext()) {
 
             RDFNode next = iterator.next();
@@ -77,6 +111,38 @@ public class SparqlClientExt extends SparqlClient {
         Resource resource = this.model.getResource(subject);
         Property predicateRes = this.model.getProperty(predicate);
         NodeIterator iterator = this.model.listObjectsOfProperty(resource, predicateRes);
+
+        while (iterator.hasNext()) {
+
+
+            RDFNode data = iterator.next();
+
+
+            if (data.isLiteral()) {
+                if (args.containsKey("lang")) {
+                    if (data.asLiteral().getLanguage().toString().equals(args.get("lang").toString()))
+                        valList.add(data.asLiteral().getString());
+                } else {
+
+                    valList.add(data.asLiteral().getString());
+
+                }
+            }
+        }
+
+        return valList;
+
+
+    }
+
+
+    public List<Object> getValuesOfDataProperty(Resource subject, Property predicate, Map<String, Object> args) {
+
+        List<Object> valList = new ArrayList<>();
+
+
+
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject, predicate);
 
         while (iterator.hasNext()) {
 
@@ -137,6 +203,40 @@ public class SparqlClientExt extends SparqlClient {
         return null;
     }
 
+    public String getValueOfDataProperty(Resource subject, Property predicate, Map<String, Object> args) {
+
+
+
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject,  predicate);
+
+
+        while (iterator.hasNext()) {
+
+
+            RDFNode data = iterator.next();
+
+
+            if (data.isLiteral()) {
+
+                if (args.containsKey("lang"))
+
+                {
+                    if (data.asLiteral().getLanguage().toString().equals(args.get("lang").toString()))
+                        return data.asLiteral().getString();
+                } else {
+
+                    return data.asLiteral().getString();
+                }
+
+            }
+
+        }
+
+
+        return null;
+    }
+
+
     @Override
     public List<RDFNode> getSubjectsOfObjectPropertyFilter(String predicate, String uri) {
         Resource resource = this.model.getResource(uri);
@@ -153,5 +253,25 @@ public class SparqlClientExt extends SparqlClient {
         return nodeList;
 
     }
+
+
+
+    public List<RDFNode> getSubjectsOfObjectPropertyFilter(Property predicate) {
+
+
+        ResIterator iterator = this.model.listSubjectsWithProperty(predicate);
+        List<RDFNode> nodeList = new ArrayList<>();
+
+
+        while (iterator.hasNext()) {
+
+            nodeList.add(iterator.next());
+        }
+
+        return nodeList;
+
+    }
+
+
 
 }
