@@ -98,8 +98,9 @@ public class GraphqlWiring {
                 nodeUri = environment.getSource();
                 String predicate = ((Field) environment.getFields().toArray()[0]).getName();
                 String stringpredicateURI = config.predicateURI(predicate);
-                predicateURI = client.getPropertyFromString(stringpredicateURI);
                 client = environment.getContext();
+                predicateURI = client.getPropertyFromString(stringpredicateURI);
+
 
         }
     }
@@ -109,8 +110,8 @@ public class GraphqlWiring {
         if (thisNode.asResource().isURIResource()) {
             return thisNode.asResource().getURI();
         } else {
-            UUID uuid = UUID.randomUUID();
-            return "_:"+ uuid;
+
+            return "_:"+thisNode.asNode().getBlankNodeLabel();
         }
     };
 
