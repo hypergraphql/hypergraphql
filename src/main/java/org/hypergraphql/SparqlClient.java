@@ -34,6 +34,7 @@ public class SparqlClient {
 
         final String MATCH_PARENT = "SELECT (GROUP_CONCAT(CONCAT(\"<\",str(%s),\">\");separator=\" \") as ?uris) WHERE { %s }";
         final String VALUES_PATTERN = "VALUES %s { %s }";
+
         model = ModelFactory.createDefaultModel();
 
         for (Map<String, String> queryRequest : queryRequests) {
@@ -43,15 +44,15 @@ public class SparqlClient {
             String match = queryRequest.get("match");
             String var = queryRequest.get("var");
 
-            if (match.equals("")) {
-                query = String.format(query, "");
-            } else {
+            if (!match.equals("")) {
+
                 String matchQuery = String.format(MATCH_PARENT, var, match);
 
                 ResultSet results = sparqlSelect(matchQuery);
                 String vals = results.next().get("?uris").toString();
 
                 query = String.format(query, String.format(VALUES_PATTERN, var, vals));
+
             }
 
             logger.debug("Executing construct query: " + query);

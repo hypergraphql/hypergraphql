@@ -1,7 +1,7 @@
 {
   "@predicates": {
     "people": {
-      "@namedGraph": "dbpedia"
+      "@namedGraph": "live-dbpedia"
     },
     "mountains": {
       "@namedGraph": "dbpedia"
@@ -73,11 +73,20 @@
     "dbpedia": {
       "@id": "http://dbpedia.org",
       "@endpoint": "dbpedia-endpoint"
+    },
+    "live-dbpedia": {
+      "@id": "",
+      "@endpoint": "live-dbpedia-endpoint"
     }
   },
   "@endpoints": {
     "dbpedia-endpoint": {
       "@id": "http://dbpedia.org/sparql/",
+      "@user": "",
+      "@password": ""
+    },
+    "live-dbpedia-endpoint": {
+      "@id": "http://live.dbpedia.org/sparql/",
       "@user": "",
       "@password": ""
     }
