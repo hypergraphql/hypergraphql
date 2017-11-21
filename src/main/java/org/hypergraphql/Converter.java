@@ -129,7 +129,7 @@ public class Converter {
         String graphName = (args.has("graph")) ? args.get("graph").asText() : field.get("graph").asText();
 
         String graphPattern;
-        if (parentField!=null) {
+        if (parentField != null) {
             JsonNode parentArgs = parentField.get("args");
             String parentGraphName = (parentArgs.has("graph")) ? parentArgs.get("graph").asText() : parentField.get("graph").asText();
             graphPattern = (parentGraphName.equals(graphName)) ? fieldPattern : graphSTR(graphName, fieldPattern);
@@ -152,7 +152,7 @@ public class Converter {
                     ArrayNode array = mapper.createArrayNode();
                     array.add(query);
                     topQuery.put(service, array);
-                    Map<String, String>  queryRequest = getConstructQuery(topQuery, true);
+                    Map<String, String> queryRequest = getConstructQuery(topQuery, true);
                     output.add(queryRequest);
                 })
         );
@@ -160,11 +160,11 @@ public class Converter {
         while (queue.size() > 0) {
 
             JsonNode nextQuery = queue.getFirst();
-            
+
             queue.removeFirst();
 
             try {
-                Map<String, String>  queryRequest = getConstructQuery(nextQuery, false);
+                Map<String, String> queryRequest = getConstructQuery(nextQuery, false);
                 output.add(queryRequest);
             } catch (Exception e) {
                 logger.error(e);
@@ -218,7 +218,7 @@ public class Converter {
         }
 
         wherePattern = (rootQuery) ? wherePattern : "%s " + wherePattern;
-       // String servicePattern = serviceSTR(service, wherePattern);
+        // String servicePattern = serviceSTR(service, wherePattern);
         String constructQuery = constructSTR(constructPattern, wherePattern);
 
         output.put("query", constructQuery);
@@ -332,7 +332,7 @@ public class Converter {
 
         Map<String, Object> result = new HashMap<>();
 
-        if (selectionSet==null) {
+        if (selectionSet == null) {
 
             return result;
 
@@ -347,77 +347,80 @@ public class Converter {
         List<Selection> children = selectionSet.getSelections();
 
         for (Selection child : children) {
+            if (child.getClass().getSimpleName().equals("Field")) {
 
-            Field inner = (Field) child;
+                Field inner = (Field) child;
 
-            Map<String, Object>  childrenFields = getSelectionJson(inner.getSelectionSet());
+                Map<String, Object> childrenFields = getSelectionJson(inner.getSelectionSet());
 
-            if (childrenFields.containsKey("context")) {
+                if (childrenFields.containsKey("context")) {
 
-                context.putAll((Map<String, String>) childrenFields.get("context"));
+                    context.putAll((Map<String, String>) childrenFields.get("context"));
 
-            }
+                }
 
-            ObjectNode fieldJson = mapper.createObjectNode();
+                ObjectNode fieldJson = mapper.createObjectNode();
 
-            List<Argument> args = inner.getArguments();
+                List<Argument> args = inner.getArguments();
 
-            ObjectNode argsJson = mapper.createObjectNode();
+                ObjectNode argsJson = mapper.createObjectNode();
 
-            for (Argument arg : args) {
+                for (Argument arg : args) {
 
-               Value val = arg.getValue();
-               String type = val.getClass().getSimpleName();
+                    Value val = arg.getValue();
+                    String type = val.getClass().getSimpleName();
 
-                switch (type) {
-                    case "IntValue": {
-                        long value = ((IntValue) val).getValue().longValueExact();
-                        argsJson.put(arg.getName().toString(), value);
-                        break;
-                    }
-                    case "StringValue": {
-                        String value = ((StringValue) val).getValue().toString();
-                        argsJson.put(arg.getName().toString(), value);
-                        break;
-                    }
-                    case "BooleanValue": {
-                        Boolean value = ((BooleanValue) val).isValue();
-                        argsJson.put(arg.getName().toString(), value);
-                        break;
+                    switch (type) {
+                        case "IntValue": {
+                            long value = ((IntValue) val).getValue().longValueExact();
+                            argsJson.put(arg.getName().toString(), value);
+                            break;
+                        }
+                        case "StringValue": {
+                            String value = ((StringValue) val).getValue().toString();
+                            argsJson.put(arg.getName().toString(), value);
+                            break;
+                        }
+                        case "BooleanValue": {
+                            Boolean value = ((BooleanValue) val).isValue();
+                            argsJson.put(arg.getName().toString(), value);
+                            break;
+                        }
                     }
                 }
-            }
 
-            fieldJson.put("name", inner.getName());
-            if (inner.getAlias()!=null) {
-                fieldJson.put("alias", inner.getAlias());
-            }
-            fieldJson.put("args", argsJson);
-            if (childrenFields.containsKey("query")) {
+                fieldJson.put("name", inner.getName());
+                if (inner.getAlias() != null) {
+                    fieldJson.put("alias", inner.getAlias());
+                }
+                fieldJson.put("args", argsJson);
+                if (childrenFields.containsKey("query")) {
 
-                fieldJson.put("fields", (ArrayNode) childrenFields.get("query"));
+                    fieldJson.put("fields", (ArrayNode) childrenFields.get("query"));
 
-            }
+                }
 
-            String contextName = (inner.getAlias()!=null) ? inner.getAlias() : inner.getName();
+                String contextName = (inner.getAlias() != null) ? inner.getAlias() : inner.getName();
 
-            if (config.containsPredicate(contextName)) {
-                context.put(contextName, config.predicateURI(contextName));
-            } else {
-                if (JSONLD_VOC.containsKey(contextName)) {
-                    context.put(contextName, JSONLD_VOC.get(contextName).toString());
+                if (config.containsPredicate(contextName)) {
+                    context.put(contextName, config.predicateURI(contextName));
                 } else {
-                    context.put(contextName, "http://hypergraphql/query/" + contextName);
+                    if (JSONLD_VOC.containsKey(contextName)) {
+                        context.put(contextName, JSONLD_VOC.get(contextName).toString());
+                    } else {
+                        context.put(contextName, "http://hypergraphql/query/" + contextName);
+                    }
                 }
+
+                fieldsJson.add(fieldJson);
+
             }
-
-            fieldsJson.add(fieldJson);
         }
-
         result.put("query", fieldsJson);
         result.put("context", context);
 
         return result;
+
     }
 
 //    public JsonNode query2json(String query) {

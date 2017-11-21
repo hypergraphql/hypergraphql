@@ -17,7 +17,9 @@ public class GraphqlService {
     private Config config;
     static Logger logger = Logger.getLogger(GraphqlService.class);
 
-    public GraphqlService(Config config) { this.config = config; }
+    public GraphqlService(Config config) {
+        this.config = config;
+    }
 
 
     public Map<String, Object> results(String query) {
@@ -36,24 +38,25 @@ public class GraphqlService {
 
         List<Map<String, String>> sparqlQueries;
 
+        Converter converter = new Converter(config);
+        Map<String, Object> preprocessedQuery = null;
+        try {
+            preprocessedQuery = converter.query2json(query);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        List<GraphQLError> validationErrors = (List<GraphQLError>) preprocessedQuery.get("errors");
+        errors.addAll(validationErrors);
 
+        if (validationErrors.size() > 0) {
+
+            //  result.put("errors", errors);
+
+            return result;
+
+        }
 
         if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
-
-            Converter converter = new Converter(config);
-
-            Map<String, Object> preprocessedQuery = converter.query2json(query);
-
-            List<GraphQLError> validationErrors = (List<GraphQLError>) preprocessedQuery.get("errors");
-            errors.addAll(validationErrors);
-
-            if (validationErrors.size()>0) {
-
-              //  result.put("errors", errors);
-
-                return result;
-
-            }
 
             JsonNode jsonQuery = converter.includeContextInQuery((JsonNode) preprocessedQuery.get("query"));
 
