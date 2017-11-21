@@ -367,7 +367,7 @@ public class Converter {
 
                Value val = arg.getValue();
                String type = val.getClass().getSimpleName();
-
+       
                 switch (type) {
                     case "IntValue": {
                         long value = ((IntValue) val).getValue().longValueExact();
@@ -375,7 +375,7 @@ public class Converter {
                         break;
                     }
                     case "StringValue": {
-                        String value = ((IntValue) val).getValue().toString();
+                        String value = ((StringValue) val).getValue().toString();
                         argsJson.put(arg.getName().toString(), value);
                         break;
                     }
