@@ -121,28 +121,28 @@ public class SparqlClient {
     }
 
 
-    public Property getPropertyFromString(String string ) {
+    public Property getPropertyFromUri(String string ) {
 
         return this.model.getProperty(string);
 
     }
 
 
-    public List<RDFNode> getSubjectsOfObjectPropertyFilter(Property predicate) {
-
-
-        ResIterator iterator = this.model.listSubjectsWithProperty(predicate);
-        List<RDFNode> nodeList = new ArrayList<>();
-
-
-        while (iterator.hasNext()) {
-
-            nodeList.add(iterator.next());
-        }
-
-        return nodeList;
-
-    }
+//    public List<RDFNode> getSubjectsOfObjectPropertyFilter(Property predicate) {
+//
+//
+//        ResIterator iterator = this.model.listSubjectsWithProperty(predicate);
+//        List<RDFNode> nodeList = new ArrayList<>();
+//
+//
+//        while (iterator.hasNext()) {
+//
+//            nodeList.add(iterator.next());
+//        }
+//
+//        return nodeList;
+//
+//    }
 
     public String getValueOfDataProperty(Resource subject, Property predicate, Map<String, Object> args) {
 

@@ -89,16 +89,16 @@ public class GraphqlWiring {
     }
 
     class fetchParams {
-        Resource nodeUri;
-        Property predicateURI;
+        Resource subjectResource;
+        Property property;
         SparqlClient client;
 
         public fetchParams(DataFetchingEnvironment environment) {
-                nodeUri = environment.getSource();
-                String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-                String stringpredicateURI = config.predicateURI(predicate);
-                client = environment.getContext();
-                predicateURI = client.getPropertyFromString(stringpredicateURI);
+            subjectResource = environment.getSource();
+            String predicate = ((Field) environment.getFields().toArray()[0]).getName();
+            String predicateURI = config.predicateURI(predicate);
+            client = environment.getContext();
+            property = client.getPropertyFromUri(predicateURI);
         }
     }
 
@@ -130,25 +130,25 @@ public class GraphqlWiring {
     private DataFetcher<List<RDFNode>> objectsFetcher = environment -> {
 
         fetchParams params = new fetchParams(environment);
-        return params.client.getValuesOfObjectProperty(params.nodeUri, params.predicateURI, environment.getArguments());
+        return params.client.getValuesOfObjectProperty(params.subjectResource, params.property, environment.getArguments());
     };
 
     private DataFetcher<RDFNode> objectFetcher = environment -> {
 
         fetchParams params = new fetchParams(environment);
-        return params.client.getValueOfObjectProperty(params.nodeUri, params.predicateURI, environment.getArguments());
+        return params.client.getValueOfObjectProperty(params.subjectResource, params.property, environment.getArguments());
     };
 
     private DataFetcher<List<Object>> literalValuesFetcher = environment -> {
 
         fetchParams params = new fetchParams(environment);
-        return params.client.getValuesOfDataProperty(params.nodeUri, params.predicateURI, environment.getArguments());
+        return params.client.getValuesOfDataProperty(params.subjectResource, params.property, environment.getArguments());
     };
 
     private DataFetcher<Object> literalValueFetcher = environment -> {
 
         fetchParams params = new fetchParams(environment);
-        return params.client.getValueOfDataProperty(params.nodeUri, params.predicateURI, environment.getArguments());
+        return params.client.getValueOfDataProperty(params.subjectResource, params.property, environment.getArguments());
     };
 
     private Map<Boolean, DataFetcher> objectFetchers = new HashMap<Boolean, DataFetcher>() {{
