@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.jena.sparql.util.Context;
 import org.apache.log4j.Logger;
 
 import static graphql.Scalars.*;
@@ -59,14 +58,16 @@ public class Config {
 
     private String contextFile;
     private String schemaFile;
-    private GraphqlConfig graphql;
+    private GraphqlConfig graphqlConfig;
 
     private JsonNode context;
     private ObjectNode mapping;
     private Map<String, GraphQLOutputType> outputTypes = new HashMap<>();
     private Map<String, String> users = new HashMap<>();
     private Map<String, String> passwords = new HashMap<>();
-    private TypeDefinitionRegistry schema;
+    private TypeDefinitionRegistry registry;
+    private GraphQLSchema schema;
+    private GraphQL graphql;
 
     static Logger logger = Logger.getLogger(Config.class);
 
@@ -79,7 +80,7 @@ public class Config {
     ) {
         this.contextFile = contextFile;
         this.schemaFile = schemaFile;
-        this.graphql = graphql;
+        this.graphqlConfig = graphql;
     }
 
     public Config(String propertiesFile) {
@@ -109,17 +110,21 @@ public class Config {
             );
 
             SchemaParser schemaParser = new SchemaParser();
-            this.schema = schemaParser.parse(new File(config.schemaFile));
+            this.registry = schemaParser.parse(new File(config.schemaFile));
 
-            this.mapping = mapping(schema);
+            this.mapping = mapping(registry);
 
             this.schemaFile = config.schemaFile;
             this.contextFile = config.contextFile;
-            this.graphql = config.graphql;
+            this.graphqlConfig = config.graphqlConfig;
 
         } catch (IOException e) {
             logger.error(e);
         }
+
+        GraphqlWiring wiring = new GraphqlWiring(this);
+        this.schema = wiring.schema();
+        this.graphql = GraphQL.newGraphQL(this.schema).build();
     }
 
     private ObjectNode mapping(TypeDefinitionRegistry registry) throws IOException {
@@ -310,12 +315,17 @@ public class Config {
         return passwords.get(service);
     }
 
-    public GraphqlConfig graphql() {
-        return graphql;
+    public GraphqlConfig graphqlConfig() {
+        return graphqlConfig;
     }
 
-//    public TypeDefinitionRegistry schema() {
-//        return schema;
+    public GraphQLSchema schema() {return schema; }
+
+    public GraphQL graphql() {return graphql; }
+
+
+//    public TypeDefinitionRegistry registry() {
+//        return registry;
 //    }
 
 }

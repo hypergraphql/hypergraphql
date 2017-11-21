@@ -2,15 +2,6 @@ package org.hypergraphql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import graphql.*;
-import graphql.execution.NonNullableFieldWasNullError;
-import graphql.language.Document;
-import graphql.language.SourceLocation;
-import graphql.parser.Parser;
-import graphql.schema.GraphQLSchema;
-import graphql.schema.idl.errors.NotAnOutputTypeError;
-import graphql.validation.ValidationError;
-import graphql.validation.ValidationErrorType;
-import graphql.validation.Validator;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -28,12 +19,12 @@ public class GraphqlService {
     static Logger logger = Logger.getLogger(GraphqlService.class);
 
 
-    public GraphqlService(Config config, GraphQL graphQL) {
-        this.graphQL = graphQL;
+    public GraphqlService(Config config) {
+        this.graphQL = config.graphql();
         this.config = config;
     }
 
-    public Map<String, Object> results(String query, GraphQLSchema schema) {
+    public Map<String, Object> results(String query) {
 
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> data = new HashMap<>();
@@ -45,45 +36,28 @@ public class GraphqlService {
 
         List<Map<String, String>> sparqlQueries;
 
-        List<ValidationError> validationErrors;
 
-
-        Validator validator = new Validator();
-        Parser parser = new Parser();
-        Document document;
-
-        try {
-            document = parser.parseDocument(query);
-        } catch (Exception e) {
-            GraphQLError err = new ValidationError(ValidationErrorType.InvalidSyntax, new SourceLocation(0, 0), "unrecognized symbols");
-            errors.add(err);
-            result.put("errors", errors);
-            return result;
-        }
-
-        validationErrors = validator.validateDocument(schema, document);
-        if (validationErrors.size() > 0) {
-            errors.addAll(validationErrors);
-            result.put("errors", errors);
-            return result;
-        }
 
         if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
             Converter converter = new Converter(config);
-            JsonNode jsonQuery;
-            try {
-                jsonQuery = converter.query2json(query);
 
-                sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
-            } catch (Exception e) {
-                GraphQLError err = new ValidationError(ValidationErrorType.InvalidSyntax, new SourceLocation(0, 0),
-                        "Queries of this form are not yet supported by HyperGraphQL.");
-                errors.add(err);
+            Map<String, Object> preprocessedQuery = converter.query2json(query);
+
+            List<GraphQLError> validationErrors = (List<GraphQLError>) preprocessedQuery.get("errors");
+            errors.addAll(validationErrors);
+
+            if (validationErrors.size()>0) {
+
                 result.put("errors", errors);
+
                 return result;
+
             }
 
+            JsonNode jsonQuery = (JsonNode) preprocessedQuery.get("query");
+
+            sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
 
             // uncomment this lines if you want to include the generated SPARQL queries in the GraphQL response for debugging purposes
             // extensions.put("sparqlQueries", sparqlQueries);
@@ -99,12 +73,9 @@ public class GraphqlService {
                     .build();
 
             qlResult = graphQL.execute(executionInput);
-            try {
-                data = converter.jsonLDdata(qlResult.getData(), jsonQuery);
-            } catch (IOException e) {
-                logger.error(e);
-            }
 
+            data.putAll(qlResult.getData());
+            data.put("@context", preprocessedQuery.get("context"));
         } else {
             qlResult = graphQL.execute(query);
             data = qlResult.getData();

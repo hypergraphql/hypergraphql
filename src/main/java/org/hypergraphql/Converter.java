@@ -4,12 +4,20 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import graphql.GraphQLError;
+import graphql.language.*;
+import graphql.parser.Parser;
+import graphql.validation.ValidationError;
+import graphql.validation.ValidationErrorType;
+import graphql.validation.Validator;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static graphql.Scalars.*;
 
 /**
  * Created by szymon on 15/09/2017.
@@ -28,7 +36,7 @@ public class Converter {
         put("_type", "@type");
         put("_language", "@language");
         put("_graph", "@graph");
-    }}; //from graphql names to jsonld reserved names
+    }}; //from graphqlConfig names to jsonld reserved names
 
     private LinkedList<JsonNode> queue = new LinkedList<>();
 
@@ -167,9 +175,6 @@ public class Converter {
 
     private Map<String, String> getConstructQuery(JsonNode query, Boolean rootQuery) {
 
-
-
-
         Map<String, String> output = new HashMap<>();
         String service = query.fieldNames().next();
         output.put("service", service);
@@ -179,7 +184,7 @@ public class Converter {
         String constructPattern = "";
         String wherePattern = "";
 
-        String matchParent = "";
+        String matchParent;
 
         while (fields.hasNext()) {
             JsonNode field = fields.next();
@@ -190,7 +195,8 @@ public class Converter {
             String fieldPattern = fieldPattern(field);
 
             matchParent = markTripleSTR(parentId);
-            String rootTriple = (rootQuery) ? rootTripleSTR(nodeId, field.get("name").asText()) : "";
+            String queryName = (field.has("alias")) ? field.get("alias").asText() : field.get("name").asText();
+            String rootTriple = (rootQuery) ? rootTripleSTR(nodeId, queryName) : "";
             String markTriple = markTripleSTR(nodeId);
 
             String limit = (args.has("limit")) ? limitSTR(args.get("limit").asInt()) : "";
@@ -283,74 +289,204 @@ public class Converter {
         return output;
     }
 
-    public JsonNode query2json(String query) {
+    public Map<String, Object> query2json(String query) {
 
-        query = query
-                .replaceAll(",", " ")
-                .replaceAll("\\s*:\\s*", ":")
-                .replaceAll(",", " ")
-                .replaceAll("\\{", " { ")
-                .replaceAll("}", " } ")
-                .replaceAll("\\(", " ( ")
-                .replaceAll("\\)", " ) ")
-                .replaceAll("\\s+", " ")
-                .replaceAll("\\{", "<")
-                .replaceAll("}", ">");
+        HashMap<String, Object> result = new HashMap<>();
+        List<ValidationError> validationErrors = new ArrayList<>();
 
-        Pattern namePtrn;
-        Matcher nameMtchr;
+        result.put("query", (new ObjectMapper()).createArrayNode());
+        result.put("errors", validationErrors);
 
-        do {
-            namePtrn = Pattern.compile("\\s(\\w+)\\s");
-            nameMtchr = namePtrn.matcher(query);
 
-            query = query.replaceAll("\\s(\\w+)\\s", " \"name\":\"$1\" ");
+        Validator validator = new Validator();
+        Parser parser = new Parser();
+        Document document;
 
-        } while (nameMtchr.find());
+        try {
+            document = parser.parseDocument(query);
+        } catch (Exception e) {
+            ValidationError err = new ValidationError(ValidationErrorType.InvalidSyntax, new SourceLocation(0, 0), "unrecognized symbols");
+            validationErrors.add(err);
+            return result;
+        }
 
-        do {
-            namePtrn = Pattern.compile("\\s(\\w+):");
-            nameMtchr = namePtrn.matcher(query);
+        validationErrors.addAll(validator.validateDocument(config.schema(), document));
+        if (validationErrors.size() > 0) {
+            return result;
+        }
 
-            query = query.replaceAll("\\s(\\w+):", " \"$1\":");
+        OperationDefinition opDef = (OperationDefinition) document.getDefinitions().get(0);
 
-        } while (nameMtchr.find());
+        Map<String, Object> conversionResult = getSelectionJson(opDef.getSelectionSet());
 
-        do {
-            namePtrn = Pattern.compile("[^{](\"name\":\"\\w+\")(\\s(\\(\\s([^()]*)\\s\\)))?(\\s<([^<>]*)>)");
-            nameMtchr = namePtrn.matcher(query);
+        JsonNode topQueries = (ArrayNode) conversionResult.get("query");
+        Map<String, String> context = (Map<String, String>) conversionResult.get("context");
+        result.put("query", topQueries);
+        result.put("context", context);
 
-            query = query
-                    .replaceAll("(\"name\":\"\\w+\")\\s\\(\\s([^()]*)\\s\\)\\s<([^<>]*)>", "{$1, \"args\":{$2}, \"fields\":[$3]}")
-                    .replaceAll("(\"name\":\"\\w+\")\\s<([^<>]*)>", "{$1, \"args\":{}, \"fields\":[$2]}");
+        return result;
+    }
 
-        } while (nameMtchr.find());
+    private Map<String, Object> getSelectionJson(SelectionSet selectionSet) {
 
-        query = query
-                .replaceAll("(\"name\":\"\\w+\")\\s\\(\\s([^()]*)\\s\\)", "{$1, \"args\":{$2}}")
-                .replaceAll("(\"name\":\"\\w+\")\\s", "{$1, \"args\":{}} ");
+        Map<String, Object> result = new HashMap<>();
 
-        query = query
-                .replaceAll("([^,])\\s\"", "$1, \"")
-                .replaceAll("}\\s*\\{", "}, {")
-                .replaceAll("<", "[")
-                .replaceAll(">", "]");
+        if (selectionSet==null) {
+
+            return result;
+
+        }
+
+        Map<String, String> context = new HashMap<>();
 
         ObjectMapper mapper = new ObjectMapper();
 
-        try {
-            JsonNode object = mapper.readTree(query);
+        ArrayNode fieldsJson = mapper.createArrayNode();
 
-            logger.debug("Generated query JSON: " + object.toString()); //debug message
+        List<Selection> children = selectionSet.getSelections();
 
-            return object;
-        } catch (IOException e) {
+        for (Selection child : children) {
 
-            logger.error(e);
+            Field inner = (Field) child;
 
-            return null;
+            Map<String, Object>  childrenFields = getSelectionJson(inner.getSelectionSet());
+
+            if (childrenFields.containsKey("context")) {
+
+                context.putAll((Map<String, String>) childrenFields.get("context"));
+
+            }
+
+            ObjectNode fieldJson = mapper.createObjectNode();
+
+            List<Argument> args = inner.getArguments();
+
+            ObjectNode argsJson = mapper.createObjectNode();
+
+            for (Argument arg : args) {
+
+               Value val = arg.getValue();
+               String type = val.getClass().getSimpleName();
+
+                switch (type) {
+                    case "IntValue": {
+                        long value = ((IntValue) val).getValue().longValueExact();
+                        argsJson.put(arg.getName().toString(), value);
+                        break;
+                    }
+                    case "StringValue": {
+                        String value = ((IntValue) val).getValue().toString();
+                        argsJson.put(arg.getName().toString(), value);
+                        break;
+                    }
+                    case "BooleanValue": {
+                        Boolean value = ((BooleanValue) val).isValue();
+                        argsJson.put(arg.getName().toString(), value);
+                        break;
+                    }
+                }
+            }
+
+            fieldJson.put("name", inner.getName());
+            if (inner.getAlias()!=null) {
+                fieldJson.put("alias", inner.getAlias());
+            }
+            fieldJson.put("args", argsJson);
+            if (childrenFields.containsKey("query")) {
+
+                fieldJson.put("fields", (ArrayNode) childrenFields.get("query"));
+
+            }
+
+            String contextName = (inner.getAlias()!=null) ? inner.getAlias() : inner.getName();
+
+            if (config.containsPredicate(contextName)) {
+                context.put(contextName, config.predicateURI(contextName));
+            } else {
+                if (JSONLD_VOC.containsKey(contextName)) {
+                    context.put(contextName, JSONLD_VOC.get(contextName).toString());
+                } else {
+                    context.put(contextName, "http://hypergraphql/query/" + contextName);
+                }
+            }
+
+            fieldsJson.add(fieldJson);
         }
+
+        result.put("query", fieldsJson);
+        result.put("context", context);
+
+        return result;
     }
+
+//    public JsonNode query2json(String query) {
+//
+//        query = query
+//                .replaceAll(",", " ")
+//                .replaceAll("\\s*:\\s*", ":")
+//                .replaceAll(",", " ")
+//                .replaceAll("\\{", " { ")
+//                .replaceAll("}", " } ")
+//                .replaceAll("\\(", " ( ")
+//                .replaceAll("\\)", " ) ")
+//                .replaceAll("\\s+", " ")
+//                .replaceAll("\\{", "<")
+//                .replaceAll("}", ">");
+//
+//        Pattern namePtrn;
+//        Matcher nameMtchr;
+//
+//        do {
+//            namePtrn = Pattern.compile("\\s(\\w+)\\s");
+//            nameMtchr = namePtrn.matcher(query);
+//
+//            query = query.replaceAll("\\s(\\w+)\\s", " \"name\":\"$1\" ");
+//
+//        } while (nameMtchr.find());
+//
+//        do {
+//            namePtrn = Pattern.compile("\\s(\\w+):");
+//            nameMtchr = namePtrn.matcher(query);
+//
+//            query = query.replaceAll("\\s(\\w+):", " \"$1\":");
+//
+//        } while (nameMtchr.find());
+//
+//        do {
+//            namePtrn = Pattern.compile("[^{](\"name\":\"\\w+\")(\\s(\\(\\s([^()]*)\\s\\)))?(\\s<([^<>]*)>)");
+//            nameMtchr = namePtrn.matcher(query);
+//
+//            query = query
+//                    .replaceAll("(\"name\":\"\\w+\")\\s\\(\\s([^()]*)\\s\\)\\s<([^<>]*)>", "{$1, \"args\":{$2}, \"fields\":[$3]}")
+//                    .replaceAll("(\"name\":\"\\w+\")\\s<([^<>]*)>", "{$1, \"args\":{}, \"fields\":[$2]}");
+//
+//        } while (nameMtchr.find());
+//
+//        query = query
+//                .replaceAll("(\"name\":\"\\w+\")\\s\\(\\s([^()]*)\\s\\)", "{$1, \"args\":{$2}}")
+//                .replaceAll("(\"name\":\"\\w+\")\\s", "{$1, \"args\":{}} ");
+//
+//        query = query
+//                .replaceAll("([^,])\\s\"", "$1, \"")
+//                .replaceAll("}\\s*\\{", "}, {")
+//                .replaceAll("<", "[")
+//                .replaceAll(">", "]");
+//
+//        ObjectMapper mapper = new ObjectMapper();
+//
+//        try {
+//            JsonNode object = mapper.readTree(query);
+//
+//            logger.debug("Generated query JSON: " + object.toString()); //debug message
+//
+//            return object;
+//        } catch (IOException e) {
+//
+//            logger.error(e);
+//
+//            return null;
+//        }
+//    }
 
     public JsonNode includeContextInQuery(JsonNode object) {
 
@@ -417,36 +553,36 @@ public class Converter {
     }
 
 
-    public Map<String, Object> jsonLDdata(Map<String, Object> data, JsonNode jsonQuery) throws IOException {
-
-        Map<String, Object> ldContext = new HashMap<>();
-        Map<String, Object> output = new HashMap<>();
-
-        jsonQuery.elements().forEachRemaining(elem ->
-                ldContext.put(elem.get("name").asText(), "http://hypergraphql/query/" + elem.get("name").asText())
-        );
-
-        Pattern namePtrn = Pattern.compile("\"name\":\"([^\"]*)\"");
-        Matcher nameMtchr = namePtrn.matcher(jsonQuery.toString());
-
-        while (nameMtchr.find()) {
-            String find = nameMtchr.group(1);
-            if (!ldContext.containsKey(find)) {
-                if (JSONLD_VOC.containsKey(find)) {
-                    ldContext.put(find, JSONLD_VOC.get(find));
-                } else {
-                    if (config.containsPredicate(find)) {
-                        ldContext.put(find, config.predicateURI(find));
-                    }
-                }
-            }
-        }
-
-        output.putAll(data);
-        output.put("@context", ldContext);
-
-        return output;
-    }
+//    public Map<String, Object> jsonLDdata(Map<String, Object> data, JsonNode jsonQuery) throws IOException {
+//
+//        Map<String, Object> ldContext = new HashMap<>();
+//        Map<String, Object> output = new HashMap<>();
+//
+//        jsonQuery.elements().forEachRemaining(elem ->
+//                ldContext.put(elem.get("name").asText(), "http://hypergraphql/query/" + elem.get("name").asText())
+//        );
+//
+//        Pattern namePtrn = Pattern.compile("\"name\":\"([^\"]*)\"");
+//        Matcher nameMtchr = namePtrn.matcher(jsonQuery.toString());
+//
+//        while (nameMtchr.find()) {
+//            String find = nameMtchr.group(1);
+//            if (!ldContext.containsKey(find)) {
+//                if (JSONLD_VOC.containsKey(find)) {
+//                    ldContext.put(find, JSONLD_VOC.get(find));
+//                } else {
+//                    if (config.containsPredicate(find)) {
+//                        ldContext.put(find, config.predicateURI(find));
+//                    }
+//                }
+//            }
+//        }
+//
+//        output.putAll(data);
+//        output.put("@context", ldContext);
+//
+//        return output;
+//    }
 
 }
 
