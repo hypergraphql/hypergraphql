@@ -1,19 +1,7 @@
 package org.hypergraphql;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.*;
-import graphql.execution.NonNullableFieldWasNullError;
-import graphql.language.Document;
-import graphql.language.Field;
-import graphql.language.OperationDefinition;
-import graphql.language.SourceLocation;
-import graphql.parser.Parser;
-import graphql.schema.GraphQLSchema;
-import graphql.schema.idl.errors.NotAnOutputTypeError;
-import graphql.validation.ValidationError;
-import graphql.validation.ValidationErrorType;
-import graphql.validation.Validator;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -54,19 +42,21 @@ public class GraphqlService {
 
             Converter converter = new Converter(config);
 
-            Map<String, Object> res = converter.gquery2json(query);
+            Map<String, Object> preprocessedQuery = converter.query2json(query);
 
-            List<GraphQLError> validationErrors = (List<GraphQLError>) res.get("errors");
+            List<GraphQLError> validationErrors = (List<GraphQLError>) preprocessedQuery.get("errors");
             errors.addAll(validationErrors);
 
             if (validationErrors.size()>0) {
 
                 result.put("errors", errors);
+
                 return result;
 
             }
 
-            JsonNode jsonQuery = (JsonNode) res.get("query");
+            JsonNode jsonQuery = (JsonNode) preprocessedQuery.get("query");
+
             sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
 
             // uncomment this lines if you want to include the generated SPARQL queries in the GraphQL response for debugging purposes
@@ -83,12 +73,9 @@ public class GraphqlService {
                     .build();
 
             qlResult = graphQL.execute(executionInput);
-            try {
-                data = converter.jsonLDdata(qlResult.getData(), jsonQuery);
-            } catch (IOException e) {
-                logger.error(e);
-            }
 
+            data.putAll(qlResult.getData());
+            data.put("@context", preprocessedQuery.get("context"));
         } else {
             qlResult = graphQL.execute(query);
             data = qlResult.getData();

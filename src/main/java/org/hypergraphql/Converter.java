@@ -175,9 +175,6 @@ public class Converter {
 
     private Map<String, String> getConstructQuery(JsonNode query, Boolean rootQuery) {
 
-
-
-
         Map<String, String> output = new HashMap<>();
         String service = query.fieldNames().next();
         output.put("service", service);
@@ -187,7 +184,7 @@ public class Converter {
         String constructPattern = "";
         String wherePattern = "";
 
-        String matchParent = "";
+        String matchParent;
 
         while (fields.hasNext()) {
             JsonNode field = fields.next();
@@ -198,7 +195,8 @@ public class Converter {
             String fieldPattern = fieldPattern(field);
 
             matchParent = markTripleSTR(parentId);
-            String rootTriple = (rootQuery) ? rootTripleSTR(nodeId, field.get("name").asText()) : "";
+            String queryName = (field.has("alias")) ? field.get("alias").asText() : field.get("name").asText();
+            String rootTriple = (rootQuery) ? rootTripleSTR(nodeId, queryName) : "";
             String markTriple = markTripleSTR(nodeId);
 
             String limit = (args.has("limit")) ? limitSTR(args.get("limit").asInt()) : "";
@@ -291,7 +289,7 @@ public class Converter {
         return output;
     }
 
-    public Map<String, Object> gquery2json(String query) {
+    public Map<String, Object> query2json(String query) {
 
         HashMap<String, Object> result = new HashMap<>();
         List<ValidationError> validationErrors = new ArrayList<>();
@@ -319,20 +317,27 @@ public class Converter {
 
         OperationDefinition opDef = (OperationDefinition) document.getDefinitions().get(0);
 
-        JsonNode topQueries = getSelectionJson(opDef.getSelectionSet());
+        Map<String, Object> conversionResult = getSelectionJson(opDef.getSelectionSet());
 
+        JsonNode topQueries = (ArrayNode) conversionResult.get("query");
+        Map<String, String> context = (Map<String, String>) conversionResult.get("context");
         result.put("query", topQueries);
+        result.put("context", context);
 
         return result;
     }
 
-    private ArrayNode getSelectionJson(SelectionSet selectionSet) {
+    private Map<String, Object> getSelectionJson(SelectionSet selectionSet) {
+
+        Map<String, Object> result = new HashMap<>();
 
         if (selectionSet==null) {
 
-            return null;
+            return result;
 
         }
+
+        Map<String, String> context = new HashMap<>();
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -344,7 +349,13 @@ public class Converter {
 
             Field inner = (Field) child;
 
-            ArrayNode childrenFields = getSelectionJson(inner.getSelectionSet());
+            Map<String, Object>  childrenFields = getSelectionJson(inner.getSelectionSet());
+
+            if (childrenFields.containsKey("context")) {
+
+                context.putAll((Map<String, String>) childrenFields.get("context"));
+
+            }
 
             ObjectNode fieldJson = mapper.createObjectNode();
 
@@ -377,17 +388,35 @@ public class Converter {
             }
 
             fieldJson.put("name", inner.getName());
-            fieldJson.put("alias", inner.getAlias());
+            if (inner.getAlias()!=null) {
+                fieldJson.put("alias", inner.getAlias());
+            }
             fieldJson.put("args", argsJson);
-            if (childrenFields != null) {
-                fieldJson.put("fields", childrenFields);
+            if (childrenFields.containsKey("query")) {
+
+                fieldJson.put("fields", (ArrayNode) childrenFields.get("query"));
+
+            }
+
+            String contextName = (inner.getAlias()!=null) ? inner.getAlias() : inner.getName();
+
+            if (config.containsPredicate(contextName)) {
+                context.put(contextName, config.predicateURI(contextName));
+            } else {
+                if (JSONLD_VOC.containsKey(contextName)) {
+                    context.put(contextName, JSONLD_VOC.get(contextName).toString());
+                } else {
+                    context.put(contextName, "http://hypergraphql/query/" + contextName);
+                }
             }
 
             fieldsJson.add(fieldJson);
         }
 
+        result.put("query", fieldsJson);
+        result.put("context", context);
 
-        return fieldsJson;
+        return result;
     }
 
 //    public JsonNode query2json(String query) {
@@ -524,36 +553,36 @@ public class Converter {
     }
 
 
-    public Map<String, Object> jsonLDdata(Map<String, Object> data, JsonNode jsonQuery) throws IOException {
-
-        Map<String, Object> ldContext = new HashMap<>();
-        Map<String, Object> output = new HashMap<>();
-
-        jsonQuery.elements().forEachRemaining(elem ->
-                ldContext.put(elem.get("name").asText(), "http://hypergraphql/query/" + elem.get("name").asText())
-        );
-
-        Pattern namePtrn = Pattern.compile("\"name\":\"([^\"]*)\"");
-        Matcher nameMtchr = namePtrn.matcher(jsonQuery.toString());
-
-        while (nameMtchr.find()) {
-            String find = nameMtchr.group(1);
-            if (!ldContext.containsKey(find)) {
-                if (JSONLD_VOC.containsKey(find)) {
-                    ldContext.put(find, JSONLD_VOC.get(find));
-                } else {
-                    if (config.containsPredicate(find)) {
-                        ldContext.put(find, config.predicateURI(find));
-                    }
-                }
-            }
-        }
-
-        output.putAll(data);
-        output.put("@context", ldContext);
-
-        return output;
-    }
+//    public Map<String, Object> jsonLDdata(Map<String, Object> data, JsonNode jsonQuery) throws IOException {
+//
+//        Map<String, Object> ldContext = new HashMap<>();
+//        Map<String, Object> output = new HashMap<>();
+//
+//        jsonQuery.elements().forEachRemaining(elem ->
+//                ldContext.put(elem.get("name").asText(), "http://hypergraphql/query/" + elem.get("name").asText())
+//        );
+//
+//        Pattern namePtrn = Pattern.compile("\"name\":\"([^\"]*)\"");
+//        Matcher nameMtchr = namePtrn.matcher(jsonQuery.toString());
+//
+//        while (nameMtchr.find()) {
+//            String find = nameMtchr.group(1);
+//            if (!ldContext.containsKey(find)) {
+//                if (JSONLD_VOC.containsKey(find)) {
+//                    ldContext.put(find, JSONLD_VOC.get(find));
+//                } else {
+//                    if (config.containsPredicate(find)) {
+//                        ldContext.put(find, config.predicateURI(find));
+//                    }
+//                }
+//            }
+//        }
+//
+//        output.putAll(data);
+//        output.put("@context", ldContext);
+//
+//        return output;
+//    }
 
 }
 

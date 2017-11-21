@@ -122,7 +122,8 @@ public class GraphqlWiring {
     };
 
     private DataFetcher<List<RDFNode>> instancesOfTypeFetcher = environment -> {
-        String type = ((Field) environment.getFields().toArray()[0]).getName();
+        Field field = (Field) environment.getFields().toArray()[0];
+        String type = (field.getAlias()!=null) ? field.getAlias() : field.getName();
         SparqlClient client = environment.getContext();
         List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter("http://hypergraphql/type", "http://hypergraphql/query/" + type);
         return subjects;
