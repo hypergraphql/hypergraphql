@@ -160,7 +160,7 @@ public class Converter {
         while (queue.size() > 0) {
 
             JsonNode nextQuery = queue.getFirst();
-
+            
             queue.removeFirst();
 
             try {
@@ -198,7 +198,7 @@ public class Converter {
             matchParent = markTripleSTR(parentId);
             String queryName = (field.has("alias")) ? field.get("alias").asText() : field.get("name").asText();
             String rootTriple = (rootQuery) ? rootTripleSTR(nodeId, queryName) : "";
-            String markTriple = markTripleSTR(nodeId);
+            String markTriple = (field.has("fields")) ? markTripleSTR(nodeId) : "";
 
             String limit = (args.has("limit")) ? limitSTR(args.get("limit").asInt()) : "";
             String offset = (args.has("offset")) ? offsetSTR(args.get("offset").asInt()) : "";
@@ -208,15 +208,16 @@ public class Converter {
             String subConstruct = (subqueries.containsKey("construct")) ? subqueries.get("construct") : "";
             String subWhere = (subqueries.containsKey("where")) ? subqueries.get("where") : "";
 
-            String matchPattern = (rootQuery) ? selectSTR(nodeId, fieldPattern, limit, offset) + subWhere + wherePattern : fieldPattern;
+            String matchPattern = (rootQuery) ? selectSTR(nodeId, fieldPattern, limit, offset) + subWhere + wherePattern : fieldPattern + subWhere + wherePattern;
 
             constructPattern = fieldPattern + rootTriple + markTriple + subConstruct + constructPattern;
             wherePattern = graphPattern(matchPattern, field, null);
 
             output.put("match", matchParent);
-            output.put("var", varSTR(nodeId));
+            output.put("var", varSTR(parentId));
         }
 
+        wherePattern = (rootQuery) ? wherePattern : "%s " + wherePattern;
        // String servicePattern = serviceSTR(service, wherePattern);
         String constructQuery = constructSTR(constructPattern, wherePattern);
 
@@ -254,9 +255,10 @@ public class Converter {
                     output.put("where", wherePattern);
 
                 } else {
+
                     ObjectMapper mapper = new ObjectMapper();
                     ObjectNode queueQuery = mapper.createObjectNode();
-                    queueQuery.put(serviceName, queueQuery);
+                    queueQuery.put(serviceName, query.get("fields").get(serviceName));
                     queue.add(queueQuery);
                 }
             }
