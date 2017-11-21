@@ -44,8 +44,6 @@ public class GraphqlService {
 
             Map<String, Object> preprocessedQuery = converter.query2json(query);
 
-            System.out.println(((JsonNode) preprocessedQuery.get("query")).toString());
-
             List<GraphQLError> validationErrors = (List<GraphQLError>) preprocessedQuery.get("errors");
             errors.addAll(validationErrors);
 

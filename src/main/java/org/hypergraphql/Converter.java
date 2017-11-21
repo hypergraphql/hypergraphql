@@ -367,7 +367,7 @@ public class Converter {
 
                Value val = arg.getValue();
                String type = val.getClass().getSimpleName();
-       
+
                 switch (type) {
                     case "IntValue": {
                         long value = ((IntValue) val).getValue().longValueExact();
