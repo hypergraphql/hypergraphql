@@ -65,7 +65,7 @@ public class GraphqlServiceTest {
         assert(people.size()==LIMIT);
 
 
-        SparqlClient clientExt = new SparqlClientExt(sparqlQueries, config);
+        SparqlClient clientExt = new SparqlClient(sparqlQueries, config);
 
       //  System.out.println("Model size: " + clientExt.model.size());
 
