@@ -306,7 +306,7 @@ public class Converter {
         try {
             document = parser.parseDocument(query);
         } catch (Exception e) {
-            ValidationError err = new ValidationError(ValidationErrorType.InvalidSyntax, new SourceLocation(0, 0), "unrecognized symbols");
+            ValidationError err = new ValidationError(ValidationErrorType.InvalidSyntax, new SourceLocation(0, 0), "Invalid query syntax.");
             validationErrors.add(err);
             return result;
         }
