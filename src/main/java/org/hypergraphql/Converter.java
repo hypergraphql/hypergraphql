@@ -160,6 +160,7 @@ public class Converter {
         while (queue.size() > 0) {
 
             JsonNode nextQuery = queue.getFirst();
+
             queue.removeFirst();
 
             try {
@@ -220,8 +221,6 @@ public class Converter {
         String constructQuery = constructSTR(constructPattern, wherePattern);
 
         output.put("query", constructQuery);
-
-
 
         return output;
     }
