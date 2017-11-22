@@ -194,68 +194,69 @@ The following example presents a possible mapping for the schema above, where al
 
 ```js
 {
-  "@predicates": {
-    "people": {
-      "@namedGraph": "dbpedia"
+  "predicates": {
+    "queryFields": {
+      "people": {
+        "service": "dbpedia"
+      },
+      "cities": {
+        "service": "dbpedia"
+      }
     },
-    "cities": {
-      "@namedGraph": "dbpedia"
+    "types": {
+      "Person": {
+        "@id": "http://dbpedia.org/ontology/Person"
+      },
+      "City": {
+        "@id": "http://dbpedia.org/ontology/City"
+      }
     },
-    "Person": {
-      "@id": "http://dbpedia.org/ontology/Person"
-    },
-    "City": {
-      "@id": "http://dbpedia.org/ontology/City"
-    },
-    "name": {
-      "@id": "http://xmlns.com/foaf/0.1/name",
-      "@namedGraph": "dbpedia"
-    },
-    "birthDate": {
-      "@id": "http://dbpedia.org/ontology/birthDate",
-      "@namedGraph": "dbpedia"
-    },
-    "birthPlace": {
-      "@id": "http://dbpedia.org/ontology/birthPlace",
-      "@namedGraph": "dbpedia"
-    },
-    "label": {
-      "@id": "http://www.w3.org/2000/01/rdf-schema#label",
-      "@namedGraph": "dbpedia"
-    },
-    "country": {
-      "@id": "http://dbpedia.org/ontology/country",
-      "@namedGraph": "dbpedia"
-    },
-    "leader": {
-      "@id": "http://dbpedia.org/ontology/leaderName",
-      "@namedGraph": "dbpedia"
+    "fields": {
+      "name": {
+        "@id": "http://xmlns.com/foaf/0.1/name",
+        "service": "dbpedia"
+      },
+      "birthDate": {
+        "@id": "http://dbpedia.org/ontology/birthDate",
+        "service": "dbpedia"
+      },
+      "birthPlace": {
+        "@id": "http://dbpedia.org/ontology/birthPlace",
+        "service": "dbpedia"
+      },
+      "label": {
+        "@id": "http://www.w3.org/2000/01/rdf-schema#label",
+        "service": "dbpedia"
+      },
+      "country": {
+        "@id": "http://dbpedia.org/ontology/country",
+        "service": "dbpedia"
+      },
+      "leader": {
+        "@id": "http://dbpedia.org/ontology/leaderName",
+        "service": "dbpedia"
+      }
     }
   },
-  "@namedGraphs": {
+  "services": {
     "dbpedia": {
-      "@id": "http://dbpedia.org",
-      "@endpoint": "dbpedia-endpoint"
-    }
-  },
-  "@endpoints": {
-    "dbpedia-endpoint": {
-      "@id": "http://dbpedia.org/sparql/",
-      "@user": "",
-      "@password": ""
+      "@type": "SparqlEndpoint",
+      "url": "http://dbpedia.org/sparql/",
+      "graph": "http://dbpedia.org",
+      "user": "",
+      "password": ""
     }
   }
 }
 ```
 
 Note that: 
-1) query fields (here: *people* and *cities*) are not mapped to URIs, but are nevertheless associated with some named graph;
+1) query fields (here: *people* and *cities*) are not mapped to URIs, but must be associated with some service;
 2) object types, at least those that serve as output types of the query fields (here *Person* and *City*), must be associated with URIs, but not with the named graphs, as they will always be associated with the endpoint of the field;
-3) each field of every object type must be associated with a URI and a named graph;
-4) each named graph must be assoicated with a SPARQL endpoint;
-5) each SPARQL endpoint must be accompanied by the authentication details. Whenever these are superfluous, they are asserted as empty strings.
+3) each (non-query) field must be associated with a URI and a service;
+4) each service must be specified with the URL of the SPARQL endpoint, the graph (id of a named graph), and authentication details. Whenever authentication is not required, the user and password are asserted as empty strings.
 
-HyperGraphQL supports also federated querying over a collection of SPARQL endpoints, although the current prototype implementation requires further optimizations. The federation is achieved by associating predicates with different SPARQL endpoints.  
+HyperGraphQL supports also federated querying over a collection of SPARQL endpoints, although the current prototype implementation requires further optimizations. The federation is achieved by associating predicates with different services.  
 
 ## Query rewriting 
 
