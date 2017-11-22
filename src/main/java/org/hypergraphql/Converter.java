@@ -473,7 +473,7 @@ public class Converter {
             if (!JSONLD_VOC.containsKey(name)) {
                 ServiceConfig service = (parentId==null) ? config.queryFields().get(name).service(): config.fields().get(name).service();
                 subquery.put("graph", service.graph());
-                String endpoint = service.url();
+                String endpoint = service.id();
                 ArrayNode subfields = (result.has(endpoint)) ? (ArrayNode) result.get(endpoint) : mapper.createArrayNode();
                 subfields.add(subquery);
                 if (subfields.size() > 0) {

@@ -62,7 +62,6 @@ public class SparqlClient {
 
             try {
 
-
                 HttpResponse<InputStream> resp = Unirest.get(config.services().get(service).url())
                         .queryString("query", query)
                         .header("accept", "application/rdf+xml")
