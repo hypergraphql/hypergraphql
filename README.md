@@ -238,15 +238,16 @@ The following example presents a possible mapping for the schema above, where al
       }
     }
   },
-  "services": {
-    "dbpedia": {
+  "services": [
+    {
+      "@id": "dbpedia",
       "@type": "SparqlEndpoint",
       "url": "http://dbpedia.org/sparql/",
       "graph": "http://dbpedia.org",
       "user": "",
       "password": ""
     }
-  }
+  ]
 }
 ```
 
