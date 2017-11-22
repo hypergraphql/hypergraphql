@@ -4,20 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import graphql.GraphQLError;
 import graphql.language.*;
 import graphql.parser.Parser;
 import graphql.validation.ValidationError;
 import graphql.validation.ValidationErrorType;
 import graphql.validation.Validator;
 import org.apache.log4j.Logger;
+import org.hypergraphql.config.HGQLConfig;
 
-import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static graphql.Scalars.*;
 
 /**
  * Created by szymon on 15/09/2017.
@@ -28,7 +23,7 @@ import static graphql.Scalars.*;
 public class Converter {
     static Logger logger = Logger.getLogger(Converter.class);
 
-    private Config config;
+    private HGQLConfig config;
     private Map<String, String> JSONLD_VOC = new HashMap<String, String>() {{
         put("_context", "@context");
         put("_id", "@id");
@@ -41,7 +36,7 @@ public class Converter {
     private LinkedList<JsonNode> queue = new LinkedList<>();
 
 
-    public Converter(Config config) {
+    public Converter(HGQLConfig config) {
         this.config = config;
     }
 

@@ -3,8 +3,8 @@ package org.hypergraphql;
 import com.fasterxml.jackson.databind.JsonNode;
 import graphql.*;
 import org.apache.log4j.Logger;
+import org.hypergraphql.config.HGQLConfig;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,10 +14,10 @@ import java.util.Map;
  * Created by szymon on 01/11/2017.
  */
 public class GraphqlService {
-    private Config config;
+    private HGQLConfig config;
     static Logger logger = Logger.getLogger(GraphqlService.class);
 
-    public GraphqlService(Config config) {
+    public GraphqlService(HGQLConfig config) {
         this.config = config;
     }
 

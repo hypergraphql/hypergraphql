@@ -1,4 +1,4 @@
-package org.hypergraphql;
+package org.hypergraphql.config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,8 +22,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
-
-import javax.xml.ws.Service;
+import org.hypergraphql.GraphqlWiring;
 
 import static graphql.Scalars.*;
 
@@ -31,7 +30,7 @@ import static graphql.Scalars.*;
  * Created by szymon on 05/09/2017.
  */
 
-public class Config {
+public class HGQLConfig {
 
     private final String SCHEMA_QUERY =
             "{\n" +
@@ -73,24 +72,24 @@ public class Config {
     private GraphQLSchema schema;
     private GraphQL graphql;
 
-    static Logger logger = Logger.getLogger(Config.class);
+    static Logger logger = Logger.getLogger(HGQLConfig.class);
 
     @JsonCreator
-    public Config(@JsonProperty("contextFile") String contextFile,
-                  @JsonProperty("schemaFile") String schemaFile,
-                  @JsonProperty("graphql") GraphqlConfig graphql
+    public HGQLConfig(@JsonProperty("contextFile") String contextFile,
+                      @JsonProperty("schemaFile") String schemaFile,
+                      @JsonProperty("graphql") GraphqlConfig graphql
     ) {
         this.contextFile = contextFile;
         this.schemaFile = schemaFile;
         this.graphqlConfig = graphql;
     }
 
-    public Config(String propertiesFile) {
+    public HGQLConfig(String propertiesFile) {
 
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            Config config = mapper.readValue(new File(propertiesFile), Config.class);
+            HGQLConfig config = mapper.readValue(new File(propertiesFile), HGQLConfig.class);
 
             if (config != null) {
                 try {
@@ -322,79 +321,4 @@ public class Config {
 
 }
 
-class PredicateConfig {
-    private String id;
-    private ServiceConfig service;
-
-    public PredicateConfig(JsonNode predicateJson, Map<String, ServiceConfig> services) {
-
-        if (predicateJson.has("@id")) this.id = predicateJson.get("@id").toString();
-        if (predicateJson.has("service")) this.service = services.get(predicateJson.get("service").asText());
-
-    }
-
-    public String id() { return this.id; }
-    public ServiceConfig service() { return this.service; }
-}
-
-
-class ServiceConfig {
-
-    @JsonCreator
-    public ServiceConfig(@JsonProperty("@type") String type,
-                         @JsonProperty("url") String url,
-                         @JsonProperty("user") String user,
-                         @JsonProperty("graph") String graph,
-                         @JsonProperty("password") String password
-    ) {
-        this.type = type;
-        this.url = url;
-        this.graph = graph;
-        this.user = user;
-        this.password = password;
-
-    }
-
-    private String type;
-    private String url;
-    private String graph;
-    private String user;
-    private String password;
-
-    public String type() { return this.type; }
-    public String url() { return this.url; }
-    public String graph() { return this.graph; }
-    public String user() { return this.user; }
-    public String password() { return this.password; }
-
-}
-
-class GraphqlConfig {
-
-    private Integer port;
-    private String path;
-    private String graphiql;
-
-    @JsonCreator
-    public GraphqlConfig(@JsonProperty("port") Integer port,
-                         @JsonProperty("path") String path,
-                         @JsonProperty("graphiql") String graphiql
-    ) {
-        this.port = port;
-        this.path = path;
-        this.graphiql = graphiql;
-    }
-
-    public Integer port() {
-        return port;
-    }
-
-    public String path() {
-        return path;
-    }
-
-    public String graphiql() {
-        return graphiql;
-    }
-}
 

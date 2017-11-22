@@ -1,6 +1,5 @@
 package org.hypergraphql;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +14,7 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.*;
 import org.apache.log4j.Logger;
+import org.hypergraphql.config.HGQLConfig;
 
 /**
  * Created by szymon on 22/08/2017.
@@ -30,7 +30,7 @@ public class SparqlClient {
     protected static Logger logger = Logger.getLogger(SparqlClient.class);
 
 
-    public SparqlClient(List<Map<String, String>> queryRequests, Config config) {
+    public SparqlClient(List<Map<String, String>> queryRequests, HGQLConfig config) {
 
         final String MATCH_PARENT = "SELECT (GROUP_CONCAT(CONCAT(\"<\",str(%s),\">\");separator=\" \") as ?uris) WHERE { %s }";
         final String VALUES_PATTERN = "VALUES %s { %s }";

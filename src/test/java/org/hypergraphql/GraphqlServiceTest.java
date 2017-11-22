@@ -3,6 +3,7 @@ package org.hypergraphql;
 import com.fasterxml.jackson.databind.JsonNode;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
+import org.hypergraphql.config.HGQLConfig;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class GraphqlServiceTest {
 
     @Test
     public void rdfFetchersPerformanceTest() {
-        Config config = new Config("properties.json");
+        HGQLConfig config = new HGQLConfig("properties.json");
 
         List<Map<String, String>> sparqlQueries;
 

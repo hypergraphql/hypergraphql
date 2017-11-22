@@ -23,6 +23,7 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.log4j.Logger;
+import org.hypergraphql.config.HGQLConfig;
 
 /**
  * Created by szymon on 24/08/2017.
@@ -32,7 +33,7 @@ import org.apache.log4j.Logger;
 
 public class GraphqlWiring {
 
-    private Config config;
+    private HGQLConfig config;
     private GraphQLSchema schema;
 
     static Logger logger = Logger.getLogger(GraphqlWiring.class);
@@ -60,7 +61,7 @@ public class GraphqlWiring {
     }};
 
 
-    public GraphqlWiring(Config config) {
+    public GraphqlWiring(HGQLConfig config) {
 
         this.config = config;
 
