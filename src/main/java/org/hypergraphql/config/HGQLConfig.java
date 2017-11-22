@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
@@ -64,9 +65,9 @@ public class HGQLConfig {
     private JsonNode context;
     private ObjectNode mapping;
     private Map<String, GraphQLOutputType> outputTypes = new HashMap<>();
-    private Map<String, PredicateConfig> types;
-    private Map<String, PredicateConfig> fields;
-    private Map<String, PredicateConfig> queryFields;
+    private Map<String, TypeConfig> types;
+    private Map<String, FieldConfig> fields;
+    private Map<String, QueryFieldConfig> queryFields;
     private Map<String, ServiceConfig> services;
     private TypeDefinitionRegistry registry;
     private GraphQLSchema schema;
@@ -104,12 +105,11 @@ public class HGQLConfig {
             this.queryFields = new HashMap<>();
             this.fields = new HashMap<>();
 
-            JsonNode servicesJson = context.get("services");
 
-            servicesJson.fieldNames().forEachRemaining(serviceKey -> {
+            context.get("services").elements().forEachRemaining(service -> {
                         try {
-                            ServiceConfig service = mapper.readValue(servicesJson.get(serviceKey).toString(), ServiceConfig.class);
-                            this.services.put(serviceKey, service);
+                            ServiceConfig serviceConfig = mapper.readValue(service.toString(), ServiceConfig.class);
+                            this.services.put(serviceConfig.id(), serviceConfig);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -120,21 +120,35 @@ public class HGQLConfig {
 
             JsonNode typesJson = predicatesJson.get("types");
 
-            typesJson.fieldNames().forEachRemaining(key ->
-                    this.types.put(key, new PredicateConfig(typesJson.get(key), this.services))
-                );
+            typesJson.fieldNames().forEachRemaining(key -> {
+
+                String id = typesJson.get(key).get("@id").asText();
+                TypeConfig typeConfig = new TypeConfig(id);
+                this.types.put(key, typeConfig);
+
+            });
 
             JsonNode fieldsJson = predicatesJson.get("fields");
 
-            fieldsJson.fieldNames().forEachRemaining(key ->
-                    this.fields.put(key, new PredicateConfig(fieldsJson.get(key), this.services))
-                );
+            fieldsJson.fieldNames().forEachRemaining(key -> {
+
+                ServiceConfig service = this.services.get(fieldsJson.get(key).get("service").asText());
+                String id = fieldsJson.get(key).get("@id").asText();
+                FieldConfig fieldConfig = new FieldConfig(id, service);
+                this.fields.put(key, fieldConfig);
+
+            });
 
             JsonNode queryFieldsJson = predicatesJson.get("queryFields");
 
-            queryFieldsJson.fieldNames().forEachRemaining(key ->
-                        this.queryFields.put(key, new PredicateConfig(queryFieldsJson.get(key), this.services))
-                );
+            queryFieldsJson.fieldNames().forEachRemaining(key -> {
+
+                ServiceConfig service = this.services.get(queryFieldsJson.get(key).get("service").asText());
+                QueryFieldConfig queryFieldConfig = new QueryFieldConfig(service);
+                this.queryFields.put(key, queryFieldConfig);
+
+
+            });
 
             SchemaParser schemaParser = new SchemaParser();
             this.registry = schemaParser.parse(new File(config.schemaFile));
@@ -311,9 +325,9 @@ public class HGQLConfig {
     }
 
     public Map<String, ServiceConfig> services() { return this.services; }
-    public Map<String, PredicateConfig> types() { return this.types; }
-    public Map<String, PredicateConfig> fields() { return this.fields; }
-    public Map<String, PredicateConfig> queryFields() { return this.queryFields; }
+    public Map<String, TypeConfig> types() { return this.types; }
+    public Map<String, FieldConfig> fields() { return this.fields; }
+    public Map<String, QueryFieldConfig> queryFields() { return this.queryFields; }
 
     public GraphQLSchema schema() {return schema; }
 

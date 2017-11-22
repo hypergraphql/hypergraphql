@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class GraphqlServiceTest {
 
-    private final int LIMIT = 1000;
+    private final int LIMIT = 100;
 
     private final String TEST_QUERY =
                     "{\n" +
@@ -26,7 +26,7 @@ public class GraphqlServiceTest {
                     "}}\n";
 
     @Test
-    public void rdfFetchersPerformanceTest() {
+    public void fetchingDataToLocalFromQuery() {
         HGQLConfig config = new HGQLConfig("properties.json");
 
         List<Map<String, String>> sparqlQueries;
@@ -39,8 +39,6 @@ public class GraphqlServiceTest {
         sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
 
         SparqlClient client = new SparqlClient(sparqlQueries, config);
-
-     //   System.out.println("Model size:" + client.model.size());
 
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
                 .query(query)
@@ -60,38 +58,6 @@ public class GraphqlServiceTest {
         Map<String, Object> data =  qlResult.getData();
 
         ArrayList people = (ArrayList) data.get("people");
-
-
-      //  System.out.println("No of matches: " + people.size());
-        assert(people.size()==LIMIT);
-
-
-        SparqlClient clientExt = new SparqlClient(sparqlQueries, config);
-
-      //  System.out.println("Model size: " + clientExt.model.size());
-
-
-        ExecutionInput executionInputExt = ExecutionInput.newExecutionInput()
-                .query(query)
-                .context(clientExt)
-                .build();
-
-
-        tStart = System.currentTimeMillis();
-
-        ExecutionResult qlResultExt = config.graphql().execute(executionInputExt);
-
-        tEnd = System.currentTimeMillis();
-        tDelta = tEnd - tStart;
-        elapsedSeconds = tDelta / 1000.0;
-
-        System.out.println("SparqlClientExt fetchers: " + elapsedSeconds);
-
-        data =  qlResultExt.getData();
-
-        people = (ArrayList) data.get("people");
-
-    //    System.out.println("No of matches: " + people.size());
 
         assert(people.size()==LIMIT);
 
