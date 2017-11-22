@@ -65,7 +65,7 @@ public class SparqlClient {
                 HttpResponse<InputStream> resp = Unirest.get(service)
                         .queryString("query", query)
                         .header("accept", "application/rdf+xml")
-                        .basicAuth(config.serviceUsr(service), config.servicePswd(service))
+                        .basicAuth(config.services().get(service).user(), config.services().get(service).password())
                         .asBinary();
 
                 Model next = ModelFactory.createDefaultModel();

@@ -23,6 +23,8 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
+import javax.xml.ws.Service;
+
 import static graphql.Scalars.*;
 
 /**
@@ -63,15 +65,15 @@ public class Config {
     private JsonNode context;
     private ObjectNode mapping;
     private Map<String, GraphQLOutputType> outputTypes = new HashMap<>();
-    private Map<String, String> users = new HashMap<>();
-    private Map<String, String> passwords = new HashMap<>();
+    private Map<String, PredicateConfig> types;
+    private Map<String, PredicateConfig> fields;
+    private Map<String, PredicateConfig> queryFields;
+    private Map<String, ServiceConfig> services;
     private TypeDefinitionRegistry registry;
     private GraphQLSchema schema;
     private GraphQL graphql;
 
     static Logger logger = Logger.getLogger(Config.class);
-
-
 
     @JsonCreator
     public Config(@JsonProperty("contextFile") String contextFile,
@@ -98,16 +100,42 @@ public class Config {
                 }
             }
 
-            context.get("@endpoints").fieldNames().forEachRemaining(endpoint ->
-                    {
-                        String uri = context.get("@endpoints").get(endpoint).get("@id").asText();
-                        String user = context.get("@endpoints").get(endpoint).get("@user").asText();
-                        String password = context.get("@endpoints").get(endpoint).get("@password").asText();
+            this.services = new HashMap<>();
+            this.types = new HashMap<>();
+            this.queryFields = new HashMap<>();
+            this.fields = new HashMap<>();
 
-                        users.put(uri, user);
-                        passwords.put(uri, password);
+            JsonNode servicesJson = context.get("services");
+
+            servicesJson.fieldNames().forEachRemaining(serviceKey -> {
+                        try {
+                            ServiceConfig service = mapper.readValue(servicesJson.get(serviceKey).toString(), ServiceConfig.class);
+                            this.services.put(serviceKey, service);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
             );
+
+            JsonNode predicatesJson = context.get("predicates");
+
+            JsonNode typesJson = predicatesJson.get("types");
+
+            typesJson.fieldNames().forEachRemaining(key ->
+                    this.types.put(key, new PredicateConfig(typesJson.get(key), this.services))
+                );
+
+            JsonNode fieldsJson = predicatesJson.get("fields");
+
+            fieldsJson.fieldNames().forEachRemaining(key ->
+                    this.fields.put(key, new PredicateConfig(fieldsJson.get(key), this.services))
+                );
+
+            JsonNode queryFieldsJson = predicatesJson.get("queryFields");
+
+            queryFieldsJson.fieldNames().forEachRemaining(key ->
+                        this.queryFields.put(key, new PredicateConfig(queryFieldsJson.get(key), this.services))
+                );
 
             SchemaParser schemaParser = new SchemaParser();
             this.registry = schemaParser.parse(new File(config.schemaFile));
@@ -277,56 +305,67 @@ public class Config {
         return outputTypes.get(id);
     }
 
-    public Boolean containsPredicate(String name) {
 
-        return (context.get("@predicates").has(name) && context.get("@predicates").get(name).has("@id"));
-
-    }
-
-    public String predicateURI(String name) {
-
-        return context.get("@predicates").get(name).get("@id").asText();
-
-    }
-
-    public String predicateGraph(String name) {
-
-        String gName = context.get("@predicates").get(name).get("@namedGraph").asText();
-
-        return context.get("@namedGraphs").get(gName).get("@id").asText();
-
-    }
-
-    public String predicateEndpoint(String name) {
-
-        String gName = context.get("@predicates").get(name).get("@namedGraph").asText();
-
-        String eName = context.get("@namedGraphs").get(gName).get("@endpoint").asText();
-
-        return context.get("@endpoints").get(eName).get("@id").asText();
-
-    }
-
-    public String serviceUsr(String service) {
-        return users.get(service);
-    }
-
-    public String servicePswd(String service) {
-        return passwords.get(service);
-    }
 
     public GraphqlConfig graphqlConfig() {
         return graphqlConfig;
     }
 
+    public Map<String, ServiceConfig> services() { return this.services; }
+    public Map<String, PredicateConfig> types() { return this.types; }
+    public Map<String, PredicateConfig> fields() { return this.fields; }
+    public Map<String, PredicateConfig> queryFields() { return this.queryFields; }
+
     public GraphQLSchema schema() {return schema; }
 
     public GraphQL graphql() {return graphql; }
 
+}
 
-//    public TypeDefinitionRegistry registry() {
-//        return registry;
-//    }
+class PredicateConfig {
+    private String id;
+    private ServiceConfig service;
+
+    public PredicateConfig(JsonNode predicateJson, Map<String, ServiceConfig> services) {
+
+        if (predicateJson.has("@id")) this.id = predicateJson.get("@id").toString();
+        if (predicateJson.has("service")) this.service = services.get(predicateJson.get("service").asText());
+
+    }
+
+    public String id() { return this.id; }
+    public ServiceConfig service() { return this.service; }
+}
+
+
+class ServiceConfig {
+
+    @JsonCreator
+    public ServiceConfig(@JsonProperty("@type") String type,
+                         @JsonProperty("url") String url,
+                         @JsonProperty("user") String user,
+                         @JsonProperty("graph") String graph,
+                         @JsonProperty("password") String password
+    ) {
+        this.type = type;
+        this.url = url;
+        this.graph = graph;
+        this.user = user;
+        this.password = password;
+
+    }
+
+    private String type;
+    private String url;
+    private String graph;
+    private String user;
+    private String password;
+
+    public String type() { return this.type; }
+    public String url() { return this.url; }
+    public String graph() { return this.graph; }
+    public String user() { return this.user; }
+    public String password() { return this.password; }
 
 }
 

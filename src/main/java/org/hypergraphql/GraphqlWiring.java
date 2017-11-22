@@ -96,7 +96,7 @@ public class GraphqlWiring {
         public fetchParams(DataFetchingEnvironment environment) {
             subjectResource = environment.getSource();
             String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-            String predicateURI = config.predicateURI(predicate);
+            String predicateURI = config.fields().get(predicate).id();
             client = environment.getContext();
             property = client.getPropertyFromUri(predicateURI);
         }
@@ -114,7 +114,7 @@ public class GraphqlWiring {
 
     private DataFetcher<String> typeFetcher = environment -> {
         String typeName = environment.getParentType().getName();
-        String type = (config.containsPredicate(typeName))? config.predicateURI(typeName) : null;
+        String type = (config.types().containsKey(typeName))? config.types().get(typeName).id() : null;
         return type;
 
     };
@@ -184,8 +184,8 @@ public class GraphqlWiring {
 
         String description;
 
-        if (config.containsPredicate(typeName)) {
-            String uri = config.predicateURI(typeName);
+        if (config.types().containsKey(typeName)) {
+            String uri = config.types().get(typeName).id();
             description = uri;
         } else {
             description = "An auxiliary type, not mapped to RDF.";
@@ -201,7 +201,7 @@ public class GraphqlWiring {
             builtFields.add(_idField);
         }
 
-        if (config.containsPredicate(typeName)) builtFields.add(_typeField);
+        if (config.types().containsKey(typeName)) builtFields.add(_typeField);
 
         GraphQLObjectType newObjectType = newObject()
                 .name(typeName)
@@ -251,9 +251,9 @@ public class GraphqlWiring {
         }
 
         String fieldName = fieldDef.get("name").asText();
-        String graphName = config.predicateGraph(fieldName);
-        String endpointURI = config.predicateEndpoint(fieldName);
-        String uri = (config.containsPredicate(fieldName)) ? config.predicateURI(fieldName) : "";
+        String graphName = (isQueryType) ? config.queryFields().get(fieldName).service().graph() : config.fields().get(fieldName).service().graph();
+        String endpointURI = (isQueryType) ? config.queryFields().get(fieldName).service().url() : config.fields().get(fieldName).service().url();
+        String uri = (isQueryType) ? null : config.fields().get(fieldName).id();
         String description = uri + " (graph: " + graphName + "; endpoint: " + endpointURI + ")";
 
 
