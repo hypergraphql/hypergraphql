@@ -2,6 +2,7 @@ package org.hypergraphql;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.hypergraphql.config.HGQLConfig;
 
 public class Main {
 
@@ -11,7 +12,7 @@ public class Main {
     public static void main(String[] args) {
 
         PropertyConfigurator.configure("log4j.properties");
-        Config config = new Config("properties.json");
+        HGQLConfig config = new HGQLConfig("properties.json");
 
         System.out.println("GraphQL server started at: http://localhost:" + config.graphqlConfig().port() + config.graphqlConfig().path());
         System.out.println("GraphiQL UI available at: http://localhost:" + config.graphqlConfig().port() + config.graphqlConfig().graphiql());

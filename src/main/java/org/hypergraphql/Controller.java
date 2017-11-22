@@ -2,12 +2,11 @@ package org.hypergraphql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import graphql.GraphQL;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import graphql.schema.GraphQLSchema;
+import org.hypergraphql.config.HGQLConfig;
 import spark.ModelAndView;
 import spark.template.velocity.VelocityTemplateEngine;
 
@@ -19,7 +18,7 @@ import static spark.Spark.*;
 public class Controller {
 
 
-    public static void start(Config config) {
+    public static void start(HGQLConfig config) {
 
 
         port(config.graphqlConfig().port());

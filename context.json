@@ -1,94 +1,94 @@
 {
-  "@predicates": {
-    "people": {
-      "@namedGraph": "live-dbpedia"
+  "predicates": {
+    "types": {
+      "Person": {
+        "@id": "http://dbpedia.org/ontology/Person"
+      },
+      "Mountain": {
+        "@id": "http://dbpedia.org/ontology/Mountain"
+      },
+      "Company": {
+        "@id": "http://dbpedia.org/ontology/Company"
+      },
+      "City": {
+        "@id": "http://dbpedia.org/ontology/City"
+      }
     },
-    "mountains": {
-      "@namedGraph": "dbpedia"
+    "queryFields": {
+      "people": {
+        "service": "live-dbpedia"
+      },
+      "mountains": {
+        "service": "dbpedia"
+      },
+      "companies": {
+        "service": "dbpedia"
+      },
+      "cities": {
+        "service": "dbpedia"
+      }
     },
-    "companies": {
-      "@namedGraph": "dbpedia"
-    },
-    "cities": {
-      "@namedGraph": "dbpedia"
-    },
-    "Person": {
-      "@id": "http://dbpedia.org/ontology/Person"
-    },
-    "Mountain": {
-      "@id": "http://dbpedia.org/ontology/Mountain"
-    },
-    "Company": {
-      "@id": "http://dbpedia.org/ontology/Company"
-    },
-    "City": {
-      "@id": "http://dbpedia.org/ontology/City"
-    },
-    "name": {
-      "@id": "http://xmlns.com/foaf/0.1/name",
-      "@namedGraph": "dbpedia"
-    },
-    "birthDate": {
-      "@id": "http://dbpedia.org/ontology/birthDate",
-      "@namedGraph": "dbpedia"
-    },
-    "birthPlace": {
-      "@id": "http://dbpedia.org/ontology/birthPlace",
-      "@namedGraph": "dbpedia"
-    },
-    "deathPlace": {
-      "@id": "http://dbpedia.org/ontology/deathPlace",
-      "@namedGraph": "dbpedia"
-    },
-    "deathDate": {
-      "@id": "http://dbpedia.org/ontology/deathDate",
-      "@namedGraph": "dbpedia"
-    },
-    "label": {
-      "@id": "http://www.w3.org/2000/01/rdf-schema#label",
-      "@namedGraph": "dbpedia"
-    },
-    "country": {
-      "@id": "http://dbpedia.org/ontology/country",
-      "@namedGraph": "dbpedia"
-    },
-    "leader": {
-      "@id": "http://dbpedia.org/ontology/leaderName",
-      "@namedGraph": "dbpedia"
-    },
-    "locationCity": {
-      "@id": "http://dbpedia.org/ontology/locationCity",
-      "@namedGraph": "dbpedia"
-    },
-    "owner": {
-      "@id": "http://dbpedia.org/ontology/owner",
-      "@namedGraph": "dbpedia"
-    },
-    "firstAscentPerson": {
-      "@id": "http://dbpedia.org/ontology/firstAscentPerson",
-      "@namedGraph": "dbpedia"
+    "fields": {
+      "name": {
+        "@id": "http://xmlns.com/foaf/0.1/name",
+        "service": "dbpedia"
+      },
+      "birthDate": {
+        "@id": "http://dbpedia.org/ontology/birthDate",
+        "service": "dbpedia"
+      },
+      "birthPlace": {
+        "@id": "http://dbpedia.org/ontology/birthPlace",
+        "service": "dbpedia"
+      },
+      "deathPlace": {
+        "@id": "http://dbpedia.org/ontology/deathPlace",
+        "service": "dbpedia"
+      },
+      "deathDate": {
+        "@id": "http://dbpedia.org/ontology/deathDate",
+        "service": "dbpedia"
+      },
+      "label": {
+        "@id": "http://www.w3.org/2000/01/rdf-schema#label",
+        "service": "dbpedia"
+      },
+      "country": {
+        "@id": "http://dbpedia.org/ontology/country",
+        "service": "dbpedia"
+      },
+      "leader": {
+        "@id": "http://dbpedia.org/ontology/leaderName",
+        "service": "dbpedia"
+      },
+      "locationCity": {
+        "@id": "http://dbpedia.org/ontology/locationCity",
+        "service": "dbpedia"
+      },
+      "owner": {
+        "@id": "http://dbpedia.org/ontology/owner",
+        "service": "dbpedia"
+      },
+      "firstAscentPerson": {
+        "@id": "http://dbpedia.org/ontology/firstAscentPerson",
+        "service": "dbpedia"
+      }
     }
   },
-  "@namedGraphs": {
+  "services": {
     "dbpedia": {
-      "@id": "http://dbpedia.org",
-      "@endpoint": "dbpedia-endpoint"
+      "@type": "SparqlEndpoint",
+      "url": "http://dbpedia.org/sparql/",
+      "graph": "http://dbpedia.org",
+      "user": "",
+      "password": ""
     },
     "live-dbpedia": {
-      "@id": "",
-      "@endpoint": "live-dbpedia-endpoint"
-    }
-  },
-  "@endpoints": {
-    "dbpedia-endpoint": {
-      "@id": "http://dbpedia.org/sparql/",
-      "@user": "",
-      "@password": ""
-    },
-    "live-dbpedia-endpoint": {
-      "@id": "http://live.dbpedia.org/sparql/",
-      "@user": "",
-      "@password": ""
+      "@type": "SparqlEndpoint",
+      "url": "http://live.dbpedia.org/sparql/",
+      "graph": "",
+      "user": "",
+      "password": ""
     }
   }
 }

@@ -1,4 +1,4 @@
-package org.hypergraphql;
+package org.hypergraphql.config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
+import org.hypergraphql.GraphqlWiring;
 
 import static graphql.Scalars.*;
 
@@ -29,7 +30,7 @@ import static graphql.Scalars.*;
  * Created by szymon on 05/09/2017.
  */
 
-public class Config {
+public class HGQLConfig {
 
     private final String SCHEMA_QUERY =
             "{\n" +
@@ -63,32 +64,32 @@ public class Config {
     private JsonNode context;
     private ObjectNode mapping;
     private Map<String, GraphQLOutputType> outputTypes = new HashMap<>();
-    private Map<String, String> users = new HashMap<>();
-    private Map<String, String> passwords = new HashMap<>();
+    private Map<String, PredicateConfig> types;
+    private Map<String, PredicateConfig> fields;
+    private Map<String, PredicateConfig> queryFields;
+    private Map<String, ServiceConfig> services;
     private TypeDefinitionRegistry registry;
     private GraphQLSchema schema;
     private GraphQL graphql;
 
-    static Logger logger = Logger.getLogger(Config.class);
-
-
+    static Logger logger = Logger.getLogger(HGQLConfig.class);
 
     @JsonCreator
-    public Config(@JsonProperty("contextFile") String contextFile,
-                  @JsonProperty("schemaFile") String schemaFile,
-                  @JsonProperty("graphql") GraphqlConfig graphql
+    public HGQLConfig(@JsonProperty("contextFile") String contextFile,
+                      @JsonProperty("schemaFile") String schemaFile,
+                      @JsonProperty("graphql") GraphqlConfig graphql
     ) {
         this.contextFile = contextFile;
         this.schemaFile = schemaFile;
         this.graphqlConfig = graphql;
     }
 
-    public Config(String propertiesFile) {
+    public HGQLConfig(String propertiesFile) {
 
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            Config config = mapper.readValue(new File(propertiesFile), Config.class);
+            HGQLConfig config = mapper.readValue(new File(propertiesFile), HGQLConfig.class);
 
             if (config != null) {
                 try {
@@ -98,16 +99,42 @@ public class Config {
                 }
             }
 
-            context.get("@endpoints").fieldNames().forEachRemaining(endpoint ->
-                    {
-                        String uri = context.get("@endpoints").get(endpoint).get("@id").asText();
-                        String user = context.get("@endpoints").get(endpoint).get("@user").asText();
-                        String password = context.get("@endpoints").get(endpoint).get("@password").asText();
+            this.services = new HashMap<>();
+            this.types = new HashMap<>();
+            this.queryFields = new HashMap<>();
+            this.fields = new HashMap<>();
 
-                        users.put(uri, user);
-                        passwords.put(uri, password);
+            JsonNode servicesJson = context.get("services");
+
+            servicesJson.fieldNames().forEachRemaining(serviceKey -> {
+                        try {
+                            ServiceConfig service = mapper.readValue(servicesJson.get(serviceKey).toString(), ServiceConfig.class);
+                            this.services.put(serviceKey, service);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
             );
+
+            JsonNode predicatesJson = context.get("predicates");
+
+            JsonNode typesJson = predicatesJson.get("types");
+
+            typesJson.fieldNames().forEachRemaining(key ->
+                    this.types.put(key, new PredicateConfig(typesJson.get(key), this.services))
+                );
+
+            JsonNode fieldsJson = predicatesJson.get("fields");
+
+            fieldsJson.fieldNames().forEachRemaining(key ->
+                    this.fields.put(key, new PredicateConfig(fieldsJson.get(key), this.services))
+                );
+
+            JsonNode queryFieldsJson = predicatesJson.get("queryFields");
+
+            queryFieldsJson.fieldNames().forEachRemaining(key ->
+                        this.queryFields.put(key, new PredicateConfig(queryFieldsJson.get(key), this.services))
+                );
 
             SchemaParser schemaParser = new SchemaParser();
             this.registry = schemaParser.parse(new File(config.schemaFile));
@@ -277,85 +304,21 @@ public class Config {
         return outputTypes.get(id);
     }
 
-    public Boolean containsPredicate(String name) {
 
-        return (context.get("@predicates").has(name) && context.get("@predicates").get(name).has("@id"));
-
-    }
-
-    public String predicateURI(String name) {
-
-        return context.get("@predicates").get(name).get("@id").asText();
-
-    }
-
-    public String predicateGraph(String name) {
-
-        String gName = context.get("@predicates").get(name).get("@namedGraph").asText();
-
-        return context.get("@namedGraphs").get(gName).get("@id").asText();
-
-    }
-
-    public String predicateEndpoint(String name) {
-
-        String gName = context.get("@predicates").get(name).get("@namedGraph").asText();
-
-        String eName = context.get("@namedGraphs").get(gName).get("@endpoint").asText();
-
-        return context.get("@endpoints").get(eName).get("@id").asText();
-
-    }
-
-    public String serviceUsr(String service) {
-        return users.get(service);
-    }
-
-    public String servicePswd(String service) {
-        return passwords.get(service);
-    }
 
     public GraphqlConfig graphqlConfig() {
         return graphqlConfig;
     }
 
+    public Map<String, ServiceConfig> services() { return this.services; }
+    public Map<String, PredicateConfig> types() { return this.types; }
+    public Map<String, PredicateConfig> fields() { return this.fields; }
+    public Map<String, PredicateConfig> queryFields() { return this.queryFields; }
+
     public GraphQLSchema schema() {return schema; }
 
     public GraphQL graphql() {return graphql; }
 
-
-//    public TypeDefinitionRegistry registry() {
-//        return registry;
-//    }
-
 }
 
-class GraphqlConfig {
-
-    private Integer port;
-    private String path;
-    private String graphiql;
-
-    @JsonCreator
-    public GraphqlConfig(@JsonProperty("port") Integer port,
-                         @JsonProperty("path") String path,
-                         @JsonProperty("graphiql") String graphiql
-    ) {
-        this.port = port;
-        this.path = path;
-        this.graphiql = graphiql;
-    }
-
-    public Integer port() {
-        return port;
-    }
-
-    public String path() {
-        return path;
-    }
-
-    public String graphiql() {
-        return graphiql;
-    }
-}
 

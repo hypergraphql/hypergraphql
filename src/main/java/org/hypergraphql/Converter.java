@@ -4,20 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import graphql.GraphQLError;
 import graphql.language.*;
 import graphql.parser.Parser;
 import graphql.validation.ValidationError;
 import graphql.validation.ValidationErrorType;
 import graphql.validation.Validator;
 import org.apache.log4j.Logger;
+import org.hypergraphql.config.HGQLConfig;
 
-import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static graphql.Scalars.*;
 
 /**
  * Created by szymon on 15/09/2017.
@@ -28,7 +23,7 @@ import static graphql.Scalars.*;
 public class Converter {
     static Logger logger = Logger.getLogger(Converter.class);
 
-    private Config config;
+    private HGQLConfig config;
     private Map<String, String> JSONLD_VOC = new HashMap<String, String>() {{
         put("_context", "@context");
         put("_id", "@id");
@@ -41,7 +36,7 @@ public class Converter {
     private LinkedList<JsonNode> queue = new LinkedList<>();
 
 
-    public Converter(Config config) {
+    public Converter(HGQLConfig config) {
         this.config = config;
     }
 
@@ -402,8 +397,8 @@ public class Converter {
 
                 String contextName = (inner.getAlias() != null) ? inner.getAlias() : inner.getName();
 
-                if (config.containsPredicate(contextName)) {
-                    context.put(contextName, config.predicateURI(contextName));
+                if (config.fields().containsKey(contextName)) {
+                    context.put(contextName, config.fields().get(contextName).id());
                 } else {
                     if (JSONLD_VOC.containsKey(contextName)) {
                         context.put(contextName, JSONLD_VOC.get(contextName).toString());
@@ -423,74 +418,6 @@ public class Converter {
 
     }
 
-//    public JsonNode query2json(String query) {
-//
-//        query = query
-//                .replaceAll(",", " ")
-//                .replaceAll("\\s*:\\s*", ":")
-//                .replaceAll(",", " ")
-//                .replaceAll("\\{", " { ")
-//                .replaceAll("}", " } ")
-//                .replaceAll("\\(", " ( ")
-//                .replaceAll("\\)", " ) ")
-//                .replaceAll("\\s+", " ")
-//                .replaceAll("\\{", "<")
-//                .replaceAll("}", ">");
-//
-//        Pattern namePtrn;
-//        Matcher nameMtchr;
-//
-//        do {
-//            namePtrn = Pattern.compile("\\s(\\w+)\\s");
-//            nameMtchr = namePtrn.matcher(query);
-//
-//            query = query.replaceAll("\\s(\\w+)\\s", " \"name\":\"$1\" ");
-//
-//        } while (nameMtchr.find());
-//
-//        do {
-//            namePtrn = Pattern.compile("\\s(\\w+):");
-//            nameMtchr = namePtrn.matcher(query);
-//
-//            query = query.replaceAll("\\s(\\w+):", " \"$1\":");
-//
-//        } while (nameMtchr.find());
-//
-//        do {
-//            namePtrn = Pattern.compile("[^{](\"name\":\"\\w+\")(\\s(\\(\\s([^()]*)\\s\\)))?(\\s<([^<>]*)>)");
-//            nameMtchr = namePtrn.matcher(query);
-//
-//            query = query
-//                    .replaceAll("(\"name\":\"\\w+\")\\s\\(\\s([^()]*)\\s\\)\\s<([^<>]*)>", "{$1, \"args\":{$2}, \"fields\":[$3]}")
-//                    .replaceAll("(\"name\":\"\\w+\")\\s<([^<>]*)>", "{$1, \"args\":{}, \"fields\":[$2]}");
-//
-//        } while (nameMtchr.find());
-//
-//        query = query
-//                .replaceAll("(\"name\":\"\\w+\")\\s\\(\\s([^()]*)\\s\\)", "{$1, \"args\":{$2}}")
-//                .replaceAll("(\"name\":\"\\w+\")\\s", "{$1, \"args\":{}} ");
-//
-//        query = query
-//                .replaceAll("([^,])\\s\"", "$1, \"")
-//                .replaceAll("}\\s*\\{", "}, {")
-//                .replaceAll("<", "[")
-//                .replaceAll(">", "]");
-//
-//        ObjectMapper mapper = new ObjectMapper();
-//
-//        try {
-//            JsonNode object = mapper.readTree(query);
-//
-//            logger.debug("Generated query JSON: " + object.toString()); //debug message
-//
-//            return object;
-//        } catch (IOException e) {
-//
-//            logger.error(e);
-//
-//            return null;
-//        }
-//    }
 
     public JsonNode includeContextInQuery(JsonNode object) {
 
@@ -534,17 +461,17 @@ public class Converter {
                 }
             }
 
-            if (config.containsPredicate(targetName)) {
-                subquery.put("targetURI", config.predicateURI(targetName));
+            if (config.types().containsKey(targetName)) {
+                subquery.put("targetURI", config.types().get(targetName).id());
             }
 
-            if (config.containsPredicate(name)) {
-                subquery.put("uri", config.predicateURI(name));
+            if (config.fields().containsKey(name)) {
+                subquery.put("uri", config.fields().get(name).id());
             }
 
             if (!JSONLD_VOC.containsKey(name)) {
-                subquery.put("graph", config.predicateGraph(name));
-                String endpoint = config.predicateEndpoint(name);
+                subquery.put("graph", config.fields().get(name).service().graph());
+                String endpoint = config.fields().get(name).service().url();
                 ArrayNode subfields = (result.has(endpoint)) ? (ArrayNode) result.get(endpoint) : mapper.createArrayNode();
                 subfields.add(subquery);
                 if (subfields.size() > 0) {
@@ -555,38 +482,6 @@ public class Converter {
 
         return result;
     }
-
-
-//    public Map<String, Object> jsonLDdata(Map<String, Object> data, JsonNode jsonQuery) throws IOException {
-//
-//        Map<String, Object> ldContext = new HashMap<>();
-//        Map<String, Object> output = new HashMap<>();
-//
-//        jsonQuery.elements().forEachRemaining(elem ->
-//                ldContext.put(elem.get("name").asText(), "http://hypergraphql/query/" + elem.get("name").asText())
-//        );
-//
-//        Pattern namePtrn = Pattern.compile("\"name\":\"([^\"]*)\"");
-//        Matcher nameMtchr = namePtrn.matcher(jsonQuery.toString());
-//
-//        while (nameMtchr.find()) {
-//            String find = nameMtchr.group(1);
-//            if (!ldContext.containsKey(find)) {
-//                if (JSONLD_VOC.containsKey(find)) {
-//                    ldContext.put(find, JSONLD_VOC.get(find));
-//                } else {
-//                    if (config.containsPredicate(find)) {
-//                        ldContext.put(find, config.predicateURI(find));
-//                    }
-//                }
-//            }
-//        }
-//
-//        output.putAll(data);
-//        output.put("@context", ldContext);
-//
-//        return output;
-//    }
 
 }
 
