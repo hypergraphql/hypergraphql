@@ -19,7 +19,7 @@ The responses of HyperGraphQL are [JSON-LD](http://json-ld.org) objects that con
 ![HyperGraphQL-screenshot](docs/screenshot.png)
 
 
-## GraphQL schema + RDF mapping = HyperGraphQL server
+## GraphQL schema + RDF/service mapping = HyperGraphQL server
 
 To set up a HyperGraphQL server you only need to provide your GraphQL type schema and its mapping to the target RDF vocabulary and SPARQL endpoints. The complete GraphQL wiring is conducted automatically on initiating the server. 
 
@@ -182,15 +182,14 @@ type Country {
 }
 ```
 
-## RDF mapping
+## RDF/service mapping
 
-The RDF mapping consists of three components:
+The RDF/service mapping consists of two components:
 
-- *@predicates*: defining the URIs associated with the GraphQL vocabulary and the named graphs from which the data is to be fetched;
-- *@namedGraphs*: defining the SPARQL endpoints where the named graphs are located;
-- *@endpoints*: defining the URLs of the SPARQL endpoints and their authentication details. 
+- *predicates*: defining the URIs associated with the GraphQL vocabulary and the services from which the data is to be fetched;
+- *services*: providing the details of each involved service (SPARQL endpoint).
 
-The following example presents a possible mapping for the schema above, where all predicates are associated with the *http://dbpedia.org* graph.
+The following example presents a possible mapping for the schema above, where all predicates are associated with the default graph of *http://dbpedia.org* SPARQL endpoint.
 
 ```js
 {
