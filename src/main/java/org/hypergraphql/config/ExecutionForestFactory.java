@@ -1,55 +1,38 @@
 package org.hypergraphql.config;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import graphql.language.*;
-import org.hypergraphql.ExecutionForrest;
-import org.hypergraphql.TreeExecutionNode;
+import org.hypergraphql.ExecutionForest;
+import org.hypergraphql.ExecutionTreeNode;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-public class TreeExecutionFactory {
+public class ExecutionForestFactory {
 
     HGQLConfig config;
 
-    public TreeExecutionFactory(HGQLConfig config) {
+    public ExecutionForestFactory(HGQLConfig config) {
         this.config = config;
     }
 
 
-    public ExecutionForrest getExecutionTree(Document queryDocument ) {
+    public ExecutionForest getExecutionForest(Document queryDocument ) {
 
-        ExecutionForrest forest = new ExecutionForrest();
+        ExecutionForest forest = new ExecutionForest();
 
         OperationDefinition opDef = (OperationDefinition) queryDocument.getDefinitions().get(0);
         SelectionSet queryFields = opDef.getSelectionSet();
-        List<Selection> fields = queryFields.getSelections();
+        List<Selection> selections = queryFields.getSelections();
 
-        for (Selection child : fields) {
+        for (Selection child : selections) {
 
-                if (child.getClass().getSimpleName().equals("Field")) {
+            if (child.getClass().getSimpleName().equals("Field")) {
 
-                    forest.add(new TreeExecutionNode(config, (Field) child));
-                }
+                forest.add(new ExecutionTreeNode(config, (Field) child, "x"));
+
+            }
 
         }
 
-
-
-
-
-        Map<String, Object> conversionResult = getSelectionJson(opDef.getSelectionSet());
-
-        JsonNode topQueries = (ArrayNode) conversionResult.get("query");
-        Map<String, String> context = (Map<String, String>) conversionResult.get("context");
-        result.put("query", topQueries);
-        result.put("context", context);
-
-
-
-        return null;
+        return forest;
     }
 }

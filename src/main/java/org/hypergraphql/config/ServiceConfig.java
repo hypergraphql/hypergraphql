@@ -3,10 +3,10 @@ package org.hypergraphql.config;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Service {
+public class ServiceConfig {
 
     @JsonCreator
-    public Service(@JsonProperty("@type") String type,
+    public ServiceConfig(@JsonProperty("@type") String type,
                          @JsonProperty("@id") String id,
                          @JsonProperty("url") String url,
                          @JsonProperty("user") String user,
