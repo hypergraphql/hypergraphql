@@ -2,8 +2,14 @@ package org.hypergraphql.config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
 
-public class Service {
+
+import java.util.Set;
+
+public abstract class Service {
 
     @JsonCreator
     public Service(@JsonProperty("@type") String type,
@@ -35,5 +41,8 @@ public class Service {
     public String graph() { return this.graph; }
     public String user() { return this.user; }
     public String password() { return this.password; }
+
+
+    public abstract ResultSet executeQuery(JsonNode query , Set<String> input );
 
 }

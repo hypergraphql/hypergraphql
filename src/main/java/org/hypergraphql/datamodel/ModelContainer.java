@@ -19,6 +19,7 @@ import org.hypergraphql.config.HGQLConfig;
 /**
  * Created by szymon on 22/08/2017.
  */
+
 public class ModelContainer {
 
 //    private static String queryValuesOfObjectPropertyTemp = "SELECT distinct ?object WHERE {<%s> <%s> ?object FILTER (!isLiteral(?object)) . }";

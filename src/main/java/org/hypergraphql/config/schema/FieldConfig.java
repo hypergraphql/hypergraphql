@@ -1,6 +1,8 @@
-package org.hypergraphql.config;
+package org.hypergraphql.config.schema;
 
-public class FieldConfig {
+import org.hypergraphql.config.Service;
+
+public class FieldConfig implements SchemElementConfig{
     private String id;
     private Service service;
 

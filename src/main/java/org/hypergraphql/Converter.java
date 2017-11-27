@@ -398,8 +398,8 @@ public class Converter {
 
                 String contextName = (inner.getAlias() != null) ? inner.getAlias() : inner.getName();
 
-                if (config.fields().containsKey(contextName)) {
-                    context.put(contextName, config.fields().get(contextName).id());
+                if (config.schemElementConfigMap().containsKey(contextName)) {
+                    context.put(contextName, config.schemElementConfigMap().get(contextName).id());
                 } else {
                     if (JSONLD_VOC.containsKey(contextName)) {
                         context.put(contextName, JSONLD_VOC.get(contextName).toString());
@@ -462,16 +462,16 @@ public class Converter {
                 }
             }
 
-            if (config.types().containsKey(targetName)) {
-                subquery.put("targetURI", config.types().get(targetName).id());
+            if (config.schemElementConfigMap().containsKey(targetName)) {
+                subquery.put("targetURI", config.schemElementConfigMap().get(targetName).id());
             }
 
-            if (config.fields().containsKey(name)) {
-                subquery.put("uri", config.fields().get(name).id());
+            if (config.schemElementConfigMap().containsKey(name)) {
+                subquery.put("uri", config.schemElementConfigMap().get(name).id());
             }
 
             if (!JSONLD_VOC.containsKey(name)) {
-                Service service = (parentId==null) ? config.queryFields().get(name).service(): config.fields().get(name).service();
+                Service service = (parentId==null) ? config.schemElementConfigMap().get(name).service(): config.schemElementConfigMap().get(name).service();
                 subquery.put("graph", service.graph());
                 String endpoint = service.id();
                 ArrayNode subfields = (result.has(endpoint)) ? (ArrayNode) result.get(endpoint) : mapper.createArrayNode();

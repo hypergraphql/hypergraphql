@@ -23,6 +23,10 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.hypergraphql.GraphqlWiring;
+import org.hypergraphql.config.schema.FieldConfig;
+import org.hypergraphql.config.schema.QueryFieldConfig;
+import org.hypergraphql.config.schema.SchemElementConfig;
+import org.hypergraphql.config.schema.TypeConfig;
 
 import static graphql.Scalars.*;
 
@@ -64,9 +68,7 @@ public class HGQLConfig {
     private JsonNode context;
     private ObjectNode mapping;
     private Map<String, GraphQLOutputType> outputTypes = new HashMap<>();
-    private Map<String, TypeConfig> types;
-    private Map<String, FieldConfig> fields;
-    private Map<String, QueryFieldConfig> queryFields;
+    private Map<String, SchemElementConfig> schemaElementConfigs;
     private Map<String, Service> services;
     private TypeDefinitionRegistry registry;
     private GraphQLSchema schema;
@@ -100,9 +102,8 @@ public class HGQLConfig {
             }
 
             this.services = new HashMap<>();
-            this.types = new HashMap<>();
-            this.queryFields = new HashMap<>();
-            this.fields = new HashMap<>();
+            this.schemaElementConfigs = new HashMap<String,SchemElementConfig>();
+
 
 
             context.get("services").elements().forEachRemaining(service -> {
@@ -123,7 +124,7 @@ public class HGQLConfig {
 
                 String id = typesJson.get(key).get("@id").asText();
                 TypeConfig typeConfig = new TypeConfig(id);
-                this.types.put(key, typeConfig);
+                this.schemaElementConfigs.put(key, typeConfig);
 
             });
 
@@ -134,7 +135,7 @@ public class HGQLConfig {
                 Service service = this.services.get(fieldsJson.get(key).get("service").asText());
                 String id = fieldsJson.get(key).get("@id").asText();
                 FieldConfig fieldConfig = new FieldConfig(id, service);
-                this.fields.put(key, fieldConfig);
+                this.schemaElementConfigs.put(key, fieldConfig);
 
             });
 
@@ -144,7 +145,7 @@ public class HGQLConfig {
 
                 Service service = this.services.get(queryFieldsJson.get(key).get("service").asText());
                 QueryFieldConfig queryFieldConfig = new QueryFieldConfig(service);
-                this.queryFields.put(key, queryFieldConfig);
+                this.schemaElementConfigs.put(key, queryFieldConfig);
 
 
             });
@@ -324,9 +325,8 @@ public class HGQLConfig {
     }
 
     public Map<String, Service> services() { return this.services; }
-    public Map<String, TypeConfig> types() { return this.types; }
-    public Map<String, FieldConfig> fields() { return this.fields; }
-    public Map<String, QueryFieldConfig> queryFields() { return this.queryFields; }
+    public Map<String, SchemElementConfig> schemElementConfigMap() { return this.schemaElementConfigs; }
+
 
     public GraphQLSchema schema() {return schema; }
 
