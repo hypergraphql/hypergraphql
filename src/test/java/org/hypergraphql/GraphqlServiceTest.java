@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import org.hypergraphql.config.HGQLConfig;
+import org.hypergraphql.datamodel.ModelContainer;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class GraphqlServiceTest {
 
         sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
 
-        SparqlClient client = new SparqlClient(sparqlQueries, config);
+        ModelContainer client = new ModelContainer(sparqlQueries, config);
 
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
                 .query(query)

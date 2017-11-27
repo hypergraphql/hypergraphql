@@ -1,23 +1,23 @@
 package org.hypergraphql;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.hypergraphql.config.ServiceConfig;
+import org.apache.jena.rdf.model.Model;
+import org.hypergraphql.config.Service;
 
 import java.util.Map;
 import java.util.Set;
 
 public class TreeExecutionNode {
-    private ServiceConfig service; //service configuration
+    private Service service; //service configuration
     private JsonNode query; //GraphQL in a basic Json format
     private String executionId; // unique identifier of this execution node
-    private String parentInfo; //URIs of resources that serve as the root for this query
-    private Set<TreeExecutionNode> childrenNodes; // succeeding executions
+    private Map<String, Set<TreeExecutionNode>> childrenNodes; // succeeding executions
 
-    public ServiceConfig getService() {
+    public Service getService() {
         return service;
     }
 
-    public void setService(ServiceConfig service) {
+    public void setService(Service service) {
         this.service = service;
     }
 
@@ -36,20 +36,10 @@ public class TreeExecutionNode {
     public void setExecutionId(String executionId) {
         this.executionId = executionId;
     }
+    
 
-    public String getParentInfo() {
-        return parentInfo;
-    }
-
-    public void setParentInfo(String parentInfo) {
-        this.parentInfo = parentInfo;
-    }
-
-    public Set<TreeExecutionNode> getChildrenNodes() {
-        return childrenNodes;
-    }
-
-    public void setChildrenNodes(Set<TreeExecutionNode> childrenNodes) {
-        this.childrenNodes = childrenNodes;
+    public Model generateModel() {
+        //todo
+        return null;
     }
 }

@@ -1,4 +1,4 @@
-package org.hypergraphql;
+package org.hypergraphql.datamodel;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import org.hypergraphql.config.HGQLConfig;
 /**
  * Created by szymon on 22/08/2017.
  */
-public class SparqlClient {
+public class ModelContainer {
 
 //    private static String queryValuesOfObjectPropertyTemp = "SELECT distinct ?object WHERE {<%s> <%s> ?object FILTER (!isLiteral(?object)) . }";
 //    private static String queryValuesOfDataPropertyTemp = "SELECT distinct (str(?object) as ?value) WHERE {<%1$s> <%2$s> ?object  FILTER isLiteral(?object) . %3$s }";
@@ -27,64 +27,16 @@ public class SparqlClient {
 
     protected Model model;
 
-    protected static Logger logger = Logger.getLogger(SparqlClient.class);
+    protected static Logger logger = Logger.getLogger(ModelContainer.class);
 
 
-    public SparqlClient(List<Map<String, String>> queryRequests, HGQLConfig config) {
+    public ModelContainer(Model model) {
 
-        final String MATCH_PARENT = "SELECT (GROUP_CONCAT(CONCAT(\"<\",str(%s),\">\");separator=\" \") as ?uris) WHERE { %s }";
-        final String VALUES_PATTERN = "VALUES %s { %s }";
-
-        model = ModelFactory.createDefaultModel();
-
-        for (Map<String, String> queryRequest : queryRequests) {
-
-            String query = queryRequest.get("query");
-            String service = queryRequest.get("service");
-            String match = queryRequest.get("match");
-            String var = queryRequest.get("var");
-
-            if (!match.equals("")) {
-
-                String matchQuery = String.format(MATCH_PARENT, var, match);
-
-                ResultSet results = sparqlSelect(matchQuery);
-                String vals = results.next().get("?uris").toString();
-
-                query = String.format(query, String.format(VALUES_PATTERN, var, vals));
-
-            }
-
-            logger.debug("Executing construct query: " + query);
-
-            Unirest.setTimeouts(0, 0);
-
-
-            try {
-
-                HttpResponse<InputStream> resp = Unirest.get(config.services().get(service).url())
-                        .queryString("query", query)
-                        .header("accept", "application/rdf+xml")
-                        .basicAuth(config.services().get(service).user(), config.services().get(service).password())
-                        .asBinary();
-
-                Model next = ModelFactory.createDefaultModel();
-
-                InputStream in = resp.getBody();
-
-
-                next.read(in, null, "RDF/XML");
-
-                model.add(next);
-
-            } catch (UnirestException e) {
-                logger.error(e);
-            }
-        }
+        this.model=model;
 
     }
 
-    public ResultSet sparqlSelect(String queryString) {
+    private ResultSet sparqlSelect(String queryString) {
 
         logger.debug("Executing SPARQL fetchquery: " + queryString);
         QueryExecution qexec = QueryExecutionFactory.create(queryString, model);

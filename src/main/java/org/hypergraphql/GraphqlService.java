@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import graphql.*;
 import org.apache.log4j.Logger;
 import org.hypergraphql.config.HGQLConfig;
+import org.hypergraphql.config.TreeExecutionFactory;
+import org.hypergraphql.datamodel.ModelContainer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,7 +70,13 @@ public class GraphqlService {
             logger.info("Generated SPARQL queries:");
             logger.info(sparqlQueries.toString());
 
-            SparqlClient client = new SparqlClient(sparqlQueries, config);
+            //todo Mirko: start from SparqlClient
+
+            TreeExecutionNode queryExecutionTree = new TreeExecutionFactory().getExecutionTree(jsonQuery);
+
+
+            ModelContainer client = new ModelContainer(queryExecutionTree.generateModel());
+
 
             executionInput = ExecutionInput.newExecutionInput()
                     .query(query)

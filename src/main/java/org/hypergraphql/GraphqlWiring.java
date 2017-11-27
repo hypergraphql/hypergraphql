@@ -24,6 +24,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.log4j.Logger;
 import org.hypergraphql.config.HGQLConfig;
+import org.hypergraphql.datamodel.ModelContainer;
 
 /**
  * Created by szymon on 24/08/2017.
@@ -92,7 +93,7 @@ public class GraphqlWiring {
     class fetchParams {
         Resource subjectResource;
         Property property;
-        SparqlClient client;
+        ModelContainer client;
 
         public fetchParams(DataFetchingEnvironment environment) {
             subjectResource = environment.getSource();
@@ -123,7 +124,7 @@ public class GraphqlWiring {
     private DataFetcher<List<RDFNode>> instancesOfTypeFetcher = environment -> {
         Field field = (Field) environment.getFields().toArray()[0];
         String type = (field.getAlias()!=null) ? field.getAlias() : field.getName();
-        SparqlClient client = environment.getContext();
+        ModelContainer client = environment.getContext();
         List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter("http://hypergraphql/type", "http://hypergraphql/query/" + type);
         return subjects;
     };
