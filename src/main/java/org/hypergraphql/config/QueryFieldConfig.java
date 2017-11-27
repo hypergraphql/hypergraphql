@@ -2,14 +2,14 @@ package org.hypergraphql.config;
 
 public class QueryFieldConfig {
 
-    private Service service;
+    private ServiceConfig service;
 
-    public QueryFieldConfig(Service service) {
+    public QueryFieldConfig(ServiceConfig service) {
 
         if (service!=null) this.service = service;
 
     }
-    public Service service() { return this.service; }
+    public ServiceConfig service() { return this.service; }
 
 
 }

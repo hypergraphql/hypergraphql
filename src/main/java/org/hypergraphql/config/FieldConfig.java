@@ -2,9 +2,9 @@ package org.hypergraphql.config;
 
 public class FieldConfig {
     private String id;
-    private Service service;
+    private ServiceConfig service;
 
-    public FieldConfig(String id, Service service) {
+    public FieldConfig(String id, ServiceConfig service) {
 
         if (id!=null) this.id = id;
         if (service!=null) this.service = service;
@@ -12,6 +12,6 @@ public class FieldConfig {
     }
 
     public String id() { return this.id; }
-    public Service service() { return this.service; }
+    public ServiceConfig service() { return this.service; }
 
 }

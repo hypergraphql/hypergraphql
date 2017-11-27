@@ -39,11 +39,11 @@ public class GraphqlServiceTest {
 
         sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
 
-        ModelContainer client = new ModelContainer(sparqlQueries, config);
+        //ModelContainer client = new ModelContainer(sparqlQueries, config);
 
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
                 .query(query)
-                .context(client)
+       //         .context(client)
                 .build();
 
         long tStart = System.currentTimeMillis();

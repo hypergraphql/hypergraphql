@@ -67,7 +67,7 @@ public class HGQLConfig {
     private Map<String, TypeConfig> types;
     private Map<String, FieldConfig> fields;
     private Map<String, QueryFieldConfig> queryFields;
-    private Map<String, Service> services;
+    private Map<String, ServiceConfig> services;
     private TypeDefinitionRegistry registry;
     private GraphQLSchema schema;
     private GraphQL graphql;
@@ -107,7 +107,7 @@ public class HGQLConfig {
 
             context.get("services").elements().forEachRemaining(service -> {
                         try {
-                            Service serviceConfig = mapper.readValue(service.toString(), Service.class);
+                            ServiceConfig serviceConfig = mapper.readValue(service.toString(), ServiceConfig.class);
                             this.services.put(serviceConfig.id(), serviceConfig);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -131,7 +131,7 @@ public class HGQLConfig {
 
             fieldsJson.fieldNames().forEachRemaining(key -> {
 
-                Service service = this.services.get(fieldsJson.get(key).get("service").asText());
+                ServiceConfig service = this.services.get(fieldsJson.get(key).get("service").asText());
                 String id = fieldsJson.get(key).get("@id").asText();
                 FieldConfig fieldConfig = new FieldConfig(id, service);
                 this.fields.put(key, fieldConfig);
@@ -142,7 +142,7 @@ public class HGQLConfig {
 
             queryFieldsJson.fieldNames().forEachRemaining(key -> {
 
-                Service service = this.services.get(queryFieldsJson.get(key).get("service").asText());
+                ServiceConfig service = this.services.get(queryFieldsJson.get(key).get("service").asText());
                 QueryFieldConfig queryFieldConfig = new QueryFieldConfig(service);
                 this.queryFields.put(key, queryFieldConfig);
 
@@ -323,7 +323,7 @@ public class HGQLConfig {
         return graphqlConfig;
     }
 
-    public Map<String, Service> services() { return this.services; }
+    public Map<String, ServiceConfig> services() { return this.services; }
     public Map<String, TypeConfig> types() { return this.types; }
     public Map<String, FieldConfig> fields() { return this.fields; }
     public Map<String, QueryFieldConfig> queryFields() { return this.queryFields; }

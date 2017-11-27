@@ -4,13 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import graphql.*;
 import org.apache.log4j.Logger;
 import org.hypergraphql.config.HGQLConfig;
-import org.hypergraphql.config.TreeExecutionFactory;
+import org.hypergraphql.config.ExecutionForestFactory;
 import org.hypergraphql.datamodel.ModelContainer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by szymon on 01/11/2017.
@@ -41,42 +38,48 @@ public class GraphqlService {
         List<Map<String, String>> sparqlQueries;
 
         Converter converter = new Converter(config);
-        Map<String, Object> preprocessedQuery = null;
-        try {
-            preprocessedQuery = converter.query2json(query);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        List<GraphQLError> validationErrors = (List<GraphQLError>) preprocessedQuery.get("errors");
-        errors.addAll(validationErrors);
 
-        if (validationErrors.size() > 0) {
+        ValidatedQuery validatedQuery = new QueryValidator(config).validateQuery(query);
 
-            //  result.put("errors", errors);
-
+        if (!validatedQuery.valid) {
+            errors.addAll(validatedQuery.errors);
             return result;
-
         }
+
+//        Map<String, Object> preprocessedQuery = null;
+//        try {
+//            preprocessedQuery = converter.query2json(query);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        List<GraphQLError> validationErrors = (List<GraphQLError>) preprocessedQuery.get("errors");
+//        errors.addAll(validationErrors);
+//
+//        if (validationErrors.size() > 0) {
+//
+//            //  result.put("errors", errors);
+//
+//            return result;
+//
+//        }
 
         if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
-            JsonNode jsonQuery = converter.includeContextInQuery((JsonNode) preprocessedQuery.get("query"));
+        //    JsonNode jsonQuery = converter.includeContextInQuery((JsonNode) preprocessedQuery.get("query"));
 
-            sparqlQueries = converter.graphql2sparql(jsonQuery);
+//            sparqlQueries = converter.graphql2sparql(jsonQuery);
 
             // uncomment this lines if you want to include the generated SPARQL queries in the GraphQL response for debugging purposes
             // extensions.put("sparqlQueries", sparqlQueries);
 
             logger.info("Generated SPARQL queries:");
-            logger.info(sparqlQueries.toString());
+     //       logger.info(sparqlQueries.toString());
 
             //todo Mirko: start from SparqlClient
 
-            TreeExecutionNode queryExecutionTree = new TreeExecutionFactory().getExecutionTree(jsonQuery);
+            ExecutionForest queryExecutionForest = new ExecutionForestFactory(config).getExecutionForest(validatedQuery.parsedQuery);
 
-
-            ModelContainer client = new ModelContainer(queryExecutionTree.generateModel());
-
+            ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 
             executionInput = ExecutionInput.newExecutionInput()
                     .query(query)
@@ -86,7 +89,7 @@ public class GraphqlService {
             qlResult = config.graphql().execute(executionInput);
 
             data.putAll(qlResult.getData());
-            data.put("@context", preprocessedQuery.get("context"));
+     //       data.put("@context", preprocessedQuery.get("context"));
         } else {
             qlResult = config.graphql().execute(query);
             data.putAll(qlResult.getData());
