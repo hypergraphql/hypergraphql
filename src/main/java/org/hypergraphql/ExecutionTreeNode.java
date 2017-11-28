@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import graphql.language.Field;
-import graphql.language.Selection;
-import graphql.language.SelectionSet;
+import graphql.language.*;
 import org.hypergraphql.config.HGQLConfig;
 import org.hypergraphql.config.ServiceConfig;
 
@@ -16,41 +14,136 @@ public class ExecutionTreeNode {
     private ServiceConfig service; //service configuration
     private JsonNode query; //GraphQL in a basic Json format
     private String executionId; // unique identifier of this execution node
-    private Map<String, ExecutionForest> childrenNodes; // succeeding executions
+    private Map<String, ExecutionTreeNode> childrenNodes; // succeeding executions
     private HGQLConfig config;
 
 
-    public ExecutionTreeNode(HGQLConfig config, Field field, String parentNode) {
+    public ExecutionTreeNode(HGQLConfig config, Field field, String nodeId) {
 
         this.config = config;
         this.service = config.queryFields().get(field.getName()).service();
         this.executionId = createId();
-
-
-        Set<Field> fieldSet = new HashSet<>();
-        fieldSet.add(field);
-
-        this.traverse(fieldSet, parentNode);
+        this.query = getQueryJson(field, nodeId, true);
 
     }
 
-    private void traverse(Set<Field> fields, String parentNode) {
+    private JsonNode getQueryJson(Set<Field> fields, String parentNode, boolean isRoot) {
 
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode query = mapper.createArrayNode();
 
-        this.query = query;
-
         for (Field field : fields) {
-            ObjectNode rootNode = mapper.createObjectNode();
 
-            rootNode.put("name", field.getName());
-            rootNode.put("alias", field.getAlias());
-
-            Map<ServiceConfig, Set<Field>> splitFields = getSplitFields(field.getSelectionSet());
+          //  query.add(getQueryJson(field, , isRoot));
 
         }
 
+        return query;
+
+    }
+
+    private JsonNode getQueryJson(Field field, String nodeId, boolean isRoot) {
+
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode query = mapper.createObjectNode();
+
+        query.put("name", field.getName());
+        query.put("alias", field.getAlias());
+        query.put("nodeId", nodeId);
+        List<Argument> args = field.getArguments();
+
+        if (!args.isEmpty()) {
+
+            query.put("args", getArgsJson(args));
+
+        }
+
+        query.put("fields", this.traverse(field, nodeId));
+
+        return query;
+
+    }
+
+    public ExecutionTreeNode(HGQLConfig config, String service, Set<Field> fields, String nodeId) {
+
+        this.service = config.services().get(service);
+        this.executionId = createId();
+
+    }
+
+    private JsonNode traverse(Field field, String parentNode) {
+
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode fieldQueries = mapper.createArrayNode();
+
+        int i = 0;
+
+        SelectionSet subFields = field.getSelectionSet();
+        
+        if (subFields!=null) {
+
+            Map<ServiceConfig, Set<Field>> splitFields = getSplitFields(subFields);
+
+            Set<ServiceConfig> serviceCalls = splitFields.keySet();
+
+            for (ServiceConfig serviceCall : serviceCalls) {
+
+                if (serviceCall==this.service) {
+
+                    Set<Field> subfields = splitFields.get(serviceCall);
+
+                    for (Field subfield : subfields) {
+
+                        i++;
+
+                        String nodeId = parentNode + "_" + i;
+
+                        fieldQueries.add(traverse(subfield, nodeId));
+
+                    }
+
+                } else {
+
+                    new ExecutionTreeNode(config, serviceCall, splitFields.get(serviceCall), );
+
+                }
+            }
+        }
+
+        return fieldQueries;
+    }
+
+    private JsonNode getArgsJson(List<Argument> args) {
+
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode argNode = mapper.createObjectNode();
+
+        for (Argument arg : args) {
+
+            Value val = arg.getValue();
+            String type = val.getClass().getSimpleName();
+
+            switch (type) {
+                case "IntValue": {
+                    long value = ((IntValue) val).getValue().longValueExact();
+                    argNode.put(arg.getName().toString(), value);
+                    break;
+                }
+                case "StringValue": {
+                    String value = ((StringValue) val).getValue().toString();
+                    argNode.put(arg.getName().toString(), value);
+                    break;
+                }
+                case "BooleanValue": {
+                    Boolean value = ((BooleanValue) val).isValue();
+                    argNode.put(arg.getName().toString(), value);
+                    break;
+                }
+            }
+
+        }
+
+        return argNode;
     }
 
     private Map<ServiceConfig, Set<Field>> getSplitFields(SelectionSet selectionSet) {
@@ -65,18 +158,21 @@ public class ExecutionTreeNode {
 
                 Field field = (Field) child;
 
-                ServiceConfig serviceConfig = config.queryFields().get(field.getName()).service();
+                if (config.fields().containsKey(field.getName())) {
 
-                if (result.containsKey(serviceConfig)) {
+                    ServiceConfig serviceConfig = config.fields().get(field.getName()).service();
 
-                    result.get(serviceConfig).add(field);
+                    if (result.containsKey(serviceConfig)) {
 
-                } else {
+                        result.get(serviceConfig).add(field);
 
-                    Set<Field> newFieldSet = new HashSet<>();
-                    newFieldSet.add(field);
-                    result.put(serviceConfig, newFieldSet);
+                    } else {
 
+                        Set<Field> newFieldSet = new HashSet<>();
+                        newFieldSet.add(field);
+                        result.put(serviceConfig, newFieldSet);
+
+                    }
                 }
 
             }
@@ -84,13 +180,6 @@ public class ExecutionTreeNode {
         }
 
         return result;
-    }
-
-    public ExecutionTreeNode(HGQLConfig config, String service, SelectionSet queryFields, Map<String, String> childrenNodesInfo) {
-
-        this.service = config.services().get(service);
-        this.executionId = createId();
-
     }
 
     public String createId() {

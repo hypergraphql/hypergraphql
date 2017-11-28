@@ -35,9 +35,9 @@ public class GraphqlService {
         ExecutionInput executionInput;
         ExecutionResult qlResult;
 
-        List<Map<String, String>> sparqlQueries;
-
-        Converter converter = new Converter(config);
+//        List<Map<String, String>> sparqlQueries;
+//
+//        Converter converter = new Converter(config);
 
         ValidatedQuery validatedQuery = new QueryValidator(config).validateQuery(query);
 
