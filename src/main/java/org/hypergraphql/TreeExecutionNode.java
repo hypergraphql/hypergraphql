@@ -7,6 +7,8 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.sparql.resultset.ResultSetMem;
 import org.hypergraphql.config.FetchingExecution;
 import org.hypergraphql.config.Service;
+import org.hypergraphql.config.TreeExecutionResult;
+import org.hypergraphql.datamodel.ModelBuilder;
 
 import java.util.HashSet;
 import java.util.List;
@@ -65,12 +67,13 @@ public class TreeExecutionNode {
 
 
         //todo
-        ResultSet resultset = service.executeQuery(query, input);
-        ResultSetMem resultSetRew = new ResultSetMem(resultset) ;
+        TreeExecutionResult executionResult = service.executeQuery(query, input);
+        Map<String,Set<String>> resultset = executionResult.getResultSet();
+     
 
-        Model model = buildCurrentModel(resultset);
+        Model model = executionResult.getModel();
 
-        List<String> vars = resultSetRew.getResultVars();
+        Set<String> vars = resultset.keySet();
 
         for (String var : vars) {
 
@@ -78,14 +81,8 @@ public class TreeExecutionNode {
 
             if (executionChildren.size()>0) {
 
-                Set<String> values = new HashSet<String>();
+                Set<String> values = resultset.get(var);
 
-                while (resultSetRew.hasNext()) {
-                    values.add(resultSetRew.nextSolution().get(var).toString());
-                    resultSetRew.next();
-
-                }
-                resultSetRew.rewind();
                 for (TreeExecutionNode node : executionChildren) {
 
 //todo with multithreading
@@ -103,9 +100,5 @@ public class TreeExecutionNode {
         return model;
     }
 
-    private Model buildCurrentModel(ResultSet resultset) {
 
-        //todo
-        return null;
-    }
 }

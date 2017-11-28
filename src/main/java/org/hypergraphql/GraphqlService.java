@@ -70,12 +70,12 @@ public class GraphqlService {
             logger.info("Generated SPARQL queries:");
             logger.info(sparqlQueries.toString());
 
-            //todo Mirko: start from SparqlClient
+
 
             TreeExecutionNode queryExecutionTree = new TreeExecutionFactory().getExecutionTree(jsonQuery);
 
 
-            ModelContainer client = new ModelContainer(queryExecutionTree.generateModel());
+            ModelContainer client = new ModelContainer(queryExecutionTree.generateTreeModel(null));
 
 
             executionInput = ExecutionInput.newExecutionInput()

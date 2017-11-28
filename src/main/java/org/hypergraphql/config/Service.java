@@ -43,6 +43,6 @@ public abstract class Service {
     public String password() { return this.password; }
 
 
-    public abstract ResultSet executeQuery(JsonNode query , Set<String> input );
+    public abstract TreeExecutionResult executeQuery(JsonNode query , Set<String> input );
 
 }
