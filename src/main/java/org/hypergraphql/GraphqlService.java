@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.hypergraphql.config.HGQLConfig;
 import org.hypergraphql.config.TreeExecutionFactory;
 import org.hypergraphql.datamodel.ModelContainer;
+import org.hypergraphql.datamodel.StoredModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,8 +75,11 @@ public class GraphqlService {
 
             TreeExecutionNode queryExecutionTree = new TreeExecutionFactory().getExecutionTree(jsonQuery);
 
+            queryExecutionTree.generateTreeModel(null);
 
-            ModelContainer client = new ModelContainer(queryExecutionTree.generateTreeModel(null));
+            //todo here wait for threads to finis
+
+            ModelContainer client = new ModelContainer(StoredModel.getInstance());
 
 
             executionInput = ExecutionInput.newExecutionInput()

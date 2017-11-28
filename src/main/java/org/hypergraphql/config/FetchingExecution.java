@@ -34,5 +34,7 @@ public class FetchingExecution implements Runnable{
     @Override
     public void run() {
 
+        node.generateTreeModel(inputValues);
+
     }
 }

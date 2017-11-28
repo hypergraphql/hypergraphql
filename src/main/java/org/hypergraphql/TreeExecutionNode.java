@@ -9,6 +9,7 @@ import org.hypergraphql.config.FetchingExecution;
 import org.hypergraphql.config.Service;
 import org.hypergraphql.config.TreeExecutionResult;
 import org.hypergraphql.datamodel.ModelBuilder;
+import org.hypergraphql.datamodel.StoredModel;
 
 import java.util.HashSet;
 import java.util.List;
@@ -63,15 +64,17 @@ public class TreeExecutionNode {
         this.input = input;
     }
 
-    public Model generateTreeModel( Set<String> input) {
+    public void generateTreeModel( Set<String> input) {
 
 
         //todo
         TreeExecutionResult executionResult = service.executeQuery(query, input);
         Map<String,Set<String>> resultset = executionResult.getResultSet();
-     
+
 
         Model model = executionResult.getModel();
+
+        StoredModel.getInstance().add(model);
 
         Set<String> vars = resultset.keySet();
 
@@ -85,19 +88,21 @@ public class TreeExecutionNode {
 
                 for (TreeExecutionNode node : executionChildren) {
 
-//todo with multithreading
-//                    FetchingExecution childExecution = new FetchingExecution(values,node);
-//
-//                    Thread thread = new Thread(childExecution, node.toString());
+
+                    FetchingExecution childExecution = new FetchingExecution(values,node);
+
+                    Thread thread = new Thread(childExecution, node.toString());
+
+                    thread.run();
 
 
-                    model.add( node.generateTreeModel(values));
+       //             node.generateTreeModel(values);
 
                 }
             }
         }
 
-        return model;
+
     }
 
 

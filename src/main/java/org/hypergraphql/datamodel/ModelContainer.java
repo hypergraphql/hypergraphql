@@ -37,6 +37,8 @@ public class ModelContainer {
 
     }
 
+
+
     private ResultSet sparqlSelect(String queryString) {
 
         logger.debug("Executing SPARQL fetchquery: " + queryString);
