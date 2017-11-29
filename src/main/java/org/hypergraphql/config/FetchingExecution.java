@@ -1,10 +1,12 @@
 package org.hypergraphql.config;
 
+import org.apache.jena.rdf.model.Model;
 import org.hypergraphql.TreeExecutionNode;
 
 import java.util.Set;
+import java.util.concurrent.Callable;
 
-public class FetchingExecution implements Runnable{
+public class FetchingExecution implements Callable<Model> {
 
     private Set<String> inputValues;
     private TreeExecutionNode node;
@@ -31,10 +33,10 @@ public class FetchingExecution implements Runnable{
         this.node = node;
     }
 
+
+
     @Override
-    public void run() {
-
-        node.generateTreeModel(inputValues);
-
+    public Model call() throws Exception {
+        return node.generateTreeModel(inputValues);
     }
 }

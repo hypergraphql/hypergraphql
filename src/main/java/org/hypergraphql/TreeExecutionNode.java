@@ -1,20 +1,18 @@
 package org.hypergraphql;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.query.ResultSetRewindable;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.sparql.resultset.ResultSetMem;
 import org.hypergraphql.config.FetchingExecution;
 import org.hypergraphql.config.Service;
 import org.hypergraphql.config.TreeExecutionResult;
-import org.hypergraphql.datamodel.ModelBuilder;
-import org.hypergraphql.datamodel.StoredModel;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class TreeExecutionNode {
     private Service service; //service configuration
@@ -64,7 +62,7 @@ public class TreeExecutionNode {
         this.input = input;
     }
 
-    public void generateTreeModel( Set<String> input) {
+    public Model generateTreeModel( Set<String> input) {
 
 
         //todo
@@ -74,9 +72,14 @@ public class TreeExecutionNode {
 
         Model model = executionResult.getModel();
 
-        StoredModel.getInstance().add(model);
+        Set<Model> computedModels = new HashSet<>();
+
+    //    StoredModel.getInstance().add(model);
 
         Set<String> vars = resultset.keySet();
+
+        ExecutorService executor = Executors.newFixedThreadPool(50);
+        Set<Future<Model>> futuremodels = new HashSet<>();
 
         for (String var : vars) {
 
@@ -91,9 +94,11 @@ public class TreeExecutionNode {
 
                     FetchingExecution childExecution = new FetchingExecution(values,node);
 
-                    Thread thread = new Thread(childExecution, node.toString());
+                    futuremodels.add(executor.submit(childExecution));
 
-                    thread.run();
+//                    Thread thread = new Thread(childExecution, node.toString());
+//
+//                    thread.run();
 
 
        //             node.generateTreeModel(values);
@@ -101,6 +106,23 @@ public class TreeExecutionNode {
                 }
             }
         }
+
+        for (Future<Model> futureModel : futuremodels) {
+            try {
+                computedModels.add(futureModel.get());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+
+        for (Model computedmodel : computedModels) {
+
+            model.add(computedmodel);
+        }
+
+        return model;
 
 
     }
