@@ -14,7 +14,7 @@ public class ExecutionTreeNode {
     private ServiceConfig service; //service configuration
     private JsonNode query; //GraphQL in a basic Json format
     private String executionId; // unique identifier of this execution node
-    private Map<String, ExecutionTreeNode> childrenNodes; // succeeding executions
+    private Map<String, ExecutionForest> childrenNodes; // succeeding executions
     private HGQLConfig config;
 
 
@@ -23,18 +23,66 @@ public class ExecutionTreeNode {
         this.config = config;
         this.service = config.queryFields().get(field.getName()).service();
         this.executionId = createId();
-        this.query = getQueryJson(field, nodeId, true);
+        this.childrenNodes = new HashMap<>();
+        this.query = getFieldJson(field, null, nodeId);
 
     }
 
-    private JsonNode getQueryJson(Set<Field> fields, String parentNode, boolean isRoot) {
+    public String toString() {
+        String result = "";
+        result += "ExecutionNodeId: " + this.executionId + "\n";
+        result += "ServiceUrl: " + this.service.url() + "\n";
+        result += "Query: " + this.query.toString() + "\n";
+        result += "ChildrenNodes: \n";
+        Set<String> children = this.childrenNodes.keySet();
+
+        for (String child : children) {
+            result += "\tParentMarker: " + child + "\t" + " Children execution nodes: " + this.childrenNodes.get(child).toString() + "\n";
+        }
+
+        result += "\n\n";
+
+        return result;
+    }
+
+
+    public ExecutionTreeNode(HGQLConfig config, ServiceConfig service, Set<Field> fields, String parentId) {
+
+        this.config = config;
+        this.service = service;
+        this.executionId = createId();
+        this.childrenNodes = new HashMap<>();
+        this.query = getFieldsJson(fields, parentId);
+
+    }
+
+
+    public ServiceConfig getService() {
+        return service;
+    }
+
+    public JsonNode getQuery() {
+        return query;
+    }
+
+    public String getExecutionId() {
+        return executionId;
+    }
+
+
+
+    private JsonNode getFieldsJson(Set<Field> fields, String parentId) {
 
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode query = mapper.createArrayNode();
 
+        int i = 0;
+
         for (Field field : fields) {
 
-          //  query.add(getQueryJson(field, , isRoot));
+            i++;
+            String nodeId = parentId + "_" + i;
+            query.add(getFieldJson(field, parentId, nodeId));
 
         }
 
@@ -42,13 +90,15 @@ public class ExecutionTreeNode {
 
     }
 
-    private JsonNode getQueryJson(Field field, String nodeId, boolean isRoot) {
+
+    private JsonNode getFieldJson(Field field, String parentId, String nodeId) {
 
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode query = mapper.createObjectNode();
 
         query.put("name", field.getName());
         query.put("alias", field.getAlias());
+        query.put("parentId", parentId);
         query.put("nodeId", nodeId);
         List<Argument> args = field.getArguments();
 
@@ -57,32 +107,19 @@ public class ExecutionTreeNode {
             query.put("args", getArgsJson(args));
 
         }
-
         query.put("fields", this.traverse(field, nodeId));
 
         return query;
 
     }
 
-    public ExecutionTreeNode(HGQLConfig config, String service, Set<Field> fields, String nodeId) {
 
-        this.service = config.services().get(service);
-        this.executionId = createId();
-
-    }
-
-    private JsonNode traverse(Field field, String parentNode) {
-
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode fieldQueries = mapper.createArrayNode();
-
-        int i = 0;
+    private JsonNode traverse(Field field, String parentId) {
 
         SelectionSet subFields = field.getSelectionSet();
-        
         if (subFields!=null) {
 
-            Map<ServiceConfig, Set<Field>> splitFields = getSplitFields(subFields);
+            Map<ServiceConfig, Set<Field>> splitFields = getPartitionedFields(subFields);
 
             Set<ServiceConfig> serviceCalls = splitFields.keySet();
 
@@ -91,27 +128,30 @@ public class ExecutionTreeNode {
                 if (serviceCall==this.service) {
 
                     Set<Field> subfields = splitFields.get(serviceCall);
-
-                    for (Field subfield : subfields) {
-
-                        i++;
-
-                        String nodeId = parentNode + "_" + i;
-
-                        fieldQueries.add(traverse(subfield, nodeId));
-
-                    }
+                    JsonNode fields = getFieldsJson(subfields, parentId);
+                    return fields;
 
                 } else {
 
-                    new ExecutionTreeNode(config, serviceCall, splitFields.get(serviceCall), );
+                    ExecutionTreeNode childNode = new ExecutionTreeNode(config, serviceCall, splitFields.get(serviceCall), parentId);
 
+                    if (this.childrenNodes.containsKey(parentId)) {
+                        try {
+                            this.childrenNodes.get(parentId).add(childNode);
+                        } catch (Exception e) { e.fillInStackTrace();}
+                    } else {
+                        ExecutionForest forest = new ExecutionForest();
+                        forest.add(childNode);
+                        try {
+                        this.childrenNodes.put(parentId, forest);
+                        } catch (Exception e) { e.fillInStackTrace();}
+                    }
                 }
             }
         }
-
-        return fieldQueries;
+        return null;
     }
+
 
     private JsonNode getArgsJson(List<Argument> args) {
 
@@ -146,7 +186,8 @@ public class ExecutionTreeNode {
         return argNode;
     }
 
-    private Map<ServiceConfig, Set<Field>> getSplitFields(SelectionSet selectionSet) {
+
+    private Map<ServiceConfig, Set<Field>> getPartitionedFields(SelectionSet selectionSet) {
 
         Map<ServiceConfig, Set<Field>> result = new HashMap<>();
 
@@ -182,32 +223,9 @@ public class ExecutionTreeNode {
         return result;
     }
 
+
     public String createId() {
         return "execution-"+ UUID.randomUUID();
-    }
-
-    public ServiceConfig getService() {
-        return service;
-    }
-
-    public void setService(ServiceConfig service) {
-        this.service = service;
-    }
-
-    public JsonNode getQuery() {
-        return query;
-    }
-
-    public void setQuery(JsonNode query) {
-        this.query = query;
-    }
-
-    public String getExecutionId() {
-        return executionId;
-    }
-
-    public void setExecutionId(String executionId) {
-        this.executionId = executionId;
     }
 
 

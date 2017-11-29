@@ -12,4 +12,15 @@ public class ExecutionForest extends HashSet<ExecutionTreeNode> {
         return null;
     }
 
+    public String toString() {
+
+        String result = "";
+
+        for (ExecutionTreeNode node : this) {
+            result += node.toString();
+        }
+
+        return result;
+    }
+
 }
