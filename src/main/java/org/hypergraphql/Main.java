@@ -7,8 +7,7 @@ import org.hypergraphql.config.HGQLConfig;
 public class Main {
 
     static Logger logger = Logger.getLogger(Main.class);
-
-
+    
     public static void main(String[] args) {
 
         PropertyConfigurator.configure("log4j.properties");

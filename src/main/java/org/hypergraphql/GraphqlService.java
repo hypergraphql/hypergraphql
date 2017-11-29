@@ -13,6 +13,7 @@ import java.util.*;
  */
 public class GraphqlService {
     private HGQLConfig config;
+
     static Logger logger = Logger.getLogger(GraphqlService.class);
 
     public GraphqlService(HGQLConfig config) {
