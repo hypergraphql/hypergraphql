@@ -1,4 +1,4 @@
-package org.hypergraphql;
+package org.hypergraphql.datafetching;
 
 import org.apache.jena.rdf.model.Model;
 

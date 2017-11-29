@@ -1,4 +1,4 @@
-package org.hypergraphql;
+package org.hypergraphql.query;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,8 +10,8 @@ import graphql.validation.ValidationError;
 import graphql.validation.ValidationErrorType;
 import graphql.validation.Validator;
 import org.apache.log4j.Logger;
-import org.hypergraphql.config.HGQLConfig;
-import org.hypergraphql.config.Service;
+import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.datafetching.services.Service;
 
 
 import java.util.*;

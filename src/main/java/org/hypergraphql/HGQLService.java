@@ -2,21 +2,24 @@ package org.hypergraphql;
 
 import graphql.*;
 import org.apache.log4j.Logger;
-import org.hypergraphql.config.HGQLConfig;
-import org.hypergraphql.config.ExecutionForestFactory;
+import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.datafetching.ExecutionForest;
+import org.hypergraphql.datafetching.ExecutionForestFactory;
 import org.hypergraphql.datamodel.ModelContainer;
+import org.hypergraphql.query.QueryValidator;
+import org.hypergraphql.query.ValidatedQuery;
 
 import java.util.*;
 
 /**
  * Created by szymon on 01/11/2017.
  */
-public class GraphqlService {
+public class HGQLService {
     private HGQLConfig config;
 
-    static Logger logger = Logger.getLogger(GraphqlService.class);
+    static Logger logger = Logger.getLogger(HGQLService.class);
 
-    public GraphqlService(HGQLConfig config) {
+    public HGQLService(HGQLConfig config) {
         this.config = config;
     }
 
@@ -41,8 +44,8 @@ public class GraphqlService {
 
         ValidatedQuery validatedQuery = new QueryValidator(config).validateQuery(query);
 
-        if (!validatedQuery.valid) {
-            errors.addAll(validatedQuery.errors);
+        if (!validatedQuery.getValid()) {
+            errors.addAll(validatedQuery.getErrors());
             return result;
         }
 
@@ -77,7 +80,7 @@ public class GraphqlService {
 
 
 
-            ExecutionForest queryExecutionForest = new ExecutionForestFactory(config).getExecutionForest(validatedQuery.parsedQuery);
+            ExecutionForest queryExecutionForest = new ExecutionForestFactory(config).getExecutionForest(validatedQuery.getParsedQuery());
 
             ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 

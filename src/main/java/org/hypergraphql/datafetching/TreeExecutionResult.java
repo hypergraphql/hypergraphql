@@ -1,6 +1,5 @@
-package org.hypergraphql.config;
+package org.hypergraphql.datafetching;
 
-import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 
 import java.util.Map;

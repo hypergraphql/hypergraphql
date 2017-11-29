@@ -1,4 +1,4 @@
-package org.hypergraphql.config;
+package org.hypergraphql.config.system;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,7 +23,7 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
-import org.hypergraphql.GraphqlWiring;
+import org.hypergraphql.datafetching.services.Service;
 import org.hypergraphql.config.schema.FieldConfig;
 import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.config.schema.SchemElementConfig;

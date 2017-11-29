@@ -3,8 +3,9 @@ package org.hypergraphql;
 import com.fasterxml.jackson.databind.JsonNode;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
-import org.hypergraphql.config.HGQLConfig;
+import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datamodel.ModelContainer;
+import org.hypergraphql.query.Converter;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.Map;
 /**
  * Created by szymon on 01/11/2017.
  */
-public class GraphqlServiceTest {
+public class HGQLServiceTest {
 
     private final int LIMIT = 100;
 

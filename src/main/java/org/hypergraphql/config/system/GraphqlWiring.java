@@ -1,4 +1,4 @@
-package org.hypergraphql;
+package org.hypergraphql.config.system;
 
 import static graphql.Scalars.GraphQLID;
 import static graphql.Scalars.GraphQLInt;
@@ -23,7 +23,6 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.log4j.Logger;
-import org.hypergraphql.config.HGQLConfig;
 import org.hypergraphql.datamodel.ModelContainer;
 
 /**

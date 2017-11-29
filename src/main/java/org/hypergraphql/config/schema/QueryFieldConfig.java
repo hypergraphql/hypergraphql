@@ -1,6 +1,6 @@
 package org.hypergraphql.config.schema;
 
-import org.hypergraphql.config.Service;
+import org.hypergraphql.datafetching.services.Service;
 
 public class QueryFieldConfig implements SchemElementConfig {
 

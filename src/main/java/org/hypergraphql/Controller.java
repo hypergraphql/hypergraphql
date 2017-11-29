@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hypergraphql.config.HGQLConfig;
+import org.hypergraphql.config.system.HGQLConfig;
 import spark.ModelAndView;
 import spark.template.velocity.VelocityTemplateEngine;
 
@@ -39,7 +39,7 @@ public class Controller {
 
 
         ObjectMapper mapper = new ObjectMapper();
-        GraphqlService service = new GraphqlService(config);
+        HGQLService service = new HGQLService(config);
 
         // post method for accessing the GraphQL service
 

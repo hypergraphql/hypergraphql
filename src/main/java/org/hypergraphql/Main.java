@@ -2,7 +2,7 @@ package org.hypergraphql;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.hypergraphql.config.HGQLConfig;
+import org.hypergraphql.config.system.HGQLConfig;
 
 public class Main {
 

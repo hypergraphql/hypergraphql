@@ -1,7 +1,6 @@
-package org.hypergraphql.config;
+package org.hypergraphql.datafetching;
 
 import org.apache.jena.rdf.model.Model;
-import org.hypergraphql.ExecutionTreeNode;
 
 import java.util.Set;
 import java.util.concurrent.Callable;

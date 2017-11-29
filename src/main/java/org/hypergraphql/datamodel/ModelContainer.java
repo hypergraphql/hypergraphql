@@ -1,20 +1,15 @@
 package org.hypergraphql.datamodel;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.*;
 import org.apache.log4j.Logger;
-import org.hypergraphql.config.HGQLConfig;
 
 /**
  * Created by szymon on 22/08/2017.

@@ -1,4 +1,4 @@
-package org.hypergraphql;
+package org.hypergraphql.query;
 
 import graphql.language.Document;
 import graphql.language.SourceLocation;
@@ -7,7 +7,7 @@ import graphql.schema.GraphQLSchema;
 import graphql.validation.ValidationError;
 import graphql.validation.ValidationErrorType;
 import graphql.validation.Validator;
-import org.hypergraphql.config.HGQLConfig;
+import org.hypergraphql.config.system.HGQLConfig;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.hypergraphql.config;
+package org.hypergraphql.config.system;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

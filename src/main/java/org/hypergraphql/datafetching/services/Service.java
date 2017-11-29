@@ -1,8 +1,9 @@
-package org.hypergraphql.config;
+package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.hypergraphql.datafetching.TreeExecutionResult;
 
 import java.util.Set;
 
@@ -41,7 +42,7 @@ public  class Service {
     public String password() { return this.password; }
 
 
-    public  TreeExecutionResult executeQuery(JsonNode query , Set<String> input ) {
+    public TreeExecutionResult executeQuery(JsonNode query , Set<String> input ) {
         //todo
         return null;
     }

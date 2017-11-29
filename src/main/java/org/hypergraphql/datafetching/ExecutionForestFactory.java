@@ -1,8 +1,7 @@
-package org.hypergraphql.config;
+package org.hypergraphql.datafetching;
 
 import graphql.language.*;
-import org.hypergraphql.ExecutionForest;
-import org.hypergraphql.ExecutionTreeNode;
+import org.hypergraphql.config.system.HGQLConfig;
 
 import java.util.List;
 

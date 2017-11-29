@@ -1,4 +1,4 @@
-package org.hypergraphql;
+package org.hypergraphql.datafetching;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,10 +6,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.language.*;
 import org.apache.jena.rdf.model.Model;
-import org.hypergraphql.config.FetchingExecution;
-import org.hypergraphql.config.HGQLConfig;
-import org.hypergraphql.config.Service;
-import org.hypergraphql.config.TreeExecutionResult;
+import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.datafetching.services.Service;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
