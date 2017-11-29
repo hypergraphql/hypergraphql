@@ -150,11 +150,11 @@ public class ExecutionTreeNode {
 
                     if (this.childrenNodes.containsKey(parentId)) {
                         try {
-                            this.childrenNodes.get(parentId).add(childNode);
+                            this.childrenNodes.get(parentId).getForest().add(childNode);
                         } catch (Exception e) { e.fillInStackTrace();}
                     } else {
                         ExecutionForest forest = new ExecutionForest();
-                        forest.add(childNode);
+                        forest.getForest().add(childNode);
                         try {
                         this.childrenNodes.put(parentId, forest);
                         } catch (Exception e) { e.fillInStackTrace();}
@@ -264,11 +264,11 @@ public class ExecutionTreeNode {
 
             ExecutionForest executionChildren = this.childrenNodes.get(var);
 
-            if (executionChildren.size()>0) {
+            if (executionChildren.getForest().size()>0) {
 
                 Set<String> values = resultset.get(var);
 
-                for (ExecutionTreeNode node : executionChildren) {
+                for (ExecutionTreeNode node : executionChildren.getForest()) {
 
 
                     FetchingExecution childExecution = new FetchingExecution(values,node);

@@ -35,7 +35,7 @@ public class ExecutionForestFactory {
                 String nodeId = "x_" + i;
                 Field field = (Field) child;
 
-                forest.add(new ExecutionTreeNode(config, field, nodeId));
+                forest.getForest().add(new ExecutionTreeNode(config, field, nodeId));
 
             }
 
