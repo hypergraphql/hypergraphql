@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.services.HGQLService;
 import spark.ModelAndView;
 import spark.template.velocity.VelocityTemplateEngine;
 

@@ -1,4 +1,4 @@
-package org.hypergraphql;
+package org.hypergraphql.services;
 
 import graphql.*;
 import org.apache.log4j.Logger;

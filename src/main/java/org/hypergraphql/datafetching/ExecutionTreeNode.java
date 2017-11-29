@@ -117,10 +117,10 @@ public class ExecutionTreeNode {
 
         if (!args.isEmpty()) {
 
-            query.put("args", getArgsJson(args));
+            query.set("args", getArgsJson(args));
 
         }
-        query.put("fields", this.traverse(field, nodeId));
+        query.set("fields", this.traverse(field, nodeId));
 
         return query;
 
