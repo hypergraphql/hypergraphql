@@ -3,21 +3,19 @@ package org.hypergraphql.config;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.rdf.model.Model;
-
 
 import java.util.Set;
 
-public abstract class Service {
+public  class Service {
+
 
     @JsonCreator
     public Service(@JsonProperty("@type") String type,
-                         @JsonProperty("@id") String id,
-                         @JsonProperty("url") String url,
-                         @JsonProperty("user") String user,
-                         @JsonProperty("graph") String graph,
-                         @JsonProperty("password") String password
+                   @JsonProperty("@id") String id,
+                   @JsonProperty("url") String url,
+                   @JsonProperty("user") String user,
+                   @JsonProperty("graph") String graph,
+                   @JsonProperty("password") String password
     ) {
         this.type = type;
         this.id = id;
@@ -43,6 +41,9 @@ public abstract class Service {
     public String password() { return this.password; }
 
 
-    public abstract TreeExecutionResult executeQuery(JsonNode query , Set<String> input );
+    public  TreeExecutionResult executeQuery(JsonNode query , Set<String> input ) {
+        //todo
+        return null;
+    }
 
 }

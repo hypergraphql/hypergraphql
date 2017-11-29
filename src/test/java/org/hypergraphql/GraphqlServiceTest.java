@@ -44,7 +44,7 @@ public class GraphqlServiceTest {
 
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
                 .query(query)
-                .context(client)
+       //         .context(client)
                 .build();
 
         long tStart = System.currentTimeMillis();

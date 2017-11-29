@@ -186,8 +186,8 @@ public class GraphqlWiring {
 
         String description;
 
-        if (config.schemElementConfigMap().containsKey(typeName)) {
-            String uri = config.schemElementConfigMap().get(typeName).id();
+        if (config.types().containsKey(typeName)) {
+            String uri = config.types().get(typeName).id();
             description = uri;
         } else {
             description = "An auxiliary type, not mapped to RDF.";
@@ -203,7 +203,7 @@ public class GraphqlWiring {
             builtFields.add(_idField);
         }
 
-        if (config.schemElementConfigMap().containsKey(typeName)) builtFields.add(_typeField);
+        if (config.types().containsKey(typeName)) builtFields.add(_typeField);
 
         GraphQLObjectType newObjectType = newObject()
                 .name(typeName)
@@ -253,9 +253,9 @@ public class GraphqlWiring {
         }
 
         String fieldName = fieldDef.get("name").asText();
-        String graphName = (isQueryType) ? config.schemElementConfigMap().get(fieldName).service().graph() : config.schemElementConfigMap().get(fieldName).service().graph();
-        String endpointURI = (isQueryType) ? config.schemElementConfigMap().get(fieldName).service().url() : config.schemElementConfigMap().get(fieldName).service().url();
-        String uri = (isQueryType) ? null : config.schemElementConfigMap().get(fieldName).id();
+        String graphName = (isQueryType) ? config.queryFields().get(fieldName).service().graph() : config.fields().get(fieldName).service().graph();
+        String endpointURI = (isQueryType) ? config.queryFields().get(fieldName).service().url() : config.fields().get(fieldName).service().url();
+        String uri = (isQueryType) ? null : config.fields().get(fieldName).id();
         String description = uri + " (graph: " + graphName + "; endpoint: " + endpointURI + ")";
 
 

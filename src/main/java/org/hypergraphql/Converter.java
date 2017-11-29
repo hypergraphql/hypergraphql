@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.hypergraphql.config.HGQLConfig;
 import org.hypergraphql.config.Service;
 
+
 import java.util.*;
 
 /**
@@ -471,7 +472,10 @@ public class Converter {
             }
 
             if (!JSONLD_VOC.containsKey(name)) {
-                Service service = (parentId==null) ? config.schemElementConfigMap().get(name).service(): config.schemElementConfigMap().get(name).service();
+
+          //      Service service = (parentId==null) ? config.schemElementConfigMap().get(name).service(): config.schemElementConfigMap().get(name).service();
+                Service service = (parentId==null) ? config.queryFields().get(name).service(): config.fields().get(name).service();
+
                 subquery.put("graph", service.graph());
                 String endpoint = service.id();
                 ArrayNode subfields = (result.has(endpoint)) ? (ArrayNode) result.get(endpoint) : mapper.createArrayNode();
