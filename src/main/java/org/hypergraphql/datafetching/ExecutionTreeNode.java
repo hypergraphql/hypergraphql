@@ -21,8 +21,56 @@ public class ExecutionTreeNode {
     private String executionId; // unique identifier of this execution node
     private Map<String, ExecutionForest> childrenNodes; // succeeding executions
     private HGQLConfig config;
-    private Set<String> input;
+    private String rootType;
 
+    public void setService(Service service) {
+        this.service = service;
+    }
+
+    public void setQuery(JsonNode query) {
+        this.query = query;
+    }
+
+    public void setExecutionId(String executionId) {
+        this.executionId = executionId;
+    }
+
+    public Map<String, ExecutionForest> getChildrenNodes() {
+        return childrenNodes;
+    }
+
+    public void setChildrenNodes(Map<String, ExecutionForest> childrenNodes) {
+        this.childrenNodes = childrenNodes;
+    }
+
+    public HGQLConfig getConfig() {
+        return config;
+    }
+
+    public void setConfig(HGQLConfig config) {
+        this.config = config;
+    }
+
+    public String getRootType() {
+        return rootType;
+    }
+
+    public void setRootType(String rootType) {
+        this.rootType = rootType;
+    }
+
+
+    public Service getService() {
+        return service;
+    }
+
+    public JsonNode getQuery() {
+        return query;
+    }
+
+    public String getExecutionId() {
+        return executionId;
+    }
 
 
     public ExecutionTreeNode(HGQLConfig config, Field field, String nodeId) {
@@ -64,22 +112,6 @@ public class ExecutionTreeNode {
 
     }
 
-
-    public Service getService() {
-        return service;
-    }
-
-    public JsonNode getQuery() {
-        return query;
-    }
-
-    public String getExecutionId() {
-        return executionId;
-    }
-
-    public Set<String> getInput() {
-        return input;
-    }
 
 
     private JsonNode getFieldsJson(Set<Field> fields, String parentId) {
@@ -243,7 +275,7 @@ public class ExecutionTreeNode {
 
 
 
-        TreeExecutionResult executionResult = service.executeQuery(query, input);
+        TreeExecutionResult executionResult = service.executeQuery(query, input , rootType);
         Map<String,Set<String>> resultset = executionResult.getResultSet();
 
 

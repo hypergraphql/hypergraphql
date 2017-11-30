@@ -1,9 +1,6 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.log4j.Logger;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.TreeExecutionResult;
@@ -33,6 +30,8 @@ public abstract class SPARQLService extends Service {
     static Logger logger = Logger.getLogger(Converter.class);
 
     private HGQLConfig config;
+
+    private final String RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
 
     private String graphSTR(String graph, String triple) {
         final String PATTERN = "GRAPH <%s> { %s } ";
@@ -109,20 +108,6 @@ public abstract class SPARQLService extends Service {
         return fieldPattern(parentId, nodeId, predicateURI, typeURI);
     }
 
-    private String graphPattern(String fieldPattern, JsonNode field, JsonNode parentField) {
-        JsonNode args = field.get("args");
-        String graphName = (args.has("graph")) ? args.get("graph").asText() : field.get("graph").asText();
-
-        String graphPattern;
-        if (parentField != null) {
-            JsonNode parentArgs = parentField.get("args");
-            String parentGraphName = (parentArgs.has("graph")) ? parentArgs.get("graph").asText() : parentField.get("graph").asText();
-            graphPattern = (parentGraphName.equals(graphName)) ? fieldPattern : graphSTR(graphName, fieldPattern);
-        } else {
-            graphPattern = graphSTR(graphName, fieldPattern);
-        }
-        return graphPattern;
-    }
 
     //from graphqlConfig names to jsonld reserved names
     public String getSelectQuery(JsonNode jsonQuery) {
@@ -142,83 +127,70 @@ public abstract class SPARQLService extends Service {
         JsonNode fieldSchema = config.mapping().get("Query").get("fields").get(queryField.get("name").asText());
         String targetName = fieldSchema.get("targetName").asText();
         String targetURI = config.types().get(targetName).id();
-        String graphID = config.queryFields().get(queryField.get("name").asText()).service().getGraph();
+        String graphID = ((SPARQLEndpointService) config.queryFields().get(queryField.get("name").asText()).service()).getGraph();
         String nodeId = queryField.get("nodeId").asText();
         JsonNode args = queryField.get("args");
+        String limitSTR = "";
+        String offsetSTR = "";
         if (args!=null) {
-            int limit = (args.has("limit")) ? args.get("limit") :
+            if (args.has("limit")) limitSTR = limitSTR(args.get("limit").asInt());
+            if (args.has("offset")) offsetSTR = offsetSTR(args.get("offset").asInt());
         }
+        String selectTriple = tripleSTR(varSTR(nodeId), RDF_TYPE_URI, uriSTR(targetURI));
+        String rootSubquery = selectSubquerySTR(nodeId, selectTriple, limitSTR, offsetSTR);
 
         JsonNode subfields = queryField.get("fields");
+        String whereClause = getSubQueries(subfields, targetName);
 
-
-
-        String whereClause = getSubquery(subfields);
-
-        String selectQuery = selectQuerySTR(whereClause, graphID);
+        String selectQuery = selectQuerySTR(rootSubquery + whereClause, graphID);
 
         return selectQuery;
     }
 
-    public String getSubqueryRoot(JsonNode jsonQuery) {
+    private String getSelectNonRoot(JsonNode jsonQuery, String typeName) {
 
-        JsonNode queryField = jsonQuery.elements().next();
-        JsonNode fieldSchema = config.mapping().get("Query").get("fields").get(queryField.get("name").asText());
-        String targetName = fieldSchema.get("targetName").asText();
+        JsonNode firstField = jsonQuery.elements().next();
+        String graphID = ((SPARQLEndpointService) config.fields().get(firstField.get("name").asText()).service()).getGraph();
 
-        config.types().get(targetName).id();
+        Iterator<JsonNode> queryFieldsIterator = jsonQuery.elements();
 
-    }
-
-    private Map<String, String> getConstructQuery(JsonNode query, Boolean rootQuery) {
-
-        Map<String, String> output = new HashMap<>();
-        String service = query.fieldNames().next();
-        output.put("service", service);
-
-        Iterator<JsonNode> fields = query.get(service).elements();
-
-        String constructPattern = "";
-        String wherePattern = "";
-
-        String matchParent;
-
-        while (fields.hasNext()) {
-            JsonNode field = fields.next();
-
-            JsonNode args = field.get("args");
+        String whereClause = "";
+        while (queryFieldsIterator.hasNext()) {
+            JsonNode field = queryFieldsIterator.next();
+            String fieldURI = config.fields().get(field.get("name").asText()).id();
+            JsonNode fieldSchema = config.mapping().get(typeName).get("fields").get(field.get("name").asText());
+            String targetName = fieldSchema.get("targetName").asText();
             String nodeId = field.get("nodeId").asText();
-            String parentId = (field.has("parentId")) ? field.get("parentId").asText() : "";
-            String fieldPattern = fieldPattern(field);
+            JsonNode args = field.get("args");
 
-            matchParent = markTripleSTR(parentId);
-            String queryName = (field.has("alias")) ? field.get("alias").asText() : field.get("name").asText();
-            String rootTriple = (rootQuery) ? rootTripleSTR(nodeId, queryName) : "";
-            String markTriple = (field.has("fields")) ? markTripleSTR(nodeId) : "";
+            String targetURI = (config.types().get(targetName).id();
 
-            String limit = (args.has("limit")) ? limitSTR(args.get("limit").asInt()) : "";
-            String offset = (args.has("offset")) ? offsetSTR(args.get("offset").asInt()) : "";
 
-            Map<String, String> subqueries = getSubqueries(service, field);
 
-            String subConstruct = (subqueries.containsKey("construct")) ? subqueries.get("construct") : "";
-            String subWhere = (subqueries.containsKey("where")) ? subqueries.get("where") : "";
-
-            String matchPattern = (rootQuery) ? selectSTR(nodeId, fieldPattern, limit, offset) + subWhere + wherePattern : fieldPattern + subWhere + wherePattern;
-
-            constructPattern = fieldPattern + rootTriple + markTriple + subConstruct + constructPattern;
-            wherePattern = graphPattern(matchPattern, field, null);
-
-            output.put("match", matchParent);
-            output.put("var", varSTR(parentId));
         }
 
-        wherePattern = (rootQuery) ? wherePattern : "%s " + wherePattern;
-        // String servicePattern = serviceSTR(service, wherePattern);
-        String constructQuery = constructSTR(constructPattern, wherePattern);
-
-        output.put("query", constructQuery);
-
-        return output;
     }
+
+    private String getFieldSubquery(JsonNode fieldJson, String typeName) {
+
+        String fieldURI = config.fields().get(fieldJson.get("name").asText()).id();
+        JsonNode fieldSchema = config.mapping().get(typeName).get("fields").get(fieldJson.get("name").asText());
+        String targetName = fieldSchema.get("targetName").asText();
+        String parentId = fieldJson.get("parentId").asText();
+        String nodeId = fieldJson.get("nodeId").asText();
+        JsonNode args = fieldJson.get("args");
+
+        String typeURI = (config.types().containsKey(targetName)) ? config.types().get(targetName).id() : "";
+
+        String fieldPattern = fieldPattern(parentId, nodeId, fieldURI, typeURI);
+
+        JsonNode subfields = fieldJson.get("fields");
+
+        String rest = getSubQueries(subfields, targetName);
+
+        String whereClause = optionalSTR(fieldPattern, rest);
+
+        return whereClause;
+    }
+
 }

@@ -38,7 +38,7 @@ public class SPARQLEndpointService extends SPARQLService {
 
 
     @Override
-    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input) {
+    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, String rootType) {
 
         //todo : Szymon
         return null;
