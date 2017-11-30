@@ -26,7 +26,7 @@ public class ExecutionForest  {
     public Model generateModel() {
         Model model = ModelFactory.createDefaultModel();
         for (ExecutionTreeNode node : this.forest) {
-            model.add(node.generateTreeModel(null));
+            model.add(node.generateTreeModel(new HashSet<String>()));
 
         }
         return model;

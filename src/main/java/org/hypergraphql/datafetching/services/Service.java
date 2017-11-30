@@ -43,7 +43,7 @@ public  class Service {
 
 
     public TreeExecutionResult executeQuery(JsonNode query , Set<String> input ) {
-        //todo
+        //todo : change this to abstract and implement method in subclasses
         return null;
     }
 
