@@ -471,19 +471,19 @@ public class Converter {
                 subquery.put("uri", config.schemElementConfigMap().get(name).id());
             }
 
-            if (!JSONLD_VOC.containsKey(name)) {
-
-          //      Service service = (parentId==null) ? config.schemElementConfigMap().get(name).service(): config.schemElementConfigMap().get(name).service();
-                Service service = (parentId==null) ? config.queryFields().get(name).service(): config.fields().get(name).service();
-
-                subquery.put("graph", service.graph());
-                String endpoint = service.id();
-                ArrayNode subfields = (result.has(endpoint)) ? (ArrayNode) result.get(endpoint) : mapper.createArrayNode();
-                subfields.add(subquery);
-                if (subfields.size() > 0) {
-                    result.put(service.id(), subfields);
-                }
-            }
+//            if (!JSONLD_VOC.containsKey(name)) {
+//
+//          //      Service service = (parentId==null) ? config.schemElementConfigMap().get(name).service(): config.schemElementConfigMap().get(name).service();
+//                Service service = (parentId==null) ? config.queryFields().get(name).service(): config.fields().get(name).service();
+//
+//                subquery.put("graph", service.getGraph());
+//                String endpoint = service.getId();
+//                ArrayNode subfields = (result.has(endpoint)) ? (ArrayNode) result.get(endpoint) : mapper.createArrayNode();
+//                subfields.add(subquery);
+//                if (subfields.size() > 0) {
+//                    result.put(service.getId(), subfields);
+//                }
+            //}
         }
 
         return result;

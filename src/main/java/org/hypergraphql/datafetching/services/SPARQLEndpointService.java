@@ -43,4 +43,15 @@ public class SPARQLEndpointService extends SPARQLService {
         //todo : Szymon
         return null;
     }
+
+    @Override
+    public void setParameters(JsonNode jsonnode) {
+
+        super.setParameters(jsonnode);
+
+        this.url = jsonnode.get("url").asText();
+        this.user = jsonnode.get("user").asText();
+        this.password = jsonnode.get("password").asText();
+
+    }
 }

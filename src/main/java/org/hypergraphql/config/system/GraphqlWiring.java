@@ -252,16 +252,16 @@ public class GraphqlWiring {
         }
 
         String fieldName = fieldDef.get("name").asText();
-        String graphName = (isQueryType) ? config.queryFields().get(fieldName).service().graph() : config.fields().get(fieldName).service().graph();
-        String endpointURI = (isQueryType) ? config.queryFields().get(fieldName).service().url() : config.fields().get(fieldName).service().url();
+       // String graphName = (isQueryType) ? config.queryFields().get(fieldName).service().getGraph() : config.fields().get(fieldName).service().getGraph();
+        //String endpointURI = (isQueryType) ? config.queryFields().get(fieldName).service().url() : config.fields().get(fieldName).service().url();
         String uri = (isQueryType) ? null : config.fields().get(fieldName).id();
-        String description = uri + " (graph: " + graphName + "; endpoint: " + endpointURI + ")";
+       // String description = uri + " (graph: " + graphName )";
 
 
         GraphQLFieldDefinition field = newFieldDefinition()
                 .name(fieldName)
                 .argument(args)
-                .description(description)
+                //.description(description)
                 .type(refType)
                 .dataFetcher(fetcher).build();
 

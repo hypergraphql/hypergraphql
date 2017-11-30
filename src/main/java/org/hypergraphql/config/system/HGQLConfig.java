@@ -115,15 +115,7 @@ public class HGQLConfig {
             this.queryFields = new HashMap<>();
             this.fields = new HashMap<>();
 
-            context.get("services").elements().forEachRemaining(service -> {
-                        try {
-                            Service serviceConfig = mapper.readValue(service.toString(), Service.class);
-                            this.services.put(serviceConfig.id(), serviceConfig);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-            );
+            generateServices(mapper);
 
             JsonNode predicatesJson = context.get("predicates");
 
@@ -178,6 +170,30 @@ public class HGQLConfig {
         GraphqlWiring wiring = new GraphqlWiring(this);
         this.schema = wiring.schema();
         this.graphql = GraphQL.newGraphQL(this.schema).build();
+    }
+
+    private void generateServices(ObjectMapper mapper) {
+
+        String packageName = "org.hypergraphql.datafetching.services";
+
+
+
+
+        context.get("services").elements().forEachRemaining(service -> {
+                    try {
+                        String type = service.get("@type").asText();
+                        Service serviceConfig = (Service) Class.forName(packageName + "." + type).newInstance();
+                        serviceConfig.setParameters(service);
+                        this.services.put(serviceConfig.getId(), serviceConfig);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+        );
     }
 
     private ObjectNode mapping(TypeDefinitionRegistry registry) throws IOException {

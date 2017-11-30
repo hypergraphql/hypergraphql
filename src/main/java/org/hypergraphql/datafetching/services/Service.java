@@ -11,7 +11,9 @@ public abstract class Service {
 
     protected String type;
     protected String id;
-    protected String graph;
+
+
+    protected Class SPARQLEndpointService ;
 
     public String getType() {
         return type;
@@ -29,15 +31,12 @@ public abstract class Service {
         this.id = id;
     }
 
-    public String getGraph() {
-        return graph;
-    }
 
-    public void setGraph(String graph) {
-        this.graph = graph;
-    }
 
     public abstract TreeExecutionResult executeQuery(JsonNode query , Set<String> input );
+
+    public abstract void setParameters(JsonNode jsonnode);
+
 
 
 }

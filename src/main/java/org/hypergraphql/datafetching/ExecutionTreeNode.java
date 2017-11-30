@@ -39,7 +39,7 @@ public class ExecutionTreeNode {
     public String toString() {
         String result = "";
         result += "ExecutionNodeId: " + this.executionId + "\n";
-        result += "ServiceUrl: " + this.service.url() + "\n";
+        result += "ServiceID: " + this.service.getId() + "\n";
         result += "Query: " + this.query.toString() + "\n";
         result += "ChildrenNodes: \n";
         Set<String> children = this.childrenNodes.keySet();
