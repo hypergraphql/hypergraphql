@@ -37,6 +37,10 @@ public class SPARQLEndpointService extends SPARQLService {
     }
 
 
+    public SPARQLEndpointService() {
+
+    }
+
     @Override
     public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, String rootType) {
 
@@ -49,6 +53,7 @@ public class SPARQLEndpointService extends SPARQLService {
 
         super.setParameters(jsonnode);
 
+        this.id = jsonnode.get("@id").asText();
         this.url = jsonnode.get("url").asText();
         this.user = jsonnode.get("user").asText();
         this.password = jsonnode.get("password").asText();

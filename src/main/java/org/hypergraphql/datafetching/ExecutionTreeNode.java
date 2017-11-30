@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.language.*;
 import org.apache.jena.rdf.model.Model;
+import org.apache.log4j.Logger;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.services.Service;
+import org.hypergraphql.query.converters.SPARQLServiceConverter;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -22,6 +24,9 @@ public class ExecutionTreeNode {
     private Map<String, ExecutionForest> childrenNodes; // succeeding executions
     private HGQLConfig config;
     private String rootType;
+
+    static Logger logger = Logger.getLogger(ExecutionTreeNode.class);
+
 
     public void setService(Service service) {
         this.service = service;
@@ -79,42 +84,51 @@ public class ExecutionTreeNode {
         this.service = config.queryFields().get(field.getName()).service();
         this.executionId = createId();
         this.childrenNodes = new HashMap<>();
-        this.query = getFieldJson(field, null, nodeId);
-
+        this.query = getFieldJson(field, null, nodeId, "Query");
+        this.rootType = "Query";
 
     }
 
-    public String toString() {
-        String result = "";
-        result += "ExecutionNodeId: " + this.executionId + "\n";
-        result += "ServiceID: " + this.service.getId() + "\n";
-        result += "Query: " + this.query.toString() + "\n";
-        result += "ChildrenNodes: \n";
-        Set<String> children = this.childrenNodes.keySet();
 
-        for (String child : children) {
-            result += "\tParentMarker: " + child + "\t" + " Children execution nodes: " + this.childrenNodes.get(child).toString() + "\n";
-        }
-
-        result += "\n\n";
-
-        return result;
-    }
-
-
-    public ExecutionTreeNode(Service service, Set<Field> fields, String parentId) {
+    public ExecutionTreeNode(Service service, Set<Field> fields, String parentId, String parentType) {
 
         this.config = HGQLConfig.getInstance();
         this.service = service;
         this.executionId = createId();
         this.childrenNodes = new HashMap<>();
-        this.query = getFieldsJson(fields, parentId);
+        this.query = getFieldsJson(fields, parentId, parentType);
+        this.rootType = parentType;
 
     }
 
 
+    public String toString(int i) {
+        
+        String space = "";
+        for (int n = 0; n<i ; n++) {
+            space += "\t";
+        }
 
-    private JsonNode getFieldsJson(Set<Field> fields, String parentId) {
+        String result = "\n";
+        result += space + "ExecutionNodeId: " + this.executionId + "\n";
+        result += space + "ServiceID: " + this.service.getId() + "\n";
+        result += space + "Query: " + this.query.toString() + "\n";
+        result += space + "rootType: " + this.rootType + "\n";
+        Set<String> children = this.childrenNodes.keySet();
+        if (!children.isEmpty()) {
+            result += space + "ChildrenNodes: \n";
+            for (String child : children) {
+                result += space + "\tParentMarker: " + child + "\n" + space + "\tChildren execution nodes: \n" + this.childrenNodes.get(child).toString(i+1) + "\n";
+            }
+        }
+
+        result += "\n";
+
+        return result;
+    }
+
+
+    private JsonNode getFieldsJson(Set<Field> fields, String parentId, String parentType) {
 
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode query = mapper.createArrayNode();
@@ -125,7 +139,7 @@ public class ExecutionTreeNode {
 
             i++;
             String nodeId = parentId + "_" + i;
-            query.add(getFieldJson(field, parentId, nodeId));
+            query.add(getFieldJson(field, parentId, nodeId, parentType));
 
         }
 
@@ -134,7 +148,7 @@ public class ExecutionTreeNode {
     }
 
 
-    private JsonNode getFieldJson(Field field, String parentId, String nodeId) {
+    private JsonNode getFieldJson(Field field, String parentId, String nodeId, String parentType) {
 
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode query = mapper.createObjectNode();
@@ -149,18 +163,31 @@ public class ExecutionTreeNode {
 
             query.set("args", getArgsJson(args));
 
+        } else {
+
+            query.set("args", null);
+
         }
-        query.set("fields", this.traverse(field, nodeId));
+
+        JsonNode fieldSchema = config.mapping().get(parentType).get("fields").get(field.getName());
+        String targetName = fieldSchema.get("targetName").asText();
+
+        query.put("targetName", targetName);
+
+        query.set("fields", this.traverse(field, nodeId, parentType));
 
         return query;
 
     }
 
 
-    private JsonNode traverse(Field field, String parentId) {
+    private JsonNode traverse(Field field, String parentId, String parentType) {
 
         SelectionSet subFields = field.getSelectionSet();
         if (subFields!=null) {
+
+            JsonNode fieldSchema = config.mapping().get(parentType).get("fields").get(field.getName());
+            String targetName = fieldSchema.get("targetName").asText();
 
             Map<Service, Set<Field>> splitFields = getPartitionedFields(subFields);
 
@@ -171,23 +198,22 @@ public class ExecutionTreeNode {
                 if (serviceCall==this.service) {
 
                     Set<Field> subfields = splitFields.get(serviceCall);
-                    JsonNode fields = getFieldsJson(subfields, parentId);
+                    JsonNode fields = getFieldsJson(subfields, parentId, targetName);
                     return fields;
 
                 } else {
-
-                    ExecutionTreeNode childNode = new ExecutionTreeNode(serviceCall, splitFields.get(serviceCall), parentId);
+                    ExecutionTreeNode childNode = new ExecutionTreeNode(serviceCall, splitFields.get(serviceCall), parentId, targetName);
 
                     if (this.childrenNodes.containsKey(parentId)) {
                         try {
                             this.childrenNodes.get(parentId).getForest().add(childNode);
-                        } catch (Exception e) { e.fillInStackTrace();}
+                        } catch (Exception e) { logger.error(e); }
                     } else {
                         ExecutionForest forest = new ExecutionForest();
                         forest.getForest().add(childNode);
                         try {
-                        this.childrenNodes.put(parentId, forest);
-                        } catch (Exception e) { e.fillInStackTrace();}
+                            this.childrenNodes.put(parentId, forest);
+                        } catch (Exception e) { logger.error(e); }
                     }
                 }
             }
@@ -275,7 +301,7 @@ public class ExecutionTreeNode {
 
 
 
-        TreeExecutionResult executionResult = service.executeQuery(query, input , rootType);
+        TreeExecutionResult executionResult = service.executeQuery(query, input, rootType);
         Map<String,Set<String>> resultset = executionResult.getResultSet();
 
 

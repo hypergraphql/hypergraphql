@@ -2,8 +2,13 @@ package org.hypergraphql.datafetching;
 
 import graphql.language.*;
 import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.datafetching.services.SPARQLEndpointService;
+import org.hypergraphql.datafetching.services.SPARQLService;
+import org.hypergraphql.query.converters.SPARQLServiceConverter;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ExecutionForestFactory {
 
@@ -15,8 +20,6 @@ public class ExecutionForestFactory {
 
 
     public ExecutionForest getExecutionForest(Document queryDocument ) {
-
-
 
         ExecutionForest forest = new ExecutionForest();
 
@@ -38,9 +41,9 @@ public class ExecutionForestFactory {
                 forest.getForest().add(new ExecutionTreeNode(field, nodeId));
 
             }
-
         }
-        //System.out.println(forest.toString());
+
+        // System.out.println(forest.toString(0));
 
         return forest;
     }

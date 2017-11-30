@@ -32,12 +32,12 @@ public class ExecutionForest  {
         return model;
     }
 
-    public String toString() {
+    public String toString(int i) {
 
         String result = "";
 
         for (ExecutionTreeNode node : this.forest) {
-            result += node.toString();
+            result += node.toString(i);
         }
 
         return result;

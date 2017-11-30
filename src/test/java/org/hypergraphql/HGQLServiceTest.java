@@ -1,18 +1,10 @@
 package org.hypergraphql;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
-import graphql.introspection.Introspection;
 import graphql.introspection.IntrospectionQuery;
 import org.hypergraphql.config.system.HGQLConfig;
-import org.hypergraphql.datamodel.ModelContainer;
-import org.hypergraphql.query.Converter;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by szymon on 01/11/2017.
@@ -31,40 +23,40 @@ public class HGQLServiceTest {
 
     @Test
     public void fetchingDataToLocalFromQuery() {
-        HGQLConfig config = HGQLConfig.getInstance();
-
-        List<Map<String, String>> sparqlQueries;
-
-        String query = String.format(TEST_QUERY, LIMIT);
-
-        Converter converter = new Converter();
-        JsonNode jsonQuery = (JsonNode) converter.query2json(query).get("query");
-
-        sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
-
-        //todo
-        ModelContainer client = null;
-
-        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
-                .query(query)
-       //         .context(client)
-                .build();
-
-        long tStart = System.currentTimeMillis();
-
-        ExecutionResult qlResult = config.graphql().execute(executionInput);
-
-        long tEnd = System.currentTimeMillis();
-        long tDelta = tEnd - tStart;
-        double elapsedSeconds = tDelta / 1000.0;
-
-        System.out.println("SparqlClient fetchers: " + elapsedSeconds);
-
-        Map<String, Object> data =  qlResult.getData();
-
-        ArrayList people = (ArrayList) data.get("people");
-
-        assert(people.size()==LIMIT);
+//        HGQLConfig config = HGQLConfig.getInstance();
+//
+//        List<Map<String, String>> sparqlQueries;
+//
+//        String query = String.format(TEST_QUERY, LIMIT);
+//
+//        Converter converter = new Converter();
+//        JsonNode jsonQuery = (JsonNode) converter.query2json(query).get("query");
+//
+//        sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
+//
+//        //todo
+//        ModelContainer client = null;
+//
+//        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+//                .query(query)
+//       //         .context(client)
+//                .build();
+//
+//        long tStart = System.currentTimeMillis();
+//
+//        ExecutionResult qlResult = config.graphql().execute(executionInput);
+//
+//        long tEnd = System.currentTimeMillis();
+//        long tDelta = tEnd - tStart;
+//        double elapsedSeconds = tDelta / 1000.0;
+//
+//        System.out.println("SparqlClient fetchers: " + elapsedSeconds);
+//
+//        Map<String, Object> data =  qlResult.getData();
+//
+//        ArrayList people = (ArrayList) data.get("people");
+//
+//        assert(people.size()==LIMIT);
 
     }
 

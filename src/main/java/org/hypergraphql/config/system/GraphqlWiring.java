@@ -97,7 +97,7 @@ public class GraphqlWiring {
         public fetchParams(DataFetchingEnvironment environment) {
             subjectResource = environment.getSource();
             String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-            String predicateURI = config.schemElementConfigMap().get(predicate).id();
+            String predicateURI = config.fields().get(predicate).id();
             client = environment.getContext();
             property = client.getPropertyFromUri(predicateURI);
         }
@@ -115,7 +115,7 @@ public class GraphqlWiring {
 
     private DataFetcher<String> typeFetcher = environment -> {
         String typeName = environment.getParentType().getName();
-        String type = (config.schemElementConfigMap().containsKey(typeName))? config.schemElementConfigMap().get(typeName).id() : null;
+        String type = (config.types().containsKey(typeName))? config.types().get(typeName).id() : null;
         return type;
 
     };
