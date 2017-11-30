@@ -82,8 +82,6 @@ public class ExecutionTreeNode {
     }
 
 
-
-
     private JsonNode getFieldsJson(Set<Field> fields, String parentId) {
 
         ObjectMapper mapper = new ObjectMapper();

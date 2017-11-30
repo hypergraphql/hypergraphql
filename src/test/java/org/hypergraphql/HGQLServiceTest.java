@@ -3,6 +3,8 @@ package org.hypergraphql;
 import com.fasterxml.jackson.databind.JsonNode;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
+import graphql.introspection.Introspection;
+import graphql.introspection.IntrospectionQuery;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datamodel.ModelContainer;
 import org.hypergraphql.query.Converter;
@@ -63,6 +65,24 @@ public class HGQLServiceTest {
         ArrayList people = (ArrayList) data.get("people");
 
         assert(people.size()==LIMIT);
+
+    }
+
+    @Test
+    public void introspectionQuery() {
+        HGQLConfig config = new HGQLConfig("properties.json");
+
+        System.out.println(config.mapping());
+
+        String query = IntrospectionQuery.INTROSPECTION_QUERY;
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                .query(query)
+                .build();
+
+        ExecutionResult qlResult = config.graphql().execute(executionInput);
+
+        assert(qlResult.getErrors().isEmpty());
 
     }
 

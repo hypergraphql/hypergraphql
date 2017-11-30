@@ -135,7 +135,7 @@ public class Converter {
         }
         return graphPattern;
     }
-
+    
 
     public List<Map<String, String>> graphql2sparql(JsonNode jsonQuery) {
 
@@ -471,6 +471,7 @@ public class Converter {
                 subquery.put("uri", config.schemElementConfigMap().get(name).id());
             }
 
+
 //            if (!JSONLD_VOC.containsKey(name)) {
 //
 //          //      Service service = (parentId==null) ? config.schemElementConfigMap().get(name).service(): config.schemElementConfigMap().get(name).service();
@@ -484,6 +485,7 @@ public class Converter {
 //                    result.put(service.getId(), subfields);
 //                }
             //}
+
         }
 
         return result;

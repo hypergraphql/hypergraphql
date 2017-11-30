@@ -1,6 +1,10 @@
 package org.hypergraphql.services;
 
 import graphql.*;
+import graphql.introspection.Introspection;
+import graphql.introspection.IntrospectionQuery;
+import graphql.introspection.IntrospectionResultToSchema;
+import graphql.schema.GraphQLObjectType;
 import org.apache.log4j.Logger;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.ExecutionForest;

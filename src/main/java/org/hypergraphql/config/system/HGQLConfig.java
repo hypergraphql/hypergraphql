@@ -81,6 +81,16 @@ public class HGQLConfig {
     private GraphQLSchema schema;
     private GraphQL graphql;
 
+    private Map<String, String> JSONLD_VOC = new HashMap<String, String>() {
+        {
+            put("_context", "@context");
+            put("_id", "@id");
+            put("_value", "@value");
+            put("_type", "@type");
+            put("_language", "@language");
+            put("_graph", "@graph");
+        }};
+
     static Logger logger = Logger.getLogger(HGQLConfig.class);
 
     @JsonCreator
