@@ -7,44 +7,37 @@ import org.hypergraphql.datafetching.TreeExecutionResult;
 
 import java.util.Set;
 
-public  class Service {
+public abstract class Service {
 
+    protected String type;
+    protected String id;
+    protected String graph;
 
-    @JsonCreator
-    public Service(@JsonProperty("@type") String type,
-                   @JsonProperty("@id") String id,
-                   @JsonProperty("url") String url,
-                   @JsonProperty("user") String user,
-                   @JsonProperty("graph") String graph,
-                   @JsonProperty("password") String password
-    ) {
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
         this.type = type;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
         this.id = id;
-        this.url = url;
+    }
+
+    public String getGraph() {
+        return graph;
+    }
+
+    public void setGraph(String graph) {
         this.graph = graph;
-        this.user = user;
-        this.password = password;
-
     }
 
-    private String type;
-    private String id;
-    private String url;
-    private String graph;
-    private String user;
-    private String password;
+    public abstract TreeExecutionResult executeQuery(JsonNode query , Set<String> input );
 
-    public String type() { return this.type; }
-    public String id() { return this.id; }
-    public String url() { return this.url; }
-    public String graph() { return this.graph; }
-    public String user() { return this.user; }
-    public String password() { return this.password; }
-
-
-    public TreeExecutionResult executeQuery(JsonNode query , Set<String> input ) {
-        //todo : change this to abstract and implement method in subclasses
-        return null;
-    }
 
 }
