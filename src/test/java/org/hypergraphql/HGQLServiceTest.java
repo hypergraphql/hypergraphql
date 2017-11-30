@@ -31,13 +31,13 @@ public class HGQLServiceTest {
 
     @Test
     public void fetchingDataToLocalFromQuery() {
-        HGQLConfig config = new HGQLConfig("properties.json");
+        HGQLConfig config = HGQLConfig.getInstance();
 
         List<Map<String, String>> sparqlQueries;
 
         String query = String.format(TEST_QUERY, LIMIT);
 
-        Converter converter = new Converter(config);
+        Converter converter = new Converter();
         JsonNode jsonQuery = (JsonNode) converter.query2json(query).get("query");
 
         sparqlQueries = converter.graphql2sparql(converter.includeContextInQuery(jsonQuery));
@@ -70,7 +70,7 @@ public class HGQLServiceTest {
 
     @Test
     public void introspectionQuery() {
-        HGQLConfig config = new HGQLConfig("properties.json");
+        HGQLConfig config = HGQLConfig.getInstance();
 
         System.out.println(config.mapping());
 

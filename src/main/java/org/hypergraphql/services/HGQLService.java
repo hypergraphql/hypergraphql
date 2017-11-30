@@ -23,8 +23,8 @@ public class HGQLService {
 
     static Logger logger = Logger.getLogger(HGQLService.class);
 
-    public HGQLService(HGQLConfig config) {
-        this.config = config;
+    public HGQLService() {
+        this.config = HGQLConfig.getInstance();
     }
 
 
@@ -46,7 +46,7 @@ public class HGQLService {
 //
 //        Converter converter = new Converter(config);
 
-        ValidatedQuery validatedQuery = new QueryValidator(config).validateQuery(query);
+        ValidatedQuery validatedQuery = new QueryValidator().validateQuery(query);
 
         if (!validatedQuery.getValid()) {
             errors.addAll(validatedQuery.getErrors());
@@ -84,7 +84,7 @@ public class HGQLService {
 
 
 
-            ExecutionForest queryExecutionForest = new ExecutionForestFactory(config).getExecutionForest(validatedQuery.getParsedQuery());
+            ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery());
 
             ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 

@@ -19,9 +19,9 @@ public class QueryValidator {
     private Validator validator;
     private Parser parser;
 
-    public QueryValidator(HGQLConfig config) {
+    public QueryValidator() {
 
-        this.schema = config.schema();
+        this.schema = HGQLConfig.getInstance().schema();
         this.validationErrors = new ArrayList<>();
         this.validator = new Validator();
         this.parser = new Parser();

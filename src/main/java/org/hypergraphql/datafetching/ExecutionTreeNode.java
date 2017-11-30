@@ -73,9 +73,9 @@ public class ExecutionTreeNode {
     }
 
 
-    public ExecutionTreeNode(HGQLConfig config, Field field, String nodeId) {
+    public ExecutionTreeNode(Field field, String nodeId) {
 
-        this.config = config;
+        this.config = HGQLConfig.getInstance();
         this.service = config.queryFields().get(field.getName()).service();
         this.executionId = createId();
         this.childrenNodes = new HashMap<>();
@@ -102,9 +102,9 @@ public class ExecutionTreeNode {
     }
 
 
-    public ExecutionTreeNode(HGQLConfig config, Service service, Set<Field> fields, String parentId) {
+    public ExecutionTreeNode(Service service, Set<Field> fields, String parentId) {
 
-        this.config = config;
+        this.config = HGQLConfig.getInstance();
         this.service = service;
         this.executionId = createId();
         this.childrenNodes = new HashMap<>();
@@ -176,7 +176,7 @@ public class ExecutionTreeNode {
 
                 } else {
 
-                    ExecutionTreeNode childNode = new ExecutionTreeNode(config, serviceCall, splitFields.get(serviceCall), parentId);
+                    ExecutionTreeNode childNode = new ExecutionTreeNode(serviceCall, splitFields.get(serviceCall), parentId);
 
                     if (this.childrenNodes.containsKey(parentId)) {
                         try {

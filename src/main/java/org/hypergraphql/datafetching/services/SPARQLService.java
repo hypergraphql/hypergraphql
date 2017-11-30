@@ -109,88 +109,88 @@ public abstract class SPARQLService extends Service {
     }
 
 
-    //from graphqlConfig names to jsonld reserved names
-    public String getSelectQuery(JsonNode jsonQuery) {
+//    //from graphqlConfig names to jsonld reserved names
+//    public String getSelectQuery(JsonNode jsonQuery) {
+//
+//        Boolean root = jsonQuery.elements().next().get("parentID")==null;
+//        if (root) {
+//            return getSelectRoot(jsonQuery);
+//        } else {
+//            return getSelectNonRoot(jsonQuery);
+//        }
+//
+//    }
 
-        Boolean root = jsonQuery.elements().next().get("parentID")==null;
-        if (root) {
-            return getSelectRoot(jsonQuery);
-        } else {
-            return getSelectNonRoot(jsonQuery);
-        }
-
-    }
-
-    private String getSelectRoot(JsonNode jsonQuery) {
-
-        JsonNode queryField = jsonQuery.elements().next();
-        JsonNode fieldSchema = config.mapping().get("Query").get("fields").get(queryField.get("name").asText());
-        String targetName = fieldSchema.get("targetName").asText();
-        String targetURI = config.types().get(targetName).id();
-        String graphID = ((SPARQLEndpointService) config.queryFields().get(queryField.get("name").asText()).service()).getGraph();
-        String nodeId = queryField.get("nodeId").asText();
-        JsonNode args = queryField.get("args");
-        String limitSTR = "";
-        String offsetSTR = "";
-        if (args!=null) {
-            if (args.has("limit")) limitSTR = limitSTR(args.get("limit").asInt());
-            if (args.has("offset")) offsetSTR = offsetSTR(args.get("offset").asInt());
-        }
-        String selectTriple = tripleSTR(varSTR(nodeId), RDF_TYPE_URI, uriSTR(targetURI));
-        String rootSubquery = selectSubquerySTR(nodeId, selectTriple, limitSTR, offsetSTR);
-
-        JsonNode subfields = queryField.get("fields");
-        String whereClause = getSubQueries(subfields, targetName);
-
-        String selectQuery = selectQuerySTR(rootSubquery + whereClause, graphID);
-
-        return selectQuery;
-    }
-
-    private String getSelectNonRoot(JsonNode jsonQuery, String typeName) {
-
-        JsonNode firstField = jsonQuery.elements().next();
-        String graphID = ((SPARQLEndpointService) config.fields().get(firstField.get("name").asText()).service()).getGraph();
-
-        Iterator<JsonNode> queryFieldsIterator = jsonQuery.elements();
-
-        String whereClause = "";
-        while (queryFieldsIterator.hasNext()) {
-            JsonNode field = queryFieldsIterator.next();
-            String fieldURI = config.fields().get(field.get("name").asText()).id();
-            JsonNode fieldSchema = config.mapping().get(typeName).get("fields").get(field.get("name").asText());
-            String targetName = fieldSchema.get("targetName").asText();
-            String nodeId = field.get("nodeId").asText();
-            JsonNode args = field.get("args");
-
-            String targetURI = (config.types().get(targetName).id();
-
-
-
-        }
-
-    }
-
-    private String getFieldSubquery(JsonNode fieldJson, String typeName) {
-
-        String fieldURI = config.fields().get(fieldJson.get("name").asText()).id();
-        JsonNode fieldSchema = config.mapping().get(typeName).get("fields").get(fieldJson.get("name").asText());
-        String targetName = fieldSchema.get("targetName").asText();
-        String parentId = fieldJson.get("parentId").asText();
-        String nodeId = fieldJson.get("nodeId").asText();
-        JsonNode args = fieldJson.get("args");
-
-        String typeURI = (config.types().containsKey(targetName)) ? config.types().get(targetName).id() : "";
-
-        String fieldPattern = fieldPattern(parentId, nodeId, fieldURI, typeURI);
-
-        JsonNode subfields = fieldJson.get("fields");
-
-        String rest = getSubQueries(subfields, targetName);
-
-        String whereClause = optionalSTR(fieldPattern, rest);
-
-        return whereClause;
-    }
+//    private String getSelectRoot(JsonNode jsonQuery) {
+//
+//        JsonNode queryField = jsonQuery.elements().next();
+//        JsonNode fieldSchema = config.mapping().get("Query").get("fields").get(queryField.get("name").asText());
+//        String targetName = fieldSchema.get("targetName").asText();
+//        String targetURI = config.types().get(targetName).id();
+//        String graphID = ((SPARQLEndpointService) config.queryFields().get(queryField.get("name").asText()).service()).getGraph();
+//        String nodeId = queryField.get("nodeId").asText();
+//        JsonNode args = queryField.get("args");
+//        String limitSTR = "";
+//        String offsetSTR = "";
+//        if (args!=null) {
+//            if (args.has("limit")) limitSTR = limitSTR(args.get("limit").asInt());
+//            if (args.has("offset")) offsetSTR = offsetSTR(args.get("offset").asInt());
+//        }
+//        String selectTriple = tripleSTR(varSTR(nodeId), RDF_TYPE_URI, uriSTR(targetURI));
+//        String rootSubquery = selectSubquerySTR(nodeId, selectTriple, limitSTR, offsetSTR);
+//
+//        JsonNode subfields = queryField.get("fields");
+//        String whereClause = getSubQueries(subfields, targetName);
+//
+//        String selectQuery = selectQuerySTR(rootSubquery + whereClause, graphID);
+//
+//        return selectQuery;
+//    }
+//
+//    private String getSelectNonRoot(JsonNode jsonQuery, String typeName) {
+//
+//        JsonNode firstField = jsonQuery.elements().next();
+//        String graphID = ((SPARQLEndpointService) config.fields().get(firstField.get("name").asText()).service()).getGraph();
+//
+//        Iterator<JsonNode> queryFieldsIterator = jsonQuery.elements();
+//
+//        String whereClause = "";
+//        while (queryFieldsIterator.hasNext()) {
+//            JsonNode field = queryFieldsIterator.next();
+//            String fieldURI = config.fields().get(field.get("name").asText()).id();
+//            JsonNode fieldSchema = config.mapping().get(typeName).get("fields").get(field.get("name").asText());
+//            String targetName = fieldSchema.get("targetName").asText();
+//            String nodeId = field.get("nodeId").asText();
+//            JsonNode args = field.get("args");
+//
+//            String targetURI = (config.types().get(targetName).id();
+//
+//
+//
+//        }
+//
+//    }
+//
+//    private String getFieldSubquery(JsonNode fieldJson, String typeName) {
+//
+//        String fieldURI = config.fields().get(fieldJson.get("name").asText()).id();
+//        JsonNode fieldSchema = config.mapping().get(typeName).get("fields").get(fieldJson.get("name").asText());
+//        String targetName = fieldSchema.get("targetName").asText();
+//        String parentId = fieldJson.get("parentId").asText();
+//        String nodeId = fieldJson.get("nodeId").asText();
+//        JsonNode args = fieldJson.get("args");
+//
+//        String typeURI = (config.types().containsKey(targetName)) ? config.types().get(targetName).id() : "";
+//
+//        String fieldPattern = fieldPattern(parentId, nodeId, fieldURI, typeURI);
+//
+//        JsonNode subfields = fieldJson.get("fields");
+//
+//        String rest = getSubQueries(subfields, targetName);
+//
+//        String whereClause = optionalSTR(fieldPattern, rest);
+//
+//        return whereClause;
+//    }
 
 }

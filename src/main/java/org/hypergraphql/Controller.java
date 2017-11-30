@@ -19,7 +19,9 @@ import static spark.Spark.*;
 public class Controller {
 
 
-    public static void start(HGQLConfig config) {
+    public static void start() {
+
+        HGQLConfig config = HGQLConfig.getInstance();
 
 
         port(config.graphqlConfig().port());
@@ -40,7 +42,7 @@ public class Controller {
 
 
         ObjectMapper mapper = new ObjectMapper();
-        HGQLService service = new HGQLService(config);
+        HGQLService service = new HGQLService();
 
         // post method for accessing the GraphQL service
 

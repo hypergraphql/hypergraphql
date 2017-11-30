@@ -38,8 +38,8 @@ public class Converter {
     private LinkedList<JsonNode> queue = new LinkedList<>();
 
 
-    public Converter(HGQLConfig config) {
-        this.config = config;
+    public Converter() {
+        this.config = HGQLConfig.getInstance();
     }
 
     private final String RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";

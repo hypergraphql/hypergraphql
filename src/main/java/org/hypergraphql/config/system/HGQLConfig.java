@@ -37,6 +37,16 @@ import static graphql.Scalars.*;
 
 public class HGQLConfig {
 
+    private static HGQLConfig instance = null;
+    private static String propertyFilepath = "properties.json";
+
+    public static HGQLConfig getInstance() {
+        if(instance == null) {
+            instance = new HGQLConfig();
+        }
+        return instance;
+    }
+
     private final String SCHEMA_QUERY =
             "{\n" +
             "  __schema {\n" +
@@ -81,20 +91,10 @@ public class HGQLConfig {
     private GraphQLSchema schema;
     private GraphQL graphql;
 
-    private Map<String, String> JSONLD_VOC = new HashMap<String, String>() {
-        {
-            put("_context", "@context");
-            put("_id", "@id");
-            put("_value", "@value");
-            put("_type", "@type");
-            put("_language", "@language");
-            put("_graph", "@graph");
-        }};
-
     static Logger logger = Logger.getLogger(HGQLConfig.class);
 
     @JsonCreator
-    public HGQLConfig(@JsonProperty("contextFile") String contextFile,
+    private  HGQLConfig(@JsonProperty("contextFile") String contextFile,
                       @JsonProperty("schemaFile") String schemaFile,
                       @JsonProperty("graphql") GraphqlConfig graphql
     ) {
@@ -103,12 +103,14 @@ public class HGQLConfig {
         this.graphqlConfig = graphql;
     }
 
-    public HGQLConfig(String propertiesFile) {
+
+
+    protected HGQLConfig() {
 
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            HGQLConfig config = mapper.readValue(new File(propertiesFile), HGQLConfig.class);
+            HGQLConfig config = mapper.readValue(new File(propertyFilepath), HGQLConfig.class);
 
             if (config != null) {
                 try {
@@ -177,7 +179,11 @@ public class HGQLConfig {
             logger.error(e);
         }
 
-        GraphqlWiring wiring = new GraphqlWiring(this);
+
+    }
+
+    public void init() {
+        GraphqlWiring wiring = new GraphqlWiring();
         this.schema = wiring.schema();
         this.graphql = GraphQL.newGraphQL(this.schema).build();
     }

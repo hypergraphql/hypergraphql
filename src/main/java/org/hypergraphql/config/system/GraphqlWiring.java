@@ -61,9 +61,9 @@ public class GraphqlWiring {
     }};
 
 
-    public GraphqlWiring(HGQLConfig config) {
+    public GraphqlWiring() {
 
-        this.config = config;
+        this.config = HGQLConfig.getInstance();
 
         Set<GraphQLType> types = new HashSet<>();
         GraphQLObjectType queryType = null;
