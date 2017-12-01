@@ -9,7 +9,6 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.log4j.Logger;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.services.Service;
-import org.hypergraphql.query.converters.SPARQLServiceConverter;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -103,7 +102,7 @@ public class ExecutionTreeNode {
 
 
     public String toString(int i) {
-        
+
         String space = "";
         for (int n = 0; n<i ; n++) {
             space += "\t";
@@ -301,7 +300,7 @@ public class ExecutionTreeNode {
 
 
 
-        TreeExecutionResult executionResult = service.executeQuery(query, input, rootType);
+        TreeExecutionResult executionResult = service.executeQuery(query, input, rootType, childrenNodes.keySet());
         Map<String,Set<String>> resultset = executionResult.getResultSet();
 
 

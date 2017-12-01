@@ -31,7 +31,7 @@ public abstract class Service {
 
 
 
-    public abstract TreeExecutionResult executeQuery(JsonNode query, Set<String> input, String rootType);
+    public abstract TreeExecutionResult executeQuery(JsonNode query, Set<String> input, String rootType, Set<String> strings);
 
     public abstract void setParameters(JsonNode jsonnode);
 
