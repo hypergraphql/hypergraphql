@@ -66,6 +66,8 @@ public class SPARQLEndpointService extends SPARQLService {
 
         Map<String, Set<String>> resultSet = new HashMap<>();
 
+        Model unionModel = ModelFactory.createDefaultModel();
+
         for (String marker : markers) {
             resultSet.put(marker, new HashSet<>());
         }
@@ -102,22 +104,31 @@ public class SPARQLEndpointService extends SPARQLService {
             while (results.hasNext()) {
                 QuerySolution solution = results.nextSolution();
 
-                System.out.println(solution.get("x_1"));
-                Model model = getModelFromResults(solution);
+                for (String marker : markers) {
+                    if (solution.contains(marker)) resultSet.get(marker).add(solution.get(marker).asResource().getURI());
+                }
+
+                Model model = getModelFromResults(query, solution);
+
+                unionModel.add(model);
             }
 
         } while (inputList.size()>VALUES_SIZE_LIMIT);
 
+        TreeExecutionResult treeExecutionResult = new TreeExecutionResult();
+
+        treeExecutionResult.setResultSet(resultSet);
+        treeExecutionResult.setModel(unionModel);
 
 
         //todo
     //    Model model = getModelFromResults(results);
 
         //todo : Szymon
-        return null;
+        return treeExecutionResult;
     }
 
-    private Model getModelFromResults(QuerySolution results) {
+    private Model getModelFromResults(JsonNode query, QuerySolution results) {
         //todo
 
 

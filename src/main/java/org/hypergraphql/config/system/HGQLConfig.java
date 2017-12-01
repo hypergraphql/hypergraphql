@@ -74,12 +74,8 @@ public class HGQLConfig {
             "}\n";
 
     private Map<String, String> JSONLD_VOC = new HashMap<String, String>() {{
-    //    put("_context", "@context");
         put("_id", "@id");
-    //    put("_value", "@value");
         put("_type", "@type");
-     //   put("_language", "@language");
-     //   put("_graph", "@graph");
     }};
 
     private String contextFile;
