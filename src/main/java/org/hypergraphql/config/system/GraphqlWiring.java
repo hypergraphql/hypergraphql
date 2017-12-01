@@ -124,7 +124,7 @@ public class GraphqlWiring {
         Field field = (Field) environment.getFields().toArray()[0];
         String type = (field.getAlias()!=null) ? field.getAlias() : field.getName();
         ModelContainer client = environment.getContext();
-        List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter("http://hypergraphql/type", "http://hypergraphql/query/" + type);
+        List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter("http://hypergraphql.org/type", "http://hypergraphql.org/query/" + type);
         return subjects;
     };
 
