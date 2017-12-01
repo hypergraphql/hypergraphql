@@ -85,6 +85,7 @@ public class HGQLService {
 
 
             ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery());
+            System.out.println(queryExecutionForest.toString(3));
 
             ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 

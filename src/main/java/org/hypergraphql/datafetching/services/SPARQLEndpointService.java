@@ -1,6 +1,8 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 
 import java.util.Set;
@@ -44,8 +46,23 @@ public class SPARQLEndpointService extends SPARQLService {
     @Override
     public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, String rootType) {
 
+
+
+
+        ResultSet results = null;
+        //todo
+        Model model = getModelFromResults(results);
+
         //todo : Szymon
         return null;
+    }
+
+    private Model getModelFromResults(ResultSet results) {
+        //todo
+
+
+        return null;
+
     }
 
     @Override
