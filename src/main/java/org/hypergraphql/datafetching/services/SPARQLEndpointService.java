@@ -100,7 +100,10 @@ public class SPARQLEndpointService extends SPARQLService {
             ResultSet results = qEngine.execSelect();
 
             while (results.hasNext()) {
-                System.out.println(results.nextSolution().get("x_1"));
+                QuerySolution solution = results.nextSolution();
+
+                System.out.println(solution.get("x_1"));
+                Model model = getModelFromResults(solution);
             }
 
         } while (inputList.size()>VALUES_SIZE_LIMIT);
@@ -114,7 +117,7 @@ public class SPARQLEndpointService extends SPARQLService {
         return null;
     }
 
-    private Model getModelFromResults(ResultSet results) {
+    private Model getModelFromResults(QuerySolution results) {
         //todo
 
 

@@ -4,6 +4,11 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 
 import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class ExecutionForest  {
 
@@ -24,11 +29,24 @@ public class ExecutionForest  {
     }
 
     public Model generateModel() {
+        ExecutorService executor = Executors.newFixedThreadPool(10);
         Model model = ModelFactory.createDefaultModel();
+        Set<Future<Model>> futuremodels = new HashSet<>();
         for (ExecutionTreeNode node : this.forest) {
-            model.add(node.generateTreeModel(new HashSet<String>()));
+            FetchingExecution fetchingExecution = new FetchingExecution(new HashSet<String>(), node);
+            futuremodels.add(executor.submit(fetchingExecution));
+
 
         }
+        futuremodels.iterator().forEachRemaining(futureModel -> {
+            try {
+                model.add(futureModel.get());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        });
         return model;
     }
 
