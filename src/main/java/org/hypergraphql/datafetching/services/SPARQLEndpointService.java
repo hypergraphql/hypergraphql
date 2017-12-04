@@ -179,12 +179,14 @@ public class SPARQLEndpointService extends SPARQLService {
                 Property predicate = model.createProperty("", propertyString.id());
                 Resource subject = results.getResource(query.get("parentId").asText());
                 Resource object = results.getResource(query.get("nodeId").asText());
+                if (predicate!=null&&subject!=null&&object!=null)
                 model.add(subject, predicate, object);
             }
 
             if (targetTypeString != null && !(query.get("nodeId").asText().equals("null"))) {
                 Resource subject = results.getResource(query.get("nodeId").asText());
                 Resource object = model.createResource(targetTypeString.id());
+                if (subject!=null&&object!=null)
                 model.add(subject, RDF.type, object);
             }
 
