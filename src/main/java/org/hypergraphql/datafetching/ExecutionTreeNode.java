@@ -209,7 +209,7 @@ public class ExecutionTreeNode {
         if (config.fields().containsKey(contextLdKey)) {
             return config.fields().get(contextLdKey).id().toString();
         } else {
-            String value = config.HGQL_NAMESPACE + "query/" + contextLdKey;
+            String value = config.HGQL_QUERY_URI + contextLdKey;
             return value;
         }
     }
