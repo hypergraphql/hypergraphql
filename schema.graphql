@@ -1,9 +1,9 @@
 type Mountain @ld(uri: "http://dbpedia.org/ontology/Mountain", service:"dbpedia") {
-    label: [String] @uri(value: "tralala") @source(value: "blaa")
-    firstAscentPerson: [Person]
+    label: [String] @ld(uri: "http://www.w3.org/2000/01/rdf-schema#label", service:"dbpedia")
+    firstAscentPerson: [Person] @ld(uri: "http://www.w3.org/2000/01/rdf-schema#firstAscentPerson", service:"dbpedia")
 }
 
-type Person {
+type Person @ld(uri: "http://dbpedia.org/ontology/Person", service:"live-dbpedia") {
     name: String
     label: [String]
     deathPlace: City
@@ -12,19 +12,19 @@ type Person {
     birthDate: String
 }
 
-type Company {
+type Company @ld(uri: "http://dbpedia.org/ontology/Company", service:"dbpedia") {
     name: [String]
     label: [String]
     locationCity: City
     owner: [Person]
 }
 
-type City {
+type City @ld(uri: "http://dbpedia.org/ontology/City", service:"dbpedia") {
     label: [String]
     country: Country
     leader: Person
 }
 
-type Country {
+type Country @ld(uri: "http://dbpedia.org/ontology/Country", service:"dbpedia") {
     label: [String]
 }
