@@ -6,7 +6,7 @@ type Query {
 }
 
 type Mountain {
-    label: [String]
+    label: [String] @uri(value: "tralala") @source(value: "blaa")
     firstAscentPerson: [Person]
 }
 

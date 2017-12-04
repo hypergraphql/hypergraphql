@@ -167,6 +167,12 @@ public class HGQLConfig {
             SchemaParser schemaParser = new SchemaParser();
             this.registry = schemaParser.parse(new File(config.schemaFile));
 
+//            System.out.println("Types:");
+//            registry.types().forEach((key, ext) -> {
+//                System.out.println(key);
+//                System.out.println(ext.toString());
+//            });
+            
             this.mapping = mapping(registry);
 
             this.schemaFile = config.schemaFile;

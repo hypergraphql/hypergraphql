@@ -166,7 +166,7 @@ public class GraphqlWiring {
     private GraphQLFieldDefinition _typeField = newFieldDefinition()
             .type(GraphQLID)
             .name("_type")
-            .description("The rdf:type of this resource that was used as a filter when querying SPARQL endpoint. ")
+            .description("The rdf:type of this resource (used as a filter when fetching data from its original source).")
             .dataFetcher(typeFetcher).build();
 
 
@@ -182,9 +182,9 @@ public class GraphqlWiring {
 
         if (config.types().containsKey(typeName)) {
             String uri = config.types().get(typeName).id();
-            description = uri;
+            description =  "Instances of \"" + uri + "\".";
         } else {
-            description = "An auxiliary type, not mapped to RDF.";
+            description = (isQueryType) ? "Top querable predicates." : "An auxiliary type, not mapped to RDF.";
         }
 
         List<GraphQLFieldDefinition> builtFields = new ArrayList<>();
@@ -247,16 +247,15 @@ public class GraphqlWiring {
         }
 
         String fieldName = fieldDef.get("name").asText();
-       // String graphName = (isQueryType) ? config.queryFields().get(fieldName).service().getGraph() : config.fields().get(fieldName).service().getGraph();
-        //String endpointURI = (isQueryType) ? config.queryFields().get(fieldName).service().url() : config.fields().get(fieldName).service().url();
-        String uri = (isQueryType) ? null : config.fields().get(fieldName).id();
-       // String description = uri + " (graph: " + graphName )";
+        String sourceId = (isQueryType) ? config.queryFields().get(fieldName).service().getId() : config.fields().get(fieldName).service().getId();
+        String uri = (isQueryType) ? "Instances of " + fieldDef.get("targetName"): "Values of \"" + config.fields().get(fieldName).id() + "\"";
+        String description = uri + " (source: "+ sourceId +").";
 
 
         GraphQLFieldDefinition field = newFieldDefinition()
                 .name(fieldName)
                 .argument(args)
-                //.description(description)
+                .description(description)
                 .type(refType)
                 .dataFetcher(fetcher).build();
 
