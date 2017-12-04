@@ -1,11 +1,4 @@
-type Query {
-    mountains: [Mountain]
-    people: [Person]
-    companies: [Company]
-    cities: [City]
-}
-
-type Mountain {
+type Mountain @ld(uri: "http://dbpedia.org/ontology/Mountain", service:"dbpedia") {
     label: [String] @uri(value: "tralala") @source(value: "blaa")
     firstAscentPerson: [Person]
 }
