@@ -4,17 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.auth.HttpAuthenticator;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.web.HttpOp;
-import org.apache.jena.sparql.engine.http.Params;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.apache.jena.vocabulary.RDF;
 import org.hypergraphql.config.schema.FieldConfig;
@@ -23,8 +19,6 @@ import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.query.converters.SPARQLServiceConverter;
 
-import java.io.InputStream;
-import java.net.URI;
 import java.util.*;
 
 public class SPARQLEndpointService extends SPARQLService {
@@ -200,6 +194,7 @@ public class SPARQLEndpointService extends SPARQLService {
         }
 
 
+        model.write(System.out);
         return model;
 
     }

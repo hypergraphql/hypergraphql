@@ -14,118 +14,118 @@ import java.util.*;
  */
 
 public class Converter {
-    static Logger logger = Logger.getLogger(Converter.class);
-
-    private HGQLConfig config;
-    private Map<String, String> JSONLD_VOC = new HashMap<String, String>() {{
-        put("_context", "@context");
-        put("_id", "@id");
-        put("_value", "@value");
-        put("_type", "@type");
-        put("_language", "@language");
-        put("_graph", "@graph");
-    }}; //from graphqlConfig names to jsonld reserved names
-
-    private LinkedList<JsonNode> queue = new LinkedList<>();
-
-
-    public Converter() {
-        this.config = HGQLConfig.getInstance();
-    }
-
-    private final String RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
-    private final String HGQL_TYPE_URI = "<http://hypergraphql/type>";
-
-    private String graphSTR(String graph, String triple) {
-        final String PATTERN = "GRAPH <%s> { %s } ";
-        return (graph.equals("")) ? triple : String.format(PATTERN, graph, triple);
-    }
-
-    private String optionalSTR(String triple, String sparqlPattern) {
-        final String PATTERN = " OPTIONAL { %s %s } ";
-        return String.format(PATTERN, triple, sparqlPattern);
-    }
-
-    private String selectSTR(String id, String sparqlPattern, String limit, String offset) {
-        final String PATTERN = "{ SELECT " + varSTR(id) + " WHERE { %s } %s %s } ";
-        return String.format(PATTERN, sparqlPattern, limit, offset);
-    }
-
-    private String limitSTR(int no) {
-        final String PATTERN = "LIMIT %s ";
-        return String.format(PATTERN, no);
-    }
-
-    private String offsetSTR(int no) {
-        final String PATTERN = "OFFSET %s ";
-        return String.format(PATTERN, no);
-    }
-
-    private String uriSTR(String uri) {
-        final String PATTERN = "<%s>";
-        return String.format(PATTERN, uri);
-    }
-
-    private String varSTR(String id) {
-        final String PATTERN = "?%s";
-        return String.format(PATTERN, id);
-    }
-
-    private String tripleSTR(String subject, String predicate, String object) {
-        final String PATTERN = "%s %s %s . ";
-        return String.format(PATTERN, subject, predicate, object);
-    }
-
-    private String langFilterSTR(JsonNode field) {
-        final String PATTERN = "FILTER (lang(%s) = \"%s\") . ";
-        String nodeVar = varSTR(field.get("nodeId").asText());
-        JsonNode args = field.get("args");
-        String langPattern = (args.has("lang")) ? String.format(PATTERN, nodeVar, args.get("lang").asText()) : "";
-        return langPattern;
-    }
-
-    private String constructSTR(String constructPattern, String wherePattern) {
-        final String PATTERN = "CONSTRUCT { %s } WHERE { %s }";
-        return String.format(PATTERN, constructPattern, wherePattern);
-    }
-
-    private String markTripleSTR(String id) {
-        String markTriple = (id.equals("")) ? "" : tripleSTR(varSTR(id), HGQL_TYPE_URI, "<http://hypergraphql/node/" + id + ">");
-        return markTriple;
-    }
-
-    private String rootTripleSTR(String id, String root) {
-        return tripleSTR(varSTR(id), HGQL_TYPE_URI, "<http://hypergraphql/query/" + root + ">");
-    }
-
-    private String fieldPattern(String parentId, String nodeId, String predicateURI, String typeURI) {
-        String predicateTriple = (parentId.equals("")) ? "" : tripleSTR(varSTR(parentId), uriSTR(predicateURI), varSTR(nodeId));
-        String typeTriple = (typeURI.equals("")) ? "" : tripleSTR(varSTR(nodeId), RDF_TYPE_URI, uriSTR(typeURI));
-        return predicateTriple + typeTriple;
-    }
-
-    private String fieldPattern(JsonNode field) {
-        String nodeId = field.get("nodeId").asText();
-        String parentId = (field.has("parentId")) ? field.get("parentId").asText() : "";
-        String predicateURI = (field.has("uri")) ? field.get("uri").asText() : "";
-        String typeURI = (field.has("targetURI")) ? field.get("targetURI").asText() : "";
-        return fieldPattern(parentId, nodeId, predicateURI, typeURI);
-    }
-
-    private String graphPattern(String fieldPattern, JsonNode field, JsonNode parentField) {
-        JsonNode args = field.get("args");
-        String graphName = (args.has("graph")) ? args.get("graph").asText() : field.get("graph").asText();
-
-        String graphPattern;
-        if (parentField != null) {
-            JsonNode parentArgs = parentField.get("args");
-            String parentGraphName = (parentArgs.has("graph")) ? parentArgs.get("graph").asText() : parentField.get("graph").asText();
-            graphPattern = (parentGraphName.equals(graphName)) ? fieldPattern : graphSTR(graphName, fieldPattern);
-        } else {
-            graphPattern = graphSTR(graphName, fieldPattern);
-        }
-        return graphPattern;
-    }
+//    static Logger logger = Logger.getLogger(Converter.class);
+//
+//    private HGQLConfig config;
+//    private Map<String, String> JSONLD_VOC = new HashMap<String, String>() {{
+//        put("_context", "@context");
+//        put("_id", "@id");
+//        put("_value", "@value");
+//        put("_type", "@type");
+//        put("_language", "@language");
+//        put("_graph", "@graph");
+//    }}; //from graphqlConfig names to jsonld reserved names
+//
+//    private LinkedList<JsonNode> queue = new LinkedList<>();
+//
+//
+//    public Converter() {
+//        this.config = HGQLConfig.getInstance();
+//    }
+//
+//    private final String RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+//    private final String HGQL_TYPE_URI = "<http://hypergraphql/type>";
+//
+//    private String graphSTR(String graph, String triple) {
+//        final String PATTERN = "GRAPH <%s> { %s } ";
+//        return (graph.equals("")) ? triple : String.format(PATTERN, graph, triple);
+//    }
+//
+//    private String optionalSTR(String triple, String sparqlPattern) {
+//        final String PATTERN = " OPTIONAL { %s %s } ";
+//        return String.format(PATTERN, triple, sparqlPattern);
+//    }
+//
+//    private String selectSTR(String id, String sparqlPattern, String limit, String offset) {
+//        final String PATTERN = "{ SELECT " + varSTR(id) + " WHERE { %s } %s %s } ";
+//        return String.format(PATTERN, sparqlPattern, limit, offset);
+//    }
+//
+//    private String limitSTR(int no) {
+//        final String PATTERN = "LIMIT %s ";
+//        return String.format(PATTERN, no);
+//    }
+//
+//    private String offsetSTR(int no) {
+//        final String PATTERN = "OFFSET %s ";
+//        return String.format(PATTERN, no);
+//    }
+//
+//    private String uriSTR(String uri) {
+//        final String PATTERN = "<%s>";
+//        return String.format(PATTERN, uri);
+//    }
+//
+//    private String varSTR(String id) {
+//        final String PATTERN = "?%s";
+//        return String.format(PATTERN, id);
+//    }
+//
+//    private String tripleSTR(String subject, String predicate, String object) {
+//        final String PATTERN = "%s %s %s . ";
+//        return String.format(PATTERN, subject, predicate, object);
+//    }
+//
+//    private String langFilterSTR(JsonNode field) {
+//        final String PATTERN = "FILTER (lang(%s) = \"%s\") . ";
+//        String nodeVar = varSTR(field.get("nodeId").asText());
+//        JsonNode args = field.get("args");
+//        String langPattern = (args.has("lang")) ? String.format(PATTERN, nodeVar, args.get("lang").asText()) : "";
+//        return langPattern;
+//    }
+//
+//    private String constructSTR(String constructPattern, String wherePattern) {
+//        final String PATTERN = "CONSTRUCT { %s } WHERE { %s }";
+//        return String.format(PATTERN, constructPattern, wherePattern);
+//    }
+//
+//    private String markTripleSTR(String id) {
+//        String markTriple = (id.equals("")) ? "" : tripleSTR(varSTR(id), HGQL_TYPE_URI, "<http://hypergraphql/node/" + id + ">");
+//        return markTriple;
+//    }
+//
+//    private String rootTripleSTR(String id, String root) {
+//        return tripleSTR(varSTR(id), HGQL_TYPE_URI, "<http://hypergraphql/query/" + root + ">");
+//    }
+//
+//    private String fieldPattern(String parentId, String nodeId, String predicateURI, String typeURI) {
+//        String predicateTriple = (parentId.equals("")) ? "" : tripleSTR(varSTR(parentId), uriSTR(predicateURI), varSTR(nodeId));
+//        String typeTriple = (typeURI.equals("")) ? "" : tripleSTR(varSTR(nodeId), RDF_TYPE_URI, uriSTR(typeURI));
+//        return predicateTriple + typeTriple;
+//    }
+//
+//    private String fieldPattern(JsonNode field) {
+//        String nodeId = field.get("nodeId").asText();
+//        String parentId = (field.has("parentId")) ? field.get("parentId").asText() : "";
+//        String predicateURI = (field.has("uri")) ? field.get("uri").asText() : "";
+//        String typeURI = (field.has("targetURI")) ? field.get("targetURI").asText() : "";
+//        return fieldPattern(parentId, nodeId, predicateURI, typeURI);
+//    }
+//
+//    private String graphPattern(String fieldPattern, JsonNode field, JsonNode parentField) {
+//        JsonNode args = field.get("args");
+//        String graphName = (args.has("graph")) ? args.get("graph").asText() : field.get("graph").asText();
+//
+//        String graphPattern;
+//        if (parentField != null) {
+//            JsonNode parentArgs = parentField.get("args");
+//            String parentGraphName = (parentArgs.has("graph")) ? parentArgs.get("graph").asText() : parentField.get("graph").asText();
+//            graphPattern = (parentGraphName.equals(graphName)) ? fieldPattern : graphSTR(graphName, fieldPattern);
+//        } else {
+//            graphPattern = graphSTR(graphName, fieldPattern);
+//        }
+//        return graphPattern;
+//    }
     
 
 //    public List<Map<String, String>> graphql2sparql(JsonNode jsonQuery) {

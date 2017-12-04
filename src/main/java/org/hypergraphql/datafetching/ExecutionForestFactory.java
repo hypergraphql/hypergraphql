@@ -43,8 +43,6 @@ public class ExecutionForestFactory {
             }
         }
 
-        // System.out.println(forest.toString(0));
-
         return forest;
     }
 }

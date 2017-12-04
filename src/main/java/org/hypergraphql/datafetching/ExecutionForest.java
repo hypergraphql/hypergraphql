@@ -3,7 +3,9 @@ package org.hypergraphql.datafetching;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -60,6 +62,20 @@ public class ExecutionForest  {
         }
 
         return result;
+    }
+
+    public Map<String, String> getFullLdContext() {
+
+        Map<String, String> result = new HashMap<>();
+
+        Set<ExecutionTreeNode> children = getForest();
+
+            for (ExecutionTreeNode child : children) {
+                    result.putAll(child.getFullLdContext());
+            }
+
+        return result;
+
     }
 
 }

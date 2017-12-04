@@ -85,7 +85,7 @@ public class HGQLService {
 
 
             ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery());
-            System.out.println(queryExecutionForest.toString(3));
+            System.out.println(queryExecutionForest.toString(0));
 
             ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 
@@ -97,7 +97,7 @@ public class HGQLService {
             qlResult = config.graphql().execute(executionInput);
 
             data.putAll(qlResult.getData());
-     //       data.put("@context", preprocessedQuery.get("context"));
+            data.put("@context", queryExecutionForest.getFullLdContext());
         } else {
             qlResult = config.graphql().execute(query);
             data.putAll(qlResult.getData());
