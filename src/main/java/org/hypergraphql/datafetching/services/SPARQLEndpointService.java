@@ -14,6 +14,7 @@ import org.apache.jena.riot.web.HttpOp;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.apache.jena.vocabulary.RDF;
 import org.hypergraphql.config.schema.FieldConfig;
+import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.config.schema.TypeConfig;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.TreeExecutionResult;
@@ -156,11 +157,22 @@ public class SPARQLEndpointService extends SPARQLService {
                     model.add(subject, predicate, object);
                 }
 
-                if (targetTypeString != null && !(currentNode.get("nodeId").asText().equals("null"))) {
+                if (targetTypeString != null) {
                     Resource subject = results.getResource(currentNode.get("nodeId").asText());
                     Resource object = model.createResource(targetTypeString.id());
                     if (subject!=null&&object!=null)
                     model.add(subject, RDF.type, object);
+                }
+
+                QueryFieldConfig queryField = HGQLConfig.getInstance().queryFields().get(currentNode.get("name").asText());
+
+                if (queryField!=null) {
+
+                    String typeName = (currentNode.get("alias").isNull()) ? currentNode.get("name").asText() : currentNode.get("alias").asText();
+                    Resource subject = results.getResource(currentNode.get("nodeId").asText());
+                    Property predicate = model.createProperty("", HGQLConfig.getInstance().HGQL_TYPE_URI);
+                    Property object = model.createProperty("", HGQLConfig.getInstance().HGQL_QUERY_URI + typeName);
+                    model.add(subject, predicate, object);
                 }
 
                 model.add(getModelFromResults(currentNode.get("fields"), results));
@@ -188,6 +200,22 @@ public class SPARQLEndpointService extends SPARQLService {
                 Resource object = model.createResource(targetTypeString.id());
                 if (subject!=null&&object!=null)
                 model.add(subject, RDF.type, object);
+            }
+
+            QueryFieldConfig queryField = HGQLConfig.getInstance().queryFields().get(query.get("name").asText());
+
+            if (queryField!=null) {
+
+                System.out.println("Query: "+ query.toString());
+
+                String typeName = (query.get("alias").isNull()) ? query.get("name").asText() : query.get("alias").asText();
+
+                System.out.println("typeName: "+ typeName);
+
+                Resource subject = results.getResource(query.get("nodeId").asText());
+                Property predicate = model.createProperty("", HGQLConfig.getInstance().HGQL_TYPE_URI);
+                Property object = model.createProperty("", HGQLConfig.getInstance().HGQL_QUERY_URI + typeName);
+                model.add(subject, predicate, object);
             }
 
             model.add(getModelFromResults(query.get("fields"), results));
