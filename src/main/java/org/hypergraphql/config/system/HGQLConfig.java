@@ -40,6 +40,7 @@ public class HGQLConfig {
 
     private static HGQLConfig instance = null;
     private static String propertyFilepath = "properties.json";
+    public static String HGQL_NAMESPACE = "http://hypergraphql.org/";
 
     public static HGQLConfig getInstance() {
         if(instance == null) {

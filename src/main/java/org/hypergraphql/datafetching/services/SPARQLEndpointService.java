@@ -164,6 +164,7 @@ public class SPARQLEndpointService extends SPARQLService {
         }
 
 
+        model.write(System.out);
         return model;
 
     }
