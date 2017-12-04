@@ -112,26 +112,16 @@ public class SPARQLEndpointService extends SPARQLService {
             }
 
         } while (inputList.size()>VALUES_SIZE_LIMIT);
-        unionModel.write(System.out);
 
         TreeExecutionResult treeExecutionResult = new TreeExecutionResult();
 
         treeExecutionResult.setResultSet(resultSet);
         treeExecutionResult.setModel(unionModel);
 
-
-        //todo
-    //    Model model = getModelFromResults(results);
-
-        //todo : Szymon
         return treeExecutionResult;
     }
 
     private Model getModelFromResults(JsonNode query, QuerySolution results) {
-
-
-
-
 
         Model model = ModelFactory.createDefaultModel();
         if (query.isNull()) return model;
@@ -145,36 +135,9 @@ public class SPARQLEndpointService extends SPARQLService {
 
 
                 JsonNode currentNode = nodesIterator.next();
-                System.out.println(currentNode.get("name").asText());
-                FieldConfig propertyString = HGQLConfig.getInstance().fields().get(currentNode.get("name").asText());
-                TypeConfig targetTypeString = HGQLConfig.getInstance().types().get(currentNode.get("targetName").asText());
-                //todo create here model and then add
-                if (propertyString != null && !(currentNode.get("parentId").asText().equals("null"))) {
-                    Property predicate = model.createProperty("", propertyString.id());
-                    Resource subject = results.getResource(currentNode.get("parentId").asText());
-                    RDFNode object = results.get(currentNode.get("nodeId").asText());
-                    if (predicate!=null&&subject!=null&&object!=null)
-                    model.add(subject, predicate, object);
-                }
 
-                if (targetTypeString != null) {
-                    Resource subject = results.getResource(currentNode.get("nodeId").asText());
-                    Resource object = model.createResource(targetTypeString.id());
-                    if (subject!=null&&object!=null)
-                    model.add(subject, RDF.type, object);
-                }
-
-                QueryFieldConfig queryField = HGQLConfig.getInstance().queryFields().get(currentNode.get("name").asText());
-
-                if (queryField!=null) {
-
-                    String typeName = (currentNode.get("alias").isNull()) ? currentNode.get("name").asText() : currentNode.get("alias").asText();
-                    Resource subject = results.getResource(currentNode.get("nodeId").asText());
-                    Property predicate = model.createProperty("", HGQLConfig.getInstance().HGQL_TYPE_URI);
-                    Property object = model.createProperty("", HGQLConfig.getInstance().HGQL_QUERY_URI + typeName);
-                    model.add(subject, predicate, object);
-                }
-
+                Model currentmodel = buildmodel(results, currentNode);
+                model.add(currentmodel);
                 model.add(getModelFromResults(currentNode.get("fields"), results));
 
             }
@@ -182,51 +145,49 @@ public class SPARQLEndpointService extends SPARQLService {
 
         else {
 
-
-            System.out.println(query.get("name").asText());
-            FieldConfig propertyString = HGQLConfig.getInstance().fields().get(query.get("name").asText());
-            TypeConfig targetTypeString = HGQLConfig.getInstance().types().get(query.get("targetName").asText());
-            //todo create here model and then add
-            if (propertyString != null && !(query.get("parentId").asText().equals("null"))) {
-                Property predicate = model.createProperty("", propertyString.id());
-                Resource subject = results.getResource(query.get("parentId").asText());
-                Resource object = results.getResource(query.get("nodeId").asText());
-                if (predicate!=null&&subject!=null&&object!=null)
-                model.add(subject, predicate, object);
-            }
-
-            if (targetTypeString != null && !(query.get("nodeId").asText().equals("null"))) {
-                Resource subject = results.getResource(query.get("nodeId").asText());
-                Resource object = model.createResource(targetTypeString.id());
-                if (subject!=null&&object!=null)
-                model.add(subject, RDF.type, object);
-            }
-
-            QueryFieldConfig queryField = HGQLConfig.getInstance().queryFields().get(query.get("name").asText());
-
-            if (queryField!=null) {
-
-                System.out.println("Query: "+ query.toString());
-
-                String typeName = (query.get("alias").isNull()) ? query.get("name").asText() : query.get("alias").asText();
-
-                System.out.println("typeName: "+ typeName);
-
-                Resource subject = results.getResource(query.get("nodeId").asText());
-                Property predicate = model.createProperty("", HGQLConfig.getInstance().HGQL_TYPE_URI);
-                Property object = model.createProperty("", HGQLConfig.getInstance().HGQL_QUERY_URI + typeName);
-                model.add(subject, predicate, object);
-            }
-
+            Model currentModel = buildmodel(results,query);
+            model.add(currentModel);
             model.add(getModelFromResults(query.get("fields"), results));
-
 
         }
 
-
-        model.write(System.out);
         return model;
 
+    }
+
+    private Model buildmodel(QuerySolution results, JsonNode currentNode) {
+
+        Model model = ModelFactory.createDefaultModel();
+
+        FieldConfig propertyString = HGQLConfig.getInstance().fields().get(currentNode.get("name").asText());
+        TypeConfig targetTypeString = HGQLConfig.getInstance().types().get(currentNode.get("targetName").asText());
+
+        if (propertyString != null && !(currentNode.get("parentId").asText().equals("null"))) {
+            Property predicate = model.createProperty("", propertyString.id());
+            Resource subject = results.getResource(currentNode.get("parentId").asText());
+            RDFNode object = results.get(currentNode.get("nodeId").asText());
+            if (predicate!=null&&subject!=null&&object!=null)
+            model.add(subject, predicate, object);
+        }
+
+        if (targetTypeString != null) {
+            Resource subject = results.getResource(currentNode.get("nodeId").asText());
+            Resource object = model.createResource(targetTypeString.id());
+            if (subject!=null&&object!=null)
+            model.add(subject, RDF.type, object);
+        }
+
+        QueryFieldConfig queryField = HGQLConfig.getInstance().queryFields().get(currentNode.get("name").asText());
+
+        if (queryField!=null) {
+
+            String typeName = (currentNode.get("alias").isNull()) ? currentNode.get("name").asText() : currentNode.get("alias").asText();
+            Resource subject = results.getResource(currentNode.get("nodeId").asText());
+            Property predicate = model.createProperty("", HGQLConfig.getInstance().HGQL_TYPE_URI);
+            Property object = model.createProperty("", HGQLConfig.getInstance().HGQL_QUERY_URI + typeName);
+            model.add(subject, predicate, object);
+        }
+        return model;
     }
 
     @Override

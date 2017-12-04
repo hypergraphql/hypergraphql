@@ -378,9 +378,9 @@ public class ExecutionTreeNode {
             try {
                 computedModels.add(futureModel.get());
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.error(e);
             } catch (ExecutionException e) {
-                e.printStackTrace();
+                logger.error(e);
             }
         }
 
