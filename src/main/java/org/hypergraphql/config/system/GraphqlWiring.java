@@ -43,21 +43,15 @@ public class GraphqlWiring {
     private Map<String, GraphQLArgument> defaultArguments = new HashMap<String, GraphQLArgument>() {{
         put("limit", new GraphQLArgument("limit", GraphQLInt));
         put("offset", new GraphQLArgument("offset", GraphQLInt));
-        // put("graph", new GraphQLArgument("graph", GraphQLString));
-        // put("endpoint", new GraphQLArgument("endpoint", GraphQLString));
         put("lang", new GraphQLArgument("lang", GraphQLString));
     }};
+
     private List<GraphQLArgument> queryArgs = new ArrayList<GraphQLArgument>() {{
         add(defaultArguments.get("limit"));
         add(defaultArguments.get("offset"));
-        // add(defaultArguments.get("graph"));
-        // add(defaultArguments.get("endpoint"));
     }};
 
-
     private List<GraphQLArgument> nonQueryArgs = new ArrayList<GraphQLArgument>() {{
-//    add(defaultArguments.get("graph"));
-//    add(defaultArguments.get("endpoint"));
     }};
 
 
@@ -84,6 +78,7 @@ public class GraphqlWiring {
         }
 
         this.schema = GraphQLSchema.newSchema()
+                .query(queryType)
                 .query(queryType)
                 .build(types);
 
