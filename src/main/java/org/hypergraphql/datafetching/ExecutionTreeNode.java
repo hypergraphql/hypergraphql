@@ -118,7 +118,6 @@ public class ExecutionTreeNode {
         this.query = getFieldsJson(fields, parentId, parentType);
         this.rootType = parentType;
 
-
     }
 
 
