@@ -28,7 +28,7 @@ public class SPARQLEndpointService extends SPARQLService {
     private String user;
     private String password;
     private int VALUES_SIZE_LIMIT = 100;
-
+    private HGQLConfig config;
 
     public String getUrl() {
         return url;
@@ -53,7 +53,6 @@ public class SPARQLEndpointService extends SPARQLService {
     public void setPassword(String password) {
         this.password = password;
     }
-
 
     public SPARQLEndpointService() {
 
@@ -157,10 +156,13 @@ public class SPARQLEndpointService extends SPARQLService {
 
     private Model buildmodel(QuerySolution results, JsonNode currentNode) {
 
+
+        this.config = HGQLConfig.getInstance();
+
         Model model = ModelFactory.createDefaultModel();
 
-        FieldConfig propertyString = HGQLConfig.getInstance().fields().get(currentNode.get("name").asText());
-        TypeConfig targetTypeString = HGQLConfig.getInstance().types().get(currentNode.get("targetName").asText());
+        FieldConfig propertyString = this.config.fields().get(currentNode.get("name").asText());
+        TypeConfig targetTypeString = this.config.types().get(currentNode.get("targetName").asText());
 
         if (propertyString != null && !(currentNode.get("parentId").asText().equals("null"))) {
             Property predicate = model.createProperty("", propertyString.id());
@@ -177,14 +179,14 @@ public class SPARQLEndpointService extends SPARQLService {
             model.add(subject, RDF.type, object);
         }
 
-        QueryFieldConfig queryField = HGQLConfig.getInstance().queryFields().get(currentNode.get("name").asText());
+        QueryFieldConfig queryField = this.config.queryFields().get(currentNode.get("name").asText());
 
         if (queryField!=null) {
 
             String typeName = (currentNode.get("alias").isNull()) ? currentNode.get("name").asText() : currentNode.get("alias").asText();
             Resource subject = results.getResource(currentNode.get("nodeId").asText());
-            Property predicate = model.createProperty("", HGQLConfig.getInstance().HGQL_TYPE_URI);
-            Property object = model.createProperty("", HGQLConfig.getInstance().HGQL_QUERY_URI + typeName);
+            Property predicate = model.createProperty("", this.config.HGQL_TYPE_URI);
+            Resource object = model.createProperty("", this.config.HGQL_QUERY_URI + typeName);
             model.add(subject, predicate, object);
         }
         return model;

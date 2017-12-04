@@ -42,10 +42,6 @@ public class HGQLService {
         ExecutionInput executionInput;
         ExecutionResult qlResult;
 
-//        List<Map<String, String>> sparqlQueries;
-//
-//        Converter converter = new Converter(config);
-
         ValidatedQuery validatedQuery = new QueryValidator().validateQuery(query);
 
         if (!validatedQuery.getValid()) {
@@ -53,39 +49,9 @@ public class HGQLService {
             return result;
         }
 
-//        Map<String, Object> preprocessedQuery = null;
-//        try {
-//            preprocessedQuery = converter.query2json(query);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        List<GraphQLError> validationErrors = (List<GraphQLError>) preprocessedQuery.get("errors");
-//        errors.addAll(validationErrors);
-//
-//        if (validationErrors.size() > 0) {
-//
-//            //  result.put("errors", errors);
-//
-//            return result;
-//
-//        }
-
         if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
-        //    JsonNode jsonQuery = converter.includeContextInQuery((JsonNode) preprocessedQuery.get("query"));
-
-//            sparqlQueries = converter.graphql2sparql(jsonQuery);
-
-            // uncomment this lines if you want to include the generated SPARQL queries in the GraphQL response for debugging purposes
-            // extensions.put("sparqlQueries", sparqlQueries);
-
-            logger.info("Generated SPARQL queries:");
-     //       logger.info(sparqlQueries.toString());
-
-
-
             ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery());
-            System.out.println(queryExecutionForest.toString(0));
 
             ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 
