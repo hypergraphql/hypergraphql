@@ -14,9 +14,13 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.web.HttpOp;
 import org.apache.jena.sparql.engine.http.Params;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
+import org.apache.jena.vocabulary.RDF;
+import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.query.converters.SPARQLServiceConverter;
 
@@ -129,10 +133,38 @@ public class SPARQLEndpointService extends SPARQLService {
     }
 
     private Model getModelFromResults(JsonNode query, QuerySolution results) {
-        //todo
+
+        Model model = ModelFactory.createDefaultModel();
 
 
-        return null;
+        Iterator<JsonNode> nodesIterator = query.elements();
+
+        while (nodesIterator.hasNext()) {
+
+
+            JsonNode currentNode = nodesIterator.next();
+            String propertyString = HGQLConfig.getInstance().fields().get(currentNode.get("name").asText()).id();
+            String targetTypeString = HGQLConfig.getInstance().types().get(currentNode.get("targetName").asText()).id();
+            //todo create here model and then add
+            if (propertyString!=null&&!(currentNode.get("parentId").asText().equals("null"))) {
+                Property predicate = model.createProperty("",propertyString);
+                Resource subject = results.getResource(currentNode.get("parentId").asText());
+                Resource object = results.getResource(currentNode.get("nodeId").asText());
+                model.add(subject,predicate,object);
+            }
+
+            if (targetTypeString!=null&&!(currentNode.get("nodeId").asText().equals("null"))) {
+                Resource subject = results.getResource(currentNode.get("nodeId").asText());
+                Resource object = model.createResource(targetTypeString);
+                model.add(subject,RDF.type,object);
+            }
+
+            model.add(getModelFromResults(currentNode.get("fields"),results));
+
+        }
+
+
+        return model;
 
     }
 
