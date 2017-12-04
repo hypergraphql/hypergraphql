@@ -40,7 +40,8 @@ public class ExecutionForest  {
         }
         futuremodels.iterator().forEachRemaining(futureModel -> {
             try {
-                model.add(futureModel.get());
+                Model futuremodel = futureModel.get();
+                model.add(futuremodel);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {

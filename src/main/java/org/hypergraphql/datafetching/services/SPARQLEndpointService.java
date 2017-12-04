@@ -12,14 +12,13 @@ import org.apache.http.impl.auth.HttpAuthenticator;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.jena.query.*;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.web.HttpOp;
 import org.apache.jena.sparql.engine.http.Params;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.apache.jena.vocabulary.RDF;
+import org.hypergraphql.config.schema.FieldConfig;
+import org.hypergraphql.config.schema.TypeConfig;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.query.converters.SPARQLServiceConverter;
@@ -106,7 +105,7 @@ public class SPARQLEndpointService extends SPARQLService {
             ResultSet results = qEngine.execSelect();
 
             while (results.hasNext()) {
-                QuerySolution solution = results.nextSolution();
+                QuerySolution solution = results.next();
 
                 for (String marker : markers) {
                     if (solution.contains(marker)) resultSet.get(marker).add(solution.get(marker).asResource().getURI());
@@ -118,6 +117,7 @@ public class SPARQLEndpointService extends SPARQLService {
             }
 
         } while (inputList.size()>VALUES_SIZE_LIMIT);
+        unionModel.write(System.out);
 
         TreeExecutionResult treeExecutionResult = new TreeExecutionResult();
 
@@ -134,32 +134,68 @@ public class SPARQLEndpointService extends SPARQLService {
 
     private Model getModelFromResults(JsonNode query, QuerySolution results) {
 
+
+
+
+
         Model model = ModelFactory.createDefaultModel();
+        if (query.isNull()) return model;
+
+        if (query.isArray()) {
 
 
-        Iterator<JsonNode> nodesIterator = query.elements();
+            Iterator<JsonNode> nodesIterator = query.elements();
 
-        while (nodesIterator.hasNext()) {
+            while (nodesIterator.hasNext()) {
 
 
-            JsonNode currentNode = nodesIterator.next();
-            String propertyString = HGQLConfig.getInstance().fields().get(currentNode.get("name").asText()).id();
-            String targetTypeString = HGQLConfig.getInstance().types().get(currentNode.get("targetName").asText()).id();
+                JsonNode currentNode = nodesIterator.next();
+                System.out.println(currentNode.get("name").asText());
+                FieldConfig propertyString = HGQLConfig.getInstance().fields().get(currentNode.get("name").asText());
+                TypeConfig targetTypeString = HGQLConfig.getInstance().types().get(currentNode.get("targetName").asText());
+                //todo create here model and then add
+                if (propertyString != null && !(currentNode.get("parentId").asText().equals("null"))) {
+                    Property predicate = model.createProperty("", propertyString.id());
+                    Resource subject = results.getResource(currentNode.get("parentId").asText());
+                    RDFNode object = results.get(currentNode.get("nodeId").asText());
+                    if (predicate!=null&&subject!=null&&object!=null)
+                    model.add(subject, predicate, object);
+                }
+
+                if (targetTypeString != null && !(currentNode.get("nodeId").asText().equals("null"))) {
+                    Resource subject = results.getResource(currentNode.get("nodeId").asText());
+                    Resource object = model.createResource(targetTypeString.id());
+                    if (subject!=null&&object!=null)
+                    model.add(subject, RDF.type, object);
+                }
+
+                model.add(getModelFromResults(currentNode.get("fields"), results));
+
+            }
+        }
+
+        else {
+
+
+            System.out.println(query.get("name").asText());
+            FieldConfig propertyString = HGQLConfig.getInstance().fields().get(query.get("name").asText());
+            TypeConfig targetTypeString = HGQLConfig.getInstance().types().get(query.get("targetName").asText());
             //todo create here model and then add
-            if (propertyString!=null&&!(currentNode.get("parentId").asText().equals("null"))) {
-                Property predicate = model.createProperty("",propertyString);
-                Resource subject = results.getResource(currentNode.get("parentId").asText());
-                Resource object = results.getResource(currentNode.get("nodeId").asText());
-                model.add(subject,predicate,object);
+            if (propertyString != null && !(query.get("parentId").asText().equals("null"))) {
+                Property predicate = model.createProperty("", propertyString.id());
+                Resource subject = results.getResource(query.get("parentId").asText());
+                Resource object = results.getResource(query.get("nodeId").asText());
+                model.add(subject, predicate, object);
             }
 
-            if (targetTypeString!=null&&!(currentNode.get("nodeId").asText().equals("null"))) {
-                Resource subject = results.getResource(currentNode.get("nodeId").asText());
-                Resource object = model.createResource(targetTypeString);
-                model.add(subject,RDF.type,object);
+            if (targetTypeString != null && !(query.get("nodeId").asText().equals("null"))) {
+                Resource subject = results.getResource(query.get("nodeId").asText());
+                Resource object = model.createResource(targetTypeString.id());
+                model.add(subject, RDF.type, object);
             }
 
-            model.add(getModelFromResults(currentNode.get("fields"),results));
+            model.add(getModelFromResults(query.get("fields"), results));
+
 
         }
 
