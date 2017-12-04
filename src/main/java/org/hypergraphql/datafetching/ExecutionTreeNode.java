@@ -129,16 +129,16 @@ public class ExecutionTreeNode {
         }
 
         String result = "\n";
-        result += space + "ExecutionNodeId: " + this.executionId + "\n";
-        result += space + "ServiceID: " + this.service.getId() + "\n";
+        result += space + "ExecutionNode ID: " + this.executionId + "\n";
+        result += space + "Service ID: " + this.service.getId() + "\n";
         result += space + "Query: " + this.query.toString() + "\n";
-        result += space + "rootType: " + this.rootType + "\n";
+        result += space + "Root type: " + this.rootType + "\n";
         result += space + "LD context: " + this.ldContext.toString() + "\n";
         Set<String> children = this.childrenNodes.keySet();
         if (!children.isEmpty()) {
-            result += space + "ChildrenNodes: \n";
+            result += space + "Children nodes: \n";
             for (String child : children) {
-                result += space + "\tParentMarker: " + child + "\n" + space + "\tChildren execution nodes: \n" + this.childrenNodes.get(child).toString(i+1) + "\n";
+                result += space + "\tParent marker: " + child + "\n" + space + "\tChildren execution nodes: \n" + this.childrenNodes.get(child).toString(i+1) + "\n";
             }
         }
 
