@@ -1,30 +1,31 @@
-type Mountain @ld(uri: "http://dbpedia.org/ontology/Mountain", service:"dbpedia") {
-    label: [String] @ld(uri: "http://www.w3.org/2000/01/rdf-schema#label", service:"dbpedia")
-    firstAscentPerson: [Person] @ld(uri: "http://www.w3.org/2000/01/rdf-schema#firstAscentPerson", service:"dbpedia")
+type Mountain @ld(uri: "http://dbpedia.org/ontology/Mountain", service:"hgql-service:dbpedia") {
+    label: [String] @ld(uri: "http://www.w3.org/2000/01/rdf-schema#label", service:"hgql-service:dbpedia")
+    firstAscentPerson: [Person] @ld(uri: "http://dbpedia.org/ontology/firstAscentPerson", service:"hgql-service:dbpedia")
 }
 
-type Person @ld(uri: "http://dbpedia.org/ontology/Person", service:"live-dbpedia") {
-    name: String
-    label: [String]
-    deathPlace: City
-    birthPlace: City
-    deathDate: String
-    birthDate: String
+type Person @ld(uri: "http://dbpedia.org/ontology/Person", service:"hgql-service:live-dbpedia") {
+    name: String @ld(uri: "http://xmlns.com/foaf/0.1/name", service:"hgql-service:dbpedia")
+    label: [String] @ld(uri: "http://www.w3.org/2000/01/rdf-schema#label", service:"hgql-service:dbpedia")
+    deathPlace: City @ld(uri: "http://dbpedia.org/ontology/deathPlace", service:"hgql-service:dbpedia")
+    birthPlace: City @ld(uri: "http://dbpedia.org/ontology/birthPlace", service:"hgql-service:dbpedia")
+    deathDate: String @ld(uri: "http://dbpedia.org/ontology/deathDate", service:"hgql-service:dbpedia")
+    birthDate: String @ld(uri: "http://dbpedia.org/ontology/birthDate", service:"hgql-service:dbpedia")
 }
 
-type Company @ld(uri: "http://dbpedia.org/ontology/Company", service:"dbpedia") {
-    name: [String]
-    label: [String]
-    locationCity: City
-    owner: [Person]
+type Company @ld(uri: "http://dbpedia.org/ontology/Company", service:"hgql-service:dbpedia") {
+    name: [String] @ld(uri: "http://xmlns.com/foaf/0.1/name", service:"hgql-service:dbpedia")
+    label: [String] @ld(uri: "http://www.w3.org/2000/01/rdf-schema#label", service:"hgql-service:dbpedia")
+    locationCity: City @ld(uri: "http://dbpedia.org/ontology/locationCity", service:"hgql-service:dbpedia")
+    owner: [Person] @ld(uri: "http://dbpedia.org/ontology/owner", service:"hgql-service:dbpedia")
 }
 
-type City @ld(uri: "http://dbpedia.org/ontology/City", service:"dbpedia") {
-    label: [String]
-    country: Country
-    leader: Person
+type City @ld(uri: "http://dbpedia.org/ontology/City", service:"hgql-service:dbpedia") {
+    label: [String] @ld(uri: "http://www.w3.org/2000/01/rdf-schema#label", service:"hgql-service:dbpedia")
+    country: Country @ld(uri: "http://dbpedia.org/ontology/country", service:"hgql-service:dbpedia")
+    leader: Person @ld(uri: "http://dbpedia.org/ontology/leader", service:"hgql-service:dbpedia")
 }
 
-type Country @ld(uri: "http://dbpedia.org/ontology/Country", service:"dbpedia") {
-    label: [String]
+type Country @ld(uri: "http://dbpedia.org/ontology/Country", service:"hgql-service:dbpedia") {
+    label: [String] @ld(uri: "http://www.w3.org/2000/01/rdf-schema#label", service:"hgql-service:dbpedia")
 }
+
