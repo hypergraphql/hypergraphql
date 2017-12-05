@@ -35,7 +35,6 @@ public class HGQLService {
         Map<Object, Object> extensions = new HashMap<>();
         List<GraphQLError> errors = new ArrayList<>();
 
-        result.put("data", data);
         result.put("errors", errors);
         result.put("extensions", extensions);
 
@@ -76,6 +75,7 @@ public class HGQLService {
         }
 
         if (qlResult!=null) {
+            result.put("data", data);
             errors.addAll(qlResult.getErrors());
         }
         return result;
