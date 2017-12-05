@@ -28,7 +28,7 @@ public class HGQLService {
     }
 
 
-    public Map<String, Object> results(String query, String acceptHeader) {
+    public Map<String, Object> results(String query, String acceptType) {
 
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> data = new HashMap<>();
@@ -55,49 +55,19 @@ public class HGQLService {
 
             ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 
-            switch (acceptHeader) {
-                case "application/rdf+xml": {
-                    result.put("data", client.getDataOutput("RDF/XML"));
-                    break;
-                }
-                case "text/turtle": {
-                    result.put("data", client.getDataOutput("TTL"));
-                    break;
-                }
-                case "application/turtle": {
-                    result.put("data", client.getDataOutput("TTL"));
-                    break;
-                }
-                case "application/ntriples": {
-                    result.put("data", client.getDataOutput("N-TRIPLES"));
-                    break;
-                }
-                case "text/ntriples": {
-                    result.put("data", client.getDataOutput("N-TRIPLES"));
-                    break;
-                }
-                case "application/rdf+n3": {
-                    result.put("data", client.getDataOutput("N3"));
-                    break;
-                }
-                case "text/rdf+n3": {
-                    result.put("data", client.getDataOutput("N3"));
-                    break;
-                }
-                default: {
-                    executionInput = ExecutionInput.newExecutionInput()
-                            .query(query)
-                            .context(client)
-                            .build();
+            if (acceptType!=null) {
+                result.put("data", client.getDataOutput(acceptType));
+            } else {
+                executionInput = ExecutionInput.newExecutionInput()
+                        .query(query)
+                        .context(client)
+                        .build();
 
-                    qlResult = config.graphql().execute(executionInput);
+                qlResult = config.graphql().execute(executionInput);
 
-                    data.putAll(qlResult.getData());
-                    data.put("@context", queryExecutionForest.getFullLdContext());
-
-                }
+                data.putAll(qlResult.getData());
+                data.put("@context", queryExecutionForest.getFullLdContext());
             }
-
 
         } else {
             qlResult = config.graphql().execute(query);

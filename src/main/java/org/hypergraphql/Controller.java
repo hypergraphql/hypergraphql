@@ -18,10 +18,18 @@ import static spark.Spark.*;
  */
 public class Controller {
 
+    private static HGQLConfig config = HGQLConfig.getInstance();
+
+    private static final Map<String, String> MIME_MAP = new HashMap<String, String>() {{
+        put("application/json+rdf+xml", "RDF/XML");
+        put("application/json+turtle", "TTL");
+        put("application/json+ntriples", "N-TRIPLES");
+        put("application/json+n3", "N3");
+    }};
+
 
     public static void start() {
 
-        HGQLConfig config = HGQLConfig.getInstance();
 
 
         port(config.graphqlConfig().port());
@@ -52,10 +60,24 @@ public class Controller {
 
             String query = requestObject.get("query").asText();
 
-            Map<String, Object> result = service.results(query, req.headers("accept"));
+            String acceptType = req.headers("accept");
+            String contentType;
+
+            String mime;
+
+
+            if (MIME_MAP.containsKey(acceptType)) {
+                mime = MIME_MAP.get(acceptType);
+                contentType = acceptType;
+            } else {
+                mime = null;
+                contentType = "application/json";
+            }
+
+            Map<String, Object> result = service.results(query, mime);
 
             JsonNode resultJson = mapper.readTree(new ObjectMapper().writeValueAsString(result));
-            res.type("application/json");
+            res.type(contentType);
 
             return resultJson;
 
