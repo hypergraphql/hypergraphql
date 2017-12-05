@@ -40,7 +40,7 @@ public class HGQLSchemaConfig {
     }
 
     private GraphQLSchema schema;
-    private GraphQL graphql;
+    //private GraphQL graphql;
     private JsonNode schemaJson;
     private HGQLConfig config;
 
@@ -99,11 +99,11 @@ public class HGQLSchemaConfig {
         );
     }
 
-    public void init() {
+  //  public void init() {
 //        HGQLSchemaConfig wiring = new HGQLSchemaConfig();
 //        this.schema = wiring.schema();
 //        this.graphql = GraphQL.newGraphQL(this.schema).build();
-    }
+ //   }
 
 
     public HGQLSchemaConfig(HGQLConfig config) {
