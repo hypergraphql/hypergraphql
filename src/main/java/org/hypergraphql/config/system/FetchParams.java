@@ -23,16 +23,5 @@ public class FetchParams {
         property = client.getPropertyFromUri(predicateURI);
     }
 
-    public Resource getSubjectResource() {
-        return subjectResource;
-    }
-
-    public Property getProperty() {
-        return property;
-    }
-
-    public ModelContainer getClient() {
-        return client;
-    }
 
 }

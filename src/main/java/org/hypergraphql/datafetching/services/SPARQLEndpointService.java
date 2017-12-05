@@ -5,7 +5,6 @@ import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.hypergraphql.config.schema.*;
-import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.SPARQLEndpointExecution;
 import org.hypergraphql.datafetching.SPARQLExecutionResult;
 import org.hypergraphql.datafetching.TreeExecutionResult;
@@ -184,7 +183,7 @@ public class SPARQLEndpointService extends SPARQLService {
 
         super.setParameters(jsonnode);
 
-        this.id = jsonnode.get("@id").asText();
+        this.id = jsonnode.get("id").asText();
         this.url = jsonnode.get("url").asText();
         this.user = jsonnode.get("user").asText();
         this.password = jsonnode.get("password").asText();
