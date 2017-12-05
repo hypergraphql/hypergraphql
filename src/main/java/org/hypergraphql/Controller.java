@@ -52,7 +52,7 @@ public class Controller {
 
             String query = requestObject.get("query").asText();
 
-            Map<String, Object> result = service.results(query);
+            Map<String, Object> result = service.results(query, req.headers("accept"));
 
             JsonNode resultJson = mapper.readTree(new ObjectMapper().writeValueAsString(result));
             res.type("application/json");

@@ -1,5 +1,6 @@
 package org.hypergraphql.datamodel;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,13 @@ public class ModelContainer {
 
     //protected static Logger logger = Logger.getLogger(ModelContainer.class);
 
+    public String getDataOutput(String format) {
+
+        StringWriter out = new StringWriter();
+        model.write(out, format);
+        return out.toString();
+        
+    }
 
     public ModelContainer(Model model) {
 

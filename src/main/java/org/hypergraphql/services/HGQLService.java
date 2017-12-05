@@ -28,7 +28,7 @@ public class HGQLService {
     }
 
 
-    public Map<String, Object> results(String query) {
+    public Map<String, Object> results(String query, String acceptHeader) {
 
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> data = new HashMap<>();
@@ -40,7 +40,7 @@ public class HGQLService {
         result.put("extensions", extensions);
 
         ExecutionInput executionInput;
-        ExecutionResult qlResult;
+        ExecutionResult qlResult = null;
 
         ValidatedQuery validatedQuery = new QueryValidator().validateQuery(query);
 
@@ -55,22 +55,59 @@ public class HGQLService {
 
             ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 
-            executionInput = ExecutionInput.newExecutionInput()
-                    .query(query)
-                    .context(client)
-                    .build();
+            switch (acceptHeader) {
+                case "application/rdf+xml": {
+                    result.put("data", client.getDataOutput("RDF/XML"));
+                    break;
+                }
+                case "text/turtle": {
+                    result.put("data", client.getDataOutput("TTL"));
+                    break;
+                }
+                case "application/turtle": {
+                    result.put("data", client.getDataOutput("TTL"));
+                    break;
+                }
+                case "application/ntriples": {
+                    result.put("data", client.getDataOutput("N-TRIPLES"));
+                    break;
+                }
+                case "text/ntriples": {
+                    result.put("data", client.getDataOutput("N-TRIPLES"));
+                    break;
+                }
+                case "application/rdf+n3": {
+                    result.put("data", client.getDataOutput("N3"));
+                    break;
+                }
+                case "text/rdf+n3": {
+                    result.put("data", client.getDataOutput("N3"));
+                    break;
+                }
+                default: {
+                    executionInput = ExecutionInput.newExecutionInput()
+                            .query(query)
+                            .context(client)
+                            .build();
 
-            qlResult = config.graphql().execute(executionInput);
+                    qlResult = config.graphql().execute(executionInput);
 
-            data.putAll(qlResult.getData());
-            data.put("@context", queryExecutionForest.getFullLdContext());
+                    data.putAll(qlResult.getData());
+                    data.put("@context", queryExecutionForest.getFullLdContext());
+
+                }
+            }
+
+
         } else {
             qlResult = config.graphql().execute(query);
             data.putAll(qlResult.getData());
+
         }
 
-        errors.addAll(qlResult.getErrors());
-
+        if (qlResult!=null) {
+            errors.addAll(qlResult.getErrors());
+        }
         return result;
     }
 }
