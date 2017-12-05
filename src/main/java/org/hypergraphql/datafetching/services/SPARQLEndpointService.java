@@ -17,10 +17,16 @@ import org.hypergraphql.config.schema.FieldConfig;
 import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.config.schema.TypeConfig;
 import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.datafetching.SPARQLEndpointExecution;
+import org.hypergraphql.datafetching.SPARQLExecutionResult;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.query.converters.SPARQLServiceConverter;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class SPARQLEndpointService extends SPARQLService {
 
@@ -65,6 +71,8 @@ public class SPARQLEndpointService extends SPARQLService {
 
         Model unionModel = ModelFactory.createDefaultModel();
 
+        Set<Future<SPARQLExecutionResult>> futureSPARQLresults = new HashSet<>();
+
         for (String marker : markers) {
             resultSet.put(marker, new HashSet<>());
         }
@@ -80,37 +88,31 @@ public class SPARQLEndpointService extends SPARQLService {
                 inputList.remove(0);
                 i++;
             }
+            ExecutorService executor = Executors.newFixedThreadPool(50);
 
-            SPARQLServiceConverter converter = new SPARQLServiceConverter();
-            String sparqlQuery = converter.getSelectQuery(query, inputSubset);
 
-            CredentialsProvider credsProvider = new BasicCredentialsProvider();
-            Credentials credentials = new UsernamePasswordCredentials(this.user, this.password);
-            credsProvider.setCredentials(AuthScope.ANY, credentials);
-            HttpClient httpclient = HttpClients.custom()
-                    .setDefaultCredentialsProvider(credsProvider)
-                    .build();
-            HttpOp.setDefaultHttpClient(httpclient);
 
-            Query jenaQuery  = QueryFactory.create(sparqlQuery);
-            QueryEngineHTTP qEngine = QueryExecutionFactory.createServiceRequest(this.url, jenaQuery);
-            qEngine.setClient(httpclient);
+            SPARQLEndpointExecution execution = new SPARQLEndpointExecution(query,inputSubset,markers,this);
+            futureSPARQLresults.add(executor.submit(execution));
 
-            ResultSet results = qEngine.execSelect();
 
-            while (results.hasNext()) {
-                QuerySolution solution = results.next();
 
-                for (String marker : markers) {
-                    if (solution.contains(marker)) resultSet.get(marker).add(solution.get(marker).asResource().getURI());
-                }
 
-                Model model = getModelFromResults(query, solution);
-
-                unionModel.add(model);
-            }
 
         } while (inputList.size()>VALUES_SIZE_LIMIT);
+
+        for (Future<SPARQLExecutionResult> futureexecutionResult : futureSPARQLresults) {
+
+            try {
+                SPARQLExecutionResult result = futureexecutionResult.get();
+                unionModel.add(result.getModel());
+                resultSet.putAll(result.getResultSet());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
 
         TreeExecutionResult treeExecutionResult = new TreeExecutionResult();
 
@@ -120,7 +122,7 @@ public class SPARQLEndpointService extends SPARQLService {
         return treeExecutionResult;
     }
 
-    private Model getModelFromResults(JsonNode query, QuerySolution results) {
+    public Model getModelFromResults(JsonNode query, QuerySolution results) {
 
         Model model = ModelFactory.createDefaultModel();
         if (query.isNull()) return model;
