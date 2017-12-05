@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
-import org.hypergraphql.config.schema.FieldConfig;
-import org.hypergraphql.config.schema.QueryFieldConfig;
-import org.hypergraphql.config.schema.TypeConfig;
+import org.hypergraphql.config.schema.*;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.SPARQLEndpointExecution;
 import org.hypergraphql.datafetching.SPARQLExecutionResult;
@@ -24,7 +22,7 @@ public class SPARQLEndpointService extends SPARQLService {
     private String user;
     private String password;
     private int VALUES_SIZE_LIMIT = 100;
-    private HGQLConfig config;
+    private HGQLSchemaConfig config = HGQLSchemaConfig.getInstance();
 
     public String getUrl() {
         return url;
@@ -148,9 +146,6 @@ public class SPARQLEndpointService extends SPARQLService {
 
     private Model buildmodel(QuerySolution results, JsonNode currentNode) {
 
-
-        this.config = HGQLConfig.getInstance();
-
         Model model = ModelFactory.createDefaultModel();
 
         FieldConfig propertyString = this.config.fields().get(currentNode.get("name").asText());
@@ -177,8 +172,8 @@ public class SPARQLEndpointService extends SPARQLService {
 
             String typeName = (currentNode.get("alias").isNull()) ? currentNode.get("name").asText() : currentNode.get("alias").asText();
             Resource object = results.getResource(currentNode.get("nodeId").asText());
-            Resource subject = model.createResource(this.config.HGQL_QUERY_URI);
-            Property predicate = model.createProperty("", this.config.HGQL_QUERY_PREFIX + typeName);
+            Resource subject = model.createResource(HGQLVocabulary.HGQL_QUERY_URI);
+            Property predicate = model.createProperty("", HGQLVocabulary.HGQL_QUERY_PREFIX + typeName);
             model.add(subject, predicate, object);
         }
         return model;

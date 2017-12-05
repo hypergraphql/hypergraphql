@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.language.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.log4j.Logger;
+import org.hypergraphql.config.schema.HGQLSchemaConfig;
+import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.services.Service;
 
@@ -17,11 +19,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class ExecutionTreeNode {
+
+    private HGQLSchemaConfig config = HGQLSchemaConfig.getInstance();
+
     private Service service; //service configuration
     private JsonNode query; //GraphQL in a basic Json format
     private String executionId; // unique identifier of this execution node
     private Map<String, ExecutionForest> childrenNodes; // succeeding executions
-    private HGQLConfig config;
+  //  private HGQLConfig config;
     private String rootType;
     private Map<String, String> ldContext;
 
@@ -35,32 +40,12 @@ public class ExecutionTreeNode {
         this.query = query;
     }
 
-    public void setExecutionId(String executionId) {
-        this.executionId = executionId;
-    }
-
     public Map<String, ExecutionForest> getChildrenNodes() {
         return childrenNodes;
     }
 
-    public void setChildrenNodes(Map<String, ExecutionForest> childrenNodes) {
-        this.childrenNodes = childrenNodes;
-    }
-
-    public HGQLConfig getConfig() {
-        return config;
-    }
-
-    public void setConfig(HGQLConfig config) {
-        this.config = config;
-    }
-
     public String getRootType() {
         return rootType;
-    }
-
-    public void setRootType(String rootType) {
-        this.rootType = rootType;
     }
 
     public Map<String, String> getLdContext() { return this.ldContext; }
@@ -95,12 +80,11 @@ public class ExecutionTreeNode {
 
     public ExecutionTreeNode(Field field, String nodeId) {
 
-        this.config = HGQLConfig.getInstance();
         this.service = config.queryFields().get(field.getName()).service();
         this.executionId = createId();
         this.childrenNodes = new HashMap<>();
         this.ldContext = new HashMap<>();
-        this.ldContext.putAll(config.getJSONLD_VOC());
+        this.ldContext.putAll(HGQLVocabulary.JSONLD_VOC);
         this.query = getFieldJson(field, null, nodeId, "Query");
         this.rootType = "Query";
 
@@ -109,12 +93,11 @@ public class ExecutionTreeNode {
 
     public ExecutionTreeNode(Service service, Set<Field> fields, String parentId, String parentType) {
 
-        this.config = HGQLConfig.getInstance();
         this.service = service;
         this.executionId = createId();
         this.childrenNodes = new HashMap<>();
         this.ldContext = new HashMap<>();
-        this.ldContext.putAll(config.getJSONLD_VOC());
+        this.ldContext.putAll(HGQLVocabulary.JSONLD_VOC);
         this.query = getFieldsJson(fields, parentId, parentType);
         this.rootType = parentType;
 
@@ -209,7 +192,7 @@ public class ExecutionTreeNode {
         if (config.fields().containsKey(contextLdKey)) {
             return config.fields().get(contextLdKey).id().toString();
         } else {
-            String value = config.HGQL_QUERY_URI + contextLdKey;
+            String value = HGQLVocabulary.HGQL_QUERY_URI + contextLdKey;
             return value;
         }
     }

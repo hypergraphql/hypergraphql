@@ -14,16 +14,8 @@ public class FetchingExecution implements Callable<Model> {
         return inputValues;
     }
 
-    public void setInputValues(Set<String> inputValues) {
-        this.inputValues = inputValues;
-    }
-
     public ExecutionTreeNode getNode() {
         return node;
-    }
-
-    public void setNode(ExecutionTreeNode node) {
-        this.node = node;
     }
 
     public FetchingExecution(Set<String> inputValues, ExecutionTreeNode node) {
@@ -31,9 +23,7 @@ public class FetchingExecution implements Callable<Model> {
         this.inputValues = inputValues;
         this.node = node;
     }
-
-
-
+    
     @Override
     public Model call() throws Exception {
         return node.generateTreeModel(inputValues);

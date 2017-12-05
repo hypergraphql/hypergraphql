@@ -1,4 +1,4 @@
-package org.hypergraphql.config.system;
+package org.hypergraphql.config.schema;
 
 import static graphql.Scalars.GraphQLID;
 import static graphql.Scalars.GraphQLInt;
@@ -7,9 +7,10 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import graphql.GraphQL;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
@@ -17,12 +18,13 @@ import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.log4j.Logger;
+import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.datafetching.services.Service;
 import org.hypergraphql.datamodel.ModelContainer;
 
 /**
@@ -31,14 +33,21 @@ import org.hypergraphql.datamodel.ModelContainer;
  * This class defines the GraphQL wiring (data fetchers and type resolvers)
  */
 
-public class GraphqlWiring {
+public class HGQLSchemaConfig {
 
-    private HGQLConfig config;
+    static Logger logger = Logger.getLogger(HGQLSchemaConfig.class);
+
+
+    private static HGQLSchemaConfig instance = null;
+
+    public GraphQLSchema getSchema() {
+        return schema;
+    }
+
     private GraphQLSchema schema;
-
-    static Logger logger = Logger.getLogger(GraphqlWiring.class);
-
-
+    private GraphQL graphql;
+    private JsonNode schemaJson;
+    private HGQLConfig config;
 
     private Map<String, GraphQLArgument> defaultArguments = new HashMap<String, GraphQLArgument>() {{
         put("limit", new GraphQLArgument("limit", GraphQLInt));
@@ -54,10 +63,57 @@ public class GraphqlWiring {
     private List<GraphQLArgument> nonQueryArgs = new ArrayList<GraphQLArgument>() {{
     }};
 
+    public static HGQLSchemaConfig getInstance() {
+        return instance;
+    }
 
-    public GraphqlWiring() {
+    public static HGQLSchemaConfig build(HGQLConfig config) {
 
-        this.config = HGQLConfig.getInstance();
+        if(instance == null) {
+            instance = new HGQLSchemaConfig(config);
+        }
+        return instance;
+    }
+
+    private void generateServices() {
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        String packageName = "org.hypergraphql.datafetching.services";
+
+        context.get("service").elements().forEachRemaining(service -> {
+                    try {
+                        String type = service.get("@type").asText();
+
+                        Class serviceType = Class.forName(packageName + "." + type);
+                        Service serviceConfig = (Service) serviceType.getConstructors()[0].newInstance();
+
+                        serviceConfig.setParameters(service);
+
+                        this.services.put(serviceConfig.getId(), serviceConfig);
+                    } catch (IllegalAccessException e) {
+                        logger.error(e);
+                    } catch (InstantiationException e) {
+                        logger.error(e);
+                    } catch (ClassNotFoundException e) {
+                        logger.error(e);
+                    } catch (InvocationTargetException e) {
+                        logger.error(e);
+                    }
+                }
+        );
+    }
+
+    public void init() {
+//        HGQLSchemaConfig wiring = new HGQLSchemaConfig();
+//        this.schema = wiring.schema();
+//        this.graphql = GraphQL.newGraphQL(this.schema).build();
+    }
+
+
+    public HGQLSchemaConfig(HGQLConfig config) {
+
+        generateServices(mapper);
 
         Set<GraphQLType> types = new HashSet<>();
         GraphQLObjectType queryType = null;
@@ -79,23 +135,8 @@ public class GraphqlWiring {
 
         this.schema = GraphQLSchema.newSchema()
                 .query(queryType)
-                .query(queryType)
                 .build(types);
 
-    }
-
-    class fetchParams {
-        Resource subjectResource;
-        Property property;
-        ModelContainer client;
-
-        public fetchParams(DataFetchingEnvironment environment) {
-            subjectResource = environment.getSource();
-            String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-            String predicateURI = config.fields().get(predicate).id();
-            client = environment.getContext();
-            property = client.getPropertyFromUri(predicateURI);
-        }
     }
 
     private DataFetcher<String> idFetcher = environment -> {
