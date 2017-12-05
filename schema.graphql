@@ -1,31 +1,42 @@
-type Mountain @ld(href: "http://dbpedia.org/ontology/Mountain", service:"hgql-service:dbpedia") @queries(get:true, getById:true) {
-    label: [String] @ld(href: "http://www.w3.org/2000/01/rdf-schema#label", service:"hgql-service:dbpedia")
-    firstAscentPerson: [Person] @ld(href: "http://dbpedia.org/ontology/firstAscentPerson", service:"hgql-service:dbpedia")
+type __Vocabulary {
+    Person:         __Ref   @ref(href: "http://dbpedia.org/ontology/Person", service:"hgql-service:live-dbpedia")    @queries(get:true, getById:true)
+    Company:        __Ref   @ref(href: "http://dbpedia.org/ontology/Company", service:"hgql-service:dbpedia")        @queries(get:true, getById:true)
+    City:           __Ref   @ref(href: "http://dbpedia.org/ontology/City", service:"hgql-service:dbpedia")           @queries(get:true, getById:true)
+    Country:        __Ref   @ref(href: "http://dbpedia.org/ontology/Country", service:"hgql-service:dbpedia")        @queries(get:true, getById:true)
+    name:           __Ref   @ref(href: "http://xmlns.com/foaf/0.1/name", service:"hgql-service:dbpedia")
+    label:          __Ref   @ref(href: "http://www.w3.org/2000/01/rdf-schema#label", service:"hgql-service:dbpedia")
+    deathPlace:     __Ref   @ref(href: "http://dbpedia.org/ontology/deathPlace", service:"hgql-service:dbpedia")
+    birthPlace:     __Ref   @ref(href: "http://dbpedia.org/ontology/birthPlace", service:"hgql-service:dbpedia")
+    deathDate:      __Ref   @ref(href: "http://dbpedia.org/ontology/deathDate", service:"hgql-service:dbpedia")
+    birthDate:      __Ref   @ref(href: "http://dbpedia.org/ontology/birthDate", service:"hgql-service:dbpedia")
+    locationCity:   __Ref   @ref(href: "http://dbpedia.org/ontology/locationCity", service:"hgql-service:dbpedia")
+    owner:          __Ref   @ref(href: "http://dbpedia.org/ontology/owner", service:"hgql-service:dbpedia")
+    country:        __Ref   @ref(href: "http://dbpedia.org/ontology/country", service:"hgql-service:dbpedia")
+    leader:         __Ref   @ref(href: "http://dbpedia.org/ontology/leader", service:"hgql-service:dbpedia")
 }
 
-type Person @ld(href: "http://dbpedia.org/ontology/Person", service:"hgql-service:live-dbpedia") @queries(get:true, getById:true) {
-    name: String @ld(href: "http://xmlns.com/foaf/0.1/name", service:"hgql-service:dbpedia")
-    label: [String] @ld(href: "http://www.w3.org/2000/01/rdf-schema#label", service:"hgql-service:dbpedia")
-    deathPlace: City @ld(href: "http://dbpedia.org/ontology/deathPlace", service:"hgql-service:dbpedia")
-    birthPlace: City @ld(href: "http://dbpedia.org/ontology/birthPlace", service:"hgql-service:dbpedia")
-    deathDate: String @ld(href: "http://dbpedia.org/ontology/deathDate", service:"hgql-service:dbpedia")
-    birthDate: String @ld(href: "http://dbpedia.org/ontology/birthDate", service:"hgql-service:dbpedia")
+type Person {
+    name: String
+    label: [String]
+    deathPlace: City
+    birthPlace: City
+    deathDate: String
+    birthDate: String
 }
 
-type Company @ld(href: "http://dbpedia.org/ontology/Company", service:"hgql-service:dbpedia") @queries(get:true, getById:true) {
-    name: [String] @ld(href: "http://xmlns.com/foaf/0.1/name", service:"hgql-service:dbpedia")
-    label: [String] @ld(href: "http://www.w3.org/2000/01/rdf-schema#label", service:"hgql-service:dbpedia")
-    locationCity: City @ld(href: "http://dbpedia.org/ontology/locationCity", service:"hgql-service:dbpedia")
-    owner: [Person] @ld(href: "http://dbpedia.org/ontology/owner", service:"hgql-service:dbpedia")
+type Company {
+    name: [String]
+    label: [String]
+    locationCity: City
+    owner: [Person]
 }
 
-type City @ld(href: "http://dbpedia.org/ontology/City", service:"hgql-service:dbpedia") @queries(get:true, getById:true) {
-    label: [String] @ld(href: "http://www.w3.org/2000/01/rdf-schema#label", service:"hgql-service:dbpedia")
-    country: Country @ld(href: "http://dbpedia.org/ontology/country", service:"hgql-service:dbpedia")
-    leader: Person @ld(href: "http://dbpedia.org/ontology/leader", service:"hgql-service:dbpedia")
+type City {
+    label: [String]
+    country: Country
+    leader: Person
 }
 
-type Country @ld(href: "http://dbpedia.org/ontology/Country", service:"hgql-service:dbpedia") @queries(get:true, getById:true) {
-    label: [String] @ld(href: "http://www.w3.org/2000/01/rdf-schema#label", service:"hgql-service:dbpedia")
+type Country  {
+    label: [String]
 }
-

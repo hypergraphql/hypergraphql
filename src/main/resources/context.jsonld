@@ -1,0 +1,45 @@
+{
+    "@vocab": "http://hypergraphql.org/",
+    "hgql": "http://hypergraphql.org/",
+    "hgql-schema": "http://hypergraphql.org/schema/",
+    "hgql-service": "http://hypergraphql.org/service/",
+    "url": {
+        "@id":"hgql:url",
+        "@type": "@id"
+    },
+    "kind": {
+        "@id": "hgql:kind",
+        "@type":"@id"
+    },
+    "href": {
+        "@id": "hgql:href",
+        "@type":"@id"
+    },
+    "ofType": {
+        "@id": "hgql:ofType",
+        "@type":"@id"
+    },
+    "type": {
+        "@id": "hgql:type",
+        "@type":"@id"
+    },
+    "field": {
+        "@id": "hgql:field",
+        "@type":"@id"
+    },
+    "name": {
+        "@id":"hgql:name"
+    },
+    "service": {
+        "@id":"hgql:service"
+    },
+    "graph": {
+        "@id":"hgql:graph"
+    },
+    "user": {
+        "@id":"hgql:user"
+    },
+    "password": {
+        "@id":"hgql:password"
+    }
+}

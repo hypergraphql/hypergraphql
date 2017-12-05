@@ -23,7 +23,6 @@ public class Controller {
 
         HGQLConfig config = HGQLConfig.getInstance();
 
-
         port(config.graphqlConfig().port());
 
 
@@ -37,6 +36,16 @@ public class Controller {
 
             return new VelocityTemplateEngine().render(
                     new ModelAndView(model, "graphiql.vtl")
+            );
+        });
+
+
+        get("/context.jsonld", (req, res) -> {
+
+            Map<String, String> model = new HashMap<>();
+
+            return new VelocityTemplateEngine().render(
+                    new ModelAndView(model, "context.jsonld")
             );
         });
 

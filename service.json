@@ -1,15 +1,5 @@
-{ "@context": {
-    "@vocab": "http://hypergraphql.org/",
-    "hgql": "http://hypergraphql.org/",
-    "hgql-schema": "http://hypergraphql.org/schema/",
-    "hgql-service": "http://hypergraphql.org/service/",
-    "url": {
-      "@type": "@id"
-    }
-  },
-  "schema": {
-      "@id": "hgql-schema:mydemo"
-  },
+{ 
+  "@context": "http://hypergraphql.org/context.jsonld",
   "service": [
     {
       "@id": "hgql-service:dbpedia",

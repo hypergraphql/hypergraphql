@@ -78,7 +78,8 @@ public class HGQLConfig {
         put("_type", "@type");
     }};
 
-    private String contextFile;
+    private String name;
+    private String serviceFile;
     private String schemaFile;
     private GraphqlConfig graphqlConfig;
 
@@ -97,11 +98,14 @@ public class HGQLConfig {
     static Logger logger = Logger.getLogger(HGQLConfig.class);
 
     @JsonCreator
-    private  HGQLConfig(@JsonProperty("contextFile") String contextFile,
-                      @JsonProperty("schemaFile") String schemaFile,
-                      @JsonProperty("graphql") GraphqlConfig graphql
+    private  HGQLConfig(
+            @JsonProperty("name") String name,
+            @JsonProperty("serviceFile") String serviceFile,
+            @JsonProperty("schemaFile") String schemaFile,
+            @JsonProperty("graphql") GraphqlConfig graphql
     ) {
-        this.contextFile = contextFile;
+        this.name = name;
+        this.serviceFile = serviceFile;
         this.schemaFile = schemaFile;
         this.graphqlConfig = graphql;
     }
@@ -117,7 +121,7 @@ public class HGQLConfig {
 
             if (config != null) {
                 try {
-                    this.context = mapper.readTree(new File(config.contextFile));
+                    this.context = mapper.readTree(new File(config.serviceFile));
                 } catch (IOException e) {
                     logger.error(e);
                 }
@@ -172,11 +176,12 @@ public class HGQLConfig {
                 System.out.println(key);
                 System.out.println(ext.toString());
             });
-            
+
+            System.out.println("Done here \n\n");
             this.mapping = mapping(registry);
 
             this.schemaFile = config.schemaFile;
-            this.contextFile = config.contextFile;
+            this.serviceFile = config.serviceFile;
             this.graphqlConfig = config.graphqlConfig;
 
         } catch (IOException e) {

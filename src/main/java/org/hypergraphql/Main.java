@@ -12,12 +12,12 @@ public class Main {
 
         PropertyConfigurator.configure("log4j.properties");
         HGQLConfig config = HGQLConfig.getInstance();
-        config.init();
+//        config.init();
 
-        System.out.println("GraphQL server started at: http://localhost:" + config.graphqlConfig().port() + config.graphqlConfig().path());
-        System.out.println("GraphiQL UI available at: http://localhost:" + config.graphqlConfig().port() + config.graphqlConfig().graphiql());
-
-        logger.info("Server started at http://localhost:" + config.graphqlConfig().port() + config.graphqlConfig().path());
+//        System.out.println("GraphQL server started at: http://localhost:" + config.graphqlConfig().port() + config.graphqlConfig().path());
+//        System.out.println("GraphiQL UI available at: http://localhost:" + config.graphqlConfig().port() + config.graphqlConfig().graphiql());
+//
+//        logger.info("Server started at http://localhost:" + config.graphqlConfig().port() + config.graphqlConfig().path());
 
         Controller.start();
 
