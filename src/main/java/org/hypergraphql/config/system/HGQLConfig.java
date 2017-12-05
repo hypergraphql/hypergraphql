@@ -131,38 +131,38 @@ public class HGQLConfig {
 
             generateServices(mapper);
 
-            JsonNode predicatesJson = context.get("predicates");
-
-            JsonNode typesJson = predicatesJson.get("types");
-
-            typesJson.fieldNames().forEachRemaining(key -> {
-
-                String id = typesJson.get(key).get("@id").asText();
-                TypeConfig typeConfig = new TypeConfig(id);
-                this.types.put(key, typeConfig);
-            });
-
-            JsonNode fieldsJson = predicatesJson.get("fields");
-
-            fieldsJson.fieldNames().forEachRemaining(key -> {
-
-
-                Service service = this.services.get(fieldsJson.get(key).get("service").asText());
-                String id = fieldsJson.get(key).get("@id").asText();
-                FieldConfig fieldConfig = new FieldConfig(id, service);
-                this.fields.put(key, fieldConfig);
-
-            });
-
-            JsonNode queryFieldsJson = predicatesJson.get("queryFields");
-
-            queryFieldsJson.fieldNames().forEachRemaining(key -> {
-
-                Service service = this.services.get(queryFieldsJson.get(key).get("service").asText());
-                QueryFieldConfig queryFieldConfig = new QueryFieldConfig(service);
-                this.queryFields.put(key, queryFieldConfig);
-
-            });
+//            JsonNode predicatesJson = context.get("predicates");
+//
+//            JsonNode typesJson = predicatesJson.get("types");
+//
+//            typesJson.fieldNames().forEachRemaining(key -> {
+//
+//                String id = typesJson.get(key).get("@id").asText();
+//                TypeConfig typeConfig = new TypeConfig(id);
+//                this.types.put(key, typeConfig);
+//            });
+//
+//            JsonNode fieldsJson = predicatesJson.get("fields");
+//
+//            fieldsJson.fieldNames().forEachRemaining(key -> {
+//
+//
+//                Service service = this.services.get(fieldsJson.get(key).get("service").asText());
+//                String id = fieldsJson.get(key).get("@id").asText();
+//                FieldConfig fieldConfig = new FieldConfig(id, service);
+//                this.fields.put(key, fieldConfig);
+//
+//            });
+//
+//            JsonNode queryFieldsJson = predicatesJson.get("queryFields");
+//
+//            queryFieldsJson.fieldNames().forEachRemaining(key -> {
+//
+//                Service service = this.services.get(queryFieldsJson.get(key).get("service").asText());
+//                QueryFieldConfig queryFieldConfig = new QueryFieldConfig(service);
+//                this.queryFields.put(key, queryFieldConfig);
+//
+//            });
 
             SchemaParser schemaParser = new SchemaParser();
             this.registry = schemaParser.parse(new File(config.schemaFile));
@@ -196,7 +196,7 @@ public class HGQLConfig {
 
         String packageName = "org.hypergraphql.datafetching.services";
 
-        context.get("services").elements().forEachRemaining(service -> {
+        context.get("service").elements().forEachRemaining(service -> {
                     try {
                         String type = service.get("@type").asText();
 
