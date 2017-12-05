@@ -52,6 +52,7 @@ public class Controller {
         ObjectMapper mapper = new ObjectMapper();
         HGQLService service = new HGQLService();
 
+
         // post method for accessing the GraphQL service
 
         post(config.graphqlConfig().path(), (req, res) -> {
@@ -61,17 +62,12 @@ public class Controller {
             String query = requestObject.get("query").asText();
 
             String acceptType = req.headers("accept");
-            String contentType;
-
-            String mime;
-
+            String mime = null;
+            String contentType = "application/json";
 
             if (MIME_MAP.containsKey(acceptType)) {
                 mime = MIME_MAP.get(acceptType);
                 contentType = acceptType;
-            } else {
-                mime = null;
-                contentType = "application/json";
             }
 
             Map<String, Object> result = service.results(query, mime);
