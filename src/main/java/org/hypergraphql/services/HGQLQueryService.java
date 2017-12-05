@@ -18,12 +18,12 @@ import java.util.*;
 /**
  * Created by szymon on 01/11/2017.
  */
-public class HGQLService {
+public class HGQLQueryService {
     private HGQLConfig config;
 
-    static Logger logger = Logger.getLogger(HGQLService.class);
+  //  static Logger logger = Logger.getLogger(HGQLQueryService.class);
 
-    public HGQLService() {
+    public HGQLQueryService() {
         this.config = HGQLConfig.getInstance();
     }
 

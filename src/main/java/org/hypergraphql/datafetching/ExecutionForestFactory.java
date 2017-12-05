@@ -12,13 +12,6 @@ import java.util.Set;
 
 public class ExecutionForestFactory {
 
-    HGQLConfig config;
-
-    public ExecutionForestFactory() {
-        this.config = HGQLConfig.getInstance();
-    }
-
-
     public ExecutionForest getExecutionForest(Document queryDocument ) {
 
         ExecutionForest forest = new ExecutionForest();

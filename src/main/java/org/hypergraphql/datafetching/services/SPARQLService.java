@@ -10,14 +10,9 @@ public abstract class SPARQLService extends Service {
         return graph;
     }
 
-    public void setGraph(String graph) {
-        this.graph = graph;
-    }
-
-
     public  void setParameters(JsonNode jsonnode) {
 
-        this.id = jsonnode.get("@id").asText();
+        this.id = jsonnode.get("id").asText();
         this.graph = jsonnode.get("graph").asText();
 
     }

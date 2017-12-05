@@ -5,6 +5,7 @@ import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.hypergraphql.config.schema.FieldConfig;
+import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.config.schema.TypeConfig;
 import org.hypergraphql.config.system.HGQLConfig;
@@ -177,8 +178,8 @@ public class SPARQLEndpointService extends SPARQLService {
 
             String typeName = (currentNode.get("alias").isNull()) ? currentNode.get("name").asText() : currentNode.get("alias").asText();
             Resource object = results.getResource(currentNode.get("nodeId").asText());
-            Resource subject = model.createResource(this.config.HGQL_QUERY_URI);
-            Property predicate = model.createProperty("", this.config.HGQL_QUERY_PREFIX + typeName);
+            Resource subject = model.createResource(HGQLVocabulary.HGQL_QUERY_URI);
+            Property predicate = model.createProperty("", HGQLVocabulary.HGQL_QUERY_PREFIX + typeName);
             model.add(subject, predicate, object);
         }
         return model;
@@ -189,7 +190,7 @@ public class SPARQLEndpointService extends SPARQLService {
 
         super.setParameters(jsonnode);
 
-        this.id = jsonnode.get("@id").asText();
+        this.id = jsonnode.get("id").asText();
         this.url = jsonnode.get("url").asText();
         this.user = jsonnode.get("user").asText();
         this.password = jsonnode.get("password").asText();

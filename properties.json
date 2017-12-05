@@ -1,7 +1,7 @@
 {
     "name": "mydemo",
     "schemaFile": "schema.graphql",
-    "serviceFile": "service.json",
+    "serviceFile": "services.json",
     "graphql": {
         "port": 8080,
         "path": "/graphql",

@@ -9,7 +9,7 @@ import java.util.Map;
 
 import graphql.GraphQLError;
 import org.hypergraphql.config.system.HGQLConfig;
-import org.hypergraphql.services.HGQLService;
+import org.hypergraphql.services.HGQLQueryService;
 import spark.ModelAndView;
 import spark.template.velocity.VelocityTemplateEngine;
 
@@ -54,16 +54,16 @@ public class Controller {
     public static void start() {
 
 
-        port(config.graphqlConfig().port());
+        port(config.getGraphqlConfig().port());
 
 
         // get method for accessing the GraphiQL UI
 
-        get(config.graphqlConfig().graphiql(), (req, res) -> {
+        get(config.getGraphqlConfig().graphiql(), (req, res) -> {
 
             Map<String, String> model = new HashMap<>();
 
-            model.put("template", String.valueOf(config.graphqlConfig().path()));
+            model.put("template", String.valueOf(config.getGraphqlConfig().path()));
 
             return new VelocityTemplateEngine().render(
                     new ModelAndView(model, "graphiql.vtl")
@@ -82,12 +82,12 @@ public class Controller {
 
 
         ObjectMapper mapper = new ObjectMapper();
-        HGQLService service = new HGQLService();
+        HGQLQueryService service = new HGQLQueryService();
 
 
         // post method for accessing the GraphQL service
 
-        post(config.graphqlConfig().path(), (req, res) -> {
+        post(config.getGraphqlConfig().path(), (req, res) -> {
 
             JsonNode requestObject = mapper.readTree(req.body().toString());
 
@@ -103,8 +103,8 @@ public class Controller {
 
             Map<String, Object> result = service.results(query, mime);
 
-
-            if (!((List<GraphQLError>) result.get("errors")).isEmpty()) {
+            List<GraphQLError> errors = (List<GraphQLError>) result.get("errors");
+            if (!errors.isEmpty()) {
                 res.status(400);
             }
 
@@ -120,8 +120,8 @@ public class Controller {
                     resultString = result.get("data").toString();
                 } else {
 
-                    JsonNode errors = mapper.readTree(new ObjectMapper().writeValueAsString(result.get("errors")));
-                    resultString = errors.toString();
+                    JsonNode errorsJson = mapper.readTree(new ObjectMapper().writeValueAsString(errors));
+                    resultString = errorsJson.toString();
 
                 }
 

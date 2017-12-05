@@ -29,10 +29,6 @@ public class ExecutionForest  {
         return forest;
     }
 
-    public void setForest(HashSet<ExecutionTreeNode> forest) {
-        this.forest = forest;
-    }
-
     public Model generateModel() {
         ExecutorService executor = Executors.newFixedThreadPool(10);
         Model model = ModelFactory.createDefaultModel();
