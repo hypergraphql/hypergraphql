@@ -19,7 +19,7 @@ public class ModelContainer {
 
     protected Model model;
 
-    protected static Logger logger = Logger.getLogger(ModelContainer.class);
+    //protected static Logger logger = Logger.getLogger(ModelContainer.class);
 
 
     public ModelContainer(Model model) {
@@ -28,20 +28,21 @@ public class ModelContainer {
 
     }
 
-    public List<RDFNode> getSubjectsOfQueryType(String predicate, String type) {
 
-        Property property = model.createProperty("", predicate);
-        Resource object = model.createProperty("", type);
+    public List<RDFNode> getRootResources(String subjectURI, String predicateURI) {
+
+        Property property = model.createProperty(predicateURI);
+        Resource subject = model.getResource(subjectURI);
 
         List<RDFNode> uriList = new ArrayList<>();
 
-        ResIterator iterator = this.model.listSubjectsWithProperty(property, object);
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject, property);
 
         while (iterator.hasNext()) {
 
-            RDFNode subject = iterator.next();
+            RDFNode object = iterator.next();
 
-            uriList.add(subject);
+            uriList.add(object);
         }
 
         return uriList;

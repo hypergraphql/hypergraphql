@@ -184,9 +184,9 @@ public class SPARQLEndpointService extends SPARQLService {
         if (queryField!=null) {
 
             String typeName = (currentNode.get("alias").isNull()) ? currentNode.get("name").asText() : currentNode.get("alias").asText();
-            Resource subject = results.getResource(currentNode.get("nodeId").asText());
-            Property predicate = model.createProperty("", this.config.HGQL_TYPE_URI);
-            Resource object = model.createProperty("", this.config.HGQL_QUERY_URI + typeName);
+            Resource object = results.getResource(currentNode.get("nodeId").asText());
+            Resource subject = model.createResource(this.config.HGQL_QUERY_URI);
+            Property predicate = model.createProperty("", this.config.HGQL_QUERY_PREFIX + typeName);
             model.add(subject, predicate, object);
         }
         return model;

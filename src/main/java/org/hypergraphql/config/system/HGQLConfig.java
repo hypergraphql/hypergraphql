@@ -41,8 +41,9 @@ public class HGQLConfig {
     private static HGQLConfig instance = null;
     private static String propertyFilepath = "properties.json";
     public static String HGQL_NAMESPACE = "http://hypergraphql.org/";
-    public static String HGQL_TYPE_URI = HGQL_NAMESPACE + "type";
-    public static String HGQL_QUERY_URI = HGQL_NAMESPACE + "query/";
+    //public static String HGQL_TYPE_URI = HGQL_NAMESPACE + "type";
+    public static String HGQL_QUERY_URI = HGQL_NAMESPACE + "query";
+    public static String HGQL_QUERY_PREFIX = HGQL_NAMESPACE + "query/";
 
     public static HGQLConfig getInstance() {
         if(instance == null) {

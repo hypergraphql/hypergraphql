@@ -124,7 +124,7 @@ public class GraphqlWiring {
         Field field = (Field) environment.getFields().toArray()[0];
         String predicate = (field.getAlias()!=null) ? field.getAlias() : field.getName();
         ModelContainer client = environment.getContext();
-        List<RDFNode> subjects = client.getSubjectsOfQueryType(config.HGQL_TYPE_URI, config.HGQL_QUERY_URI + predicate);
+        List<RDFNode> subjects = client.getRootResources(config.HGQL_QUERY_URI, config.HGQL_QUERY_PREFIX + predicate);
         return subjects;
     };
 
