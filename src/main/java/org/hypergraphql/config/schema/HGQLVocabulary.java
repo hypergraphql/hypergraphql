@@ -8,8 +8,9 @@ public class HGQLVocabulary {
     public static final String HGQL_NAMESPACE = "http://hypergraphql.org/";
     public static final String HGQL_QUERY_URI = HGQL_NAMESPACE + "query";
     public static final String HGQL_QUERY_PREFIX = HGQL_QUERY_URI + "/";
+    public static final String HGQL_SCHEMA_PREFIX = HGQL_NAMESPACE + "schema/";
 
-    public static final Map<String, String> JSONLD_VOC = new HashMap<String, String>() {{
+    public static final Map<String, String> JSONLD = new HashMap<String, String>() {{
         put("_id", "@id");
         put("_type", "@type");
     }};

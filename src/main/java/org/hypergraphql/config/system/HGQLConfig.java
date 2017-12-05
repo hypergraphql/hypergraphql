@@ -362,7 +362,7 @@ public class HGQLConfig {
 //
 //    public GraphQL graphql() {return graphql; }
 //
-//    public Map<String, String> getJSONLD_VOC() { return JSONLD_VOC; }
+//    public Map<String, String> getJSONLD_VOC() { return JSONLD; }
 
 }
 

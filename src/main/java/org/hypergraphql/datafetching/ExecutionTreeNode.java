@@ -83,7 +83,7 @@ public class ExecutionTreeNode {
         this.executionId = createId();
         this.childrenNodes = new HashMap<>();
         this.ldContext = new HashMap<>();
-        this.ldContext.putAll(HGQLVocabulary.JSONLD_VOC);
+        this.ldContext.putAll(HGQLVocabulary.JSONLD);
         this.query = getFieldJson(field, null, nodeId, "Query");
         this.rootType = "Query";
 
@@ -96,7 +96,7 @@ public class ExecutionTreeNode {
         this.executionId = createId();
         this.childrenNodes = new HashMap<>();
         this.ldContext = new HashMap<>();
-        this.ldContext.putAll(HGQLVocabulary.JSONLD_VOC);
+        this.ldContext.putAll(HGQLVocabulary.JSONLD);
         this.query = getFieldsJson(fields, parentId, parentType);
         this.rootType = parentType;
 
