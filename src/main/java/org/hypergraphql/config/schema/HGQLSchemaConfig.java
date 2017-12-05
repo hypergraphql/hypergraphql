@@ -10,19 +10,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.GraphQL;
 import graphql.language.Field;
-import graphql.schema.DataFetcher;
-import graphql.schema.GraphQLArgument;
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLOutputType;
-import graphql.schema.GraphQLSchema;
-import graphql.schema.GraphQLType;
+import graphql.schema.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.log4j.Logger;
+import org.hypergraphql.config.system.FetchParams;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.services.Service;
 import org.hypergraphql.datamodel.ModelContainer;
@@ -160,32 +155,32 @@ public class HGQLSchemaConfig {
         Field field = (Field) environment.getFields().toArray()[0];
         String predicate = (field.getAlias()!=null) ? field.getAlias() : field.getName();
         ModelContainer client = environment.getContext();
-        List<RDFNode> subjects = client.getRootResources(config.HGQL_QUERY_URI, config.HGQL_QUERY_PREFIX + predicate);
+        List<RDFNode> subjects = client.getRootResources(HGQLVocabulary.HGQL_QUERY_URI, HGQLVocabulary.HGQL_QUERY_NAMESPACE + predicate);
         return subjects;
     };
 
     private DataFetcher<List<RDFNode>> objectsFetcher = environment -> {
 
-        fetchParams params = new fetchParams(environment);
-        return params.client.getValuesOfObjectProperty(params.subjectResource, params.property, environment.getArguments());
+        FetchParams params = new FetchParams(environment);
+        return params.getClient().getValuesOfObjectProperty(params.getSubjectResource(), params.getProperty(), environment.getArguments());
     };
 
     private DataFetcher<RDFNode> objectFetcher = environment -> {
 
-        fetchParams params = new fetchParams(environment);
-        return params.client.getValueOfObjectProperty(params.subjectResource, params.property, environment.getArguments());
+        FetchParams params = new FetchParams(environment);
+        return params.getClient().getValueOfObjectProperty(params.getSubjectResource(), params.getProperty(), environment.getArguments());
     };
 
     private DataFetcher<List<Object>> literalValuesFetcher = environment -> {
 
-        fetchParams params = new fetchParams(environment);
-        return params.client.getValuesOfDataProperty(params.subjectResource, params.property, environment.getArguments());
+        FetchParams params = new FetchParams(environment);
+        return params.getClient().getValuesOfDataProperty(params.getSubjectResource(), params.getProperty(), environment.getArguments());
     };
 
     private DataFetcher<Object> literalValueFetcher = environment -> {
 
-        fetchParams params = new fetchParams(environment);
-        return params.client.getValueOfDataProperty(params.subjectResource, params.property, environment.getArguments());
+        FetchParams params = new FetchParams(environment);
+        return params.getClient().getValueOfDataProperty(params.getSubjectResource(), params.getProperty(), environment.getArguments());
     };
 
     private Map<Boolean, DataFetcher> objectFetchers = new HashMap<Boolean, DataFetcher>() {{

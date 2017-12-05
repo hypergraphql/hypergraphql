@@ -15,12 +15,24 @@ public class FetchParams {
 
     private HGQLSchemaConfig config = HGQLSchemaConfig.getInstance();
 
-    public void FetchParams(DataFetchingEnvironment environment) {
+    public FetchParams(DataFetchingEnvironment environment) {
         subjectResource = environment.getSource();
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
         String predicateURI = config.fields().get(predicate).id();
         client = environment.getContext();
         property = client.getPropertyFromUri(predicateURI);
+    }
+
+    public Resource getSubjectResource() {
+        return subjectResource;
+    }
+
+    public Property getProperty() {
+        return property;
+    }
+
+    public ModelContainer getClient() {
+        return client;
     }
 
 
