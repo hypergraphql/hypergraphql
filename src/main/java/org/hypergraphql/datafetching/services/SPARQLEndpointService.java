@@ -172,7 +172,7 @@ public class SPARQLEndpointService extends SPARQLService {
             String typeName = (currentNode.get("alias").isNull()) ? currentNode.get("name").asText() : currentNode.get("alias").asText();
             Resource object = results.getResource(currentNode.get("nodeId").asText());
             Resource subject = model.createResource(HGQLVocabulary.HGQL_QUERY_URI);
-            Property predicate = model.createProperty("", HGQLVocabulary.HGQL_QUERY_PREFIX + typeName);
+            Property predicate = model.createProperty("", HGQLVocabulary.HGQL_QUERY_NAMESPACE + typeName);
             model.add(subject, predicate, object);
         }
         return model;

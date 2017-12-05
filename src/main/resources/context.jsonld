@@ -2,7 +2,6 @@
     "@vocab": "http://hypergraphql.org/",
     "hgql": "http://hypergraphql.org/",
     "hgql-schema": "http://hypergraphql.org/schema/",
-    "hgql-service": "http://hypergraphql.org/service/",
     "url": {
         "@id":"hgql:url",
         "@type": "@id"
@@ -29,17 +28,5 @@
     },
     "name": {
         "@id":"hgql:name"
-    },
-    "service": {
-        "@id":"hgql:service"
-    },
-    "graph": {
-        "@id":"hgql:graph"
-    },
-    "user": {
-        "@id":"hgql:user"
-    },
-    "password": {
-        "@id":"hgql:password"
     }
 }
