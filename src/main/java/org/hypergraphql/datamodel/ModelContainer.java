@@ -1,5 +1,6 @@
 package org.hypergraphql.datamodel;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,14 +18,17 @@ import org.apache.log4j.Logger;
 
 public class ModelContainer {
 
-//    private static String queryValuesOfObjectPropertyTemp = "SELECT distinct ?object WHERE {<%s> <%s> ?object FILTER (!isLiteral(?object)) . }";
-//    private static String queryValuesOfDataPropertyTemp = "SELECT distinct (str(?object) as ?value) WHERE {<%1$s> <%2$s> ?object  FILTER isLiteral(?object) . %3$s }";
-    private static String querySubjectsOfObjectPropertyFilterTemp = "SELECT ?subject WHERE { ?subject <%1$s> <%2$s> . } ";
-
     protected Model model;
 
-    protected static Logger logger = Logger.getLogger(ModelContainer.class);
+    //protected static Logger logger = Logger.getLogger(ModelContainer.class);
 
+    public String getDataOutput(String format) {
+
+        StringWriter out = new StringWriter();
+        model.write(out, format);
+        return out.toString();
+        
+    }
 
     public ModelContainer(Model model) {
 
@@ -33,42 +37,24 @@ public class ModelContainer {
     }
 
 
+    public List<RDFNode> getRootResources(String subjectURI, String predicateURI) {
 
-    private ResultSet sparqlSelect(String queryString) {
+        Property property = model.createProperty(predicateURI);
+        Resource subject = model.getResource(subjectURI);
 
-        logger.debug("Executing SPARQL fetchquery: " + queryString);
-        QueryExecution qexec = QueryExecutionFactory.create(queryString, model);
-        try {
-            ResultSet results = qexec.execSelect();
-            return results;
-        } catch (Exception e) {
-            logger.error("Failed to return the response on query: " + queryString);
-            logger.error(e);
-            return null;
+        List<RDFNode> uriList = new ArrayList<>();
+
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject, property);
+
+        while (iterator.hasNext()) {
+
+            RDFNode object = iterator.next();
+
+            uriList.add(object);
         }
-    }
 
+        return uriList;
 
-
-    public List<RDFNode> getSubjectsOfObjectPropertyFilter(String predicate, String uri) {
-
-        String queryString = String.format(querySubjectsOfObjectPropertyFilterTemp, predicate, uri);
-
-        ResultSet queryResults = sparqlSelect(queryString);
-
-        if (queryResults != null) {
-
-            List<RDFNode> uriList = new ArrayList<>();
-
-            while (queryResults.hasNext()) {
-                QuerySolution nextSol = queryResults.nextSolution();
-                RDFNode subject = nextSol.get("?subject");
-                uriList.add(subject);
-            }
-            return uriList;
-        } else {
-            return null;
-        }
     }
 
 
@@ -78,28 +64,11 @@ public class ModelContainer {
 
     }
 
-
-//    public List<RDFNode> getSubjectsOfObjectPropertyFilter(Property predicate) {
-//
-//
-//        ResIterator iterator = this.model.listSubjectsWithProperty(predicate);
-//        List<RDFNode> nodeList = new ArrayList<>();
-//
-//
-//        while (iterator.hasNext()) {
-//
-//            nodeList.add(iterator.next());
-//        }
-//
-//        return nodeList;
-//
-//    }
-
     public String getValueOfDataProperty(Resource subject, Property predicate, Map<String, Object> args) {
 
 
 
-        NodeIterator iterator = this.model.listObjectsOfProperty(subject,  predicate);
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject, predicate);
 
 
         while (iterator.hasNext()) {

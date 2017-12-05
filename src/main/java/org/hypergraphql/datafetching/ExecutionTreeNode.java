@@ -23,9 +23,9 @@ public class ExecutionTreeNode {
     private Map<String, ExecutionForest> childrenNodes; // succeeding executions
     private HGQLConfig config;
     private String rootType;
+    private Map<String, String> ldContext;
 
     static Logger logger = Logger.getLogger(ExecutionTreeNode.class);
-
 
     public void setService(Service service) {
         this.service = service;
@@ -63,19 +63,35 @@ public class ExecutionTreeNode {
         this.rootType = rootType;
     }
 
+    public Map<String, String> getLdContext() { return this.ldContext; }
 
     public Service getService() {
         return service;
     }
 
-    public JsonNode getQuery() {
-        return query;
-    }
+    public JsonNode getQuery() { return query; }
 
     public String getExecutionId() {
         return executionId;
     }
 
+
+    public Map<String, String> getFullLdContext() {
+
+        Map<String, String> result = new HashMap<>();
+        result.putAll(ldContext);
+
+        Collection<ExecutionForest> children = getChildrenNodes().values();
+
+        if (!children.isEmpty()) {
+            for (ExecutionForest child : children) {
+                    result.putAll(child.getFullLdContext());
+            }
+        }
+
+        return result;
+
+    }
 
     public ExecutionTreeNode(Field field, String nodeId) {
 
@@ -83,11 +99,13 @@ public class ExecutionTreeNode {
         this.service = config.queryFields().get(field.getName()).service();
         this.executionId = createId();
         this.childrenNodes = new HashMap<>();
+        this.ldContext = new HashMap<>();
+        this.ldContext.putAll(config.getJSONLD_VOC());
         this.query = getFieldJson(field, null, nodeId, "Query");
         this.rootType = "Query";
 
-    }
 
+    }
 
     public ExecutionTreeNode(Service service, Set<Field> fields, String parentId, String parentType) {
 
@@ -95,6 +113,8 @@ public class ExecutionTreeNode {
         this.service = service;
         this.executionId = createId();
         this.childrenNodes = new HashMap<>();
+        this.ldContext = new HashMap<>();
+        this.ldContext.putAll(config.getJSONLD_VOC());
         this.query = getFieldsJson(fields, parentId, parentType);
         this.rootType = parentType;
 
@@ -109,15 +129,16 @@ public class ExecutionTreeNode {
         }
 
         String result = "\n";
-        result += space + "ExecutionNodeId: " + this.executionId + "\n";
-        result += space + "ServiceID: " + this.service.getId() + "\n";
+        result += space + "ExecutionNode ID: " + this.executionId + "\n";
+        result += space + "Service ID: " + this.service.getId() + "\n";
         result += space + "Query: " + this.query.toString() + "\n";
-        result += space + "rootType: " + this.rootType + "\n";
+        result += space + "Root type: " + this.rootType + "\n";
+        result += space + "LD context: " + this.ldContext.toString() + "\n";
         Set<String> children = this.childrenNodes.keySet();
         if (!children.isEmpty()) {
-            result += space + "ChildrenNodes: \n";
+            result += space + "Children nodes: \n";
             for (String child : children) {
-                result += space + "\tParentMarker: " + child + "\n" + space + "\tChildren execution nodes: \n" + this.childrenNodes.get(child).toString(i+1) + "\n";
+                result += space + "\tParent marker: " + child + "\n" + space + "\tChildren execution nodes: \n" + this.childrenNodes.get(child).toString(i+1) + "\n";
             }
         }
 
@@ -158,6 +179,11 @@ public class ExecutionTreeNode {
         query.put("nodeId", nodeId);
         List<Argument> args = field.getArguments();
 
+        String contextLdKey = (field.getAlias()==null) ? field.getName() : field.getAlias();
+        String contextLdValue = getContextLdValue(contextLdKey);
+
+        this.ldContext.put(contextLdKey, contextLdValue);
+
         if (!args.isEmpty()) {
 
             query.set("args", getArgsJson(args));
@@ -177,6 +203,15 @@ public class ExecutionTreeNode {
 
         return query;
 
+    }
+
+    private String getContextLdValue(String contextLdKey) {
+        if (config.fields().containsKey(contextLdKey)) {
+            return config.fields().get(contextLdKey).id().toString();
+        } else {
+            String value = config.HGQL_QUERY_URI + contextLdKey;
+            return value;
+        }
     }
 
 
@@ -283,9 +318,7 @@ public class ExecutionTreeNode {
 
                     }
                 }
-
             }
-
         }
 
         return result;
@@ -345,9 +378,9 @@ public class ExecutionTreeNode {
             try {
                 computedModels.add(futureModel.get());
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.error(e);
             } catch (ExecutionException e) {
-                e.printStackTrace();
+                logger.error(e);
             }
         }
 

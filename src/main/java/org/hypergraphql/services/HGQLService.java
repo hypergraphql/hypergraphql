@@ -28,23 +28,18 @@ public class HGQLService {
     }
 
 
-    public Map<String, Object> results(String query) {
+    public Map<String, Object> results(String query, String acceptType) {
 
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> data = new HashMap<>();
         Map<Object, Object> extensions = new HashMap<>();
         List<GraphQLError> errors = new ArrayList<>();
 
-        result.put("data", data);
         result.put("errors", errors);
         result.put("extensions", extensions);
 
         ExecutionInput executionInput;
-        ExecutionResult qlResult;
-
-//        List<Map<String, String>> sparqlQueries;
-//
-//        Converter converter = new Converter(config);
+        ExecutionResult qlResult = null;
 
         ValidatedQuery validatedQuery = new QueryValidator().validateQuery(query);
 
@@ -53,58 +48,36 @@ public class HGQLService {
             return result;
         }
 
-//        Map<String, Object> preprocessedQuery = null;
-//        try {
-//            preprocessedQuery = converter.query2json(query);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        List<GraphQLError> validationErrors = (List<GraphQLError>) preprocessedQuery.get("errors");
-//        errors.addAll(validationErrors);
-//
-//        if (validationErrors.size() > 0) {
-//
-//            //  result.put("errors", errors);
-//
-//            return result;
-//
-//        }
-
         if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
-        //    JsonNode jsonQuery = converter.includeContextInQuery((JsonNode) preprocessedQuery.get("query"));
-
-//            sparqlQueries = converter.graphql2sparql(jsonQuery);
-
-            // uncomment this lines if you want to include the generated SPARQL queries in the GraphQL response for debugging purposes
-            // extensions.put("sparqlQueries", sparqlQueries);
-
-            logger.info("Generated SPARQL queries:");
-     //       logger.info(sparqlQueries.toString());
-
-
-
             ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery());
-            System.out.println(queryExecutionForest.toString(3));
 
             ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 
-            executionInput = ExecutionInput.newExecutionInput()
-                    .query(query)
-                    .context(client)
-                    .build();
+            if (acceptType!=null) {
+                result.put("data", client.getDataOutput(acceptType));
+            } else {
+                executionInput = ExecutionInput.newExecutionInput()
+                        .query(query)
+                        .context(client)
+                        .build();
 
-            qlResult = config.graphql().execute(executionInput);
+                qlResult = config.graphql().execute(executionInput);
 
-            data.putAll(qlResult.getData());
-     //       data.put("@context", preprocessedQuery.get("context"));
+                data.putAll(qlResult.getData());
+                data.put("@context", queryExecutionForest.getFullLdContext());
+            }
+
         } else {
             qlResult = config.graphql().execute(query);
             data.putAll(qlResult.getData());
+
         }
 
-        errors.addAll(qlResult.getErrors());
-
+        if (qlResult!=null) {
+            result.put("data", data);
+            errors.addAll(qlResult.getErrors());
+        }
         return result;
     }
 }

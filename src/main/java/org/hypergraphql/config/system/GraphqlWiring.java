@@ -117,9 +117,9 @@ public class GraphqlWiring {
 
     private DataFetcher<List<RDFNode>> instancesOfTypeFetcher = environment -> {
         Field field = (Field) environment.getFields().toArray()[0];
-        String type = (field.getAlias()!=null) ? field.getAlias() : field.getName();
+        String predicate = (field.getAlias()!=null) ? field.getAlias() : field.getName();
         ModelContainer client = environment.getContext();
-        List<RDFNode> subjects = client.getSubjectsOfObjectPropertyFilter("http://hypergraphql.org/type", "http://hypergraphql.org/query/" + type);
+        List<RDFNode> subjects = client.getRootResources(config.HGQL_QUERY_URI, config.HGQL_QUERY_PREFIX + predicate);
         return subjects;
     };
 
