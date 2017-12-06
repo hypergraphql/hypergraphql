@@ -1,6 +1,7 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 
 import java.util.Set;
@@ -33,7 +34,7 @@ public abstract class Service {
 
     public abstract TreeExecutionResult executeQuery(JsonNode query, Set<String> input, String rootType, Set<String> strings);
 
-    public abstract void setParameters(JsonNode jsonnode);
+    public abstract void setParameters(ServiceConfig serviceConfig);
 
 
 

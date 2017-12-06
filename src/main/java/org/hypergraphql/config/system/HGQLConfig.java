@@ -75,7 +75,8 @@ public class HGQLConfig {
     private String serviceFile;
     private String schemaFile;
     private GraphqlConfig graphqlConfig;
-    private Set<ServiceConfig> serviceConfigs;
+    private List<ServiceConfig> serviceConfigs;
+    private TypeDefinitionRegistry registry;
 
    // private JsonNode context;
    // private ObjectNode mapping;
@@ -85,11 +86,11 @@ public class HGQLConfig {
 //    private Map<String, QueryFieldConfig> queryFields;
 
     // private Map<String, Service> services;
-    private TypeDefinitionRegistry registry;
+
 //    private GraphQLSchema schema;
 //    private GraphQL graphql;
 
-    static Logger logger = Logger.getLogger(HGQLConfig.class);
+    private static Logger logger = Logger.getLogger(HGQLConfig.class);
 
     @JsonCreator
     private  HGQLConfig(
@@ -168,6 +169,7 @@ public class HGQLConfig {
             SchemaParser schemaParser = new SchemaParser();
             this.registry = schemaParser.parse(new File(config.schemaFile));
 
+            this.name = config.name;
             this.schemaFile = config.schemaFile;
             this.serviceFile = config.serviceFile;
             this.graphqlConfig = config.graphqlConfig;
@@ -180,7 +182,7 @@ public class HGQLConfig {
     }
 
 //    public void init() {
-//        HGQLSchemaConfig wiring = new HGQLSchemaConfig();
+//        HGQLSchemaWiring wiring = new HGQLSchemaWiring();
 //        this.schema = wiring.schema();
 //        this.graphql = GraphQL.newGraphQL(this.schema).build();
 //    }
@@ -337,7 +339,7 @@ public class HGQLConfig {
 
 
 
-    public Set<ServiceConfig> getServiceConfigs() {
+    public List<ServiceConfig> getServiceConfigs() {
         return serviceConfigs;
     }
 
@@ -347,6 +349,10 @@ public class HGQLConfig {
 
     public String getName() {
         return name;
+    }
+
+    public String getServiceFile() {
+        return serviceFile;
     }
 
     public TypeDefinitionRegistry getRegistry() {

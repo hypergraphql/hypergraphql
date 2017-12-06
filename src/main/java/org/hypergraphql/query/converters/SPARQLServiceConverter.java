@@ -1,6 +1,8 @@
 package org.hypergraphql.query.converters;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.hypergraphql.config.schema.HGQLSchemaWiring;
+import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
 
@@ -10,7 +12,7 @@ import java.util.Set;
 
 public class SPARQLServiceConverter {
 
-    private HGQLConfig config = HGQLConfig.getInstance();
+    private HGQLSchemaWiring config = HGQLSchemaWiring.getInstance();
 
     private final String RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
 
@@ -155,7 +157,7 @@ public class SPARQLServiceConverter {
 
         String fieldName = fieldJson.get("name").asText();
 
-        if (config.getJSONLD_VOC().containsKey(fieldName)) return "";
+        if (HGQLVocabulary.JSONLD.containsKey(fieldName)) return "";
 
         String fieldURI = config.fields().get(fieldName).id();
         String targetName = fieldJson.get("targetName").asText();

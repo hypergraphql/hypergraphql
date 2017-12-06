@@ -7,9 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import graphql.GraphQL;
 import graphql.GraphQLError;
-import org.hypergraphql.config.schema.HGQLSchemaConfig;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.services.HGQLQueryService;
 import spark.ModelAndView;
@@ -68,17 +66,6 @@ public class Controller {
                     new ModelAndView(model, "graphiql.vtl")
             );
         });
-
-
-        get("/context.jsonld", (req, res) -> {
-
-            Map<String, String> model = new HashMap<>();
-
-            return new VelocityTemplateEngine().render(
-                    new ModelAndView(model, "context.jsonld")
-            );
-        });
-
 
         ObjectMapper mapper = new ObjectMapper();
         HGQLQueryService service = new HGQLQueryService();

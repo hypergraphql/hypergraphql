@@ -1,13 +1,7 @@
 package org.hypergraphql.services;
 
 import graphql.*;
-import graphql.introspection.Introspection;
-import graphql.introspection.IntrospectionQuery;
-import graphql.introspection.IntrospectionResultToSchema;
-import graphql.schema.GraphQLObjectType;
-import org.apache.log4j.Logger;
-import org.hypergraphql.config.schema.HGQLSchemaConfig;
-import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.config.schema.HGQLSchemaWiring;
 import org.hypergraphql.datafetching.ExecutionForest;
 import org.hypergraphql.datafetching.ExecutionForestFactory;
 import org.hypergraphql.datamodel.ModelContainer;
@@ -21,7 +15,7 @@ import java.util.*;
  */
 public class HGQLQueryService {
 
-    private GraphQL graphql = GraphQL.newGraphQL(HGQLSchemaConfig.getInstance().getSchema()).build();
+    private GraphQL graphql = GraphQL.newGraphQL(HGQLSchemaWiring.getInstance().getSchema()).build();
 
     //  static Logger logger = Logger.getLogger(HGQLQueryService.class);
 

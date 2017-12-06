@@ -31,9 +31,7 @@ public class ModelContainer {
     }
 
     public ModelContainer(Model model) {
-
         this.model=model;
-
     }
 
 

@@ -4,7 +4,7 @@ import graphql.language.Field;
 import graphql.schema.DataFetchingEnvironment;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
-import org.hypergraphql.config.schema.HGQLSchemaConfig;
+import org.hypergraphql.config.schema.HGQLSchemaWiring;
 import org.hypergraphql.datamodel.ModelContainer;
 
 public class FetchParams {
@@ -13,9 +13,10 @@ public class FetchParams {
     private Property property;
     private ModelContainer client;
 
-    private HGQLSchemaConfig config = HGQLSchemaConfig.getInstance();
+    private HGQLSchemaWiring config = HGQLSchemaWiring.getInstance();
 
     public FetchParams(DataFetchingEnvironment environment) {
+
         subjectResource = environment.getSource();
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
         String predicateURI = config.fields().get(predicate).id();

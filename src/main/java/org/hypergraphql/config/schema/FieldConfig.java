@@ -3,6 +3,7 @@ package org.hypergraphql.config.schema;
 import org.hypergraphql.datafetching.services.Service;
 
 public class FieldConfig implements SchemElementConfig{
+
     private String id;
     private Service service;
 

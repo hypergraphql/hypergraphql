@@ -5,6 +5,7 @@ import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.hypergraphql.config.schema.*;
+import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.SPARQLEndpointExecution;
 import org.hypergraphql.datafetching.SPARQLExecutionResult;
 import org.hypergraphql.datafetching.TreeExecutionResult;
@@ -21,30 +22,18 @@ public class SPARQLEndpointService extends SPARQLService {
     private String user;
     private String password;
     private int VALUES_SIZE_LIMIT = 100;
-    private HGQLSchemaConfig config = HGQLSchemaConfig.getInstance();
+    private HGQLSchemaWiring config = HGQLSchemaWiring.getInstance();
 
     public String getUrl() {
         return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     public String getUser() {
         return user;
     }
 
-    public void setUser(String user) {
-        this.user = user;
-    }
-
     public String getPassword() {
         return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public SPARQLEndpointService() {
@@ -179,14 +168,15 @@ public class SPARQLEndpointService extends SPARQLService {
     }
 
     @Override
-    public void setParameters(JsonNode jsonnode) {
+    public void setParameters(ServiceConfig serviceConfig) {
 
-        super.setParameters(jsonnode);
+        super.setParameters(serviceConfig);
 
-        this.id = jsonnode.get("id").asText();
-        this.url = jsonnode.get("url").asText();
-        this.user = jsonnode.get("user").asText();
-        this.password = jsonnode.get("password").asText();
+        this.id = serviceConfig.getId();
+        this.url = serviceConfig.getUrl();
+        this.user = serviceConfig.getUser();
+        this.graph = serviceConfig.getGraph();
+        this.password = serviceConfig.getPassword();
 
     }
 }

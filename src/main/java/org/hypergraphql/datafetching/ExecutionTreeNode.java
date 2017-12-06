@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.language.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.log4j.Logger;
-import org.hypergraphql.config.schema.HGQLSchemaConfig;
+import org.hypergraphql.config.schema.HGQLSchemaWiring;
 import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.datafetching.services.Service;
 
@@ -19,13 +19,12 @@ import java.util.concurrent.Future;
 
 public class ExecutionTreeNode {
 
-    private HGQLSchemaConfig config = HGQLSchemaConfig.getInstance();
+    private HGQLSchemaWiring config = HGQLSchemaWiring.getInstance();
 
     private Service service; //service configuration
     private JsonNode query; //GraphQL in a basic Json format
     private String executionId; // unique identifier of this execution node
     private Map<String, ExecutionForest> childrenNodes; // succeeding executions
-  //  private HGQLConfig config;
     private String rootType;
     private Map<String, String> ldContext;
 
