@@ -22,11 +22,9 @@ public class GraphqlConfig {
     public Integer port() {
         return port;
     }
-
     public String path() {
         return path;
     }
-
     public String graphiql() {
         return graphiql;
     }

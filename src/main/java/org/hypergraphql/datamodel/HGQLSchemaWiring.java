@@ -52,6 +52,17 @@ public class HGQLSchemaWiring {
 
     private static HGQLSchemaWiring instance = null;
 
+    public static HGQLSchemaWiring getInstance() {
+        return instance;
+    }
+
+    public static void build(HGQLConfig config) {
+
+        if(instance == null) {
+            instance = new HGQLSchemaWiring(config);
+        }
+    }
+
     private GraphQLSchema schema;
     private HGQLSchema hgqlSchema;
     private Map<String, Service> services;
@@ -82,19 +93,8 @@ public class HGQLSchemaWiring {
         add(defaultArguments.get("uris"));
     }};
 
-    public static HGQLSchemaWiring getInstance() {
-        return instance;
-    }
 
-    public static HGQLSchemaWiring build(HGQLConfig config) {
-
-        if(instance == null) {
-            instance = new HGQLSchemaWiring(config);
-        }
-        return instance;
-    }
-
-    public HGQLSchemaWiring(HGQLConfig config) {
+    private HGQLSchemaWiring(HGQLConfig config) {
 
         this.services = new HashMap<>();
 
@@ -102,15 +102,14 @@ public class HGQLSchemaWiring {
 
         try {
             this.hgqlSchema = new HGQLSchema(config.getRegistry(), config.getName(), this.services);
+            this.fields = hgqlSchema.getFields();
+            this.types = hgqlSchema.getTypes();
+            this.queryFields = hgqlSchema.getQueryFields();
+            this.schema = generateSchema();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        this.fields = hgqlSchema.getFields();
-        this.types = hgqlSchema.getTypes();
-        this.queryFields = hgqlSchema.getQueryFields();
-        this.schema = generateSchema();
     }
 
     private void generateServices(List<ServiceConfig> serviceConfigs) {
