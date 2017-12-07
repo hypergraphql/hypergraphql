@@ -129,7 +129,7 @@ public class SPARQLServiceConverter {
     private String getSelectNonRoot(JsonNode jsonQuery, Set<String> input) {
 
         JsonNode firstField = jsonQuery.elements().next();
-        String graphID = ((SPARQLEndpointService) wiring.getFields().get(firstField.get("name").asText()).service()).getGraph();
+        String graphID = ((SPARQLEndpointService) wiring.getFields().get(firstField.get("name").asText()).getSetvice()).getGraph();
         String parentId = firstField.get("parentId").asText();
         String valueSTR = valuesSTR(parentId, input);
 
@@ -158,7 +158,7 @@ public class SPARQLServiceConverter {
 
         if (HGQLVocabulary.JSONLD.containsKey(fieldName)) return "";
 
-        String fieldURI = wiring.getFields().get(fieldName).id();
+        String fieldURI = wiring.getFields().get(fieldName).getId();
         String targetName = fieldJson.get("targetName").asText();
         String parentId = fieldJson.get("parentId").asText();
         String nodeId = fieldJson.get("nodeId").asText();

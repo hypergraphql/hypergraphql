@@ -22,7 +22,7 @@ public class ExecutionTreeNode {
 
     private HGQLSchemaWiring wiring = HGQLSchemaWiring.getInstance();
 
-    private Service service; //service configuration
+    private Service service; //getSetvice configuration
     private JsonNode query; //GraphQL in a basic Json format
     private String executionId; // unique identifier of this execution node
     private Map<String, ExecutionForest> childrenNodes; // succeeding executions
@@ -189,7 +189,7 @@ public class ExecutionTreeNode {
 
     private String getContextLdValue(String contextLdKey) {
         if (wiring.getFields().containsKey(contextLdKey)) {
-            return wiring.getFields().get(contextLdKey).id().toString();
+            return wiring.getFields().get(contextLdKey).getId().toString();
         } else {
             String value = HGQLVocabulary.HGQL_QUERY_URI + contextLdKey;
             return value;
@@ -286,7 +286,7 @@ public class ExecutionTreeNode {
 
                 if (wiring.getFields().containsKey(field.getName())) {
 
-                    Service serviceConfig = wiring.getFields().get(field.getName()).service();
+                    Service serviceConfig = wiring.getFields().get(field.getName()).getSetvice();
 
                     if (result.containsKey(serviceConfig)) {
 

@@ -14,7 +14,7 @@ public class FieldConfig {
 
     }
 
-    public String id() { return this.id; }
-    public Service service() { return this.service; }
+    public String getId() { return this.id; }
+    public Service getSetvice() { return this.service; }
 
 }

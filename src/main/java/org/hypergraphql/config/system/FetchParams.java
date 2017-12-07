@@ -18,7 +18,7 @@ public class FetchParams {
 
         subjectResource = environment.getSource();
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
-        predicateURI = config.getFields().get(predicate).id();
+        predicateURI = config.getFields().get(predicate).getId();
         client = environment.getContext();
     }
 

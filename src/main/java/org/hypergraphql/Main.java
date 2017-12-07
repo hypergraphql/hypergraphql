@@ -21,10 +21,6 @@ public class Main {
 
         logger.info("Server started at http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().path());
 
-        HGQLSchemaWiring.getInstance().getTypes().keySet().forEach(key -> System.out.println(key));
-        System.out.println(HGQLSchemaWiring.getInstance().getTypes().get("Person").getField("name").getService().getId());
-
-
         Controller.start(config);
 
     }

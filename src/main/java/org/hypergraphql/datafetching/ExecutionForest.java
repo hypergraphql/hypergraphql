@@ -52,6 +52,10 @@ public class ExecutionForest  {
         return model;
     }
 
+    public String toString() {
+        return this.toString(0);
+    }
+
     public String toString(int i) {
 
         String result = "";

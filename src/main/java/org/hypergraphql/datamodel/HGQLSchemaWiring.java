@@ -154,7 +154,9 @@ public class HGQLSchemaWiring {
                 .query(builtQueryType)
                 .build(builtTypes);
 
-    }
+}
+
+
 
     private DataFetcher<String> idFetcher = environment -> {
         RDFNode thisNode = environment.getSource();

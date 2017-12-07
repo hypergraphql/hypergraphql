@@ -67,13 +67,14 @@ public class Controller {
             );
         });
 
-        ObjectMapper mapper = new ObjectMapper();
-        HGQLQueryService service = new HGQLQueryService();
 
-
-        // post method for accessing the GraphQL service
+        // post method for accessing the GraphQL getSetvice
 
         post(config.getGraphqlConfig().path(), (req, res) -> {
+            ObjectMapper mapper = new ObjectMapper();
+            HGQLQueryService service = new HGQLQueryService();
+
+
 
             JsonNode requestObject = mapper.readTree(req.body().toString());
 

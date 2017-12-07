@@ -130,7 +130,7 @@ public class SPARQLEndpointService extends SPARQLService {
         TypeConfig targetTypeString = this.config.getTypes().get(currentNode.get("targetName").asText());
 
         if (propertyString != null && !(currentNode.get("parentId").asText().equals("null"))) {
-            Property predicate = model.createProperty("", propertyString.id());
+            Property predicate = model.createProperty("", propertyString.getId());
             Resource subject = results.getResource(currentNode.get("parentId").asText());
             RDFNode object = results.get(currentNode.get("nodeId").asText());
             if (predicate!=null&&subject!=null&&object!=null)

@@ -89,7 +89,7 @@ public abstract class Service {
         TypeConfig targetTypeString = wiring.getTypes().get(currentNode.get("targetName").asText());
 
         if (propertyString != null && !(currentNode.get("parentId").asText().equals("null"))) {
-            Property predicate = model.createProperty("", propertyString.id());
+            Property predicate = model.createProperty("", propertyString.getId());
             Resource subject = results.getResource(currentNode.get("parentId").asText());
             RDFNode object = results.get(currentNode.get("nodeId").asText());
             if (predicate != null && subject != null && object != null)
@@ -225,7 +225,7 @@ public abstract class Service {
             if (field == null) {
                 throw new RuntimeException("Field not found.");
             }
-            Property predicate = model.createProperty(field.id());
+            Property predicate = model.createProperty(field.getId());
             QueryNode queryNode = new QueryNode(predicate, nodeMarker);
             newPath.add(queryNode);
             paths.add(newPath);

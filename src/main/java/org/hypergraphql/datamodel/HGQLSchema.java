@@ -152,9 +152,6 @@ public class HGQLSchema {
                     rdfSchema.insertObjectTriple(fieldURI, HGQL_OUTPUT_TYPE, outputTypeUri);
 
                 } catch(Exception e) {}
-
-
-
             }
         }
 
