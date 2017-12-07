@@ -1,7 +1,7 @@
 package org.hypergraphql.services;
 
 import graphql.*;
-import org.hypergraphql.config.schema.HGQLSchemaWiring;
+import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.datafetching.ExecutionForest;
 import org.hypergraphql.datafetching.ExecutionForestFactory;
 import org.hypergraphql.datamodel.ModelContainer;

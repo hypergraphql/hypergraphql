@@ -2,6 +2,7 @@ package org.hypergraphql.datamodel;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,135 +28,160 @@ public class ModelContainer {
         StringWriter out = new StringWriter();
         model.write(out, format);
         return out.toString();
-        
+
     }
 
     public ModelContainer(Model model) {
-        this.model=model;
+        this.model = model;
     }
 
 
-    public List<RDFNode> getRootResources(String subjectURI, String predicateURI) {
+    public Property getPropertyFromUri(String propertyURI) {
 
-        Property property = model.createProperty(predicateURI);
-        Resource subject = model.getResource(subjectURI);
+        return this.model.getProperty(propertyURI);
 
-        List<RDFNode> uriList = new ArrayList<>();
+    }
 
-        NodeIterator iterator = this.model.listObjectsOfProperty(subject, property);
+    public Resource getResourceFromUri(String resourceURI) {
+
+        return this.model.getResource(resourceURI);
+
+    }
+
+    public List<RDFNode> getSubjectsOfObjectProperty(String predicateURI, String objectURI) {
+
+        ResIterator iterator = this.model.listSubjectsWithProperty(getPropertyFromUri(predicateURI), getResourceFromUri(objectURI));
+        List<RDFNode> nodeList = new ArrayList<>();
 
         while (iterator.hasNext()) {
 
-            RDFNode object = iterator.next();
-
-            uriList.add(object);
+            nodeList.add(iterator.next());
         }
-
-        return uriList;
-
+        return nodeList;
     }
 
 
-    public Property getPropertyFromUri(String string ) {
+    public String getValueOfDataProperty(String subjectURI, String predicateURI) {
 
-        return this.model.getProperty(string);
+        return getValueOfDataProperty(getResourceFromUri(subjectURI), predicateURI);
 
     }
 
-    public String getValueOfDataProperty(Resource subject, Property predicate, Map<String, Object> args) {
+    public String getValueOfDataProperty(RDFNode subject, String predicateURI) {
 
+        return getValueOfDataProperty(subject, predicateURI, new HashMap<>());
 
+    }
 
-        NodeIterator iterator = this.model.listObjectsOfProperty(subject, predicate);
+    public String getValueOfDataProperty(String subjectURI, String predicateURI, Map<String, Object> args) {
 
+        return getValueOfDataProperty(getResourceFromUri(subjectURI), predicateURI, args);
 
+    }
+
+    public String getValueOfDataProperty(RDFNode subject, String predicateURI, Map<String, Object> args) {
+
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
         while (iterator.hasNext()) {
-
 
             RDFNode data = iterator.next();
-
-
             if (data.isLiteral()) {
 
-                if (args.containsKey("lang"))
-
-                {
+                if (args.containsKey("lang")) {
                     if (data.asLiteral().getLanguage().toString().equals(args.get("lang").toString()))
                         return data.asLiteral().getString();
                 } else {
-
                     return data.asLiteral().getString();
                 }
-
             }
-
         }
-
-
         return null;
     }
 
-    public List<Object> getValuesOfDataProperty(Resource subject, Property predicate, Map<String, Object> args) {
+    public List<String> getValuesOfDataProperty(String subjectURI, String predicateURI) {
 
-        List<Object> valList = new ArrayList<>();
+        return getValuesOfDataProperty(getResourceFromUri(subjectURI), predicateURI);
+
+    }
+
+    public List<String> getValuesOfDataProperty(RDFNode subject, String predicateURI) {
+
+        return getValuesOfDataProperty(subject.asResource(), predicateURI, new HashMap<>());
+
+    }
 
 
+    public List<String> getValuesOfDataProperty(String subjectURI, String predicateURI, Map<String, Object> args) {
 
-        NodeIterator iterator = this.model.listObjectsOfProperty(subject, predicate);
+        return getValuesOfDataProperty(getResourceFromUri(subjectURI), predicateURI, args);
+
+    }
+
+
+    public List<String> getValuesOfDataProperty(RDFNode subject, String predicateURI, Map<String, Object> args) {
+
+        List<String> valList = new ArrayList<>();
+
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
 
         while (iterator.hasNext()) {
 
-
             RDFNode data = iterator.next();
-
 
             if (data.isLiteral()) {
                 if (args.containsKey("lang")) {
                     if (data.asLiteral().getLanguage().toString().equals(args.get("lang").toString()))
                         valList.add(data.asLiteral().getString());
                 } else {
-
                     valList.add(data.asLiteral().getString());
-
                 }
             }
         }
-
         return valList;
-
-
     }
 
-    public List<RDFNode> getValuesOfObjectProperty(Resource subject, Property predicate, Map<String, Object> args) {
+    public List<RDFNode> getValuesOfObjectProperty(String subjectURI, String predicateURI) {
+
+        return getValuesOfObjectProperty(getResourceFromUri(subjectURI), predicateURI);
+    }
 
 
+    public List<RDFNode> getValuesOfObjectProperty(RDFNode subject, String predicateURI) {
 
-        NodeIterator iterator = this.model.listObjectsOfProperty(subject, predicate);
-        List<RDFNode> uriList = new ArrayList<>();
-
-
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
+        List<RDFNode> rdfNodes = new ArrayList<>();
         while (iterator.hasNext()) {
-
             RDFNode next = iterator.next();
-
-            if (!next.isLiteral()) uriList.add(next);
+            if (!next.isLiteral()) rdfNodes.add(next);
         }
-
-        return uriList;
-
+        return rdfNodes;
     }
 
-    public RDFNode getValueOfObjectProperty(Resource subject, Property predicate, Map<String, Object> args) {
+    public RDFNode getValueOfObjectProperty(String subjectURI, String predicateURI) {
+        return getValueOfObjectProperty(getResourceFromUri(subjectURI), predicateURI);
+    }
 
+    public RDFNode getValueOfObjectProperty(RDFNode subject, String predicateURI) {
 
-        NodeIterator iterator = this.model.listObjectsOfProperty(subject, predicate);
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
         while (iterator.hasNext()) {
 
             RDFNode next = iterator.next();
-
             if (!next.isLiteral()) return next;
+
         }
         return null;
+    }
+
+    public void insertObjectTriple(String subjectURI, String predicateURI, String objectURI) {
+
+        model.add(getResourceFromUri(subjectURI), getPropertyFromUri(predicateURI), getResourceFromUri(objectURI));
+
+    }
+
+    public void insertStringLiteralTriple(String subjectURI, String predicateURI, String value) {
+
+        model.add(getResourceFromUri(subjectURI), getPropertyFromUri(predicateURI), value);
 
     }
 }

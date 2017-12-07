@@ -1,9 +1,8 @@
 package org.hypergraphql.query.converters;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.hypergraphql.config.schema.HGQLSchemaWiring;
+import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.config.schema.HGQLVocabulary;
-import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
 
 import java.util.HashSet;
@@ -112,14 +111,14 @@ public class SPARQLServiceConverter {
     private String getSelectRoot(JsonNode queryField) {
 
         String targetName = queryField.get("targetName").asText();
-        String targetURI = config.types().get(targetName).id();
-        String graphID = ((SPARQLEndpointService) config.queryFields().get(queryField.get("name").asText()).service()).getGraph();
+        String targetURI = config.getTypes().get(targetName).getId();
+        String graphID = ((SPARQLEndpointService) config.getQueryFields().get(queryField.get("name").asText()).service()).getGraph();
         String nodeId = queryField.get("nodeId").asText();
         String limitOffsetSTR = limitOffsetSTR(queryField);
         String selectTriple = tripleSTR(varSTR(nodeId), RDF_TYPE_URI, uriSTR(targetURI));
         String rootSubquery = selectSubquerySTR(nodeId, selectTriple, limitOffsetSTR);
 
-        JsonNode subfields = queryField.get("fields");
+        JsonNode subfields = queryField.get("getFields");
         String whereClause = getSubQueries(subfields);
 
         String selectQuery = selectQuerySTR(rootSubquery + whereClause, graphID);
@@ -130,7 +129,7 @@ public class SPARQLServiceConverter {
     private String getSelectNonRoot(JsonNode jsonQuery, Set<String> input) {
 
         JsonNode firstField = jsonQuery.elements().next();
-        String graphID = ((SPARQLEndpointService) config.fields().get(firstField.get("name").asText()).service()).getGraph();
+        String graphID = ((SPARQLEndpointService) config.getFields().get(firstField.get("name").asText()).service()).getGraph();
         String parentId = firstField.get("parentId").asText();
         String valueSTR = valuesSTR(parentId, input);
 
@@ -159,18 +158,18 @@ public class SPARQLServiceConverter {
 
         if (HGQLVocabulary.JSONLD.containsKey(fieldName)) return "";
 
-        String fieldURI = config.fields().get(fieldName).id();
+        String fieldURI = config.getFields().get(fieldName).id();
         String targetName = fieldJson.get("targetName").asText();
         String parentId = fieldJson.get("parentId").asText();
         String nodeId = fieldJson.get("nodeId").asText();
 
         String langFilter = langFilterSTR(fieldJson);
 
-        String typeURI = (config.types().containsKey(targetName)) ? config.types().get(targetName).id() : "";
+        String typeURI = (config.getTypes().containsKey(targetName)) ? config.getTypes().get(targetName).getId() : "";
 
         String fieldPattern = fieldPattern(parentId, nodeId, fieldURI, typeURI);
 
-        JsonNode subfields = fieldJson.get("fields");
+        JsonNode subfields = fieldJson.get("getFields");
 
         String rest = getSubQueries(subfields);
 

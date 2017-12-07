@@ -9,6 +9,7 @@ import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.SPARQLEndpointExecution;
 import org.hypergraphql.datafetching.SPARQLExecutionResult;
 import org.hypergraphql.datafetching.TreeExecutionResult;
+import org.hypergraphql.datamodel.HGQLSchemaWiring;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -115,7 +116,7 @@ public class SPARQLEndpointService extends SPARQLService {
 
                 Model currentmodel = buildmodel(results, currentNode);
                 model.add(currentmodel);
-                model.add(getModelFromResults(currentNode.get("fields"), results));
+                model.add(getModelFromResults(currentNode.get("getFields"), results));
 
             }
         }
@@ -124,7 +125,7 @@ public class SPARQLEndpointService extends SPARQLService {
 
             Model currentModel = buildmodel(results,query);
             model.add(currentModel);
-            model.add(getModelFromResults(query.get("fields"), results));
+            model.add(getModelFromResults(query.get("getFields"), results));
 
         }
 
@@ -136,8 +137,8 @@ public class SPARQLEndpointService extends SPARQLService {
 
         Model model = ModelFactory.createDefaultModel();
 
-        FieldConfig propertyString = this.config.fields().get(currentNode.get("name").asText());
-        TypeConfig targetTypeString = this.config.types().get(currentNode.get("targetName").asText());
+        FieldConfig propertyString = this.config.getFields().get(currentNode.get("name").asText());
+        TypeConfig targetTypeString = this.config.getTypes().get(currentNode.get("targetName").asText());
 
         if (propertyString != null && !(currentNode.get("parentId").asText().equals("null"))) {
             Property predicate = model.createProperty("", propertyString.id());
@@ -149,12 +150,12 @@ public class SPARQLEndpointService extends SPARQLService {
 
         if (targetTypeString != null) {
             Resource subject = results.getResource(currentNode.get("nodeId").asText());
-            Resource object = model.createResource(targetTypeString.id());
+            Resource object = model.createResource(targetTypeString.getId());
             if (subject!=null&&object!=null)
             model.add(subject, RDF.type, object);
         }
 
-        QueryFieldConfig queryField = this.config.queryFields().get(currentNode.get("name").asText());
+        QueryFieldConfig queryField = this.config.getQueryFields().get(currentNode.get("name").asText());
 
         if (queryField!=null) {
 

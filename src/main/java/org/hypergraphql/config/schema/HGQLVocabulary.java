@@ -1,7 +1,11 @@
 package org.hypergraphql.config.schema;
 
+import graphql.schema.GraphQLOutputType;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import static graphql.Scalars.*;
 
 public class HGQLVocabulary {
 
@@ -47,9 +51,18 @@ public class HGQLVocabulary {
         put("ID", HGQL_ID);
     }};
 
+    public static final Map<String, GraphQLOutputType> SCALAR_TYPES_TO_GRAPHQL_OUTPUT = new HashMap<String, GraphQLOutputType>() {{
+        put(HGQL_STRING, GraphQLString);
+        put(HGQL_Int, GraphQLInt);
+        put(HGQL_Boolean, GraphQLBoolean);
+        put(HGQL_ID, GraphQLID);
+    }};
+
     public static final Map<String, String> JSONLD = new HashMap<String, String>() {{
         put("_id", "@id");
         put("_type", "@type");
     }};
+
+
 
 }

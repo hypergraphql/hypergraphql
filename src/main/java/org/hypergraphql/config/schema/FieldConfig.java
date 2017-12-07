@@ -2,15 +2,15 @@ package org.hypergraphql.config.schema;
 
 import org.hypergraphql.datafetching.services.Service;
 
-public class FieldConfig implements SchemElementConfig{
+public class FieldConfig {
 
     private String id;
     private Service service;
 
     public FieldConfig(String id, Service service) {
 
-        if (id!=null) this.id = id;
-        if (service!=null) this.service = service;
+        this.id = id;
+        this.service = service;
 
     }
 

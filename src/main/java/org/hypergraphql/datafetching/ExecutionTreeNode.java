@@ -7,7 +7,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.language.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.log4j.Logger;
-import org.hypergraphql.config.schema.HGQLSchemaWiring;
+import org.hypergraphql.config.schema.FieldOfTypeConfig;
+import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.datafetching.services.Service;
 
@@ -19,7 +20,7 @@ import java.util.concurrent.Future;
 
 public class ExecutionTreeNode {
 
-    private HGQLSchemaWiring config = HGQLSchemaWiring.getInstance();
+    private HGQLSchemaWiring wiring = HGQLSchemaWiring.getInstance();
 
     private Service service; //service configuration
     private JsonNode query; //GraphQL in a basic Json format
@@ -78,7 +79,7 @@ public class ExecutionTreeNode {
 
     public ExecutionTreeNode(Field field, String nodeId) {
 
-        this.service = config.queryFields().get(field.getName()).service();
+        this.service = wiring.getQueryFields().get(field.getName()).service();
         this.executionId = createId();
         this.childrenNodes = new HashMap<>();
         this.ldContext = new HashMap<>();
@@ -175,20 +176,20 @@ public class ExecutionTreeNode {
 
         }
 
-        JsonNode fieldSchema = config.mapping().get(parentType).get("fields").get(field.getName());
-        String targetName = fieldSchema.get("targetName").asText();
+        FieldOfTypeConfig fieldConfig = wiring.getTypes().get(parentType).getField(field.getName());
+        String targetName = fieldConfig.getTargetName();
 
         query.put("targetName", targetName);
 
-        query.set("fields", this.traverse(field, nodeId, parentType));
+        query.set("getFields", this.traverse(field, nodeId, parentType));
 
         return query;
 
     }
 
     private String getContextLdValue(String contextLdKey) {
-        if (config.fields().containsKey(contextLdKey)) {
-            return config.fields().get(contextLdKey).id().toString();
+        if (wiring.getFields().containsKey(contextLdKey)) {
+            return wiring.getFields().get(contextLdKey).id().toString();
         } else {
             String value = HGQLVocabulary.HGQL_QUERY_URI + contextLdKey;
             return value;
@@ -201,8 +202,8 @@ public class ExecutionTreeNode {
         SelectionSet subFields = field.getSelectionSet();
         if (subFields!=null) {
 
-            JsonNode fieldSchema = config.mapping().get(parentType).get("fields").get(field.getName());
-            String targetName = fieldSchema.get("targetName").asText();
+            FieldOfTypeConfig fieldConfig = wiring.getTypes().get(parentType).getField(field.getName());
+            String targetName = fieldConfig.getTargetName();
 
             Map<Service, Set<Field>> splitFields = getPartitionedFields(subFields);
 
@@ -283,9 +284,9 @@ public class ExecutionTreeNode {
 
                 Field field = (Field) child;
 
-                if (config.fields().containsKey(field.getName())) {
+                if (wiring.getFields().containsKey(field.getName())) {
 
-                    Service serviceConfig = config.fields().get(field.getName()).service();
+                    Service serviceConfig = wiring.getFields().get(field.getName()).service();
 
                     if (result.containsKey(serviceConfig)) {
 

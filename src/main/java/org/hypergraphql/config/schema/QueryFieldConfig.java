@@ -2,7 +2,7 @@ package org.hypergraphql.config.schema;
 
 import org.hypergraphql.datafetching.services.Service;
 
-public class QueryFieldConfig implements SchemElementConfig {
+public class QueryFieldConfig {
 
     private Service service;
     private String type;
@@ -17,8 +17,4 @@ public class QueryFieldConfig implements SchemElementConfig {
     public String type() { return this.type; }
 
 
-    @Override
-    public String id() {
-        return null;
-    }
 }

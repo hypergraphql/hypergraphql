@@ -17,21 +17,33 @@ public class FieldOfTypeConfig {
         return graphqlOutputType;
     }
 
-    public String getTypeName() {
-        return typeName;
+    public Boolean getIsList() {
+        return isList;
+    }
+
+    public String getTargetName() {
+        return targetName;
+    }
+
+    public String getName() {
+        return name;
     }
 
     private String id;
+    private String name;
     private Service service;
     private GraphQLOutputType graphqlOutputType;
-    private String typeName;
+    private Boolean isList;
+    private String targetName;
 
-    public FieldOfTypeConfig(String id, Service service, GraphQLOutputType graphqlOutputType, String typeName) {
+    public FieldOfTypeConfig(String name, String id, Service service, GraphQLOutputType graphqlOutputType, Boolean isList, String targetName) {
 
+        this.name = name;
         this.id=id;
         this.service=service;
         this.graphqlOutputType = graphqlOutputType;
-        this.typeName=typeName;
+        this.targetName=targetName;
+        this.isList=isList;
 
     }
 
