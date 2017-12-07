@@ -82,9 +82,6 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
             unionModel.add(model);
 
 
-
-
-
         }
 
         SPARQLExecutionResult sparqlExecutionResult = new SPARQLExecutionResult(resultSet, unionModel);
