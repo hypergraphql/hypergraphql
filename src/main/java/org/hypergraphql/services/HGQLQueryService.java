@@ -1,12 +1,7 @@
 package org.hypergraphql.services;
 
 import graphql.*;
-import graphql.introspection.Introspection;
-import graphql.introspection.IntrospectionQuery;
-import graphql.introspection.IntrospectionResultToSchema;
-import graphql.schema.GraphQLObjectType;
-import org.apache.log4j.Logger;
-import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.datafetching.ExecutionForest;
 import org.hypergraphql.datafetching.ExecutionForestFactory;
 import org.hypergraphql.datamodel.ModelContainer;
@@ -18,17 +13,17 @@ import java.util.*;
 /**
  * Created by szymon on 01/11/2017.
  */
-public class HGQLService {
-    private HGQLConfig config;
+public class HGQLQueryService {
 
-    static Logger logger = Logger.getLogger(HGQLService.class);
+    private GraphQL graphql = GraphQL.newGraphQL(HGQLSchemaWiring.getInstance().getSchema()).build();
 
-    public HGQLService() {
-        this.config = HGQLConfig.getInstance();
-    }
+    //  static Logger logger = Logger.getLogger(HGQLQueryService.class);
 
 
     public Map<String, Object> results(String query, String acceptType) {
+
+
+
 
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> data = new HashMap<>();
@@ -64,14 +59,14 @@ public class HGQLService {
                         .context(client)
                         .build();
 
-                qlResult = config.graphql().execute(executionInput);
+                qlResult = graphql.execute(executionInput);
 
                 data.putAll(qlResult.getData());
                 data.put("@context", queryExecutionForest.getFullLdContext());
             }
 
         } else {
-            qlResult = config.graphql().execute(query);
+            qlResult = graphql.execute(query);
             data.putAll(qlResult.getData());
 
         }

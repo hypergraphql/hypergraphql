@@ -2,20 +2,39 @@ package org.hypergraphql.config.schema;
 
 import org.hypergraphql.datafetching.services.Service;
 
-public class TypeConfig implements SchemElementConfig {
+import java.util.Map;
+
+public class TypeConfig  {
+
+    public String getName() {
+        return name;
+    }
+
+    public String getId() {
+        return this.id;
+    }
+
+    public FieldOfTypeConfig getField(String name) {
+        return this.fields.get(name);
+    }
 
     private String id;
 
-    public TypeConfig(String id) {
+    private String name;
 
-        if (id!=null) this.id = id;
+    public Map<String, FieldOfTypeConfig> getFields() {
+        return fields;
+    }
+
+    private Map<String, FieldOfTypeConfig> fields;
+
+    public TypeConfig(String name, String id, Map<String, FieldOfTypeConfig> fields) {
+
+        this.name=name;
+        this.id = id;
+        this.fields=fields;
 
     }
 
-    public String id() { return this.id; }
 
-    @Override
-    public Service service() {
-        return null;
-    }
 }

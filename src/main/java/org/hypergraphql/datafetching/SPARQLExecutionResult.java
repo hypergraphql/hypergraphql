@@ -14,10 +14,6 @@ public class SPARQLExecutionResult {
         return resultSet;
     }
 
-    public void setResultSet(Map<String, Set<String>> resultSet) {
-        this.resultSet = resultSet;
-    }
-
     public Model getModel() {
         return model;
     }

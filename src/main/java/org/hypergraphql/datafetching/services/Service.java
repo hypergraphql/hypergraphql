@@ -1,17 +1,21 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.hypergraphql.config.system.ServiceConfig;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.hypergraphql.config.schema.FieldConfig;
 import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.config.schema.TypeConfig;
-import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.TreeExecutionResult;
+import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.datamodel.QueryNode;
 
 import java.util.*;
+
+import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_NAMESPACE;
+import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_URI;
 
 public abstract class Service {
 
@@ -19,7 +23,7 @@ public abstract class Service {
     protected String id;
 
 
-    protected Class SPARQLEndpointService ;
+    protected Class SPARQLEndpointService;
 
     public String getType() {
         return type;
@@ -38,10 +42,9 @@ public abstract class Service {
     }
 
 
+    public abstract TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> strings);
 
-    public abstract TreeExecutionResult executeQuery(JsonNode query, Set<String> input,  Set<String> strings);
-
-    public abstract void setParameters(JsonNode jsonnode);
+    public abstract void setParameters(ServiceConfig serviceConfig);
 
     public Model getModelFromResults(JsonNode query, QuerySolution results) {
 
@@ -63,11 +66,9 @@ public abstract class Service {
                 model.add(getModelFromResults(currentNode.get("fields"), results));
 
             }
-        }
+        } else {
 
-        else {
-
-            Model currentModel = buildmodel(results,query);
+            Model currentModel = buildmodel(results, query);
             model.add(currentModel);
             model.add(getModelFromResults(query.get("fields"), results));
 
@@ -80,59 +81,58 @@ public abstract class Service {
     private Model buildmodel(QuerySolution results, JsonNode currentNode) {
 
 
-        HGQLConfig config = HGQLConfig.getInstance();
+        HGQLSchemaWiring wiring = HGQLSchemaWiring.getInstance();
 
         Model model = ModelFactory.createDefaultModel();
 
-        FieldConfig propertyString = config.fields().get(currentNode.get("name").asText());
-        TypeConfig targetTypeString = config.types().get(currentNode.get("targetName").asText());
+        FieldConfig propertyString = wiring.getFields().get(currentNode.get("name").asText());
+        TypeConfig targetTypeString = wiring.getTypes().get(currentNode.get("targetName").asText());
 
         if (propertyString != null && !(currentNode.get("parentId").asText().equals("null"))) {
             Property predicate = model.createProperty("", propertyString.id());
             Resource subject = results.getResource(currentNode.get("parentId").asText());
             RDFNode object = results.get(currentNode.get("nodeId").asText());
-            if (predicate!=null&&subject!=null&&object!=null)
+            if (predicate != null && subject != null && object != null)
                 model.add(subject, predicate, object);
         }
 
         if (targetTypeString != null) {
             Resource subject = results.getResource(currentNode.get("nodeId").asText());
-            Resource object = model.createResource(targetTypeString.id());
-            if (subject!=null&&object!=null)
+            Resource object = model.createResource(targetTypeString.getId());
+            if (subject != null && object != null)
                 model.add(subject, RDF.type, object);
         }
 
-        QueryFieldConfig queryField = config.queryFields().get(currentNode.get("name").asText());
+        QueryFieldConfig queryField = wiring.getQueryFields().get(currentNode.get("name").asText());
 
-        if (queryField!=null) {
+        if (queryField != null) {
 
             String typeName = (currentNode.get("alias").isNull()) ? currentNode.get("name").asText() : currentNode.get("alias").asText();
             Resource object = results.getResource(currentNode.get("nodeId").asText());
-            Resource subject = model.createResource(config.HGQL_QUERY_URI);
-            Property predicate = model.createProperty("", config.HGQL_QUERY_PREFIX + typeName);
+            Resource subject = model.createResource(HGQL_QUERY_URI);
+            Property predicate = model.createProperty("", HGQL_QUERY_NAMESPACE + typeName);
             model.add(subject, predicate, object);
         }
         return model;
     }
 
-    protected  Map<String,Set<String>> getResultset(Model model, JsonNode query, Set<String> input, Set<String> markers) {
+    protected Map<String, Set<String>> getResultset(Model model, JsonNode query, Set<String> input, Set<String> markers) {
 
 
-        Map<String,Set<String>> resultset = new HashMap<>();
+        Map<String, Set<String>> resultset = new HashMap<>();
 
         Set<LinkedList<QueryNode>> paths = getQueryPaths(query);
 
-        for (LinkedList<QueryNode> path : paths ) {
+        for (LinkedList<QueryNode> path : paths) {
 
-            if (hasMarkerLeaf(path,markers)) {
-                Set<String> identifiers = findIdentifiers(model,input,path);
+            if (hasMarkerLeaf(path, markers)) {
+                Set<String> identifiers = findIdentifiers(model, input, path);
                 String marker = getLeafMarker(path);
-                resultset.put(marker,identifiers);
+                resultset.put(marker, identifiers);
 
             }
 
         }
-
 
 
         return resultset;
@@ -148,9 +148,9 @@ public abstract class Service {
 
         Set<String> objects;
         Set<String> subjects;
-        if (input==null)
+        if (input == null)
             objects = new HashSet<>();
-        else objects=input;
+        else objects = input;
 
         Iterator<QueryNode> iterator = path.iterator();
 
@@ -158,36 +158,28 @@ public abstract class Service {
             QueryNode queryNode = iterator.next();
             subjects = new HashSet<>(objects);
             objects = new HashSet<>();
-            if (!subjects.isEmpty()){
+            if (!subjects.isEmpty()) {
                 Iterator<String> subjectIterator = subjects.iterator();
                 while (subjectIterator.hasNext()) {
                     String subject = subjectIterator.next();
                     Resource subjectresoource = model.createResource(subject);
-                    NodeIterator partialobjects = model.listObjectsOfProperty(subjectresoource,queryNode.getNode());
-                    while(partialobjects.hasNext())
+                    NodeIterator partialobjects = model.listObjectsOfProperty(subjectresoource, queryNode.getNode());
+                    while (partialobjects.hasNext())
                         objects.add(partialobjects.next().toString());
                 }
 
-            }
-
-            else {
+            } else {
 
                 NodeIterator objectsIterator = model.listObjectsOfProperty(queryNode.getNode());
                 while (objectsIterator.hasNext())
                     objects.add(objectsIterator.next().toString());
 
 
-
-
             }
-
 
 
         }
         return objects;
-
-
-
 
 
     }
@@ -196,31 +188,29 @@ public abstract class Service {
 
         for (String marker : markers) {
 
-            if(path.getLast().getMarker().equals(marker))
+            if (path.getLast().getMarker().equals(marker))
                 return true;
         }
-
 
 
         return false;
     }
 
-    protected  Set<LinkedList<QueryNode>> getQueryPaths(JsonNode query) {
-        Set<LinkedList<QueryNode>> paths = new HashSet<>() ;
+    protected Set<LinkedList<QueryNode>> getQueryPaths(JsonNode query) {
+        Set<LinkedList<QueryNode>> paths = new HashSet<>();
 
-        getQueryPathsRecursive(query,paths,null);
+        getQueryPathsRecursive(query, paths, null);
         return paths;
-
 
 
     }
 
-    protected  void getQueryPathsRecursive(JsonNode query, Set<LinkedList<QueryNode>> paths, LinkedList<QueryNode> path)  {
+    protected void getQueryPathsRecursive(JsonNode query, Set<LinkedList<QueryNode>> paths, LinkedList<QueryNode> path) {
 
-        Model model= ModelFactory.createDefaultModel();
+        Model model = ModelFactory.createDefaultModel();
 
-        if (path==null)
-            path= new LinkedList<QueryNode>();
+        if (path == null)
+            path = new LinkedList<QueryNode>();
         else {
             paths.remove(path);
         }
@@ -231,17 +221,17 @@ public abstract class Service {
             LinkedList<QueryNode> newPath = new LinkedList<QueryNode>(path);
             String nodeMarker = currentNode.get("nodeId").asText();
             String nodeName = currentNode.get("name").asText();
-            FieldConfig field = HGQLConfig.getInstance().fields().get(nodeName);
-            if (field==null) {
-                throw  new RuntimeException("Field not found.");
+            FieldConfig field = HGQLSchemaWiring.getInstance().getFields().get(nodeName);
+            if (field == null) {
+                throw new RuntimeException("Field not found.");
             }
             Property predicate = model.createProperty(field.id());
-            QueryNode queryNode = new QueryNode(predicate,nodeMarker);
+            QueryNode queryNode = new QueryNode(predicate, nodeMarker);
             newPath.add(queryNode);
             paths.add(newPath);
             JsonNode fields = currentNode.get("fields");
-            if (fields!=null&&!fields.isNull())
-                getQueryPathsRecursive(fields,paths,newPath);
+            if (fields != null && !fields.isNull())
+                getQueryPathsRecursive(fields, paths, newPath);
 
         }
 

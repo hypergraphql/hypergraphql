@@ -7,7 +7,7 @@ import graphql.schema.GraphQLSchema;
 import graphql.validation.ValidationError;
 import graphql.validation.ValidationErrorType;
 import graphql.validation.Validator;
-import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.datamodel.HGQLSchemaWiring;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ public class QueryValidator {
 
     public QueryValidator() {
 
-        this.schema = HGQLConfig.getInstance().schema();
+        this.schema = HGQLSchemaWiring.getInstance().getSchema();
         this.validationErrors = new ArrayList<>();
         this.validator = new Validator();
         this.parser = new Parser();

@@ -3,6 +3,7 @@ package org.hypergraphql.datafetching.services;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.rdf.model.impl.StatementImpl;
+import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.QueryNode;
 import org.hypergraphql.query.converters.HGraphQLConverter;
@@ -112,11 +113,11 @@ public class LocalModelService extends Service {
 
 
     @Override
-    public void setParameters(JsonNode jsonNode) {
+    public void setParameters(ServiceConfig serviceConfig) {
 
-        this.id = jsonNode.get("@id").asText();
-        this.filetype = jsonNode.get("filetype").asText();
-        this.filepath = jsonNode.get("filepath").asText();
+        this.id = serviceConfig.getId();
+        this.filetype = serviceConfig.getFiletype();
+        this.filepath = serviceConfig.getFilepath();
 
     }
 }

@@ -1,6 +1,7 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.hypergraphql.config.system.ServiceConfig;
 
 public abstract class SPARQLService extends Service {
 
@@ -10,15 +11,10 @@ public abstract class SPARQLService extends Service {
         return graph;
     }
 
-    public void setGraph(String graph) {
-        this.graph = graph;
-    }
+    public void setParameters(ServiceConfig serviceConfig) {
 
-
-    public  void setParameters(JsonNode jsonnode) {
-
-        this.id = jsonnode.get("@id").asText();
-        this.graph = jsonnode.get("graph").asText();
+        this.id = serviceConfig.getId();
+        this.graph = serviceConfig.getGraph();
 
     }
 

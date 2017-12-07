@@ -1,17 +1,11 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sun.org.apache.xpath.internal.operations.Mod;
-import org.apache.commons.lang.UnhandledException;
-import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdf.model.*;
-import org.hypergraphql.config.schema.FieldConfig;
-import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.TreeExecutionResult;
-import org.hypergraphql.datamodel.QueryNode;
 import org.hypergraphql.query.converters.HGraphQLConverter;
 
-import javax.jws.WebParam;
 import java.util.*;
 
 public class HGraphQLService extends Service {
@@ -45,12 +39,12 @@ public class HGraphQLService extends Service {
     }
 
     @Override
-    public void setParameters(JsonNode jsonnode) {
+    public void setParameters(ServiceConfig serviceConfig) {
 
-        this.id = jsonnode.get("@id").asText();
-        this.url = jsonnode.get("url").asText();
-        this.user = jsonnode.get("user").asText();
-        this.password = jsonnode.get("password").asText();
+        this.id = serviceConfig.getId();
+        this.url = serviceConfig.getUrl();
+        this.user = serviceConfig.getUser();
+        this.password = serviceConfig.getPassword();
 
     }
 }
