@@ -72,7 +72,7 @@ public class HGraphQLService extends Service {
         Set<String> objects;
         Set<String> subjects;
         if (input==null)
-           objects = new HashSet<>();
+            objects = new HashSet<>();
         else objects=input;
 
         Iterator<QueryNode> iterator = path.iterator();
@@ -91,6 +91,15 @@ public class HGraphQLService extends Service {
                         objects.add(partialobjects.next().toString());
                 }
 
+            }
+
+            else {
+
+                NodeIterator objectsIterator = model.listObjectsOfProperty(queryNode.getNode());
+                while (objectsIterator.hasNext())
+                    objects.add(objectsIterator.next().toString());
+
+
 
 
             }
@@ -98,7 +107,7 @@ public class HGraphQLService extends Service {
 
 
         }
-      return objects;
+        return objects;
 
 
 
@@ -136,15 +145,15 @@ public class HGraphQLService extends Service {
 
     }
 
-private  Set<LinkedList<QueryNode>> getQueryPaths(JsonNode query) {
-    Set<LinkedList<QueryNode>> paths = new HashSet<>() ;
+    private  Set<LinkedList<QueryNode>> getQueryPaths(JsonNode query) {
+        Set<LinkedList<QueryNode>> paths = new HashSet<>() ;
 
-    getQueryPathsRecursive(query,paths,null);
-    return paths;
+        getQueryPathsRecursive(query,paths,null);
+        return paths;
 
 
 
-}
+    }
 
     private  void getQueryPathsRecursive(JsonNode query, Set<LinkedList<QueryNode>> paths, LinkedList<QueryNode> path)  {
 
@@ -155,26 +164,26 @@ private  Set<LinkedList<QueryNode>> getQueryPaths(JsonNode query) {
         else {
             paths.remove(path);
         }
-            Iterator<JsonNode> iterator = query.elements();
+        Iterator<JsonNode> iterator = query.elements();
 
-            while (iterator.hasNext()) {
-                JsonNode currentNode = iterator.next();
-                LinkedList<QueryNode> newPath = new LinkedList<QueryNode>(path);
-                String nodeMarker = currentNode.get("nodeId").asText();
-                String nodeName = currentNode.get("name").asText();
-                FieldConfig field = HGQLConfig.getInstance().fields().get(nodeName);
-                if (field==null) {
-                    throw  new RuntimeException("Field not found.");
-                }
-                Property predicate = model.createProperty(field.id());
-                QueryNode queryNode = new QueryNode(predicate,nodeMarker);
-                newPath.add(queryNode);
-                paths.add(newPath);
-                JsonNode fields = currentNode.get("fields");
-                if (fields!=null&&!fields.isNull())
+        while (iterator.hasNext()) {
+            JsonNode currentNode = iterator.next();
+            LinkedList<QueryNode> newPath = new LinkedList<QueryNode>(path);
+            String nodeMarker = currentNode.get("nodeId").asText();
+            String nodeName = currentNode.get("name").asText();
+            FieldConfig field = HGQLConfig.getInstance().fields().get(nodeName);
+            if (field==null) {
+                throw  new RuntimeException("Field not found.");
+            }
+            Property predicate = model.createProperty(field.id());
+            QueryNode queryNode = new QueryNode(predicate,nodeMarker);
+            newPath.add(queryNode);
+            paths.add(newPath);
+            JsonNode fields = currentNode.get("fields");
+            if (fields!=null&&!fields.isNull())
                 getQueryPathsRecursive(fields,paths,newPath);
 
-            }
+        }
 
 
     }
