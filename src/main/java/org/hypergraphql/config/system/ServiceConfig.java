@@ -11,6 +11,8 @@ public class ServiceConfig {
     private String graph;
     private String user;
     private String password;
+    private String filepath;
+    private String filetype;
 
     @JsonCreator
     public ServiceConfig(@JsonProperty("id") String id,
@@ -18,7 +20,9 @@ public class ServiceConfig {
                          @JsonProperty("url") String url,
                          @JsonProperty("graph") String graph,
                          @JsonProperty("user") String user,
-                         @JsonProperty("password") String password
+                         @JsonProperty("password") String password,
+                         @JsonProperty("filepath") String filepath,
+                         @JsonProperty("filetype") String filetype
     ) {
         this.id = id;
         this.type = type;
@@ -26,11 +30,20 @@ public class ServiceConfig {
         this.graph = graph;
         this.user = user;
         this.password = password;
+        this.filepath = filepath;
+        this.filetype = filetype;
     }
-
 
     public String getId() {
         return id;
+    }
+
+    public String getFilepath() {
+        return filepath;
+    }
+
+    public String getFiletype() {
+        return filetype;
     }
 
     public String getType() {
@@ -52,6 +65,5 @@ public class ServiceConfig {
     public String getPassword() {
         return password;
     }
-
 
 }

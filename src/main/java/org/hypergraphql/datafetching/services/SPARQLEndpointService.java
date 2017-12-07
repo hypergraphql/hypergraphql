@@ -42,12 +42,10 @@ public class SPARQLEndpointService extends SPARQLService {
     }
 
     @Override
-    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, String rootType, Set<String> markers) {
+    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input,  Set<String> markers) {
 
         Map<String, Set<String>> resultSet = new HashMap<>();
-
         Model unionModel = ModelFactory.createDefaultModel();
-
         Set<Future<SPARQLExecutionResult>> futureSPARQLresults = new HashSet<>();
 
         for (String marker : markers) {
@@ -66,20 +64,12 @@ public class SPARQLEndpointService extends SPARQLService {
                 i++;
             }
             ExecutorService executor = Executors.newFixedThreadPool(50);
-
-
-
             SPARQLEndpointExecution execution = new SPARQLEndpointExecution(query,inputSubset,markers,this);
             futureSPARQLresults.add(executor.submit(execution));
-
-
-
-
 
         } while (inputList.size()>VALUES_SIZE_LIMIT);
 
         for (Future<SPARQLExecutionResult> futureexecutionResult : futureSPARQLresults) {
-
             try {
                 SPARQLExecutionResult result = futureexecutionResult.get();
                 unionModel.add(result.getModel());
@@ -92,7 +82,6 @@ public class SPARQLEndpointService extends SPARQLService {
         }
 
         TreeExecutionResult treeExecutionResult = new TreeExecutionResult();
-
         treeExecutionResult.setResultSet(resultSet);
         treeExecutionResult.setModel(unionModel);
 
