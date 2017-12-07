@@ -14,6 +14,7 @@ public class LocalModelService extends Service {
 
     String filepath;
     String filetype;
+    Model localmodel;
 
     @Override
     public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers) {
@@ -33,8 +34,7 @@ public class LocalModelService extends Service {
 
     private Model getModelFromLocal(JsonNode query, Set<String> input) {
 
-        Model localmodel = ModelFactory.createDefaultModel();
-       localmodel.read(filepath,filetype);
+
        Model returnModel = ModelFactory.createDefaultModel();
 
 
@@ -118,6 +118,9 @@ public class LocalModelService extends Service {
         this.id = serviceConfig.getId();
         this.filetype = serviceConfig.getFiletype();
         this.filepath = serviceConfig.getFilepath();
+        this.localmodel = ModelFactory.createDefaultModel();
+        this.localmodel.read(filepath,filetype);
+
 
     }
 }
