@@ -333,7 +333,7 @@ public class ExecutionTreeNode {
 
 
 
-        TreeExecutionResult executionResult = service.executeQuery(query, input, rootType, childrenNodes.keySet());
+        TreeExecutionResult executionResult = service.executeQuery(query, input,  childrenNodes.keySet());
         Map<String,Set<String>> resultset = executionResult.getResultSet();
 
 

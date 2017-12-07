@@ -31,4 +31,17 @@ public class SPARQLExecutionResult {
         this.resultSet = resultSet;
         this.model = model;
     }
+
+    @Override
+    public String toString() {
+
+        String out = "";
+
+        out+="RESULTS\n";
+        out+="Model : \n" + this.model.toString() + "\n";
+        out+="ResultSet : \n" + this.resultSet.toString();
+
+
+        return out;
+    }
 }

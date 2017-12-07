@@ -41,6 +41,7 @@ public class HGQLService {
         ExecutionInput executionInput;
         ExecutionResult qlResult = null;
 
+
         ValidatedQuery validatedQuery = new QueryValidator().validateQuery(query);
 
         if (!validatedQuery.getValid()) {
@@ -51,6 +52,7 @@ public class HGQLService {
         if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
             ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery());
+
 
             ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 

@@ -13,6 +13,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.web.HttpOp;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
+import org.apache.log4j.Logger;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
 import org.hypergraphql.query.converters.SPARQLServiceConverter;
 
@@ -29,6 +30,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
     private Set<String> inputSubset;
     private Set<String> markers;
     private SPARQLEndpointService sparqlEndpointService;
+    protected static Logger logger = Logger.getLogger(SPARQLEndpointExecution.class);
 
 
     public SPARQLEndpointExecution(JsonNode query, Set<String> inputSubset, Set<String> markers, SPARQLEndpointService sparqlEndpointService) {
@@ -53,6 +55,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
 
         SPARQLServiceConverter converter = new SPARQLServiceConverter();
         String sparqlQuery = converter.getSelectQuery(query, inputSubset);
+        logger.info(sparqlQuery);
 
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         Credentials credentials = new UsernamePasswordCredentials(this.sparqlEndpointService.getUser(), this.sparqlEndpointService.getPassword());
@@ -85,6 +88,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
         }
 
         SPARQLExecutionResult sparqlExecutionResult = new SPARQLExecutionResult(resultSet, unionModel);
+        logger.info(sparqlExecutionResult);
 
         return sparqlExecutionResult;
     }
