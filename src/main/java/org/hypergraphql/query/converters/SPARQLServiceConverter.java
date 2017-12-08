@@ -99,6 +99,9 @@ public class SPARQLServiceConverter {
 
     public String getSelectQuery(JsonNode jsonQuery, Set<String> input) {
 
+        System.out.println(jsonQuery.toString());
+        System.out.println(input.size());
+
         Boolean root = input.isEmpty();
         if (root) {
             return getSelectRoot(jsonQuery);
@@ -122,6 +125,8 @@ public class SPARQLServiceConverter {
         String whereClause = getSubQueries(subfields);
 
         String selectQuery = selectQuerySTR(rootSubquery + whereClause, graphID);
+
+        System.out.println(selectQuery);
 
         return selectQuery;
     }

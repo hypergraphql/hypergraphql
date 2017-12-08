@@ -23,7 +23,6 @@ public class SPARQLEndpointService extends SPARQLService {
     private String user;
     private String password;
     private int VALUES_SIZE_LIMIT = 100;
-    private HGQLSchemaWiring config = HGQLSchemaWiring.getInstance();
 
     public String getUrl() {
         return url;
@@ -81,6 +80,8 @@ public class SPARQLEndpointService extends SPARQLService {
             }
         }
 
+        unionModel.write(System.out);
+
         TreeExecutionResult treeExecutionResult = new TreeExecutionResult();
         treeExecutionResult.setResultSet(resultSet);
         treeExecutionResult.setModel(unionModel);
@@ -126,8 +127,8 @@ public class SPARQLEndpointService extends SPARQLService {
 
         Model model = ModelFactory.createDefaultModel();
 
-        FieldConfig propertyString = this.config.getFields().get(currentNode.get("name").asText());
-        TypeConfig targetTypeString = this.config.getTypes().get(currentNode.get("targetName").asText());
+        FieldConfig propertyString = HGQLSchemaWiring.getInstance().getFields().get(currentNode.get("name").asText());
+        TypeConfig targetTypeString = HGQLSchemaWiring.getInstance().getTypes().get(currentNode.get("targetName").asText());
 
         if (propertyString != null && !(currentNode.get("parentId").asText().equals("null"))) {
             Property predicate = model.createProperty("", propertyString.getId());
@@ -144,7 +145,7 @@ public class SPARQLEndpointService extends SPARQLService {
             model.add(subject, RDF.type, object);
         }
 
-        QueryFieldConfig queryField = this.config.getQueryFields().get(currentNode.get("name").asText());
+        QueryFieldConfig queryField = HGQLSchemaWiring.getInstance().getQueryFields().get(currentNode.get("name").asText());
 
         if (queryField!=null) {
 

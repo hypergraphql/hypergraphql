@@ -31,6 +31,8 @@ import org.hypergraphql.datafetching.services.Service;
 public class HGQLSchemaWiring {
 
     static Logger logger = Logger.getLogger(HGQLSchemaWiring.class);
+    static  HGQLConfig staticconfig ;
+
 
 
     public GraphQLSchema getSchema() {
@@ -53,14 +55,17 @@ public class HGQLSchemaWiring {
     private static HGQLSchemaWiring instance = null;
 
     public static HGQLSchemaWiring getInstance() {
-        return instance;
+        if (instance==null) build(staticconfig);
+
+        return  instance;
     }
 
     public static void build(HGQLConfig config) {
+        if (config==null)
+            throw new RuntimeException("Empty configuration. You need to call HGQLSchemaWiring.build(HGQLConfig config) first.");
 
-        if(instance == null) {
-            instance = new HGQLSchemaWiring(config);
-        }
+        staticconfig = config;
+        instance = new HGQLSchemaWiring(staticconfig);
     }
 
     private GraphQLSchema schema;
