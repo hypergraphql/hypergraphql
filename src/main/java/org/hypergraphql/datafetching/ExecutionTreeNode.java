@@ -179,7 +179,7 @@ public class ExecutionTreeNode {
 
         query.put("targetName", targetName);
 
-        query.set("getFields", this.traverse(field, nodeId, parentType));
+        query.set("fields", this.traverse(field, nodeId, parentType));
 
         return query;
 
@@ -189,7 +189,7 @@ public class ExecutionTreeNode {
         if (HGQLSchemaWiring.getInstance().getFields().containsKey(contextLdKey)) {
             return HGQLSchemaWiring.getInstance().getFields().get(contextLdKey).getId().toString();
         } else {
-            String value = HGQLVocabulary.HGQL_QUERY_URI + contextLdKey;
+            String value = HGQLVocabulary.HGQL_QUERY_NAMESPACE + contextLdKey;
             return value;
         }
     }
@@ -262,6 +262,17 @@ public class ExecutionTreeNode {
                     argNode.put(arg.getName().toString(), value);
                     break;
                 }
+                case "ArrayValue": {
+                    List<Node> nodes = val.getChildren();
+                    ArrayNode arrayNode = mapper.createArrayNode();
+
+                    for (Node node : nodes)  {
+                        String value = ((StringValue) node).getValue().toString();
+                        arrayNode.add(value);
+                    }
+                    argNode.set(arg.getName().toString(), arrayNode);
+                    break;
+                }
             }
 
         }
@@ -313,7 +324,7 @@ public class ExecutionTreeNode {
 
 
 
-        TreeExecutionResult executionResult = service.executeQuery(query, input,  childrenNodes.keySet());
+        TreeExecutionResult executionResult = service.executeQuery(query, input,  childrenNodes.keySet(), rootType);
         Map<String,Set<String>> resultset = executionResult.getResultSet();
 
 

@@ -42,7 +42,7 @@ public abstract class Service {
     }
 
 
-    public abstract TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> strings);
+    public abstract TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> strings, String rootType);
 
     public abstract void setParameters(ServiceConfig serviceConfig);
 

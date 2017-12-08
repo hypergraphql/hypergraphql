@@ -41,7 +41,7 @@ public class SPARQLEndpointService extends SPARQLService {
     }
 
     @Override
-    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input,  Set<String> markers) {
+    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers, String rootType) {
 
         Map<String, Set<String>> resultSet = new HashMap<>();
         Model unionModel = ModelFactory.createDefaultModel();
@@ -104,7 +104,7 @@ public class SPARQLEndpointService extends SPARQLService {
 
                 Model currentmodel = buildmodel(results, currentNode);
                 model.add(currentmodel);
-                model.add(getModelFromResults(currentNode.get("getFields"), results));
+                model.add(getModelFromResults(currentNode.get("fields"), results));
 
             }
         }
@@ -113,7 +113,7 @@ public class SPARQLEndpointService extends SPARQLService {
 
             Model currentModel = buildmodel(results,query);
             model.add(currentModel);
-            model.add(getModelFromResults(query.get("getFields"), results));
+            model.add(getModelFromResults(query.get("fields"), results));
 
         }
 

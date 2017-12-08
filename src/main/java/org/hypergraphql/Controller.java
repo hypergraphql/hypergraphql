@@ -74,8 +74,6 @@ public class Controller {
             ObjectMapper mapper = new ObjectMapper();
             HGQLQueryService service = new HGQLQueryService();
 
-
-
             JsonNode requestObject = mapper.readTree(req.body().toString());
 
             String query = requestObject.get("query").asText();

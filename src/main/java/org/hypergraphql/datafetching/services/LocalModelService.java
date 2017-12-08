@@ -6,7 +6,6 @@ import org.apache.jena.rdf.model.impl.StatementImpl;
 import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.QueryNode;
-import org.hypergraphql.query.converters.HGraphQLConverter;
 
 import java.util.*;
 
@@ -17,7 +16,7 @@ public class LocalModelService extends Service {
     Model localmodel;
 
     @Override
-    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers) {
+    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers, String rootType) {
         Model model;
         Map<String, Set<String>> resultSet;
 

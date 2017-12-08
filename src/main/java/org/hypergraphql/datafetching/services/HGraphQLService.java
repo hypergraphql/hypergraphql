@@ -1,11 +1,17 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.jena.rdf.model.*;
 import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.query.converters.HGraphQLConverter;
 
+import java.io.InputStream;
 import java.util.*;
 
 public class HGraphQLService extends Service {
@@ -15,11 +21,11 @@ public class HGraphQLService extends Service {
 
 
     @Override
-    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers) {
+    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers, String rootType) {
 
         Model model;
         Map<String, Set<String>> resultSet;
-        JsonNode graphQlQuery = new HGraphQLConverter().convertToHGraphQL(query, input);
+        String graphQlQuery = new HGraphQLConverter().convertToHGraphQL(query, input, rootType);
         model = getModelFromRemote(graphQlQuery);
 
         resultSet = getResultset(model, query, input, markers);
@@ -32,10 +38,31 @@ public class HGraphQLService extends Service {
     }
 
 
-    private Model getModelFromRemote(JsonNode graphQlQuery) {
+    private Model getModelFromRemote(String graphQlQuery) {
 
-        //todo
-        return null;
+        ObjectMapper mapper = new ObjectMapper();
+
+        ObjectNode bodyParam = mapper.createObjectNode();
+
+        bodyParam.set("operationName", null);
+        bodyParam.set("variables", null);
+        bodyParam.put("query", graphQlQuery);
+
+        Model model = ModelFactory.createDefaultModel();
+
+        try {
+            HttpResponse<InputStream> response = Unirest.post(url)
+                    .header("Accept", "application/rdf+xml")
+                    .body(bodyParam.toString())
+                    .asBinary();
+
+            model.read(response.getBody(), "RDF/XML");
+
+        } catch (UnirestException e) {
+            e.printStackTrace();
+        }
+
+        return model;
     }
 
     @Override

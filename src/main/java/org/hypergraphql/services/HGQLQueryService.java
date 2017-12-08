@@ -22,9 +22,6 @@ public class HGQLQueryService {
 
     public Map<String, Object> results(String query, String acceptType) {
 
-
-
-
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> data = new HashMap<>();
         Map<Object, Object> extensions = new HashMap<>();

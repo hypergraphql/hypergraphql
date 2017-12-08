@@ -1,12 +1,15 @@
 package org.hypergraphql.query.converters;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 public class SPARQLServiceConverter {
@@ -97,16 +100,45 @@ public class SPARQLServiceConverter {
 
     public String getSelectQuery(JsonNode jsonQuery, Set<String> input) {
 
-         Boolean root = input.isEmpty();
-        if (root) {
-            return getSelectRoot(jsonQuery);
-        } else {
-            return getSelectNonRoot(jsonQuery, input);
-        }
+        Map<String, QueryFieldConfig> queryFields = HGQLSchemaWiring.getInstance().getQueryFields();
 
+        Boolean root = (!jsonQuery.isArray() && queryFields.containsKey(jsonQuery.get("name").asText()));
+
+        if (root) {
+            if (queryFields.get(jsonQuery.get("name").asText()).type().equals(HGQLVocabulary.HGQL_QUERY_GET_FIELD)) {
+                return getSelectRoot_GET(jsonQuery);
+            } else {
+                return getSelectRoot_GET_BY_ID(jsonQuery);
+            }
+        } else {
+            return getSelectNonRoot((ArrayNode) jsonQuery, input);
+        }
     }
 
-    private String getSelectRoot(JsonNode queryField) {
+    private String getSelectRoot_GET_BY_ID(JsonNode queryField) {
+
+        Iterator<JsonNode> urisIter = queryField.get("args").get("uris").elements();
+
+        Set<String> uris = new HashSet<>();
+
+        urisIter.forEachRemaining(uri -> uris.add(uri.asText()));
+
+        String targetName = queryField.get("targetName").asText();
+        String targetURI = HGQLSchemaWiring.getInstance().getTypes().get(targetName).getId();
+        String graphID = ((SPARQLEndpointService) HGQLSchemaWiring.getInstance().getQueryFields().get(queryField.get("name").asText()).service()).getGraph();
+        String nodeId = queryField.get("nodeId").asText();
+        String selectTriple = tripleSTR(varSTR(nodeId), RDF_TYPE_URI, uriSTR(targetURI));
+        String valueSTR = valuesSTR(nodeId, uris);
+
+        JsonNode subfields = queryField.get("fields");
+        String subQuery = getSubQueries(subfields);
+
+        String selectQuery = selectQuerySTR(valueSTR + selectTriple + subQuery, graphID);
+
+        return selectQuery;
+    }
+
+    private String getSelectRoot_GET(JsonNode queryField) {
 
         String targetName = queryField.get("targetName").asText();
         String targetURI = HGQLSchemaWiring.getInstance().getTypes().get(targetName).getId();
@@ -116,15 +148,15 @@ public class SPARQLServiceConverter {
         String selectTriple = tripleSTR(varSTR(nodeId), RDF_TYPE_URI, uriSTR(targetURI));
         String rootSubquery = selectSubquerySTR(nodeId, selectTriple, limitOffsetSTR);
 
-        JsonNode subfields = queryField.get("getFields");
+        JsonNode subfields = queryField.get("fields");
         String whereClause = getSubQueries(subfields);
 
         String selectQuery = selectQuerySTR(rootSubquery + whereClause, graphID);
 
-         return selectQuery;
+        return selectQuery;
     }
 
-    private String getSelectNonRoot(JsonNode jsonQuery, Set<String> input) {
+    private String getSelectNonRoot(ArrayNode jsonQuery, Set<String> input) {
 
         JsonNode firstField = jsonQuery.elements().next();
         String graphID = ((SPARQLEndpointService) HGQLSchemaWiring.getInstance().getFields().get(firstField.get("name").asText()).getSetvice()).getGraph();
@@ -147,6 +179,7 @@ public class SPARQLServiceConverter {
         String selectQuery = selectQuerySTR(valueSTR + whereClause, graphID);
 
         return selectQuery;
+
     }
 
 
@@ -167,9 +200,11 @@ public class SPARQLServiceConverter {
 
         String fieldPattern = fieldPattern(parentId, nodeId, fieldURI, typeURI);
 
-        JsonNode subfields = fieldJson.get("getFields");
+        JsonNode subfields = fieldJson.get("fields");
 
         String rest = getSubQueries(subfields);
+
+
 
         String whereClause = optionalSTR(fieldPattern + langFilter + rest);
 
@@ -178,6 +213,8 @@ public class SPARQLServiceConverter {
 
 
     private String getSubQueries(JsonNode subfields) {
+
+        if (subfields.isNull()) return "";
 
         Iterator<JsonNode> queryFieldsIterator = subfields.elements();
 

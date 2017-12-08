@@ -1,0 +1,18 @@
+[
+    {
+      "id": "dbpedia",
+      "type": "SPARQLEndpointService",
+      "url": "http://dbpedia.org/sparql/",
+      "graph": "http://dbpedia.org",
+      "user": "",
+      "password": ""
+    },
+    {
+      "id": "live-dbpedia",
+      "type": "SPARQLEndpointService",
+      "url": "http://live.dbpedia.org/sparql/",
+      "graph": "",
+      "user": "",
+      "password": ""
+    }
+]

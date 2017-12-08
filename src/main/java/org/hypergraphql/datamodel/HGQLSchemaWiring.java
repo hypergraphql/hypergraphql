@@ -86,7 +86,7 @@ public class HGQLSchemaWiring {
         put("limit", new GraphQLArgument("limit", GraphQLInt));
         put("offset", new GraphQLArgument("offset", GraphQLInt));
         put("lang", new GraphQLArgument("lang", GraphQLString));
-        put("uris", new GraphQLArgument("uris", new GraphQLList(GraphQLID)));
+        put("uris", new GraphQLArgument("uris", new GraphQLNonNull(new GraphQLList(GraphQLID))));
     }};
 
     private List<GraphQLArgument> getQueryArgs = new ArrayList<GraphQLArgument>() {{
