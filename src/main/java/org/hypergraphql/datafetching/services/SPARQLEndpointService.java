@@ -80,8 +80,6 @@ public class SPARQLEndpointService extends SPARQLService {
             }
         }
 
-        unionModel.write(System.out);
-
         TreeExecutionResult treeExecutionResult = new TreeExecutionResult();
         treeExecutionResult.setResultSet(resultSet);
         treeExecutionResult.setModel(unionModel);

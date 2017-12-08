@@ -11,8 +11,6 @@ import java.util.Set;
 
 public class SPARQLServiceConverter {
 
-    private HGQLSchemaWiring wiring = HGQLSchemaWiring.getInstance();
-
     private final String RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
 
     private String optionalSTR(String sparqlPattern) {
@@ -99,10 +97,7 @@ public class SPARQLServiceConverter {
 
     public String getSelectQuery(JsonNode jsonQuery, Set<String> input) {
 
-        System.out.println(jsonQuery.toString());
-        System.out.println(input.size());
-
-        Boolean root = input.isEmpty();
+         Boolean root = input.isEmpty();
         if (root) {
             return getSelectRoot(jsonQuery);
         } else {
@@ -114,8 +109,8 @@ public class SPARQLServiceConverter {
     private String getSelectRoot(JsonNode queryField) {
 
         String targetName = queryField.get("targetName").asText();
-        String targetURI = wiring.getTypes().get(targetName).getId();
-        String graphID = ((SPARQLEndpointService) wiring.getQueryFields().get(queryField.get("name").asText()).service()).getGraph();
+        String targetURI = HGQLSchemaWiring.getInstance().getTypes().get(targetName).getId();
+        String graphID = ((SPARQLEndpointService) HGQLSchemaWiring.getInstance().getQueryFields().get(queryField.get("name").asText()).service()).getGraph();
         String nodeId = queryField.get("nodeId").asText();
         String limitOffsetSTR = limitOffsetSTR(queryField);
         String selectTriple = tripleSTR(varSTR(nodeId), RDF_TYPE_URI, uriSTR(targetURI));
@@ -126,15 +121,13 @@ public class SPARQLServiceConverter {
 
         String selectQuery = selectQuerySTR(rootSubquery + whereClause, graphID);
 
-        System.out.println(selectQuery);
-
-        return selectQuery;
+         return selectQuery;
     }
 
     private String getSelectNonRoot(JsonNode jsonQuery, Set<String> input) {
 
         JsonNode firstField = jsonQuery.elements().next();
-        String graphID = ((SPARQLEndpointService) wiring.getFields().get(firstField.get("name").asText()).getSetvice()).getGraph();
+        String graphID = ((SPARQLEndpointService) HGQLSchemaWiring.getInstance().getFields().get(firstField.get("name").asText()).getSetvice()).getGraph();
         String parentId = firstField.get("parentId").asText();
         String valueSTR = valuesSTR(parentId, input);
 
@@ -163,14 +156,14 @@ public class SPARQLServiceConverter {
 
         if (HGQLVocabulary.JSONLD.containsKey(fieldName)) return "";
 
-        String fieldURI = wiring.getFields().get(fieldName).getId();
+        String fieldURI = HGQLSchemaWiring.getInstance().getFields().get(fieldName).getId();
         String targetName = fieldJson.get("targetName").asText();
         String parentId = fieldJson.get("parentId").asText();
         String nodeId = fieldJson.get("nodeId").asText();
 
         String langFilter = langFilterSTR(fieldJson);
 
-        String typeURI = (wiring.getTypes().containsKey(targetName)) ? wiring.getTypes().get(targetName).getId() : "";
+        String typeURI = (HGQLSchemaWiring.getInstance().getTypes().containsKey(targetName)) ? HGQLSchemaWiring.getInstance().getTypes().get(targetName).getId() : "";
 
         String fieldPattern = fieldPattern(parentId, nodeId, fieldURI, typeURI);
 

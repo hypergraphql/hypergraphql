@@ -74,8 +74,6 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
         while (results.hasNext()) {
             QuerySolution solution = results.next();
 
-            System.out.println(solution.toString());
-
             for (String marker : markers) {
                 if (solution.contains(marker)) resultSet.get(marker).add(solution.get(marker).asResource().getURI());
 

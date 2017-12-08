@@ -20,8 +20,6 @@ import java.util.concurrent.Future;
 
 public class ExecutionTreeNode {
 
-    private HGQLSchemaWiring wiring = HGQLSchemaWiring.getInstance();
-
     private Service service; //getSetvice configuration
     private JsonNode query; //GraphQL in a basic Json format
     private String executionId; // unique identifier of this execution node
@@ -79,7 +77,7 @@ public class ExecutionTreeNode {
 
     public ExecutionTreeNode(Field field, String nodeId) {
 
-        this.service = wiring.getQueryFields().get(field.getName()).service();
+        this.service = HGQLSchemaWiring.getInstance().getQueryFields().get(field.getName()).service();
         this.executionId = createId();
         this.childrenNodes = new HashMap<>();
         this.ldContext = new HashMap<>();
@@ -176,7 +174,7 @@ public class ExecutionTreeNode {
 
         }
 
-        FieldOfTypeConfig fieldConfig = wiring.getTypes().get(parentType).getField(field.getName());
+        FieldOfTypeConfig fieldConfig = HGQLSchemaWiring.getInstance().getTypes().get(parentType).getField(field.getName());
         String targetName = fieldConfig.getTargetName();
 
         query.put("targetName", targetName);
@@ -188,8 +186,8 @@ public class ExecutionTreeNode {
     }
 
     private String getContextLdValue(String contextLdKey) {
-        if (wiring.getFields().containsKey(contextLdKey)) {
-            return wiring.getFields().get(contextLdKey).getId().toString();
+        if (HGQLSchemaWiring.getInstance().getFields().containsKey(contextLdKey)) {
+            return HGQLSchemaWiring.getInstance().getFields().get(contextLdKey).getId().toString();
         } else {
             String value = HGQLVocabulary.HGQL_QUERY_URI + contextLdKey;
             return value;
@@ -202,7 +200,7 @@ public class ExecutionTreeNode {
         SelectionSet subFields = field.getSelectionSet();
         if (subFields!=null) {
 
-            FieldOfTypeConfig fieldConfig = wiring.getTypes().get(parentType).getField(field.getName());
+            FieldOfTypeConfig fieldConfig = HGQLSchemaWiring.getInstance().getTypes().get(parentType).getField(field.getName());
             String targetName = fieldConfig.getTargetName();
 
             Map<Service, Set<Field>> splitFields = getPartitionedFields(subFields);
@@ -284,9 +282,9 @@ public class ExecutionTreeNode {
 
                 Field field = (Field) child;
 
-                if (wiring.getFields().containsKey(field.getName())) {
+                if (HGQLSchemaWiring.getInstance().getFields().containsKey(field.getName())) {
 
-                    Service serviceConfig = wiring.getFields().get(field.getName()).getSetvice();
+                    Service serviceConfig = HGQLSchemaWiring.getInstance().getFields().get(field.getName()).getSetvice();
 
                     if (result.containsKey(serviceConfig)) {
 
