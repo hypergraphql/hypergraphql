@@ -1,7 +1,7 @@
 docs:
 - title: Home
-  url:
+  url: hypergraphql
 - title: Documentation
-  url: documentation
+  url: hypergraphql/documentation
 - title: Demo
-  url: demo
+  url: hypergraphql/demo
