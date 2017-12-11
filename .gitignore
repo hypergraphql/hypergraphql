@@ -20,3 +20,5 @@ queryTranslation\.txt
 build/
 *.iml
 
+
+docs/_site/
