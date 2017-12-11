@@ -8,6 +8,7 @@ import graphql.language.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.log4j.Logger;
 import org.hypergraphql.config.schema.FieldOfTypeConfig;
+import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.datafetching.services.Service;
@@ -26,6 +27,7 @@ public class ExecutionTreeNode {
     private Map<String, ExecutionForest> childrenNodes; // succeeding executions
     private String rootType;
     private Map<String, String> ldContext;
+    private HGQLSchema hgqlSchema;
 
     static Logger logger = Logger.getLogger(ExecutionTreeNode.class);
 
@@ -75,28 +77,30 @@ public class ExecutionTreeNode {
 
     }
 
-    public ExecutionTreeNode(Field field, String nodeId) {
+    public ExecutionTreeNode(Field field, String nodeId , HGQLSchema schema ) {
 
-        this.service = HGQLSchemaWiring.getInstance().getQueryFields().get(field.getName()).service();
+        this.service = schema.getQueryFields().get(field.getName()).service();
         this.executionId = createId();
         this.childrenNodes = new HashMap<>();
         this.ldContext = new HashMap<>();
         this.ldContext.putAll(HGQLVocabulary.JSONLD);
-        this.query = getFieldJson(field, null, nodeId, "Query");
         this.rootType = "Query";
+        this.hgqlSchema = schema;
+        this.query = getFieldJson(field, null, nodeId, "Query");
 
 
     }
 
-    public ExecutionTreeNode(Service service, Set<Field> fields, String parentId, String parentType) {
+    public ExecutionTreeNode(Service service, Set<Field> fields, String parentId, String parentType, HGQLSchema schema) {
 
         this.service = service;
         this.executionId = createId();
         this.childrenNodes = new HashMap<>();
         this.ldContext = new HashMap<>();
-        this.ldContext.putAll(HGQLVocabulary.JSONLD);
-        this.query = getFieldsJson(fields, parentId, parentType);
         this.rootType = parentType;
+        this.hgqlSchema = schema;
+        this.query = getFieldsJson(fields, parentId, parentType);
+        this.ldContext.putAll(HGQLVocabulary.JSONLD);
 
     }
 
@@ -174,7 +178,7 @@ public class ExecutionTreeNode {
 
         }
 
-        FieldOfTypeConfig fieldConfig = HGQLSchemaWiring.getInstance().getTypes().get(parentType).getField(field.getName());
+        FieldOfTypeConfig fieldConfig = hgqlSchema.getTypes().get(parentType).getField(field.getName());
         String targetName = fieldConfig.getTargetName();
 
         query.put("targetName", targetName);
@@ -186,8 +190,8 @@ public class ExecutionTreeNode {
     }
 
     private String getContextLdValue(String contextLdKey) {
-        if (HGQLSchemaWiring.getInstance().getFields().containsKey(contextLdKey)) {
-            return HGQLSchemaWiring.getInstance().getFields().get(contextLdKey).getId().toString();
+        if (hgqlSchema.getFields().containsKey(contextLdKey)) {
+            return hgqlSchema.getFields().get(contextLdKey).getId().toString();
         } else {
             String value = HGQLVocabulary.HGQL_QUERY_NAMESPACE + contextLdKey;
             return value;
@@ -200,7 +204,7 @@ public class ExecutionTreeNode {
         SelectionSet subFields = field.getSelectionSet();
         if (subFields!=null) {
 
-            FieldOfTypeConfig fieldConfig = HGQLSchemaWiring.getInstance().getTypes().get(parentType).getField(field.getName());
+            FieldOfTypeConfig fieldConfig = hgqlSchema.getTypes().get(parentType).getField(field.getName());
             String targetName = fieldConfig.getTargetName();
 
             Map<Service, Set<Field>> splitFields = getPartitionedFields(subFields);
@@ -216,7 +220,7 @@ public class ExecutionTreeNode {
                     return fields;
 
                 } else {
-                    ExecutionTreeNode childNode = new ExecutionTreeNode(serviceCall, splitFields.get(serviceCall), parentId, targetName);
+                    ExecutionTreeNode childNode = new ExecutionTreeNode(serviceCall, splitFields.get(serviceCall), parentId, targetName , hgqlSchema);
 
                     if (this.childrenNodes.containsKey(parentId)) {
                         try {
@@ -293,9 +297,9 @@ public class ExecutionTreeNode {
 
                 Field field = (Field) child;
 
-                if (HGQLSchemaWiring.getInstance().getFields().containsKey(field.getName())) {
+                if (hgqlSchema.getFields().containsKey(field.getName())) {
 
-                    Service serviceConfig = HGQLSchemaWiring.getInstance().getFields().get(field.getName()).getSetvice();
+                    Service serviceConfig = hgqlSchema.getFields().get(field.getName()).getSetvice();
 
                     if (result.containsKey(serviceConfig)) {
 
@@ -324,7 +328,9 @@ public class ExecutionTreeNode {
 
 
 
-        TreeExecutionResult executionResult = service.executeQuery(query, input,  childrenNodes.keySet(), rootType);
+
+        TreeExecutionResult executionResult = service.executeQuery(query, input,  childrenNodes.keySet() , rootType, hgqlSchema);
+
         Map<String,Set<String>> resultset = executionResult.getResultSet();
 
 

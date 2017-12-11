@@ -18,8 +18,8 @@ class HGraphQLServiceTest {
     @Test
     public void getModelFromHGQLService() throws IllegalAccessException, NoSuchFieldException, NoSuchMethodException, InvocationTargetException {
 
+
         HGQLConfig config = new HGQLConfig("src/test/resources/properties.json");
-        HGQLSchemaWiring.build(config);
         Controller.start(config);
 
         HGraphQLService hgqlService = new HGraphQLService();

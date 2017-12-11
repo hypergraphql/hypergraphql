@@ -1,6 +1,7 @@
 package org.hypergraphql.query.converters;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.hypergraphql.Controller;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.ExecutionForest;
 import org.hypergraphql.datafetching.ExecutionForestFactory;
@@ -19,18 +20,18 @@ class HGraphQLConverterTest {
 
     public Boolean generateRewritingForRootReturnValidity(String inputQuery) {
 
-        HGQLConfig config = new HGQLConfig("properties.json");
-        HGQLSchemaWiring.build(config);
-        HGraphQLConverter converter = new HGraphQLConverter();
+        HGQLConfig config = new HGQLConfig("src/test/resources/properties.json");
+        Controller.start(config);
+        HGraphQLConverter converter = new HGraphQLConverter(config.getHgqlSchema());
 
-        ValidatedQuery validatedQuery = new QueryValidator().validateQuery(inputQuery);
-        ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery());
+        ValidatedQuery validatedQuery = new QueryValidator(config.getSchema()).validateQuery(inputQuery);
+        ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery(), config.getHgqlSchema());
         ExecutionTreeNode node = queryExecutionForest.getForest().iterator().next();
         JsonNode query = node.getQuery();
         String typeName = node.getRootType();
         String gqlQuery = converter.convertToHGraphQL(query, new HashSet<>(), typeName);
         System.out.println(gqlQuery);
-        ValidatedQuery testQueryValidation = new QueryValidator().validateQuery(gqlQuery);
+        ValidatedQuery testQueryValidation = new QueryValidator(config.getSchema()).validateQuery(gqlQuery);
 
         return testQueryValidation.getValid();
 
@@ -81,17 +82,18 @@ class HGraphQLConverterTest {
     public Boolean generateRewritingForNonRootReturnValidity(String inputQuery, Set<String> inputSet) {
 
         HGQLConfig config = new HGQLConfig("src/test/resources/properties.json");
-        HGQLSchemaWiring.build(config);
-        HGraphQLConverter converter = new HGraphQLConverter();
+        Controller.start(config);
+        HGraphQLConverter converter = new HGraphQLConverter(config.getHgqlSchema());
 
-        ValidatedQuery validatedQuery = new QueryValidator().validateQuery(inputQuery);
-        ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery());
+
+        ValidatedQuery validatedQuery = new QueryValidator(config.getSchema()).validateQuery(inputQuery);
+        ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery(), config.getHgqlSchema());
         ExecutionTreeNode node = queryExecutionForest.getForest().iterator().next().getChildrenNodes().get("x_1").getForest().iterator().next();
         JsonNode query = node.getQuery();
         String typeName = node.getRootType();
         String gqlQuery = converter.convertToHGraphQL(query, inputSet, typeName);
         System.out.println(gqlQuery);
-        ValidatedQuery testQueryValidation = new QueryValidator().validateQuery(gqlQuery);
+        ValidatedQuery testQueryValidation = new QueryValidator(config.getSchema()).validateQuery(gqlQuery);
 
         return testQueryValidation.getValid();
 

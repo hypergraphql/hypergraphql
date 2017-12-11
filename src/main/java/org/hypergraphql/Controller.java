@@ -72,7 +72,7 @@ public class Controller {
 
         post(config.getGraphqlConfig().path(), (req, res) -> {
             ObjectMapper mapper = new ObjectMapper();
-            HGQLQueryService service = new HGQLQueryService();
+            HGQLQueryService service = new HGQLQueryService(config);
 
             JsonNode requestObject = mapper.readTree(req.body().toString());
 

@@ -15,6 +15,7 @@ import org.apache.jena.riot.web.HttpOp;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.apache.log4j.Logger;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
+import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.query.converters.SPARQLServiceConverter;
 
 import java.util.HashMap;
@@ -30,14 +31,17 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
     private Set<String> inputSubset;
     private Set<String> markers;
     private SPARQLEndpointService sparqlEndpointService;
+    private HGQLSchema schema ;
     protected static Logger logger = Logger.getLogger(SPARQLEndpointExecution.class);
 
 
-    public SPARQLEndpointExecution(JsonNode query, Set<String> inputSubset, Set<String> markers, SPARQLEndpointService sparqlEndpointService) {
+    public SPARQLEndpointExecution(JsonNode query, Set<String> inputSubset, Set<String> markers, SPARQLEndpointService sparqlEndpointService, HGQLSchema schema) {
         this.query = query;
         this.inputSubset = inputSubset;
         this.markers = markers;
         this.sparqlEndpointService = sparqlEndpointService;
+        this.schema = schema;
+
 
     }
 
@@ -53,7 +57,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
         Model unionModel = ModelFactory.createDefaultModel();
 
 
-        SPARQLServiceConverter converter = new SPARQLServiceConverter();
+        SPARQLServiceConverter converter = new SPARQLServiceConverter(schema);
         String sparqlQuery = converter.getSelectQuery(query, inputSubset);
         logger.info(sparqlQuery);
 
@@ -79,7 +83,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
 
             }
 
-            Model model = this.sparqlEndpointService.getModelFromResults(query, solution);
+            Model model = this.sparqlEndpointService.getModelFromResults(query, solution, schema);
             unionModel.add(model);
 
 

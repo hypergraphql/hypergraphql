@@ -1,6 +1,9 @@
 package org.hypergraphql.services;
 
 import graphql.*;
+import graphql.schema.GraphQLSchema;
+import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.datafetching.ExecutionForest;
 import org.hypergraphql.datafetching.ExecutionForestFactory;
@@ -15,7 +18,17 @@ import java.util.*;
  */
 public class HGQLQueryService {
 
-    private GraphQL graphql = GraphQL.newGraphQL(HGQLSchemaWiring.getInstance().getSchema()).build();
+    private GraphQL graphql;
+    private GraphQLSchema schema;
+    private HGQLSchema hgqlSchema;
+
+
+    public HGQLQueryService (HGQLConfig config) {
+        this.hgqlSchema = config.getHgqlSchema();
+        this.schema = config.getSchema();
+
+        this.graphql = GraphQL.newGraphQL(config.getSchema()).build();
+    }
 
     //  static Logger logger = Logger.getLogger(HGQLQueryService.class);
 
@@ -34,7 +47,7 @@ public class HGQLQueryService {
         ExecutionResult qlResult = null;
 
 
-        ValidatedQuery validatedQuery = new QueryValidator().validateQuery(query);
+        ValidatedQuery validatedQuery = new QueryValidator(schema).validateQuery(query);
 
         if (!validatedQuery.getValid()) {
             errors.addAll(validatedQuery.getErrors());
@@ -43,7 +56,7 @@ public class HGQLQueryService {
 
         if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
-            ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery());
+            ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery(), hgqlSchema);
 
             ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 

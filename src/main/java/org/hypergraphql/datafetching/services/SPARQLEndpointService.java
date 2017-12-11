@@ -9,6 +9,7 @@ import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.SPARQLEndpointExecution;
 import org.hypergraphql.datafetching.SPARQLExecutionResult;
 import org.hypergraphql.datafetching.TreeExecutionResult;
+import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.datamodel.HGQLSchemaWiring;
 
 import java.util.*;
@@ -41,7 +42,9 @@ public class SPARQLEndpointService extends SPARQLService {
     }
 
     @Override
-    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers, String rootType) {
+
+    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers , String rootType ,HGQLSchema schema) {
+
 
         Map<String, Set<String>> resultSet = new HashMap<>();
         Model unionModel = ModelFactory.createDefaultModel();
@@ -63,7 +66,7 @@ public class SPARQLEndpointService extends SPARQLService {
                 i++;
             }
             ExecutorService executor = Executors.newFixedThreadPool(50);
-            SPARQLEndpointExecution execution = new SPARQLEndpointExecution(query,inputSubset,markers,this);
+            SPARQLEndpointExecution execution = new SPARQLEndpointExecution(query,inputSubset,markers,this, schema);
             futureSPARQLresults.add(executor.submit(execution));
 
         } while (inputList.size()>VALUES_SIZE_LIMIT);
@@ -87,7 +90,7 @@ public class SPARQLEndpointService extends SPARQLService {
         return treeExecutionResult;
     }
 
-    public Model getModelFromResults(JsonNode query, QuerySolution results) {
+    public Model getModelFromResults(JsonNode query, QuerySolution results , HGQLSchema schema) {
 
         Model model = ModelFactory.createDefaultModel();
         if (query.isNull()) return model;
@@ -102,18 +105,22 @@ public class SPARQLEndpointService extends SPARQLService {
 
                 JsonNode currentNode = nodesIterator.next();
 
-                Model currentmodel = buildmodel(results, currentNode);
+                Model currentmodel = buildmodel(results, currentNode , schema);
                 model.add(currentmodel);
-                model.add(getModelFromResults(currentNode.get("fields"), results));
+
+                model.add(getModelFromResults(currentNode.get("fields"), results, schema));
+
 
             }
         }
 
         else {
 
-            Model currentModel = buildmodel(results,query);
+            Model currentModel = buildmodel(results,query ,schema);
             model.add(currentModel);
-            model.add(getModelFromResults(query.get("fields"), results));
+
+            model.add(getModelFromResults(query.get("fields"), results, schema));
+
 
         }
 
@@ -121,12 +128,12 @@ public class SPARQLEndpointService extends SPARQLService {
 
     }
 
-    private Model buildmodel(QuerySolution results, JsonNode currentNode) {
+    private Model buildmodel(QuerySolution results, JsonNode currentNode , HGQLSchema schema) {
 
         Model model = ModelFactory.createDefaultModel();
 
-        FieldConfig propertyString = HGQLSchemaWiring.getInstance().getFields().get(currentNode.get("name").asText());
-        TypeConfig targetTypeString = HGQLSchemaWiring.getInstance().getTypes().get(currentNode.get("targetName").asText());
+        FieldConfig propertyString = schema.getFields().get(currentNode.get("name").asText());
+        TypeConfig targetTypeString = schema.getTypes().get(currentNode.get("targetName").asText());
 
         if (propertyString != null && !(currentNode.get("parentId").asText().equals("null"))) {
             Property predicate = model.createProperty("", propertyString.getId());
@@ -143,7 +150,7 @@ public class SPARQLEndpointService extends SPARQLService {
             model.add(subject, RDF.type, object);
         }
 
-        QueryFieldConfig queryField = HGQLSchemaWiring.getInstance().getQueryFields().get(currentNode.get("name").asText());
+        QueryFieldConfig queryField = schema.getQueryFields().get(currentNode.get("name").asText());
 
         if (queryField!=null) {
 

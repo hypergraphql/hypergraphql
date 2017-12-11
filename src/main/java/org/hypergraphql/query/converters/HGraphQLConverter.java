@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.hypergraphql.config.schema.FieldOfTypeConfig;
 import org.hypergraphql.config.schema.QueryFieldConfig;
+import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.datamodel.HGQLSchemaWiring;
 
 import java.util.HashSet;
@@ -16,7 +17,13 @@ import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_GET_BY_ID
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_GET_FIELD;
 
 public class HGraphQLConverter {
+    private HGQLSchema schema;
 
+
+    public  HGraphQLConverter(HGQLSchema schema ) {
+
+        this.schema = schema;
+    }
     private String urisArgSTR(Set<String> uris) {
 
         final String QUOTE = "\"%s\"";
@@ -74,7 +81,7 @@ public class HGraphQLConverter {
 
     public String convertToHGraphQL(JsonNode jsonQuery, Set<String> input, String rootType) {
 
-        Map<String, QueryFieldConfig> queryFields = HGQLSchemaWiring.getInstance().getQueryFields();
+        Map<String, QueryFieldConfig> queryFields = schema.getQueryFields();
 
         Boolean root = (!jsonQuery.isArray() && queryFields.containsKey(jsonQuery.get("name").asText()));
 
@@ -119,19 +126,19 @@ public class HGraphQLConverter {
 
     private String getSelectNonRoot(ArrayNode jsonQuery, Set<String> input, String rootType) {
 
-        HGQLSchemaWiring wiring = HGQLSchemaWiring.getInstance();
 
-        String typeUri = wiring.getTypes().get(rootType).getId();
-        Map<String, FieldOfTypeConfig> fields = wiring.getTypes().get("Query").getFields();
+
+        String typeUri = schema.getTypes().get(rootType).getId();
+        Map<String, FieldOfTypeConfig> fields = schema.getTypes().get("Query").getFields();
         Set<String> queryFieldNames = fields.keySet();
 
         String topQueryFieldName = null;
 
         for (String queryFieldName : queryFieldNames) {
 
-            String targetId = wiring.getTypes().get(fields.get(queryFieldName).getTargetName()).getId();
+            String targetId = schema.getTypes().get(fields.get(queryFieldName).getTargetName()).getId();
 
-            if (typeUri.equals(targetId) && wiring.getQueryFields().get(queryFieldName).type().equals(HGQL_QUERY_GET_BY_ID_FIELD)) {
+            if (typeUri.equals(targetId) && schema.getQueryFields().get(queryFieldName).type().equals(HGQL_QUERY_GET_BY_ID_FIELD)) {
                 topQueryFieldName = queryFieldName;
             }
         };
@@ -149,7 +156,7 @@ public class HGraphQLConverter {
 
         Set<String> subQueryStrings = new HashSet<>();
 
-        if (HGQLSchemaWiring.getInstance().getTypes().containsKey(parentType)) {
+        if (schema.getTypes().containsKey(parentType)) {
             subQueryStrings.add("_id");
             subQueryStrings.add("_type");
         }
