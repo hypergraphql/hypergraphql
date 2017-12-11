@@ -15,14 +15,15 @@ To set up a HyperGraphQL server you only need to provide your GraphQL type schem
 Clone the Git repository into a local directory. Then in the root of the project execute the following: 
 
 **Maven**: 
-1) **mvn install**
-2) **mvn exec:java**
+1. **mvn install**
+2. **mvn exec:java**
+
 
 (*Note*: in Windows these must be executed in a *cmd* terminal, not *PowerShell*).
 
 **Gradle**: 
-1) **gradle build**
-2) **gradle execute**
+1. **gradle build**
+2. **gradle execute**
 
 
 By deafault, the HyperGraphQL server starts at: 
