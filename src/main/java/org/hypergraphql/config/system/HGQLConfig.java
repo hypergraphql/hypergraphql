@@ -26,6 +26,8 @@ import org.hypergraphql.datafetching.services.Service;
 import org.hypergraphql.config.schema.FieldConfig;
 import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.config.schema.TypeConfig;
+import org.hypergraphql.datamodel.HGQLSchema;
+import org.hypergraphql.datamodel.HGQLSchemaWiring;
 
 import static graphql.Scalars.*;
 
@@ -41,6 +43,61 @@ public class HGQLConfig {
     private GraphqlConfig graphqlConfig;
     private List<ServiceConfig> serviceConfigs;
     private TypeDefinitionRegistry registry;
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setServiceFile(String serviceFile) {
+        this.serviceFile = serviceFile;
+    }
+
+    public String getSchemaFile() {
+        return schemaFile;
+    }
+
+    public void setSchemaFile(String schemaFile) {
+        this.schemaFile = schemaFile;
+    }
+
+    public void setGraphqlConfig(GraphqlConfig graphqlConfig) {
+        this.graphqlConfig = graphqlConfig;
+    }
+
+    public void setServiceConfigs(List<ServiceConfig> serviceConfigs) {
+        this.serviceConfigs = serviceConfigs;
+    }
+
+    public void setRegistry(TypeDefinitionRegistry registry) {
+        this.registry = registry;
+    }
+
+    public GraphQLSchema getSchema() {
+        return schema;
+    }
+
+    public void setSchema(GraphQLSchema schema) {
+        this.schema = schema;
+    }
+
+    public HGQLSchema getHgqlSchema() {
+        return hgqlSchema;
+    }
+
+    public void setHgqlSchema(HGQLSchema hgqlSchema) {
+        this.hgqlSchema = hgqlSchema;
+    }
+
+    public static Logger getLogger() {
+        return logger;
+    }
+
+    public static void setLogger(Logger logger) {
+        HGQLConfig.logger = logger;
+    }
+
+    private GraphQLSchema schema;
+    private HGQLSchema hgqlSchema;
 
     private static Logger logger = Logger.getLogger(HGQLConfig.class);
 
@@ -78,6 +135,8 @@ public class HGQLConfig {
             }
 
 
+
+
             SchemaParser schemaParser = new SchemaParser();
             this.registry = schemaParser.parse(new File(config.schemaFile));
 
@@ -85,6 +144,9 @@ public class HGQLConfig {
             this.schemaFile = config.schemaFile;
             this.serviceFile = config.serviceFile;
             this.graphqlConfig = config.graphqlConfig;
+            HGQLSchemaWiring wiring = new HGQLSchemaWiring(this.registry,this.name,this.serviceConfigs);
+            this.schema = wiring.getSchema();
+            this.hgqlSchema = wiring.getHgqlSchema();
 
         } catch (IOException e) {
             logger.error(e);

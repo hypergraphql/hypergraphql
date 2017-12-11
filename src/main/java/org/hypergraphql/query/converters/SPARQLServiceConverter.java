@@ -1,6 +1,7 @@
 package org.hypergraphql.query.converters;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
@@ -10,6 +11,13 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class SPARQLServiceConverter {
+
+
+    private final HGQLSchema schema;
+
+    public SPARQLServiceConverter(HGQLSchema schema) {
+        this.schema = schema;
+    }
 
     private final String RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
 
@@ -109,8 +117,8 @@ public class SPARQLServiceConverter {
     private String getSelectRoot(JsonNode queryField) {
 
         String targetName = queryField.get("targetName").asText();
-        String targetURI = HGQLSchemaWiring.getInstance().getTypes().get(targetName).getId();
-        String graphID = ((SPARQLEndpointService) HGQLSchemaWiring.getInstance().getQueryFields().get(queryField.get("name").asText()).service()).getGraph();
+        String targetURI = schema.getTypes().get(targetName).getId();
+        String graphID = ((SPARQLEndpointService) schema.getQueryFields().get(queryField.get("name").asText()).service()).getGraph();
         String nodeId = queryField.get("nodeId").asText();
         String limitOffsetSTR = limitOffsetSTR(queryField);
         String selectTriple = tripleSTR(varSTR(nodeId), RDF_TYPE_URI, uriSTR(targetURI));
@@ -124,10 +132,10 @@ public class SPARQLServiceConverter {
          return selectQuery;
     }
 
-    private String getSelectNonRoot(JsonNode jsonQuery, Set<String> input) {
+    private String getSelectNonRoot(JsonNode jsonQuery, Set<String> input ) {
 
         JsonNode firstField = jsonQuery.elements().next();
-        String graphID = ((SPARQLEndpointService) HGQLSchemaWiring.getInstance().getFields().get(firstField.get("name").asText()).getSetvice()).getGraph();
+        String graphID = ((SPARQLEndpointService) schema.getFields().get(firstField.get("name").asText()).getSetvice()).getGraph();
         String parentId = firstField.get("parentId").asText();
         String valueSTR = valuesSTR(parentId, input);
 
@@ -156,14 +164,14 @@ public class SPARQLServiceConverter {
 
         if (HGQLVocabulary.JSONLD.containsKey(fieldName)) return "";
 
-        String fieldURI = HGQLSchemaWiring.getInstance().getFields().get(fieldName).getId();
+        String fieldURI = schema.getFields().get(fieldName).getId();
         String targetName = fieldJson.get("targetName").asText();
         String parentId = fieldJson.get("parentId").asText();
         String nodeId = fieldJson.get("nodeId").asText();
 
         String langFilter = langFilterSTR(fieldJson);
 
-        String typeURI = (HGQLSchemaWiring.getInstance().getTypes().containsKey(targetName)) ? HGQLSchemaWiring.getInstance().getTypes().get(targetName).getId() : "";
+        String typeURI = (schema.getTypes().containsKey(targetName)) ? schema.getTypes().get(targetName).getId() : "";
 
         String fieldPattern = fieldPattern(parentId, nodeId, fieldURI, typeURI);
 

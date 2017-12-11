@@ -5,6 +5,7 @@ import org.apache.jena.rdf.model.*;
 import org.apache.jena.rdf.model.impl.StatementImpl;
 import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.TreeExecutionResult;
+import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.datamodel.QueryNode;
 import org.hypergraphql.query.converters.HGraphQLConverter;
 
@@ -17,13 +18,13 @@ public class LocalModelService extends Service {
     Model localmodel;
 
     @Override
-    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers) {
+    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers , HGQLSchema schema) {
         Model model;
         Map<String, Set<String>> resultSet;
 
-        model = getModelFromLocal(query , input);
+        model = getModelFromLocal(query , input ,schema);
 
-        resultSet = getResultset(model, query, input, markers);
+        resultSet = getResultset(model, query, input, markers , schema);
 
         TreeExecutionResult treeExecutionResult = new TreeExecutionResult();
         treeExecutionResult.setResultSet(resultSet);
@@ -32,7 +33,7 @@ public class LocalModelService extends Service {
         return treeExecutionResult;
     }
 
-    private Model getModelFromLocal(JsonNode query, Set<String> input) {
+    private Model getModelFromLocal(JsonNode query, Set<String> input, HGQLSchema schema) {
 
 
        Model returnModel = ModelFactory.createDefaultModel();
@@ -40,7 +41,7 @@ public class LocalModelService extends Service {
 
 
 
-        Set<LinkedList<QueryNode>> paths = getQueryPaths(query);
+        Set<LinkedList<QueryNode>> paths = getQueryPaths(query, schema);
 
         for (LinkedList<QueryNode> path : paths ) {
 

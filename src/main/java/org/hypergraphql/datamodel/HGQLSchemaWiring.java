@@ -8,17 +8,16 @@ import static graphql.schema.GraphQLObjectType.newObject;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_GET_FIELD;
 import static org.hypergraphql.config.schema.HGQLVocabulary.SCALAR_TYPES;
 
-import graphql.language.Field;
 import graphql.schema.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-import org.apache.jena.rdf.model.RDFNode;
+import graphql.schema.idl.TypeDefinitionRegistry;
+
 import org.apache.log4j.Logger;
 import org.hypergraphql.config.schema.*;
-import org.hypergraphql.config.system.FetchParams;
-import org.hypergraphql.config.system.HGQLConfig;
+
 import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.services.Service;
 
@@ -31,50 +30,21 @@ import org.hypergraphql.datafetching.services.Service;
 public class HGQLSchemaWiring {
 
     static Logger logger = Logger.getLogger(HGQLSchemaWiring.class);
-    static  HGQLConfig staticconfig ;
-
-
 
     public GraphQLSchema getSchema() {
 
         return schema;
     }
 
-    public Map<String, TypeConfig> getTypes() {
-        return types;
-    }
-
-    public Map<String, FieldConfig> getFields() {
-        return fields;
-    }
-
-    public Map<String, QueryFieldConfig> getQueryFields() {
-        return queryFields;
-    }
-
-    private static HGQLSchemaWiring instance = null;
-
-    public static HGQLSchemaWiring getInstance() {
-        if (instance==null) build(staticconfig);
-
-        return  instance;
-    }
-
-    public static void build(HGQLConfig config) {
-        if (config==null)
-            throw new RuntimeException("Empty configuration. You need to call HGQLSchemaWiring.build(HGQLConfig config) first.");
-
-        staticconfig = config;
-        instance = new HGQLSchemaWiring(staticconfig);
-    }
 
     private GraphQLSchema schema;
-    private HGQLSchema hgqlSchema;
-    private Map<String, Service> services;
 
-    private Map<String, TypeConfig> types;
-    private Map<String, FieldConfig> fields;
-    private Map<String, QueryFieldConfig> queryFields;
+    public HGQLSchema getHgqlSchema() {
+        return hgqlSchema;
+    }
+
+    private HGQLSchema hgqlSchema;
+
 
     public String getRdfSchemaOutput(String format) {
 
@@ -99,17 +69,11 @@ public class HGQLSchemaWiring {
     }};
 
 
-    private HGQLSchemaWiring(HGQLConfig config) {
+    public HGQLSchemaWiring(TypeDefinitionRegistry registry, String schemaName, List<ServiceConfig> serviceConfigs) {
 
-        this.services = new HashMap<>();
-
-        generateServices(config.getServiceConfigs());
 
         try {
-            this.hgqlSchema = new HGQLSchema(config.getRegistry(), config.getName(), this.services);
-            this.fields = hgqlSchema.getFields();
-            this.types = hgqlSchema.getTypes();
-            this.queryFields = hgqlSchema.getQueryFields();
+            this.hgqlSchema = new HGQLSchema(registry, schemaName, generateServices(serviceConfigs));
             this.schema = generateSchema();
 
         } catch (Exception e) {
@@ -117,7 +81,9 @@ public class HGQLSchemaWiring {
         }
     }
 
-    private void generateServices(List<ServiceConfig> serviceConfigs) {
+    private Map<String, Service> generateServices(List<ServiceConfig> serviceConfigs) {
+
+        Map<String, Service> services = new HashMap<>();
 
         String packageName = "org.hypergraphql.datafetching.services";
 
@@ -130,7 +96,8 @@ public class HGQLSchemaWiring {
 
                 service.setParameters(serviceConfig);
 
-                this.services.put(serviceConfig.getId(), service);
+
+                services.put(serviceConfig.getId(), service);
             } catch (IllegalAccessException e) {
                 logger.error(e);
             } catch (InstantiationException e) {
@@ -141,17 +108,19 @@ public class HGQLSchemaWiring {
                 logger.error(e);
             }
         }
+
+        return services;
     }
 
     private GraphQLSchema generateSchema() {
 
-        Set<String> typeNames = types.keySet();
-        GraphQLObjectType builtQueryType = registerGraphQLQueryType(types.get("Query"));
+        Set<String> typeNames = this.hgqlSchema.getTypes().keySet();
+        GraphQLObjectType builtQueryType = registerGraphQLQueryType(this.hgqlSchema.getTypes().get("Query"));
         Set<GraphQLType> builtTypes = new HashSet<>();
 
         for (String typeName : typeNames) {
             if (!typeName.equals("Query")) {
-                builtTypes.add(registerGraphQLType(types.get(typeName)));
+                builtTypes.add(registerGraphQLType(this.hgqlSchema.getTypes().get(typeName)));
             }
         }
 
@@ -163,78 +132,25 @@ public class HGQLSchemaWiring {
 
 
 
-    private DataFetcher<String> idFetcher = environment -> {
-        RDFNode thisNode = environment.getSource();
+    private GraphQLFieldDefinition getidField() {
+        FetcherFactory fetcherFactory = new FetcherFactory(hgqlSchema);
 
-        if (thisNode.asResource().isURIResource()) {
+       return  newFieldDefinition()
+                .type(GraphQLID)
+                .name("_id")
+                .description("The URI of this resource.")
+                .dataFetcher(fetcherFactory.idFetcher()).build();
+    }
 
-            return thisNode.asResource().getURI();
+    private GraphQLFieldDefinition gettypeField() {
+    FetcherFactory fetcherFactory = new FetcherFactory(hgqlSchema);
 
-        } else {
-            return "_:" + thisNode.asNode().getBlankNodeLabel();
-        }
-    };
-
-    private DataFetcher<String> typeFetcher = environment -> {
-        String typeName = environment.getParentType().getName();
-        String type = (this.getTypes().containsKey(typeName))? getTypes().get(typeName).getId() : null;
-        return type;
-
-    };
-
-    private DataFetcher<List<RDFNode>> instancesOfTypeFetcher = environment -> {
-        Field field = (Field) environment.getFields().toArray()[0];
-        String predicate = (field.getAlias()!=null) ? field.getAlias() : field.getName();
-        ModelContainer client = environment.getContext();
-        List<RDFNode> subjects = client.getValuesOfObjectProperty(HGQLVocabulary.HGQL_QUERY_URI, HGQLVocabulary.HGQL_QUERY_NAMESPACE + predicate);
-        return subjects;
-    };
-
-    private DataFetcher<List<RDFNode>> objectsFetcher = environment -> {
-
-        FetchParams params = new FetchParams(environment);
-        return params.getClient().getValuesOfObjectProperty(params.getSubjectResource(), params.getPredicateURI());
-    };
-
-    private DataFetcher<RDFNode> objectFetcher = environment -> {
-
-        FetchParams params = new FetchParams(environment);
-        return params.getClient().getValueOfObjectProperty(params.getSubjectResource(), params.getPredicateURI());
-    };
-
-    private DataFetcher<List<String>> literalValuesFetcher = environment -> {
-
-        FetchParams params = new FetchParams(environment);
-        return params.getClient().getValuesOfDataProperty(params.getSubjectResource(), params.getPredicateURI(), environment.getArguments());
-    };
-
-    private DataFetcher<String> literalValueFetcher = environment -> {
-
-        FetchParams params = new FetchParams(environment);
-        return params.getClient().getValueOfDataProperty(params.getSubjectResource(), params.getPredicateURI(), environment.getArguments());
-    };
-
-    private Map<Boolean, DataFetcher> objectFetchers = new HashMap<Boolean, DataFetcher>() {{
-        put(true, objectsFetcher);
-        put(false, objectFetcher);
-    }};
-
-    private Map<Boolean, DataFetcher> literalFetchers = new HashMap<Boolean, DataFetcher>() {{
-        put(true, literalValuesFetcher);
-        put(false, literalValueFetcher);
-    }};
-
-    private GraphQLFieldDefinition _idField = newFieldDefinition()
-            .type(GraphQLID)
-            .name("_id")
-            .description("The URI of this resource.")
-            .dataFetcher(idFetcher).build();
-
-    private GraphQLFieldDefinition _typeField = newFieldDefinition()
-            .type(GraphQLID)
-            .name("_type")
-            .description("The rdf:type of this resource (used as a filter when fetching data from its original source).")
-            .dataFetcher(typeFetcher).build();
+        return newFieldDefinition()
+                .type(GraphQLID)
+                .name("_type")
+                .description("The rdf:type of this resource (used as a filter when fetching data from its original source).")
+                .dataFetcher(fetcherFactory.typeFetcher(this.hgqlSchema.getTypes())).build();
+    }
 
 
     private GraphQLObjectType registerGraphQLQueryType(TypeConfig type) {
@@ -266,7 +182,7 @@ public class HGQLSchemaWiring {
     private GraphQLObjectType registerGraphQLType(TypeConfig type) {
 
         String typeName = type.getName();
-        String uri = getTypes().get(typeName).getId();
+        String uri = this.hgqlSchema.getTypes().get(typeName).getId();
         String description =  "Instances of \"" + uri + "\".";
 
         List<GraphQLFieldDefinition> builtFields = new ArrayList<>();
@@ -279,8 +195,8 @@ public class HGQLSchemaWiring {
             builtFields.add(registerGraphQLField(type.getField(fieldName)));
         }
 
-        builtFields.add(_idField);
-        builtFields.add(_typeField);
+        builtFields.add(getidField());
+        builtFields.add(gettypeField());
 
         GraphQLObjectType newObjectType = newObject()
                 .name(typeName)
@@ -292,18 +208,26 @@ public class HGQLSchemaWiring {
     }
 
     private GraphQLFieldDefinition registerGraphQLField(FieldOfTypeConfig field) {
+        FetcherFactory fetcherFactory = new FetcherFactory(hgqlSchema);
+
+        Boolean isList = field.getIsList();
 
             if (SCALAR_TYPES.containsKey(field.getTargetName())) {
-                return getBuiltField(field, literalFetchers.get(field.getIsList()));
+                if (isList) return getBuiltField(field,fetcherFactory.literalValuesFetcher());
+                else return getBuiltField(field,fetcherFactory.literalValueFetcher());
+
             } else {
-                return getBuiltField(field, objectFetchers.get(field.getIsList()));
+                if (isList) return getBuiltField(field,fetcherFactory.objectsFetcher());
+                else return getBuiltField(field,fetcherFactory.objectFetcher());
+
         }
 
     }
 
     private GraphQLFieldDefinition registerGraphQLQueryField(FieldOfTypeConfig field) {
+        FetcherFactory fetcherFactory = new FetcherFactory(hgqlSchema);
 
-        return getBuiltQueryField(field, instancesOfTypeFetcher);
+        return getBuiltQueryField(field, fetcherFactory.instancesOfTypeFetcher());
     }
 
     private GraphQLFieldDefinition getBuiltField(FieldOfTypeConfig field, DataFetcher fetcher) {
@@ -331,13 +255,13 @@ public class HGQLSchemaWiring {
 
         List<GraphQLArgument> args = new ArrayList<>();
 
-        if (queryFields.get(field.getName()).type().equals(HGQL_QUERY_GET_FIELD)) {
+        if (this.hgqlSchema.getQueryFields().get(field.getName()).type().equals(HGQL_QUERY_GET_FIELD)) {
             args.addAll(getQueryArgs);
         } else {
             args.addAll(getByIdQueryArgs);
         }
 
-        String description = (queryFields.get(field.getName()).type().equals(HGQL_QUERY_GET_FIELD)) ?
+        String description = (this.hgqlSchema.getQueryFields().get(field.getName()).type().equals(HGQL_QUERY_GET_FIELD)) ?
                 "Get instances of " + field.getTargetName() + "." : "Get instances of " + field.getTargetName() + " by URIs.";
 
         GraphQLFieldDefinition builtField = newFieldDefinition()
