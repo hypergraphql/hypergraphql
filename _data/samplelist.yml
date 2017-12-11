@@ -1,6 +1,7 @@
-docs_list_title: ACME Documentation
 docs:
-- title: About
-  url: about
+- title: Home
+  url: 
 - title: Documentation
   url: documentation
+- title: Demo
+  url: demo
