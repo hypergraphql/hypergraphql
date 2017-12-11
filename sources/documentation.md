@@ -8,6 +8,8 @@ permalink: /documentation/
 
 To set up a HyperGraphQL server you only need to provide your GraphQL type schema and its mapping to the target RDF vocabulary and SPARQL endpoints. The complete GraphQL wiring is conducted automatically on initiating the server. 
 
+![HyperGraphQL-screenshot](../sources/screenshot.png)
+
 ## Running
 
 Clone the Git repository into a local directory. Then in the root of the project execute the following: 
