@@ -16,12 +16,12 @@
     <div class="wrapper">
       <header>
         <topTitle>{{ site.title | default: site.github.repository_name }}</topTitle> 
-        <img src="{{site.url}}/sources/hgql-logo.png" style="width: 80%; padding: 10px; display: block; margin: 0 auto;" alt="logo">
+        <img src="https://github.com/semantic-integration/hypergraphql/blob/gh-pages/sources/hgql-logo.png" style="width: 80%; padding: 10px; display: block; margin: 0 auto;" alt="logo">
         <p>A GraphQL interface for querying linked data on the Web.</p>
 
 
           {% for item in site.data.samplelist.docs %}
-             <m><p></p><a href="{{site.url}}/{{ item.url }}">{{ item.title }}</a></p></m>
+             <m><p></p><a href="hypergraphql/{{site.url}}/{{ item.url }}">{{ item.title }}</a></p></m>
           {% endfor %}
       </header>
       <section>
