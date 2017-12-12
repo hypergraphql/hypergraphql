@@ -2,11 +2,6 @@ HyperGraphQL is a [GraphQL](http://graphql.org) interface for querying and servi
 
 ![HyperGraphQL-screenshot](/sources/front-diagram.png)
 
-HyperGraphQL serves several objectives:
-
-- hiding the complexities of the Semantic Web stack behind the GraphQL interface, which might be more familiar to some developers
-- providing a unified view and restricting access to diverse linked data services stores
-- 
 
 ### License note:
  This software has been developed and is maintained by [Semantic Integration Ltd.](http://semanticintegration.co.uk). It 

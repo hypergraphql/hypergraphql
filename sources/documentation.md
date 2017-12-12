@@ -6,15 +6,18 @@ permalink: /documentation/
 
 ## Summary
 
-HyperGraphQL serves several objectives:
+HyperGraphQL is a [GraphQL](http://graphql.org) interface for querying and serving [linked data](https://www.w3.org/standards/semanticweb/data) on the Web. It is designed to support federated querying and exposing data from multiple linked data services using GraphQL query language and schemas. 
 
-- hiding the complexities of the Semantic Web stack behind the GraphQL server, thus enabling access to linked data via a simpler and more familiar to many clients GraphQL interface;
-- providing a flexible mechanism for restricting access to RDF stores down to naturally definable subsets of (tree-shaped) queries, which can be efficiently handled by the RDF stores, thus minimising the impact on the stores' availability. 
+HyperGraphQL serves several key objectives:
 
-The responses of HyperGraphQL are [JSON-LD](http://json-ld.org) objects that convey full semantic context of the fetched data. This makes HyperGraphQL a natural [Linked Data Fragment](http://linkeddatafragments.org) interface for hypermedia-enabled Web APIs, backed by RDF stores. 
+- hiding the complexities of the Semantic Web stack behind the GraphQL interface, thus enabling access to linked data via a simpler and more familiar to many clients GraphQL interface;
+- enforcing a unified view on the data residing in disconnected multiple services, while preserving the original URIs and links between them; 
+- restricting access to RDF stores (as one of supported services) down to naturally definable subsets of (tree-shaped) queries, which can be more efficiently handled, thus minimising the impact on the stores' availability;
+- enabling easy deployment of reasonably sized linked datasets via embedded, in-memory [Apache Jena](https://jena.apache.org/) storage, and exposing them via GraphQL endpoint and accompanying [GraphiQL](https://github.com/graphql/graphiql) UI.
 
+The basic response fromat is [JSON-LD](json-ld.org), which extends the standard JSON with the [JSON-LD context](https://json-ld.org/spec/latest/json-ld-api-best-practices/#dfn-json-ld-context) enabling semantic disambiguation of the contained data.
 
-## GraphQL schema + RDF/service mapping = HyperGraphQL server
+## GraphQL schema + RDF mapping + service configs = HyperGraphQL server
 
 To set up a HyperGraphQL server you only need to provide your GraphQL type schema and its mapping to the target RDF vocabulary and SPARQL endpoints. The complete GraphQL wiring is conducted automatically on initiating the server. 
 
