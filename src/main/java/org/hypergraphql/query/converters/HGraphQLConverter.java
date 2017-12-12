@@ -169,14 +169,17 @@ public class HGraphQLConverter {
             }
         }
 
-        Iterator<JsonNode> fields = fieldsJson.elements();
+        else {
 
-        fields.forEachRemaining(field -> {
-            ArrayNode fieldsArray = (field.get("fields").isNull()) ? null : (ArrayNode) field.get("fields");
-            String arg = (field.get("args").isNull()) ? "" : langSTR((ObjectNode) field.get("args"));
-            String fieldString = field.get("name").asText() + arg + " " + getSubQuery(fieldsArray, field.get("targetName").asText());
-            subQueryStrings.add(fieldString);
-        });
+            Iterator<JsonNode> fields = fieldsJson.elements();
+
+            fields.forEachRemaining(field -> {
+                ArrayNode fieldsArray = (field.get("fields").isNull()) ? null : (ArrayNode) field.get("fields");
+                String arg = (field.get("args").isNull()) ? "" : langSTR((ObjectNode) field.get("args"));
+                String fieldString = field.get("name").asText() + arg + " " + getSubQuery(fieldsArray, field.get("targetName").asText());
+                subQueryStrings.add(fieldString);
+            });
+        }
 
         if (!subQueryStrings.isEmpty()) {
             return querySTR(String.join(" ", subQueryStrings));

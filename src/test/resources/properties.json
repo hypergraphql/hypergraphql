@@ -3,7 +3,7 @@
     "schemaFile": "src/test/resources/schema.graphql",
     "serviceFile": "src/test/resources/services.json",
     "graphql": {
-        "port": 8080,
+        "port": 8081,
         "path": "/graphql",
         "graphiql": "/graphiql"
     }

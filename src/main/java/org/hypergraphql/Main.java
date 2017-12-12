@@ -14,12 +14,13 @@ public class Main {
         PropertyConfigurator.configure("log4j.properties");
         HGQLConfig config = new HGQLConfig("properties.json");
 
-        System.out.println("GraphQL server started at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().path());
-        System.out.println("GraphiQL UI available at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphiql());
+
 
         logger.info("Server started at http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().path());
 
         Controller.start(config);
+
+
 
     }
 }

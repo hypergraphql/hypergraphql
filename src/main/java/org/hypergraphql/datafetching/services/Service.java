@@ -124,7 +124,7 @@ public abstract class Service {
 
         Map<String, Set<String>> resultset = new HashMap<>();
 
-        Set<LinkedList<QueryNode>> paths = getQueryPaths(query , schema);
+        Set<LinkedList<QueryNode>> paths = getQueryPaths(query.get("fields") , schema);
 
         for (LinkedList<QueryNode> path : paths) {
 
@@ -216,29 +216,42 @@ public abstract class Service {
             path = new LinkedList<QueryNode>();
         else {
             paths.remove(path);
-        }
-        Iterator<JsonNode> iterator = query.elements();
 
-        while (iterator.hasNext()) {
-            JsonNode currentNode = iterator.next();
-            LinkedList<QueryNode> newPath = new LinkedList<QueryNode>(path);
-            String nodeMarker = currentNode.get("nodeId").asText();
-            String nodeName = currentNode.get("name").asText();
-            FieldConfig field = schema.getFields().get(nodeName);
-            if (field == null) {
-                throw new RuntimeException("Field not found.");
+        }
+
+        if (query.isArray()) {
+            Iterator<JsonNode> iterator = query.elements();
+
+            while (iterator.hasNext()) {
+                JsonNode currentNode = iterator.next();
+                getFieldPath(paths, path, schema, model, currentNode);
+
             }
-            Property predicate = model.createProperty(field.getId());
-            QueryNode queryNode = new QueryNode(predicate, nodeMarker);
-            newPath.add(queryNode);
-            paths.add(newPath);
-            JsonNode fields = currentNode.get("fields");
-            if (fields != null && !fields.isNull())
-                getQueryPathsRecursive(fields, paths, newPath, schema);
+        }
+        else {
+            getFieldPath(paths, path, schema, model, query);
 
         }
 
 
+    }
+
+    private void getFieldPath(Set<LinkedList<QueryNode>> paths, LinkedList<QueryNode> path, HGQLSchema schema, Model model, JsonNode currentNode) {
+
+        LinkedList<QueryNode> newPath = new LinkedList<QueryNode>(path);
+        String nodeMarker = currentNode.get("nodeId").asText();
+        String nodeName = currentNode.get("name").asText();
+        FieldConfig field = schema.getFields().get(nodeName);
+        if (field == null)
+                throw new RuntimeException("field not found");
+
+        Property predicate = model.createProperty(field.getId());
+        QueryNode queryNode = new QueryNode(predicate, nodeMarker);
+        newPath.add(queryNode);
+        paths.add(newPath);
+        JsonNode fields = currentNode.get("fields");
+        if (fields != null && !fields.isNull())
+            getQueryPathsRecursive(fields, paths, newPath, schema);
     }
 }
 

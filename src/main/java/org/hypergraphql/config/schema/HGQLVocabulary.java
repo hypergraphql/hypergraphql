@@ -59,7 +59,7 @@ public class HGQLVocabulary {
     }};
 
     public static final Map<String, String> JSONLD = new HashMap<String, String>() {{
-        put("_id", "@getId");
+        put("_id", "@id");
         put("_type", "@type");
     }};
 

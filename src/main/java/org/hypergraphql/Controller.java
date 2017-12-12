@@ -50,6 +50,8 @@ public class Controller {
 
 
     public static void start(HGQLConfig config) {
+        System.out.println("GraphQL server started at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().path());
+        System.out.println("GraphiQL UI available at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphiql());
 
         port(config.getGraphqlConfig().port());
 
