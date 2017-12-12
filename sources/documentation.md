@@ -6,7 +6,7 @@ permalink: /documentation/
 
 ## Summary
 
-HyperGraphQL serves two key objectives:
+HyperGraphQL serves several objectives:
 
 - hiding the complexities of the Semantic Web stack behind the GraphQL server, thus enabling access to linked data via a simpler and more familiar to many clients GraphQL interface;
 - providing a flexible mechanism for restricting access to RDF stores down to naturally definable subsets of (tree-shaped) queries, which can be efficiently handled by the RDF stores, thus minimising the impact on the stores' availability. 

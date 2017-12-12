@@ -1,9 +1,12 @@
-HyperGraphQL is a [GraphQL](http://graphql.org) interface for querying and serving [linked data](https://www.w3.org/standards/semanticweb/data) on the Web. It is designed to support federated querying of multiple linked data services using GraphQL query language and schemas. 
-
+HyperGraphQL is a [GraphQL](http://graphql.org) interface for querying and serving [linked data](https://www.w3.org/standards/semanticweb/data) on the Web. It is designed to support federated querying and exposing data from multiple linked data services using GraphQL query language and schemas. The basic response fromat is [JSON-LD](json-ld.org), which extends the standard JSON with the [JSON-LD context](https://json-ld.org/spec/latest/json-ld-api-best-practices/#dfn-json-ld-context) enabling semantic disambiguation of thez data.
 
 ![HyperGraphQL-screenshot](/sources/front-diagram.png)
 
+HyperGraphQL serves several objectives:
 
+- hiding the complexities of the Semantic Web stack behind the GraphQL interface, which might be more familiar to some developers
+- providing a unified view and restricting access to diverse linked data services stores
+- 
 
 ### License note:
  This software has been developed and is maintained by [Semantic Integration Ltd.](http://semanticintegration.co.uk). It 
