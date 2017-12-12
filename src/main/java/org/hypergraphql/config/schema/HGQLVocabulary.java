@@ -34,7 +34,7 @@ public class HGQLVocabulary {
     public static final String HGQL_SERVICE = HGQL_NAMESPACE + "Service";
     public static final String HGQL_HAS_SERVICE = HGQL_NAMESPACE + "service";
     public static final String HGQL_HAS_NAME = HGQL_NAMESPACE + "name";
-    public static final String HGQL_HAS_ID = HGQL_NAMESPACE + "getId";
+    public static final String HGQL_HAS_ID = HGQL_NAMESPACE + "id";
     public static final String HGQL_SERVICE_NAMESPACE = HGQL_HAS_SERVICE + "/";
     public static final String HGQL_OUTPUT_TYPE = HGQL_NAMESPACE + "outputType";
     public static final String HGQL_OF_TYPE = HGQL_NAMESPACE + "ofType";

@@ -89,6 +89,15 @@ public class HGQLSchema {
         Set<String> typeNames = types.keySet();
         typeNames.remove("__Vocabulary");
 
+        Set<String> serviceIds = services.keySet();
+
+        for (String serviceId : serviceIds) {
+            String serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
+            rdfSchema.insertObjectTriple(serviceURI, RDF_TYPE, HGQL_SERVICE);
+            rdfSchema.insertStringLiteralTriple(serviceURI, HGQL_HAS_ID, serviceId);
+        }
+
+
         for (String typeName : typeNames) {
 
             String typeUri = THIS_SCHEMA_NAMESPACE + typeName;
@@ -126,8 +135,6 @@ public class HGQLSchema {
                     String serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
                     rdfSchema.insertObjectTriple(getQueryUri, HGQL_HAS_SERVICE, serviceURI);
                     rdfSchema.insertObjectTriple(getByIdQueryUri, HGQL_HAS_SERVICE, serviceURI);
-                    rdfSchema.insertObjectTriple(serviceURI, RDF_TYPE, HGQL_SERVICE);
-                    rdfSchema.insertStringLiteralTriple(serviceURI, HGQL_HAS_ID, serviceId);
                 }
             }
 
@@ -155,6 +162,7 @@ public class HGQLSchema {
             }
         }
 
+        rdfSchema.model.write(System.out);
         generateConfigs(services);
 
     }
