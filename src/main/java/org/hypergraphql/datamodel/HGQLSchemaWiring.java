@@ -261,8 +261,9 @@ public class HGQLSchemaWiring {
             args.addAll(getByIdQueryArgs);
         }
 
+        String serviceId = this.hgqlSchema.getQueryFields().get(field.getName()).service().getId();
         String description = (this.hgqlSchema.getQueryFields().get(field.getName()).type().equals(HGQL_QUERY_GET_FIELD)) ?
-                "Get instances of " + field.getTargetName() + "." : "Get instances of " + field.getTargetName() + " by URIs.";
+                "Get instances of " + field.getTargetName() + " (service: " + serviceId + ")"  : "Get instances of " + field.getTargetName() + " by URIs (service: " + serviceId + ")";
 
         GraphQLFieldDefinition builtField = newFieldDefinition()
                 .name(field.getName())

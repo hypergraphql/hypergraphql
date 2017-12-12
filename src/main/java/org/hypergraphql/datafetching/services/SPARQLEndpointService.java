@@ -54,6 +54,14 @@ public class SPARQLEndpointService extends SPARQLService {
             resultSet.put(marker, new HashSet<>());
         }
 
+        if (rootType.equals("Query")&&schema.getQueryFields().get(query.get("name").asText()).type().equals(HGQLVocabulary.HGQL_QUERY_GET_BY_ID_FIELD)) {
+            Iterator<JsonNode> uris = query.get("args").get("uris").elements();
+            while (uris.hasNext()) {
+                String uri = uris.next().asText();
+                input.add(uri);
+            }
+        }
+
         List<String> inputList = (List<String>) new ArrayList(input);
 
         do {

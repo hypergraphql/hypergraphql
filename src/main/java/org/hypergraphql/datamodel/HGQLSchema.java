@@ -161,8 +161,7 @@ public class HGQLSchema {
                 } catch(Exception e) {}
             }
         }
-
-        rdfSchema.model.write(System.out);
+        
         generateConfigs(services);
 
     }
