@@ -15,7 +15,7 @@ type __Vocabulary {
     leader:         _@href(iri: "http://dbpedia.org/ontology/leader")
 }
 
-type Person @service(id:"live-dbpedia") {
+type Person @service(id:"dbpedia") {
     name: String @service(id:"dbpedia")
     label: [String] @service(id:"dbpedia")
     deathPlace: City @service(id:"dbpedia")

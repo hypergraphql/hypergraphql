@@ -12,7 +12,6 @@ import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.datamodel.QueryNode;
-import sun.jvm.hotspot.tools.JSnap;
 
 import java.util.*;
 
@@ -144,7 +143,7 @@ public abstract class Service {
         }
 
 
-git         return resultset;
+        return resultset;
     }
 
     protected String getLeafMarker(LinkedList<QueryNode> path) {
