@@ -46,37 +46,6 @@ The [GraphiQL](https://github.com/graphql/graphiql) UI is initiated at:
 http://localhost:8080/graphiql
 ```
 
-
-## GraphQL schema + RDF mapping + service configs = HyperGraphQL server
-
-To set up a HyperGraphQL server you only need to provide your GraphQL type schema and its mapping to the target RDF vocabulary and SPARQL endpoints. The complete GraphQL wiring is conducted automatically on initiating the server. 
-
-![HyperGraphQL-screenshot](../sources/screenshot.png)
-
-
-## Properties
-
-Basic settings are defined in the *properties.json* file. The defaults are:
-
-```js
-{
-    "name": "mydemo",
-    "schemaFile": "schema.graphql",
-    "serviceFile": "services.json",
-    "graphql": {
-        "port": 8080,
-        "path": "/graphql",
-        "graphiql": "/graphiql"
-    }
-}
-```
-
-- *schemaFile*: the file containing GraphQL schema definition;
-- *contextFile*: the file containing mapping from the schema file to RDF vocabularies and respective SPARQL endpoints to be used for resolving GraphQL fields;
-- *graphql.port*: the port at thich the GraphQL server and GraphiQL interface are initiated;
-- *graphql.path*: the URL path of the GraphQL server;
-- *graphql.graphiql*: the URL path of the GraphiQL UI.
-
 ## Example
 
 The following query requests a single person instance with its URI (*_id*) and RDF type (*_type*), its name, birth date; further its birth place with the URI, an english label, and the country in which it is located, also including its URI and an english label. 
@@ -157,6 +126,36 @@ _:b0 <http://hypergraphql.org/query/Person_GET> <http://dbpedia.org/resource/San
 ```
 This graph (except for the first triple, added by the HyperGraphQL server) is a subset of the DBpedia dataset. 
 
+## GraphQL schema + RDF mapping + service configs = HyperGraphQL server
+
+To set up a HyperGraphQL server you only need to provide your GraphQL type schema and its mapping to the target RDF vocabulary and SPARQL endpoints. The complete GraphQL wiring is conducted automatically on initiating the server. 
+
+![HyperGraphQL-screenshot](../sources/screenshot.png)
+
+
+## Properties
+
+Basic settings are defined in the *properties.json* file. The defaults are:
+
+```js
+{
+    "name": "mydemo",
+    "schemaFile": "schema.graphql",
+    "serviceFile": "services.json",
+    "graphql": {
+        "port": 8080,
+        "path": "/graphql",
+        "graphiql": "/graphiql"
+    }
+}
+```
+
+- *schemaFile*: the file containing GraphQL schema definition;
+- *contextFile*: the file containing mapping from the schema file to RDF vocabularies and respective SPARQL endpoints to be used for resolving GraphQL fields;
+- *graphql.port*: the port at thich the GraphQL server and GraphiQL interface are initiated;
+- *graphql.path*: the URL path of the GraphQL server;
+- *graphql.graphiql*: the URL path of the GraphiQL UI.
+
 ## Schema
 
 The schema definition complies with the GraphQL spec (see: 	[http://graphql.org/learn/schema/](http://graphql.org/learn/schema/)). Currently, only the core fragment of the spec, including object types and fields, is supported, as presented in the example below. Additionally, some default SPARQL-related fields and arguments are added automatically to each schema. 
@@ -174,17 +173,17 @@ type __Context {
     leader:         _@href(iri: "http://dbpedia.org/ontology/leader")
 }
 
-type Person @service(id:"dbpedia") {
+type Person @service(id:"live-dbpedia") {
     name: String @service(id:"dbpedia")
     label: [String] @service(id:"dbpedia")
     birthPlace: City @service(id:"dbpedia")
     birthDate: String @service(id:"dbpedia")
 }
 
-type City @service(id:"dbpedia") {
-    label: [String] @service(id:"dbpedia")
-    country: Country @service(id:"dbpedia")
-    leader: Person @service(id:"dbpedia")
+type City @service(id:"hgql-demo") {
+    label: [String] @service(id:"hgql-demo")
+    country: Country @service(id:"hgql-demo")
+    leader: Person @service(id:"hgql-demo")
 }
 
 type Country @service(id:"dbpedia") {
@@ -221,11 +220,8 @@ The following example presents a possible mapping for the schema above, where al
     },
     {
       "id": "hgql-demo",
-      "type": "SPARQLEndpointService",
+      "type": "HGraphQLService",
       "url": "http://hypergraphql.org/demo",
-      "graph": "",
-      "user": "",
-      "password": ""
     }
 ]
 ```
