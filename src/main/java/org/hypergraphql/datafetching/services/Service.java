@@ -12,6 +12,7 @@ import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.datamodel.QueryNode;
+import sun.jvm.hotspot.tools.JSnap;
 
 import java.util.*;
 
@@ -123,8 +124,13 @@ public abstract class Service {
 
 
         Map<String, Set<String>> resultset = new HashMap<>();
+        JsonNode node;
 
-        Set<LinkedList<QueryNode>> paths = getQueryPaths(query.get("fields") , schema);
+        if (!query.isArray())
+            node = query.get("fields");
+        else
+            node = query;
+        Set<LinkedList<QueryNode>> paths = getQueryPaths(node , schema);
 
         for (LinkedList<QueryNode> path : paths) {
 
@@ -138,7 +144,7 @@ public abstract class Service {
         }
 
 
-        return resultset;
+git         return resultset;
     }
 
     protected String getLeafMarker(LinkedList<QueryNode> path) {
