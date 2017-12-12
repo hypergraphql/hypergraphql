@@ -69,15 +69,15 @@ public class HGQLSchema {
 
         Map<String, TypeDefinition> types = registry.types();
 
-        TypeDefinition vocabulary = types.get("__Vocabulary");
+        TypeDefinition context = types.get("__Context");
 
-        if (vocabulary==null) {
-            Exception e = new Exception("The provided GraphQL schema IDL specification is missing the obligatory __Vocabulary type (see specs at http://hypergraphql.org).");
+        if (context==null) {
+            Exception e = new Exception("The provided GraphQL schema IDL specification is missing the obligatory __Context type (see specs at http://hypergraphql.org).");
             logger.error(e);
             throw(e);
         }
 
-        List<Node> children = vocabulary.getChildren();
+        List<Node> children = context.getChildren();
 
         for (Node node : children) {
             FieldDefinition field = ((FieldDefinition) node);
@@ -87,7 +87,7 @@ public class HGQLSchema {
         }
 
         Set<String> typeNames = types.keySet();
-        typeNames.remove("__Vocabulary");
+        typeNames.remove("__Context");
 
         Set<String> serviceIds = services.keySet();
 
