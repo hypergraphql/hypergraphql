@@ -16,12 +16,12 @@
     <div class="wrapper">
       <header>
         <topTitle>{{ site.title | default: site.github.repository_name }}</topTitle> 
-        <img src="https://raw.githubusercontent.com/semantic-integration/hypergraphql/gh-pages/sources/hgql-logo.png" style="width: 80%; padding: 10px; display: block; margin: 0 auto;" alt="logo">
-        <p>A GraphQL interface for querying linked data on the Web.</p>
+        <img src="https://raw.githubusercontent.com/semantic-integration/hypergraphql/gh-pages/sources/hgql-logo.png" style="width: 50%; padding: 10px; display: block; margin: 0 auto;" alt="logo">
+        <p>A GraphQL interface for querying and serving linked data on the Web.</p>
 
 
           {% for item in site.data.samplelist.docs %}
-             <m><p></p><a href="/{{ item.url }}">{{ item.title }}</a></p></m>
+             <m><a href="/{{ item.url }}">{{ item.title }}</a><br></m>
           {% endfor %}
       </header>
       <section>
@@ -30,15 +30,19 @@
 
       </section>
       <footer>
-          <p class="view"><a href="{{ site.github.repository_url }}">View the Project on GitHub <small>{{ github_name }}</small></a></p>
-          <p><a href="{{ site.github.zip_url }}">Download <strong>ZIP File</strong></a></p>
-        {% if site.github.is_project_page %}
-        <p>This software has been developed and is maintained by <a href="http://semanticintegration.co.uk">Semantic Integration</a>. It 
-          is released under Apache License 2.0. See <a href="https://github.com/semantic-integration/hypergraphql/blob/master/LICENSE.TXT">LICENSE.TXT</a> for license infromation. 
+          <p><a href="{{ site.github.repository_url }}">View the Project on GitHub <small>{{ github_name }}</small></a>
+         
+            <a href="{{ site.github.zip_url }}">Download <strong>ZIP File</strong></a>
+            </p>
+            <p>
+        license: <a href="https://github.com/semantic-integration/hypergraphql/blob/master/LICENSE.TXT">Apache License 2.0</a>
+        <br>
+        email: <a href="mailto:info@hypergraphql.org">info@hypergraphql.org</a>
+        <br>
+        twitter: <a href="https://twitter.com/HyperGraphQL">@HyperGraphQL</a>
+        <br> 
+        delivered by: <a href="http://semanticintegration.co.uk">Semantic Integration Ltd.</a>
       </p>
-        {% endif %}
-      <p>email: <a href="info@hypergraphql.org">info@hypergraphql.org</a></p>
-      <p>twitter: <a href="https://twitter.com/HyperGraphQL">@HyperGraphQL</a></p>
       </footer>
     </div>
     <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>

@@ -8,3 +8,6 @@ HyperGraphQL serves two key objectives:
 The responses of HyperGraphQL are [JSON-LD](http://json-ld.org) objects that convey full semantic context of the fetched data. This makes HyperGraphQL a natural [Linked Data Fragment](http://linkeddatafragments.org) interface for hypermedia-enabled Web APIs, backed by RDF stores. 
 
 
+ This software has been developed and is maintained by [Semantic Integration Ltd.](http://semanticintegration.co.uk). It 
+          is released under Apache License 2.0. See [LICENSE.TXT](https://github.com/semantic-integration/hypergraphql/blob/master/LICENSE.TXT) for more infromation. 
+      
