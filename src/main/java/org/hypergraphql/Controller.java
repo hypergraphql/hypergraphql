@@ -116,6 +116,23 @@ public class Controller {
             }
 
         });
+
+        //Return the internal HGQL schema representation as rdf.
+
+        get(config.getGraphqlConfig().path() , (req, res) -> {
+
+            String acceptType = req.headers("accept");
+
+            Boolean rdfContentType = (MIME_MAP.containsKey(acceptType) && GRAPHQL_COMPATIBLE_TYPE.containsKey(acceptType) && !GRAPHQL_COMPATIBLE_TYPE.get(acceptType));
+            String mime = rdfContentType ? MIME_MAP.get(acceptType) : "RDF/XML";
+            String contentType = rdfContentType ? acceptType : "application/rdf+xml";
+
+            res.type(contentType);
+
+            return config.getHgqlSchema().getRdfSchemaOutput(mime);
+        });
     }
+
+
 
 }
