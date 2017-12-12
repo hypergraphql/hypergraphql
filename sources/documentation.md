@@ -98,7 +98,7 @@ The following query requests a single person instance with its URI (*_id*) and R
 The response of HyperGraphQL server to this query consists of the usual GraphQL JSON object, further augmented with a JSON-LD context, included as the value of the property "@context" on the "data" object.
 
 ### HyperGraphQL response:
-```js
+```json
 {
   "extensions": {},
   "data": {
@@ -189,7 +189,7 @@ The RDF/service mapping consists of two components:
 
 The following example presents a possible mapping for the schema above, where all predicates are associated with the default graph of *http://dbpedia.org* SPARQL endpoint.
 
-```js
+```json
 {
   "predicates": {
     "queryFields": {
