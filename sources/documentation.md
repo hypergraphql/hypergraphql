@@ -4,24 +4,19 @@ title: Documentation
 permalink: /documentation/
 ---
 
-## Summary
+## Overview
 
 HyperGraphQL is a [GraphQL](http://graphql.org) interface for querying and serving [linked data](https://www.w3.org/standards/semanticweb/data) on the Web. It is designed to support federated querying and exposing data from multiple linked data services using GraphQL query language and schemas. 
 
-HyperGraphQL serves several key objectives:
+HyperGraphQL serves several key objectives and application scenarios:
 
 - hiding the complexities of the Semantic Web stack behind the GraphQL interface, thus enabling access to linked data via a simpler and more familiar to many clients GraphQL interface;
-- enforcing a unified view on the data residing in disconnected multiple services, while preserving the original URIs and links between them; 
+- enforcing a uniform, strict view over heterogenous linked data sources residing in disconnected multiple services, while preserving the original URIs and links between them; 
 - restricting access to RDF stores (as one of supported services) down to naturally definable subsets of (tree-shaped) queries, which can be more efficiently handled, thus minimising the impact on the stores' availability;
-- enabling easy deployment of reasonably sized linked datasets via embedded, in-memory [Apache Jena](https://jena.apache.org/) storage, and exposing them via GraphQL endpoint and accompanying [GraphiQL](https://github.com/graphql/graphiql) UI.
+- enabling easy deployment of reasonably sized linked datasets via embedded, in-memory [Apache Jena](https://jena.apache.org/) storage, and exposing them via GraphQL endpoints with accompanying [GraphiQL](https://github.com/graphql/graphiql) UI;
+- facilitating construction of micorservice-based linked data solutions in a plug-and-play fashion.
 
-The basic response fromat is [JSON-LD](json-ld.org), which extends the standard JSON with the [JSON-LD context](https://json-ld.org/spec/latest/json-ld-api-best-practices/#dfn-json-ld-context) enabling semantic disambiguation of the contained data.
-
-## GraphQL schema + RDF mapping + service configs = HyperGraphQL server
-
-To set up a HyperGraphQL server you only need to provide your GraphQL type schema and its mapping to the target RDF vocabulary and SPARQL endpoints. The complete GraphQL wiring is conducted automatically on initiating the server. 
-
-![HyperGraphQL-screenshot](../sources/screenshot.png)
+The basic response fromat of HyperGraphQL is [JSON-LD](json-ld.org), which extends the standard JSON with the [JSON-LD context](https://json-ld.org/spec/latest/json-ld-api-best-practices/#dfn-json-ld-context) enabling semantic disambiguation of the served data. Support for other RDF serialisation formats is also provided.
 
 ## Running
 
@@ -52,14 +47,22 @@ http://localhost:8080/graphiql
 ```
 
 
+## GraphQL schema + RDF mapping + service configs = HyperGraphQL server
+
+To set up a HyperGraphQL server you only need to provide your GraphQL type schema and its mapping to the target RDF vocabulary and SPARQL endpoints. The complete GraphQL wiring is conducted automatically on initiating the server. 
+
+![HyperGraphQL-screenshot](../sources/screenshot.png)
+
+
 ## Properties
 
 Basic settings are defined in the *properties.json* file. The defaults are:
 
 ```js
 {
+    "name": "mydemo",
     "schemaFile": "schema.graphql",
-    "contextFile": "context.json",
+    "serviceFile": "services.json",
     "graphql": {
         "port": 8080,
         "path": "/graphql",
@@ -81,7 +84,7 @@ The following query requests a single person instance with its URI (*_id*) and R
 ### HyperGraphQL query:
 ```
 {
-  people(limit: 1, offset: 6) {
+  Person_GET(limit: 1, offset: 6) {
     _id
     _type
     name
@@ -105,7 +108,7 @@ The response of HyperGraphQL server to this query consists of the usual GraphQL 
 {
   "extensions": {},
   "data": {
-    "people": [
+    "Person_GET": [
       {
         "_id": "http://dbpedia.org/resource/Sani_ol_molk",
         "_type": "http://dbpedia.org/ontology/Person",
@@ -132,7 +135,7 @@ The response of HyperGraphQL server to this query consists of the usual GraphQL 
       "name": "http://xmlns.com/foaf/0.1/name",
       "_id": "@id",
       "label": "http://www.w3.org/2000/01/rdf-schema#label",
-      "people": "http://hypergraphql/query/people",
+      "people": "http://hypergraphql.org/query/Person_GET",
       "birthDate": "http://dbpedia.org/ontology/birthDate"
     }
   },
@@ -143,7 +146,7 @@ The response of HyperGraphQL server to this query consists of the usual GraphQL 
 It's easy to find out, using e.g. [JSON-LD playground](https://json-ld.org/playground/), that the "data" element in this response is in fact a valid JSON-LD object encoding the following RDF graph (in N-TRIPLE notation):
 
 ```
-_:b0 <http://hypergraphql/query/people> <http://dbpedia.org/resource/Sani_ol_molk> .
+_:b0 <http://hypergraphql.org/query/Person_GET> <http://dbpedia.org/resource/Sani_ol_molk> .
 <http://dbpedia.org/resource/Sani_ol_molk> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Person> .
 <http://dbpedia.org/resource/Sani_ol_molk> <http://xmlns.com/foaf/0.1/name> "Mirza Abolhassan Khan Ghaffari" .
 <http://dbpedia.org/resource/Sani_ol_molk> <http://dbpedia.org/ontology/birthDate> "1814-1-1" .
@@ -158,32 +161,38 @@ This graph (except for the first triple, added by the HyperGraphQL server) is a 
 
 The schema definition complies with the GraphQL spec (see: 	[http://graphql.org/learn/schema/](http://graphql.org/learn/schema/)). Currently, only the core fragment of the spec, including object types and fields, is supported, as presented in the example below. Additionally, some default SPARQL-related fields and arguments are added automatically to each schema. 
 
-
 ```
-type Query {
-    people: [Person]
-    cities: [City]
+type __Context {
+    Person:         _@href(iri: "http://dbpedia.org/ontology/Person")
+    City:           _@href(iri: "http://dbpedia.org/ontology/City")
+    Country:        _@href(iri: "http://dbpedia.org/ontology/Country")
+    name:           _@href(iri: "http://xmlns.com/foaf/0.1/name")
+    label:          _@href(iri: "http://www.w3.org/2000/01/rdf-schema#label")
+    birthPlace:     _@href(iri: "http://dbpedia.org/ontology/birthPlace")
+    birthDate:      _@href(iri: "http://dbpedia.org/ontology/birthDate")
+    country:        _@href(iri: "http://dbpedia.org/ontology/country")
+    leader:         _@href(iri: "http://dbpedia.org/ontology/leader")
 }
 
-type Person {
-    name: String
-    label: [String]
-    birthPlace: City
-    birthDate: String
+type Person @service(id:"dbpedia") {
+    name: String @service(id:"dbpedia")
+    label: [String] @service(id:"dbpedia")
+    birthPlace: City @service(id:"dbpedia")
+    birthDate: String @service(id:"dbpedia")
 }
 
-type City {
-    label: [String]
-    country: Country
-    leader: Person
+type City @service(id:"dbpedia") {
+    label: [String] @service(id:"dbpedia")
+    country: Country @service(id:"dbpedia")
+    leader: Person @service(id:"dbpedia")
 }
 
-type Country {
-    label: [String]
+type Country @service(id:"dbpedia") {
+    label: [String] @service(id:"dbpedia")
 }
 ```
 
-## RDF/service mapping
+## Services details
 
 The RDF/service mapping consists of two components:
 
@@ -193,62 +202,32 @@ The RDF/service mapping consists of two components:
 The following example presents a possible mapping for the schema above, where all predicates are associated with the default graph of *http://dbpedia.org* SPARQL endpoint.
 
 ```json
-{
-  "predicates": {
-    "queryFields": {
-      "people": {
-        "service": "dbpedia"
-      },
-      "cities": {
-        "service": "dbpedia"
-      }
-    },
-    "types": {
-      "Person": {
-        "@id": "http://dbpedia.org/ontology/Person"
-      },
-      "City": {
-        "@id": "http://dbpedia.org/ontology/City"
-      }
-    },
-    "fields": {
-      "name": {
-        "@id": "http://xmlns.com/foaf/0.1/name",
-        "service": "dbpedia"
-      },
-      "birthDate": {
-        "@id": "http://dbpedia.org/ontology/birthDate",
-        "service": "dbpedia"
-      },
-      "birthPlace": {
-        "@id": "http://dbpedia.org/ontology/birthPlace",
-        "service": "dbpedia"
-      },
-      "label": {
-        "@id": "http://www.w3.org/2000/01/rdf-schema#label",
-        "service": "dbpedia"
-      },
-      "country": {
-        "@id": "http://dbpedia.org/ontology/country",
-        "service": "dbpedia"
-      },
-      "leader": {
-        "@id": "http://dbpedia.org/ontology/leaderName",
-        "service": "dbpedia"
-      }
-    }
-  },
-  "services": [
+[
     {
-      "@id": "dbpedia",
-      "@type": "SparqlEndpoint",
+      "id": "dbpedia",
+      "type": "SPARQLEndpointService",
       "url": "http://dbpedia.org/sparql/",
       "graph": "http://dbpedia.org",
       "user": "",
       "password": ""
+    },
+    {
+      "id": "live-dbpedia",
+      "type": "SPARQLEndpointService",
+      "url": "http://live.dbpedia.org/sparql/",
+      "graph": "",
+      "user": "",
+      "password": ""
+    },
+    {
+      "id": "hgql-demo",
+      "type": "SPARQLEndpointService",
+      "url": "http://hypergraphql.org/demo",
+      "graph": "",
+      "user": "",
+      "password": ""
     }
-  ]
-}
+]
 ```
 
 Note that: 
@@ -306,6 +285,11 @@ OPTIONAL {
 ## Execution
 
 To minimise the number of return trips between HyperGraphQL server and RDF stores, the original GraphQL query is translated into possibly few SPARQL CONSTRUCT queries necessary to fetch all the relevant RDF data. The further transformation of the data into  HyperGraphQL responses is done locally by the HyperGraphQL server. When the query requests data from a single SPARQL endpoint, only one SPARQL CONSTRUCT query is issued. 
+
+
+## Response formats
+
+The basic response fromat is [JSON-LD](json-ld.org), which extends the standard JSON with the [JSON-LD context](https://json-ld.org/spec/latest/json-ld-api-best-practices/#dfn-json-ld-context) enabling semantic disambiguation of the contained data.
 
 
 ## Other references

@@ -24,11 +24,6 @@
              <m><a href="/{{ item.url }}">{{ item.title }}</a><br></m>
           {% endfor %}
       </header>
-      <section>
-
-      {{ content }}
-
-      </section>
       <footer>
           <p><a href="{{ site.github.repository_url }}">View the Project on GitHub <small>{{ github_name }}</small></a>
          
@@ -44,6 +39,11 @@
         delivered by: <a href="http://semanticintegration.co.uk">Semantic Integration Ltd.</a>
       </p>
       </footer>
+      <section>
+
+      {{ content }}
+
+      </section>
     </div>
     <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
 
