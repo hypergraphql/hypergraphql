@@ -11,63 +11,14 @@ permalink: /tutorial/
     <script src="//cdn.jsdelivr.net/react/15.4.2/react-dom.min.js"></script>
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.css" />
     <script src="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.js"></script>
-    <script> 
-        function getEditFunction(parameters) {
-            return function onEditQuery(newQuery) {
-                parameters.query = newQuery;
-            }
-        }
-        function getFetchingFunction(url) {
-            return function graphQLFetcher(graphQLParams) {
-                return fetch(url, {
-                    method: 'post',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(graphQLParams),
-                    credentials: 'include',
-                }).then(function (response) {
-                    return response.text();
-                }).then(function (responseBody) {
-                    try {
-                        return JSON.parse(responseBody);
-                    } catch (error) {
-                        return responseBody;
-                    }
-                });
-            }
-        }
-    </script>
+    <script> src="https://raw.githubusercontent.com/semantic-integration/hypergraphql/gh-pages/sources/graphiqlinit.js" />
 </graphiqlconfig>
 
 This will be our first GraphQL service:
 
 <graphiql id="tutorial1" graphql="graphql1" graphiql="graphiql1" query="{ try me 1 }">
     <script>
-        var name = 'tutorial1';
-        var gqlelement = document.getElementById(name);
-        var graphql = gqlelement.attributes['graphql'].value;
-        var graphiql = gqlelement.attributes['graphiql'].value;
-        var queryString = gqlelement.attributes['query'].value;
-        var div = document.createElement('div');
-        div.textContent = "Loading...";
-        div.setAttribute('class', 'graphiql');
-        div.setAttribute('id', name + '_dashboard');
-        gqlelement.appendChild(div);
-        var full = document.createElement('a');
-        full.textContent = "See in fullscreen mode.";
-        full.setAttribute('href', '/hypergraphql/service/' + graphiql + '?query=' + queryString);
-        gqlelement.appendChild(full);
-        var parameters = {query: queryString};
-        ReactDOM.render(
-            React.createElement(GraphiQL, {
-                fetcher: getFetchingFunction('/hypergraphql/service/' + graphql),
-                query: parameters.query,
-                onEditQuery: getEditFunction(parameters),
-            }),
-            document.getElementById(name + '_dashboard')
-        );
+       graphiqlInit('tutorial1');
     </script>
 </graphiql>
 
