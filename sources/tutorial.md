@@ -60,6 +60,7 @@ This will be our first GraphQL service:
 </script>
 </graphiql>
 [See in fullscreen mode](/hypergraphql/service/graphiql1).
+[See in fullscreen mode](/hypergraphql/service/graphiql1?query={PERSON_GET(limit:10) { _id name } }).
 
 This will be our second GraphQL service
 
