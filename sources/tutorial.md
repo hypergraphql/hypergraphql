@@ -59,8 +59,7 @@ This will be our first GraphQL service:
     );
 </script>
 </graphiql>
-[See in fullscreen mode](/hypergraphql/service/graphiql1).
-[See in fullscreen mode](/hypergraphql/service/graphiql1?query={PERSON_GET(limit:10) { _id name } }).
+[See in fullscreen mode](/hypergraphql/service/graphiql1?query={ service 1 }).
 
 This will be our second GraphQL service
 
@@ -103,7 +102,7 @@ This will be our second GraphQL service
     );
 </script>
 </graphiql>
-[See in fullscreen mode](/hypergraphql/service/graphiql2). 
+[See in fullscreen mode](/hypergraphql/service/graphiql2?query={ service 2 }). 
 
 This will be our third GraphQL service:
 
@@ -147,4 +146,4 @@ This will be our third GraphQL service:
     );
 </script>
 </graphiql>
-[See in fullscreen mode](/hypergraphql/service/graphiql3). 
+[See in fullscreen mode](/hypergraphql/service/graphiql3?query={ service 3 }). 
