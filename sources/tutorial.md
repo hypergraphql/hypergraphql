@@ -43,18 +43,30 @@ permalink: /tutorial/
 
 This will be our first GraphQL service:
 
-<graphiql>
-    <div class="graphiql" id="tutorial1">Loading...</div>
-    <a href="/hypergraphql/service/graphiql1?query={ service 1 }">See in fullscreen mode</a>
+<graphiql id="tutorial1" graphql="graphql1" graphiql="graphiql1" query="{ try me 1 }">
     <script>
-        var parameters1 = {query: "{ try me 1 }"};
+        var name = 'tutorial1';
+        var gqlelement = document.getElementById(name);
+        var graphql = gqlelement.attributes['graphql'].value;
+        var graphiql = gqlelement.attributes['graphiql'].value;
+        var queryString = gqlelement.attributes['query'].value;
+        var div = document.createElement('div');
+        div.textContent = "Loading...";
+        div.setAttribute('class', 'graphiql');
+        div.setAttribute('id', name + '_dashboard');
+        gqlelement.appendChild(div);
+        var full = document.createElement('a');
+        full.textContent = "See in fullscreen mode.";
+        full.setAttribute('href', '/hypergraphql/service/' + graphiql + '?query=' + queryString);
+        gqlelement.appendChild(full);
+        var parameters = {query: queryString};
         ReactDOM.render(
             React.createElement(GraphiQL, {
-                fetcher: getFetchingFunction('/hypergraphql/service/graphql1'),
+                fetcher: getFetchingFunction('/hypergraphql/service/' + graphql),
                 query: parameters1.query,
-                onEditQuery: getEditFunction(parameters1),
+                onEditQuery: getEditFunction(parameters),
             }),
-            document.getElementById('tutorial1')
+            document.getElementById(name + '_dashboard')
         );
     </script>
 </graphiql>
