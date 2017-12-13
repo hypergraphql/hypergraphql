@@ -1,9 +1,9 @@
 docs:
 - title: Home
-  url: hypergraphql
+  url: /
 - title: Documentation
-  url: hypergraphql/documentation
+  url: documentation
 - title: Demo
-  url: hypergraphql/demo
+  url: demo
 - title: Tutorial
-  url: hypergraphql/tutorial 
+  url: tutorial 

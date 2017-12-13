@@ -38,12 +38,12 @@ function graphiqlInit(name) {
     gqlelement.appendChild(div);
     var full = document.createElement('a');
     full.textContent = "See in fullscreen mode.";
-    full.setAttribute('href', '/hypergraphql/service/' + graphiql + '?query=' + queryString);
+    full.setAttribute('href', '/service/' + graphiql + '?query=' + queryString);
     gqlelement.appendChild(full);
     var parameters = {query: queryString};
     ReactDOM.render(
         React.createElement(GraphiQL, {
-            fetcher: getFetchingFunction('/hypergraphql/service/' + graphql),
+            fetcher: getFetchingFunction('/service/' + graphql),
             query: parameters.query,
             onEditQuery: getEditFunction(parameters),
         }),

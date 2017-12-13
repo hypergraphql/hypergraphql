@@ -25,7 +25,7 @@ You can also try the following predefined queries:
 We will try three queries on the same endpoint:
 
 We can also take a look at the internal representation of the RDF schema:
-[See the rdf schema](/hypergraphql/service/graphql4)
+[See the rdf schema](/service/graphql4)
 
 
 <br>
@@ -37,9 +37,9 @@ We can also take a look at the internal representation of the RDF schema:
   }
 }"
 >
-    <script>
+  <script>
        graphiqlInit('demo1');
-    </script>
+  </script>
 </graphiql>
 <br>
 
