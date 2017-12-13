@@ -5,23 +5,18 @@ permalink: /tutorial/
 ---
 
 <graphiqlconfig>
- <script src="//cdn.jsdelivr.net/es6-promise/4.0.5/es6-promise.auto.min.js"></script>
+    <script src="//cdn.jsdelivr.net/es6-promise/4.0.5/es6-promise.auto.min.js"></script>
     <script src="//cdn.jsdelivr.net/fetch/0.9.0/fetch.min.js"></script>
     <script src="//cdn.jsdelivr.net/react/15.4.2/react.min.js"></script>
     <script src="//cdn.jsdelivr.net/react/15.4.2/react-dom.min.js"></script>
-        <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.css" />
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.css" />
     <script src="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.js"></script>
-    <style>
-        .graphiql {
-            height: 400px;
-        }
-</style>
 </graphiqlconfig>
 
 This will be our first GraphQL service:
 
 <graphiql>
-<div class="graphiql" id="tutotial1">Loading...</div>
+<div class="graphiql" id="tutorial1">Loading...</div>
 
 <script>
     var parameters = {query: "{ try me 1 }"};
@@ -29,8 +24,10 @@ This will be our first GraphQL service:
         parameters.query = newQuery;
     }
 
-    function graphQLFetcher(graphQLParams) {
-        return fetch('/hypergraphql/service/graphql1', {
+    function getFetchingFunction(url) {
+
+    return function graphQLFetcher(graphQLParams) {
+        return fetch(url, {
             method: 'post',
             headers: {
                 'Accept': 'application/json',
@@ -48,14 +45,15 @@ This will be our first GraphQL service:
             }
         });
     }
+    }
 
     ReactDOM.render(
         React.createElement(GraphiQL, {
-            fetcher: graphQLFetcher,
+            fetcher: getFetchingFunction('/hypergraphql/service/graphql1'),
             query: parameters.query,
             onEditQuery: onEditQuery,
         }),
-        document.getElementById('tutotial1')
+        document.getElementById('tutorial1')
     );
 </script>
 </graphiql>
@@ -64,7 +62,7 @@ This will be our first GraphQL service:
 This will be our second GraphQL service
 
 <graphiql>
-<div class="graphiql" id="tutotial2">Loading...</div>
+<div class="graphiql" id="tutorial2">Loading...</div>
 
 <script>
     var parameters = {query: "{ try me 2 }"};
@@ -98,7 +96,7 @@ This will be our second GraphQL service
             query: parameters.query,
             onEditQuery: onEditQuery,
         }),
-        document.getElementById('tutotial2')
+        document.getElementById('tutorial2')
     );
 </script>
 </graphiql>
@@ -108,7 +106,7 @@ This will be our third GraphQL service:
 
 
 <graphiql>
-<div class="graphiql" id="tutotial3">Loading...</div>
+<div class="graphiql" id="tutorial3">Loading...</div>
 
 <script>
     var parameters = {query: "{ try me 3 }"};
@@ -142,7 +140,7 @@ This will be our third GraphQL service:
             query: parameters.query,
             onEditQuery: onEditQuery,
         }),
-        document.getElementById('tutotial3')
+        document.getElementById('tutorial3')
     );
 </script>
 </graphiql>
