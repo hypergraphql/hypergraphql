@@ -1,6 +1,7 @@
-function getEditFunction(parameters) {
+function getEditFunction(parameters, name) {
     return function onEditQuery(newQuery) {
         parameters.query = newQuery;
+        document.getElementById(name + '_full').attributes['href'].value = '/service/' + graphiql + '?query=' + encodeURI(newQuery);
     }
 };
 
@@ -39,13 +40,14 @@ function graphiqlInit(name) {
     var full = document.createElement('a');
     full.textContent = "See in fullscreen mode.";
     full.setAttribute('href', '/service/' + graphiql + '?query=' + encodeURI(queryString));
+    full.setAttribute('id', name + '_full');
     gqlelement.appendChild(full);
     var parameters = {query: queryString};
     ReactDOM.render(
         React.createElement(GraphiQL, {
             fetcher: getFetchingFunction('/service/' + graphql),
             query: parameters.query,
-            onEditQuery: getEditFunction(parameters),
+            onEditQuery: getEditFunction(parameters, name),
         }),
         document.getElementById(name + '_dashboard')
     );
