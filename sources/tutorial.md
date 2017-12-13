@@ -16,6 +16,7 @@ permalink: /tutorial/
 
 This will be our first GraphQL service:
 
+<br>
 <graphiql id="tutorial1" graphql="graphql1" graphiql="graphiql1" query=
 "{
   Person_GET(limit:10) {
@@ -27,12 +28,12 @@ This will be our first GraphQL service:
     <script>
        graphiqlInit('tutorial1');
     </script>
-    <br>
 </graphiql>
+<br>
 
 This will be our second GraphQL service
 
-
+<br>
 <graphiql id="tutorial2" graphql="graphql2" graphiql="graphiql2" query=
 "{
   Person_GET(limit:10) {
@@ -44,12 +45,12 @@ This will be our second GraphQL service
     <script>
        graphiqlInit('tutorial2');
     </script>
-    <br>
 </graphiql>
+<br>
 
 This will be our third GraphQL service:
 
-
+<br>
 <graphiql id="tutorial3" graphql="graphql3" graphiql="graphiql3" query=
 "{
   Person_GET(limit:10) {
@@ -61,5 +62,5 @@ This will be our third GraphQL service:
     <script>
        graphiqlInit('tutorial3');
     </script>
-    <br>
 </graphiql>
+<br>

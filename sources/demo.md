@@ -28,7 +28,7 @@ We can also take a look at the internal representation of the RDF schema:
 [See the rdf schema](/hypergraphql/service/graphql4)
 
 
-
+<br>
 <graphiql id="demo1" graphql="graphql4" graphiql="graphiql4" query=
 "{
   Person_GET(limit:10) {
@@ -40,11 +40,12 @@ We can also take a look at the internal representation of the RDF schema:
     <script>
        graphiqlInit('demo1');
     </script>
-    <br>
 </graphiql>
+<br>
 
+test test
 
-
+<br>
 <graphiql id="demo2" graphql="graphql4" graphiql="graphiql4" query=
 "{
   Person_GET(limit:10) {
@@ -56,6 +57,6 @@ We can also take a look at the internal representation of the RDF schema:
  <script>
        graphiqlInit('demo2');
 </script>
-<br>
-</graphiql>
 
+</graphiql>
+<br>
