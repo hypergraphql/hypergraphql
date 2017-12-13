@@ -16,95 +16,50 @@ permalink: /tutorial/
 
 This will be our first GraphQL service:
 
-<graphiql id="tutorial1" graphql="graphql1" graphiql="graphiql1" query="{ try me 1 }">
+<graphiql id="tutorial1" graphql="graphql1" graphiql="graphiql1" query=
+"{
+  Person_GET(limit:10) {
+    _id
+    name
+  }
+}"
+>
     <script>
        graphiqlInit('tutorial1');
     </script>
+    <br>
 </graphiql>
 
 This will be our second GraphQL service
 
-<graphiql>
-<div class="graphiql" id="tutorial2">Loading...</div>
 
-<script>
-    var parameters = {query: "{ try me 2 }"};
-    function onEditQuery(newQuery) {
-        parameters.query = newQuery;
-    }
-
-    function graphQLFetcher(graphQLParams) {
-        return fetch('/hypergraphql/service/graphql2', {
-            method: 'post',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(graphQLParams),
-            credentials: 'include',
-        }).then(function (response) {
-            return response.text();
-        }).then(function (responseBody) {
-            try {
-                return JSON.parse(responseBody);
-            } catch (error) {
-                return responseBody;
-            }
-        });
-    }
-
-    ReactDOM.render(
-        React.createElement(GraphiQL, {
-            fetcher: graphQLFetcher,
-            query: parameters.query,
-            onEditQuery: onEditQuery,
-        }),
-        document.getElementById('tutorial2')
-    );
-</script>
+<graphiql id="tutorial2" graphql="graphql2" graphiql="graphiql2" query=
+"{
+  Person_GET(limit:10) {
+    _id
+    name
+  }
+}"
+>
+    <script>
+       graphiqlInit('tutorial2');
+    </script>
+    <br>
 </graphiql>
-[See in fullscreen mode](/hypergraphql/service/graphiql2?query={ service 2 }). 
 
 This will be our third GraphQL service:
 
 
-<graphiql>
-<div class="graphiql" id="tutorial3">Loading...</div>
-
-<script>
-    var parameters = {query: "{ try me 3 }"};
-    function onEditQuery(newQuery) {
-        parameters.query = newQuery;
-    }
-
-    function graphQLFetcher(graphQLParams) {
-        return fetch('/hypergraphql/service/graphql3', {
-            method: 'post',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(graphQLParams),
-            credentials: 'include',
-        }).then(function (response) {
-            return response.text();
-        }).then(function (responseBody) {
-            try {
-                return JSON.parse(responseBody);
-            } catch (error) {
-                return responseBody;
-            }
-        });
-    }
-
-    ReactDOM.render(
-        React.createElement(GraphiQL, {
-            fetcher: graphQLFetcher,
-            query: parameters.query,
-            onEditQuery: onEditQuery,
-        }),
-        document.getElementById('tutorial3')
-    );
-</script>
+<graphiql id="tutorial3" graphql="graphql3" graphiql="graphiql3" query=
+"{
+  Person_GET(limit:10) {
+    _id
+    name
+  }
+}"
+>
+    <script>
+       graphiqlInit('tutorial3');
+    </script>
+    <br>
 </graphiql>
-[See in fullscreen mode](/hypergraphql/service/graphiql3?query={ service 3 }). 
