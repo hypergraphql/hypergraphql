@@ -2,7 +2,7 @@ function getEditFunction(parameters) {
     return function onEditQuery(newQuery) {
         parameters.query = newQuery;
     }
-}
+};
 
 function getFetchingFunction(url) {
     return function graphQLFetcher(graphQLParams) {
@@ -24,7 +24,7 @@ function getFetchingFunction(url) {
             }
         });
     }
-}
+};
 
 function graphiqlInit(name) {
     var gqlelement = document.getElementById(name);
@@ -49,4 +49,4 @@ function graphiqlInit(name) {
         }),
         document.getElementById(name + '_dashboard')
     );
-}
+};
