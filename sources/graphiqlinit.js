@@ -26,8 +26,7 @@ function getFetchingFunction(url) {
     }
 }
 
-function graphiqlInit(id) {
-    var name = 'tutorial1';
+function graphiqlInit(name) {
     var gqlelement = document.getElementById(name);
     var graphql = gqlelement.attributes['graphql'].value;
     var graphiql = gqlelement.attributes['graphiql'].value;
