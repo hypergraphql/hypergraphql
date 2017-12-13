@@ -38,7 +38,7 @@ This will be our first GraphQL service:
     }
 
     function graphQLFetcher(graphQLParams) {
-        return fetch('/graphql1', {
+        return fetch('/hypergraphql/demo/graphql1', {
             method: 'post',
             headers: {
                 'Accept': 'application/json',
@@ -80,7 +80,7 @@ This will be our second GraphQL service
     }
 
     function graphQLFetcher(graphQLParams) {
-        return fetch('/graphql2', {
+        return fetch('/hypergraphql/demo/graphql2', {
             method: 'post',
             headers: {
                 'Accept': 'application/json',
@@ -124,7 +124,7 @@ This will be our third GraphQL service:
     }
 
     function graphQLFetcher(graphQLParams) {
-        return fetch('/graphql3', {
+        return fetch('/hypergraphql/demo/graphql3', {
             method: 'post',
             headers: {
                 'Accept': 'application/json',
