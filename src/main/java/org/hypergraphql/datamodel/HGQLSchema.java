@@ -79,11 +79,12 @@ public class HGQLSchema {
 
         List<Node> children = context.getChildren();
 
+        Map<String, String> contextMap = new HashMap<>();
+
         for (Node node : children) {
             FieldDefinition field = ((FieldDefinition) node);
             String iri = ((StringValue) field.getDirective("href").getArgument("iri").getValue()).getValue();
-            rdfSchema.insertObjectTriple(THIS_SCHEMA_NAMESPACE + field.getName(), HGQL_HREF, iri);
-
+            contextMap.put(field.getName(), iri);
         }
 
         Set<String> typeNames = types.keySet();
@@ -102,6 +103,7 @@ public class HGQLSchema {
 
             String typeUri = THIS_SCHEMA_NAMESPACE + typeName;
             rdfSchema.insertStringLiteralTriple(typeUri, HGQL_HAS_NAME, typeName);
+            rdfSchema.insertObjectTriple(typeUri, HGQL_HREF, contextMap.get(typeName));
 
 
             String getQueryUri = typeUri + "_GET";
@@ -141,11 +143,12 @@ public class HGQLSchema {
             List<Node> typeChildren = type.getChildren();
 
             for (Node node : typeChildren) {
-                try {
+                    if (node.getClass().getSimpleName().equals("FieldDefinition")) {
                     FieldDefinition field = (FieldDefinition) node;
-                    String fieldURI = THIS_SCHEMA_NAMESPACE + field.getName();
+                    String fieldURI = THIS_SCHEMA_NAMESPACE + typeName + "/" + field.getName();
 
                     rdfSchema.insertStringLiteralTriple(fieldURI, HGQL_HAS_NAME, field.getName());
+                    rdfSchema.insertObjectTriple(fieldURI, HGQL_HREF, contextMap.get(field.getName()));
 
                     rdfSchema.insertObjectTriple(fieldURI, RDF_TYPE, HGQL_FIELD);
                     rdfSchema.insertObjectTriple(typeUri, HGQL_HAS_FIELD, fieldURI);
@@ -158,11 +161,11 @@ public class HGQLSchema {
                     String outputTypeUri = getOutputType(field.getType());
                     rdfSchema.insertObjectTriple(fieldURI, HGQL_OUTPUT_TYPE, outputTypeUri);
 
-                } catch(Exception e) {}
+                }
             }
         }
-        
-        generateConfigs(services);
+
+       generateConfigs(services);
 
     }
 
