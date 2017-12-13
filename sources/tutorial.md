@@ -11,7 +11,7 @@ permalink: /tutorial/
     <script src="//cdn.jsdelivr.net/react/15.4.2/react-dom.min.js"></script>
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.css" />
     <script src="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.js"></script>
-    <script> src="https://raw.githubusercontent.com/semantic-integration/hypergraphql/gh-pages/sources/graphiqlinit.js" />
+    <script src="https://raw.githubusercontent.com/semantic-integration/hypergraphql/gh-pages/sources/graphiqlinit.js"></script>
 </graphiqlconfig>
 
 This will be our first GraphQL service:
