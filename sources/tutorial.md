@@ -63,7 +63,7 @@ This will be our first GraphQL service:
         ReactDOM.render(
             React.createElement(GraphiQL, {
                 fetcher: getFetchingFunction('/hypergraphql/service/' + graphql),
-                query: parameters1.query,
+                query: parameters.query,
                 onEditQuery: getEditFunction(parameters),
             }),
             document.getElementById(name + '_dashboard')
