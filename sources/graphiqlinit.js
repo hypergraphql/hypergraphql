@@ -1,6 +1,7 @@
 function getEditFunction(parameters, name) {
     return function onEditQuery(newQuery) {
         parameters.query = newQuery;
+        var graphiql = document.getElementById(name).attributes['graphiql'].value;
         document.getElementById(name + '_full').attributes['href'].value = '/service/' + graphiql + '?query=' + encodeURI(newQuery);
     }
 };
