@@ -14,9 +14,11 @@ permalink: /tutorial/
     <script type="application/javascript" src="https://semantic-integration.github.io/hypergraphql/sources/graphiqlinit.js"></script>
 </graphiqlconfig>
 
+
 This will be our first GraphQL service:
 
-<br>
+
+
 <graphiql id="tutorial1" graphql="graphql1" graphiql="graphiql1" query=
 "{
   Person_GET(limit:10) {
@@ -29,11 +31,14 @@ This will be our first GraphQL service:
        graphiqlInit('tutorial1');
     </script>
 </graphiql>
-<br>
 
+
+
+<br>
 This will be our second GraphQL service
 
-<br>
+
+
 <graphiql id="tutorial2" graphql="graphql2" graphiql="graphiql2" query=
 "{
   Person_GET(limit:10) {
@@ -46,11 +51,13 @@ This will be our second GraphQL service
        graphiqlInit('tutorial2');
     </script>
 </graphiql>
-<br>
 
+
+<br>
 This will be our third GraphQL service:
 
-<br>
+
+
 <graphiql id="tutorial3" graphql="graphql3" graphiql="graphiql3" query=
 "{
   Person_GET(limit:10) {

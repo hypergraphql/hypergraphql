@@ -39,12 +39,12 @@ We can also take a look at the internal representation of the RDF schema:
        graphiqlInit('demo1');
   </script>
 </graphiql>
-
+<br>
 test test
 
 
 <graphiql id="demo2" graphql="graphql4" graphiql="graphiql4" query=
-"{
+"{ 
   Person_GET(limit:10) {
     _id
     name
@@ -54,5 +54,5 @@ test test
  <script>
        graphiqlInit('demo2');
 </script>
-
 </graphiql>
+<br>
