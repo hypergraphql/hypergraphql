@@ -21,7 +21,7 @@ permalink: /tutorial/
 This will be our first GraphQL service:
 
 <graphiql>
-<div class="graphiql" id="graphiql1">Loading...</div>
+<div class="graphiql" id="tutotial1">Loading...</div>
 
 <script>
     var parameters = {query: "{ try me 1 }"};
@@ -55,7 +55,7 @@ This will be our first GraphQL service:
             query: parameters.query,
             onEditQuery: onEditQuery,
         }),
-        document.getElementById('graphiql1')
+        document.getElementById('tutotial1')
     );
 </script>
 </graphiql>
@@ -64,7 +64,7 @@ This will be our first GraphQL service:
 This will be our second GraphQL service
 
 <graphiql>
-<div class="graphiql" id="graphiql2">Loading...</div>
+<div class="graphiql" id="tutotial2">Loading...</div>
 
 <script>
     var parameters = {query: "{ try me 2 }"};
@@ -98,7 +98,7 @@ This will be our second GraphQL service
             query: parameters.query,
             onEditQuery: onEditQuery,
         }),
-        document.getElementById('graphiql2')
+        document.getElementById('tutotial2')
     );
 </script>
 </graphiql>
@@ -108,7 +108,7 @@ This will be our third GraphQL service:
 
 
 <graphiql>
-<div class="graphiql" id="graphiql3">Loading...</div>
+<div class="graphiql" id="tutotial3">Loading...</div>
 
 <script>
     var parameters = {query: "{ try me 3 }"};
@@ -142,7 +142,7 @@ This will be our third GraphQL service:
             query: parameters.query,
             onEditQuery: onEditQuery,
         }),
-        document.getElementById('graphiql3')
+        document.getElementById('tutotial3')
     );
 </script>
 </graphiql>

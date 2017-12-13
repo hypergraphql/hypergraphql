@@ -34,7 +34,7 @@ We can also take a look at the internal representation of the RDF schema:
 
 
 <graphiql>
-<div class="graphiql" id="graphiql4">Loading...</div>
+<div class="graphiql" id="demo1">Loading...</div>
 
 <script>
     var parameters = {query: "{ query 1 }"};
@@ -68,15 +68,15 @@ We can also take a look at the internal representation of the RDF schema:
             query: parameters.query,
             onEditQuery: onEditQuery,
         }),
-        document.getElementById('graphiql4')
+        document.getElementById('demo1')
     );
 </script>
 </graphiql>
-[See in fullscreen mode](/hypergraphql/service/graphiql1?query={ service 4 query 1 }).
+[See in fullscreen mode](/hypergraphql/service/graphiql4?query={ service 4 query 1 }).
 
 
 <graphiql>
-<div class="graphiql" id="graphiql4">Loading...</div>
+<div class="graphiql" id="demo2">Loading...</div>
 
 <script>
     var parameters = {query: "{ query 2 }"};
@@ -110,15 +110,15 @@ We can also take a look at the internal representation of the RDF schema:
             query: parameters.query,
             onEditQuery: onEditQuery,
         }),
-        document.getElementById('graphiql4')
+        document.getElementById('demo2')
     );
 </script>
 </graphiql>
-[See in fullscreen mode](/hypergraphql/service/graphiql1?query={ service 4 query 2 }).
+[See in fullscreen mode](/hypergraphql/service/graphiql4?query={ service 4 query 2 }).
 
 
 <graphiql>
-<div class="graphiql" id="graphiql4">Loading...</div>
+<div class="graphiql" id="demo3">Loading...</div>
 
 <script>
     var parameters = {query: "{ query 3 }"};
@@ -152,9 +152,9 @@ We can also take a look at the internal representation of the RDF schema:
             query: parameters.query,
             onEditQuery: onEditQuery,
         }),
-        document.getElementById('graphiql4')
+        document.getElementById('demo3')
     );
 </script>
 </graphiql>
-[See in fullscreen mode](/hypergraphql/service/graphiql1?query={ service 4 query 3 }).
+[See in fullscreen mode](/hypergraphql/service/graphiql4?query={ service 4 query 3 }).
 
