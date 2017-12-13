@@ -38,7 +38,7 @@ function graphiqlInit(name) {
     gqlelement.appendChild(div);
     var full = document.createElement('a');
     full.textContent = "See in fullscreen mode.";
-    full.setAttribute('href', '/service/' + graphiql + '?query=' + queryString);
+    full.setAttribute('href', '/service/' + graphiql + '?query=' + encodeURI(queryString));
     gqlelement.appendChild(full);
     var parameters = {query: queryString};
     ReactDOM.render(
