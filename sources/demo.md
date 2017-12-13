@@ -29,7 +29,7 @@ You can also try the following predefined queries:
 This will be our first GraphQL service:
 
 <graphiql>
-<div class="graphiql" id="graphiql1">Loading...</div>
+<div class="graphiql" id="graphiql4">Loading...</div>
 
 <script>
     var parameters = {query: "{ try me 1 }"};
@@ -38,7 +38,7 @@ This will be our first GraphQL service:
     }
 
     function graphQLFetcher(graphQLParams) {
-        return fetch('/hypergraphql/demo/graphql1', {
+        return fetch('/hypergraphql/service/graphql4', {
             method: 'post',
             headers: {
                 'Accept': 'application/json',
@@ -63,93 +63,10 @@ This will be our first GraphQL service:
             query: parameters.query,
             onEditQuery: onEditQuery,
         }),
-        document.getElementById('graphiql1')
+        document.getElementById('graphiql4')
     );
 </script>
 </graphiql>
+[See in fullscreen mode](/hypergraphql/service/graphiql4).
 
-This will be our second GraphQL service
-
-<graphiql>
-<div class="graphiql" id="graphiql2">Loading...</div>
-
-<script>
-    var parameters = {query: "{ try me 2 }"};
-    function onEditQuery(newQuery) {
-        parameters.query = newQuery;
-    }
-
-    function graphQLFetcher(graphQLParams) {
-        return fetch('/hypergraphql/demo/graphql2', {
-            method: 'post',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(graphQLParams),
-            credentials: 'include',
-        }).then(function (response) {
-            return response.text();
-        }).then(function (responseBody) {
-            try {
-                return JSON.parse(responseBody);
-            } catch (error) {
-                return responseBody;
-            }
-        });
-    }
-
-    ReactDOM.render(
-        React.createElement(GraphiQL, {
-            fetcher: graphQLFetcher,
-            query: parameters.query,
-            onEditQuery: onEditQuery,
-        }),
-        document.getElementById('graphiql2')
-    );
-</script>
-</graphiql>
-
-
-This will be our third GraphQL service:
-
-
-<graphiql>
-<div class="graphiql" id="graphiql3">Loading...</div>
-
-<script>
-    var parameters = {query: "{ try me 3 }"};
-    function onEditQuery(newQuery) {
-        parameters.query = newQuery;
-    }
-
-    function graphQLFetcher(graphQLParams) {
-        return fetch('/hypergraphql/demo/graphql3', {
-            method: 'post',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(graphQLParams),
-            credentials: 'include',
-        }).then(function (response) {
-            return response.text();
-        }).then(function (responseBody) {
-            try {
-                return JSON.parse(responseBody);
-            } catch (error) {
-                return responseBody;
-            }
-        });
-    }
-
-    ReactDOM.render(
-        React.createElement(GraphiQL, {
-            fetcher: graphQLFetcher,
-            query: parameters.query,
-            onEditQuery: onEditQuery,
-        }),
-        document.getElementById('graphiql3')
-    );
-</script>
-</graphiql>
+[See the rdf schema](/hypergraphql/service/graphql4)

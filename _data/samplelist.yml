@@ -5,3 +5,5 @@ docs:
   url: hypergraphql/documentation
 - title: Demo
   url: hypergraphql/demo
+- title: Tutorial
+  url: hypergraphql/tutorial
