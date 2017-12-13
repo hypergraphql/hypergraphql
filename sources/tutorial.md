@@ -12,8 +12,10 @@ permalink: /tutorial/
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.css" />
     <script src="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.js"></script>
     <script> 
-        function onEditQuery(parameters, newQuery) {
-            parameters.query = newQuery;
+        function getEditFunction(parameters) {
+            return function onEditQuery(newQuery) {
+                parameters.query = newQuery;
+            }
         }
         function getFetchingFunction(url) {
             return function graphQLFetcher(graphQLParams) {
@@ -49,8 +51,8 @@ This will be our first GraphQL service:
         ReactDOM.render(
             React.createElement(GraphiQL, {
                 fetcher: getFetchingFunction('/hypergraphql/service/graphql1'),
-                query: parameters2.query,
-                onEditQuery: onEditQuery(parameters1),
+                query: parameters1.query,
+                onEditQuery: getEditFunction(parameters1),
             }),
             document.getElementById('tutorial1')
         );
