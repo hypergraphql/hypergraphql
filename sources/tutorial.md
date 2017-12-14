@@ -18,7 +18,6 @@ permalink: /tutorial/
 This will be our first GraphQL service:
 
 
-
 <graphiql id="tutorial1" graphql="graphql1" graphiql="graphiql1" query=
 "{
   Person_GET(limit:10) {

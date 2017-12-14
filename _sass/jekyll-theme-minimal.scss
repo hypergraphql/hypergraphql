@@ -119,11 +119,40 @@ img {
   max-width:100%;
 }
 
+outer {
+  display: cell;
+  width: 295px;
+  float: left;
+  position: fixed;
+  max-height: 100%;
+  min-height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+sidebar {
+  display: table;
+  width: 295px;
+  float: left;
+  position: relative;
+  min-height: 640px;
+  height: calc(100vh - 70px);
+
+}
 header {
-  width:270px;
-  float:left;
-  position:fixed;
-  -webkit-font-smoothing:subpixel-antialiased;
+  display: block;
+  width: 270px;
+  position: absolute;
+  float: left;
+  top: 0;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+footer {
+  display: block;
+  width: 270px;
+  position: absolute;
+  float: left;
+  bottom: 40px;
+  -webkit-font-smoothing: subpixel-antialiased;
 }
 
 header ul {
@@ -202,14 +231,6 @@ hr {
   background:#e5e5e5;
   height:1px;
   margin:0 0 20px;
-}
-
-footer {
-  width:270px;
-  float:left;
-  position: fixed;
-  bottom:50px;
-  -webkit-font-smoothing:subpixel-antialiased;
 }
 
 .graphiql {
