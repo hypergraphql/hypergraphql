@@ -1,9 +1,9 @@
 {
     "name": "mydemo",
-    "schemaFile": "src/test/resources/schema.graphql",
-    "graphql": {
+    "schema": "src/test/resources/schema.graphql",
+    "server": {
         "port": 8080,
-        "path": "/graphql",
+        "graphql": "/graphql",
         "graphiql": "/graphiql"
     },
     "services": [
