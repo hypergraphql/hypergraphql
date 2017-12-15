@@ -133,20 +133,29 @@ To set up a HyperGraphQL server you only need to provide your GraphQL type schem
 ![HyperGraphQL-screenshot](../sources/screenshot.png)
 
 
-## Properties
+## Service configuration
 
 Basic settings are defined in the *properties.json* file. The defaults are:
 
 ```js
 {
-    "name": "dbpedia-sparql-demo",
-    "schemaFile": "schema.graphql",
-    "serviceFile": "services.json",
-    "graphql": {
+    "name": "dbpedia-sparql-hgql-demo",
+    "schema": "schema.graphql",
+    "server": {
         "port": 8080,
-        "path": "/graphql",
+        "graphql": "/graphql",
         "graphiql": "/graphiql"
-    }
+    },
+    "services": [
+        {
+            "id": "dbpedia-sparql",
+            "type": "SPARQLEndpointService",
+            "url": "http://dbpedia.org/sparql/",
+            "graph": "http://dbpedia.org",
+            "user": "",
+            "password": ""
+        }
+    ]
 }
 ```
 
@@ -158,7 +167,7 @@ Basic settings are defined in the *properties.json* file. The defaults are:
 
 ## Schema
 
-The schema definition complies with the GraphQL spec (see: 	[http://graphql.org/learn/schema/](http://graphql.org/learn/schema/)). Currently, only the core fragment of the spec, including object types and fields, is supported, as presented in the example below. Additionally, some default SPARQL-related fields and arguments are added automatically to each schema. 
+The schema definition complies with the [GraphQL schema spec](http://graphql.org/learn/schema/). Currently, only the core fragment of the spec, including object types and fields, is supported, as presented in the example below. Additionally, some default SPARQL-related fields and arguments are added automatically to each schema. 
 
 ```
 type __Context {
@@ -173,7 +182,9 @@ type __Context {
     locationCity:   _@href(iri: "http://dbpedia.org/ontology/locationCity")
     owner:          _@href(iri: "http://dbpedia.org/ontology/owner")
     country:        _@href(iri: "http://dbpedia.org/ontology/country")
-    leader:         _@href(iri: "http://dbpedia.org/ontology/leader")
+    leader:         _@href(iri: "http://dbpedia.org/ontology/leaderName")
+    country:        _@href(iri: "http://dbpedia.org/ontology/country")
+    capital:        _@href(iri: "http://dbpedia.org/ontology/capital")
 }
 
 type Person @service(id:"dbpedia-sparql") {
@@ -198,38 +209,9 @@ type City @service(id:"dbpedia-sparql") {
 
 type Country @service(id:"dbpedia-sparql") {
     label: [String] @service(id:"dbpedia-sparql")
+    capital: City @service(id:"dbpedia-sparql")
 }
 ```
-
-## Services details
-
-The RDF/service mapping consists of two components:
-
-- *predicates*: defining the URIs associated with the GraphQL vocabulary and the services from which the data is to be fetched;
-- *services*: providing the details of each involved service (SPARQL endpoint).
-
-The following example presents a possible mapping for the schema above, where all predicates are associated with the default graph of *http://dbpedia.org* SPARQL endpoint.
-
-```json
-[
-    {
-      "id": "dbpedia-sparql",
-      "type": "SPARQLEndpointService",
-      "url": "http://dbpedia.org/sparql/",
-      "graph": "http://dbpedia.org",
-      "user": "",
-      "password": ""
-    }
-]
-```
-
-Note that: 
-1) query fields (here: *people* and *cities*) are not mapped to URIs, but must be associated with some service;
-2) object types, at least those that serve as output types of the query fields (here *Person* and *City*), must be associated with URIs, but not with the named graphs, as they will always be associated with the endpoint of the field;
-3) each (non-query) field must be associated with a URI and a service;
-4) each service must be specified with the URL of the SPARQL endpoint, the graph (id of a named graph), and authentication details. Whenever authentication is not required, the user and password are asserted as empty strings.
-
-HyperGraphQL supports also federated querying over a collection of SPARQL endpoints, although the current prototype implementation requires further optimizations. The federation is achieved by associating predicates with different services.  
 
 ## Query rewriting 
 

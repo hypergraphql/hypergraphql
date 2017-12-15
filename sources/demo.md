@@ -28,12 +28,22 @@ We can also take a look at the internal representation of the RDF schema:
 [See the rdf schema](/service/graphql4)
 
 <graphiql id="demo1" graphql="graphql4" graphiql="graphiql4" query=
-"{
-  Person_GET(limit:10) {
+'{
+  Person_GET(limit: 1, offset: 6) {
     _id
+    _type
     name
+    birthDate
+    birthPlace {
+      _id
+      label(lang:"en")
+      country {
+        _id
+        label(lang:"en")
+      }
+    }
   }
-}"
+}'
 >
   <script>
        graphiqlInit('demo1');
@@ -44,15 +54,91 @@ test test
 
 
 <graphiql id="demo2" graphql="graphql4" graphiql="graphiql4" query=
-"{ 
-  Person_GET(limit:10) {
+'{
+  Company_GET_BY_ID(uris:[
+    "http://dbpedia.org/resource/BMW"
+  ]) {
     _id
-    name
+    _type
+    owner {
+      _id
+      name
+    }
+    locationCity {
+      _id
+      label
+      country {
+        _id
+        label
+      }
+    }
   }
-}"
+}'
 >
  <script>
        graphiqlInit('demo2');
+</script>
+</graphiql>
+<br>
+
+
+<graphiql id="demo3" graphql="graphql4" graphiql="graphiql4" query=
+'{
+  Country_GET_BY_ID(uris:[
+    "http://dbpedia.org/resource/Italy",
+    "http://dbpedia.org/resource/Japan",
+    "http://dbpedia.org/resource/Kenya",
+    "http://dbpedia.org/resource/Spain",
+    "http://dbpedia.org/resource/Canada"
+  ]) {
+    _id
+    _type
+    label(lang:"en")
+    capital {
+    	_id
+      label(lang:"en")
+      leader {
+        name
+        birthPlace {
+          label(lang:"en")
+        }
+      }
+    }
+  }
+}'
+>
+ <script>
+       graphiqlInit('demo3');
+</script>
+</graphiql>
+<br>
+
+Introspection query
+
+<graphiql id="demo4" graphql="graphql4" graphiql="graphiql4" query=
+'{
+  __schema {
+    types {
+      name
+      description
+      fields {
+        name
+        description
+        type {
+          name
+          kind
+          ofType {
+            name
+            kind
+          }
+        }
+      }
+    }
+  }
+}'
+>
+ <script>
+       graphiqlInit('demo4');
 </script>
 </graphiql>
 <br>
