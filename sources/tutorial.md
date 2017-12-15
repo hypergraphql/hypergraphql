@@ -177,14 +177,10 @@ type Concept @service(id:"agrovoc-local") {
     broader {
       _id
       prefLabel(lang:"en")
-    }
-    narrower {
-      _id
-      prefLabel(lang:"en")
-    }
-    related {
-      _id
-      prefLabel(lang:"en")
+        narrower {
+        _id
+        prefLabel(lang:"en")
+      }
     }
   }
 }'
@@ -236,6 +232,7 @@ type __Context {
     label:          _@href(iri: "http://www.w3.org/2000/01/rdf-schema#label")
     comment:        _@href(iri: "http://www.w3.org/2000/01/rdf-schema#comment")
     country:        _@href(iri: "http://dbpedia.org/ontology/country")
+    capital:        _@href(iri: "http://dbpedia.org/ontology/capital")
     FaoCountry:     _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/self_governing")
     hasBorderWith:  _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/hasBorderWith")
     GeoRegion:      _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/geographical_region")
@@ -310,11 +307,6 @@ type Concept {
     population
     hasBorderWith {
       _id
-      faoName(lang:"en")
-    }
-    inGeoRegion {
-      _id
-      faoName(lang:"en")
     }
     inEconomicRegion {
       _id
