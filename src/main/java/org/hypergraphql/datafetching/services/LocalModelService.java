@@ -40,9 +40,14 @@ public class LocalModelService extends Service {
        Model returnModel = ModelFactory.createDefaultModel();
 
 
+        JsonNode node;
 
+        if (!query.isArray())
+            node = query.get("fields");
+        else
+            node = query;
 
-        Set<LinkedList<QueryNode>> paths = getQueryPaths(query, schema);
+        Set<LinkedList<QueryNode>> paths = getQueryPaths(node, schema);
 
         for (LinkedList<QueryNode> path : paths ) {
 

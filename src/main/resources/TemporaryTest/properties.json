@@ -1,0 +1,10 @@
+{
+    "name": "mydemo",
+    "schemaFile": "src/main/resources/TemporaryTest/schema.graphql",
+    "serviceFile": "src/main/resources/TemporaryTest/services.json",
+    "graphql": {
+        "port": 8080,
+        "path": "/graphql",
+        "graphiql": "/graphiql"
+    }
+}

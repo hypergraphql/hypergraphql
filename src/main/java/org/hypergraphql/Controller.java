@@ -11,6 +11,7 @@ import graphql.GraphQLError;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.services.HGQLQueryService;
 import spark.ModelAndView;
+import spark.Service;
 import spark.template.velocity.VelocityTemplateEngine;
 
 import static spark.Spark.*;
@@ -49,16 +50,18 @@ public class Controller {
     }};
 
 
-    public static void start(HGQLConfig config) {
+    public void start(HGQLConfig config) {
         System.out.println("GraphQL server started at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().path());
         System.out.println("GraphiQL UI available at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphiql());
 
-        port(config.getGraphqlConfig().port());
+        Service service1 = Service.ignite().port(config.getGraphqlConfig().port());
+
+        //port(config.getGraphqlConfig().port());
 
 
         // get method for accessing the GraphiQL UI
 
-        get(config.getGraphqlConfig().graphiql(), (req, res) -> {
+        service1.get(config.getGraphqlConfig().graphiql(), (req, res) -> {
 
             Map<String, String> model = new HashMap<>();
 
@@ -72,7 +75,7 @@ public class Controller {
 
         // post method for accessing the GraphQL getSetvice
 
-        post(config.getGraphqlConfig().path(), (req, res) -> {
+        service1.post(config.getGraphqlConfig().path(), (req, res) -> {
             ObjectMapper mapper = new ObjectMapper();
             HGQLQueryService service = new HGQLQueryService(config);
 

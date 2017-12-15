@@ -1,5 +1,10 @@
 package org.hypergraphql;
 
+
+
+import org.apache.jena.fuseki.embedded.FusekiServer;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.hypergraphql.datamodel.HGQLSchemaWiring;
@@ -12,13 +17,15 @@ public class Main {
     public static void main(String[] args) {
 
         PropertyConfigurator.configure("log4j.properties");
-        HGQLConfig config = new HGQLConfig("properties.json");
-
-
-
+        HGQLConfig config = new HGQLConfig("src/main/resources/TemporaryTest/properties.json");
         logger.info("Server started at http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().path());
 
-        Controller.start(config);
+        Controller controller = new Controller();
+        controller.start(config);
+
+
+
+
 
 
 

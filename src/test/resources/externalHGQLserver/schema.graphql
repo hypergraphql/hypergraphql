@@ -1,0 +1,42 @@
+type __Vocabulary {
+    Person:         _@href(iri: "http://dbpedia.org/ontology/Person")
+    Company:        _@href(iri: "http://dbpedia.org/ontology/Company")
+    City:           _@href(iri: "http://dbpedia.org/ontology/City")
+    Country:        _@href(iri: "http://dbpedia.org/ontology/Country")
+    name:           _@href(iri: "http://xmlns.com/foaf/0.1/name")
+    label:          _@href(iri: "http://www.w3.org/2000/01/rdf-schema#label")
+    deathPlace:     _@href(iri: "http://dbpedia.org/ontology/deathPlace")
+    birthPlace:     _@href(iri: "http://dbpedia.org/ontology/birthPlace")
+    deathDate:      _@href(iri: "http://dbpedia.org/ontology/deathDate")
+    birthDate:      _@href(iri: "http://dbpedia.org/ontology/birthDate")
+    locationCity:   _@href(iri: "http://dbpedia.org/ontology/locationCity")
+    owner:          _@href(iri: "http://dbpedia.org/ontology/owner")
+    country:        _@href(iri: "http://dbpedia.org/ontology/country")
+    leader:         _@href(iri: "http://dbpedia.org/ontology/leader")
+}
+
+type Person @service(id:"dbpedia") {
+    name: String @service(id:"dbpedia")
+    label: [String] @service(id:"dbpedia")
+    deathPlace: City @service(id:"dbpedia")
+    birthPlace: City @service(id:"hgraphql")
+    deathDate: String @service(id:"dbpedia")
+    birthDate: String @service(id:"dbpedia")
+}
+
+type Company @service(id:"dbpedia") {
+    name: [String] @service(id:"dbpedia")
+    label: [String] @service(id:"dbpedia")
+    locationCity: City @service(id:"dbpedia")
+    owner: [Person] @service(id:"dbpedia")
+}
+
+type City @service(id:"dbpedia") {
+    label: [String] @service(id:"dbpedia")
+    country: Country @service(id:"dbpedia")
+    leader: Person @service(id:"dbpedia")
+}
+
+type Country @service(id:"dbpedia") {
+    label: [String] @service(id:"dbpedia")
+}

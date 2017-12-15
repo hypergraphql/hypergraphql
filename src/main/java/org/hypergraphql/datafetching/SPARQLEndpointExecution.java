@@ -27,11 +27,11 @@ import java.util.concurrent.Callable;
 
 public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> {
 
-    private JsonNode query;
-    private Set<String> inputSubset;
-    private Set<String> markers;
-    private SPARQLEndpointService sparqlEndpointService;
-    private HGQLSchema schema ;
+    protected JsonNode query;
+    protected Set<String> inputSubset;
+    protected Set<String> markers;
+    protected SPARQLEndpointService sparqlEndpointService;
+    protected HGQLSchema schema ;
     protected static Logger logger = Logger.getLogger(SPARQLEndpointExecution.class);
 
 

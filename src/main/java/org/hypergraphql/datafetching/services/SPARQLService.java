@@ -14,7 +14,10 @@ public abstract class SPARQLService extends Service {
     public void setParameters(ServiceConfig serviceConfig) {
 
         this.id = serviceConfig.getId();
+        if (serviceConfig.getGraph()!=null)
         this.graph = serviceConfig.getGraph();
+        else
+            this.graph="";
 
     }
 

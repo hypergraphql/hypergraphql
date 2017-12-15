@@ -23,7 +23,7 @@ public class SPARQLEndpointService extends SPARQLService {
     private String url;
     private String user;
     private String password;
-    private int VALUES_SIZE_LIMIT = 100;
+    protected int VALUES_SIZE_LIMIT = 100;
 
     public String getUrl() {
         return url;
@@ -50,19 +50,7 @@ public class SPARQLEndpointService extends SPARQLService {
         Model unionModel = ModelFactory.createDefaultModel();
         Set<Future<SPARQLExecutionResult>> futureSPARQLresults = new HashSet<>();
 
-        for (String marker : markers) {
-            resultSet.put(marker, new HashSet<>());
-        }
-
-        if (rootType.equals("Query")&&schema.getQueryFields().get(query.get("name").asText()).type().equals(HGQLVocabulary.HGQL_QUERY_GET_BY_ID_FIELD)) {
-            Iterator<JsonNode> uris = query.get("args").get("uris").elements();
-            while (uris.hasNext()) {
-                String uri = uris.next().asText();
-                input.add(uri);
-            }
-        }
-
-        List<String> inputList = (List<String>) new ArrayList(input);
+        List<String> inputList = getStrings(query, input, markers, rootType, schema, resultSet);
 
         do {
 
@@ -96,6 +84,22 @@ public class SPARQLEndpointService extends SPARQLService {
         treeExecutionResult.setModel(unionModel);
 
         return treeExecutionResult;
+    }
+
+    protected List<String> getStrings(JsonNode query, Set<String> input, Set<String> markers, String rootType, HGQLSchema schema, Map<String, Set<String>> resultSet) {
+        for (String marker : markers) {
+            resultSet.put(marker, new HashSet<>());
+        }
+
+        if (rootType.equals("Query")&&schema.getQueryFields().get(query.get("name").asText()).type().equals(HGQLVocabulary.HGQL_QUERY_GET_BY_ID_FIELD)) {
+            Iterator<JsonNode> uris = query.get("args").get("uris").elements();
+            while (uris.hasNext()) {
+                String uri = uris.next().asText();
+                input.add(uri);
+            }
+        }
+
+        return (List<String>) new ArrayList(input);
     }
 
     public Model getModelFromResults(JsonNode query, QuerySolution results , HGQLSchema schema) {

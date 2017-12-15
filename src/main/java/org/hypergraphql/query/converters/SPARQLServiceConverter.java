@@ -43,7 +43,7 @@ public class SPARQLServiceConverter {
 
     private String graphSTR(String graphID, String whereSTR) {
         final String PATTERN = "GRAPH <%s> { %s } ";
-        String result = (graphID.equals("")) ? whereSTR : String.format(PATTERN, graphID, whereSTR);
+        String result = (graphID==null || graphID.equals("")) ? whereSTR : String.format(PATTERN, graphID, whereSTR);
         return result;
     }
 

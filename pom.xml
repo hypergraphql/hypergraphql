@@ -97,5 +97,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-fuseki-embedded</artifactId>
+            <version>3.5.0</version> <!-- Set the version -->
+        </dependency>
+
     </dependencies>
 </project>

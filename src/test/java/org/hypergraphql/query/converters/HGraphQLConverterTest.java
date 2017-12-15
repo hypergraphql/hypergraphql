@@ -21,7 +21,8 @@ class HGraphQLConverterTest {
     public Boolean generateRewritingForRootReturnValidity(String inputQuery) {
 
         HGQLConfig config = new HGQLConfig("src/test/resources/properties.json");
-        Controller.start(config);
+        Controller controller = new Controller();
+        controller.start(config);
         HGraphQLConverter converter = new HGraphQLConverter(config.getHgqlSchema());
 
         ValidatedQuery validatedQuery = new QueryValidator(config.getSchema()).validateQuery(inputQuery);
@@ -82,7 +83,8 @@ class HGraphQLConverterTest {
     public Boolean generateRewritingForNonRootReturnValidity(String inputQuery, Set<String> inputSet) {
 
         HGQLConfig config = new HGQLConfig("src/test/resources/properties.json");
-        Controller.start(config);
+        Controller controller = new Controller();
+        controller.start(config);
         HGraphQLConverter converter = new HGraphQLConverter(config.getHgqlSchema());
 
 
