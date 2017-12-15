@@ -1,4 +1,4 @@
-type __Vocabulary {
+type __Context {
     Person:         _@href(iri: "http://dbpedia.org/ontology/Person")
     Company:        _@href(iri: "http://dbpedia.org/ontology/Company")
     City:           _@href(iri: "http://dbpedia.org/ontology/City")

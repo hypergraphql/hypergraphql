@@ -377,7 +377,6 @@ public class ExecutionTreeNode {
             } catch (InterruptedException e) {
                 logger.error(e);
             } catch (ExecutionException e) {
-                e.printStackTrace();
                 logger.error(e);
             }
         }
