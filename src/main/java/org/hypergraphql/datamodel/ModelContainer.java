@@ -12,6 +12,7 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.*;
 import org.apache.log4j.Logger;
+import org.hypergraphql.config.schema.HGQLVocabulary;
 
 /**
  * Created by szymon on 22/08/2017.
@@ -145,7 +146,6 @@ public class ModelContainer {
         return getValuesOfObjectProperty(getResourceFromUri(subjectURI), predicateURI);
     }
 
-
     public List<RDFNode> getValuesOfObjectProperty(RDFNode subject, String predicateURI) {
 
         NodeIterator iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
@@ -155,6 +155,22 @@ public class ModelContainer {
             if (!next.isLiteral()) rdfNodes.add(next);
         }
         return rdfNodes;
+    }
+
+    public List<RDFNode> getValuesOfObjectProperty(RDFNode subject, String predicateURI, String targetURI) {
+
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
+        List<RDFNode> rdfNodes = new ArrayList<>();
+        while (iterator.hasNext()) {
+            RDFNode next = iterator.next();
+            if (!next.isLiteral()) {
+                if (targetURI!=null && this.model.contains(next.asResource(), getPropertyFromUri(HGQLVocabulary.RDF_TYPE), getResourceFromUri(targetURI))) {
+                    rdfNodes.add(next);
+                }
+            }
+        }
+        return rdfNodes;
+
     }
 
     public RDFNode getValueOfObjectProperty(String subjectURI, String predicateURI) {
@@ -173,6 +189,23 @@ public class ModelContainer {
         return null;
     }
 
+    public RDFNode getValueOfObjectProperty(RDFNode subject, String predicateURI, String targetURI) {
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
+        while (iterator.hasNext()) {
+
+            while (iterator.hasNext()) {
+                RDFNode next = iterator.next();
+                if (!next.isLiteral()) {
+                    if (targetURI!=null && this.model.contains(next.asResource(), getPropertyFromUri(HGQLVocabulary.RDF_TYPE), getResourceFromUri(targetURI))) {
+                        return next;
+                    }
+                }
+            }
+
+        }
+        return null;
+    }
+
     public void insertObjectTriple(String subjectURI, String predicateURI, String objectURI) {
 
         model.add(getResourceFromUri(subjectURI), getPropertyFromUri(predicateURI), getResourceFromUri(objectURI));
@@ -184,4 +217,6 @@ public class ModelContainer {
         model.add(getResourceFromUri(subjectURI), getPropertyFromUri(predicateURI), value);
 
     }
+
+
 }

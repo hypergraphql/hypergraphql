@@ -44,7 +44,7 @@ public class FetcherFactory {
         return environment -> {
 
             FetchParams params = new FetchParams(environment,hgqlschema);
-            return params.getClient().getValuesOfObjectProperty(params.getSubjectResource(), params.getPredicateURI());
+            return params.getClient().getValuesOfObjectProperty(params.getSubjectResource(), params.getPredicateURI(), params.getTargetURI());
         };
     }
 
@@ -80,7 +80,7 @@ public class FetcherFactory {
         return environment -> {
 
             FetchParams params = new FetchParams(environment, hgqlschema);
-            return params.getClient().getValueOfObjectProperty(params.getSubjectResource(), params.getPredicateURI());
+            return params.getClient().getValueOfObjectProperty(params.getSubjectResource(), params.getPredicateURI(), params.getTargetURI());
         };
     }
 

@@ -12,6 +12,7 @@ public class FetchParams {
     private Resource subjectResource;
     private String predicateURI;
     private ModelContainer client;
+    private String targetURI;
 
 
 
@@ -21,6 +22,12 @@ public class FetchParams {
         String predicate = ((Field) environment.getFields().toArray()[0]).getName();
         predicateURI = hgqlschema.getFields().get(predicate).getId();
         client = environment.getContext();
+        if (!environment.getParentType().getName().equals("Query")) {
+            String targetName = hgqlschema.getTypes().get(environment.getParentType().getName()).getField(predicate).getTargetName();
+            if (hgqlschema.getTypes().containsKey(targetName) && hgqlschema.getTypes().get(targetName).getId()!=null) {
+                targetURI=hgqlschema.getTypes().get(targetName).getId();
+            }
+        }
     }
 
     public Resource getSubjectResource() {
@@ -32,5 +39,6 @@ public class FetchParams {
     public ModelContainer getClient() {
         return client;
     }
+    public String getTargetURI() {return targetURI; }
 
 }
