@@ -139,7 +139,7 @@ Basic settings are defined in the *properties.json* file. The defaults are:
 
 ```js
 {
-    "name": "mydemo",
+    "name": "dbpedia-sparql-demo",
     "schemaFile": "schema.graphql",
     "serviceFile": "services.json",
     "graphql": {
@@ -163,31 +163,41 @@ The schema definition complies with the GraphQL spec (see: 	[http://graphql.org/
 ```
 type __Context {
     Person:         _@href(iri: "http://dbpedia.org/ontology/Person")
+    Company:        _@href(iri: "http://dbpedia.org/ontology/Company")
     City:           _@href(iri: "http://dbpedia.org/ontology/City")
     Country:        _@href(iri: "http://dbpedia.org/ontology/Country")
     name:           _@href(iri: "http://xmlns.com/foaf/0.1/name")
     label:          _@href(iri: "http://www.w3.org/2000/01/rdf-schema#label")
     birthPlace:     _@href(iri: "http://dbpedia.org/ontology/birthPlace")
     birthDate:      _@href(iri: "http://dbpedia.org/ontology/birthDate")
+    locationCity:   _@href(iri: "http://dbpedia.org/ontology/locationCity")
+    owner:          _@href(iri: "http://dbpedia.org/ontology/owner")
     country:        _@href(iri: "http://dbpedia.org/ontology/country")
     leader:         _@href(iri: "http://dbpedia.org/ontology/leader")
 }
 
-type Person @service(id:"live-dbpedia") {
-    name: String @service(id:"dbpedia")
-    label: [String] @service(id:"dbpedia")
-    birthPlace: City @service(id:"dbpedia")
-    birthDate: String @service(id:"dbpedia")
+type Person @service(id:"dbpedia-sparql") {
+    name: String @service(id:"dbpedia-sparql")
+    label: [String] @service(id:"dbpedia-sparql")
+    birthPlace: City @service(id:"dbpedia-sparql")
+    birthDate: String @service(id:"dbpedia-sparql")
 }
 
-type City @service(id:"hgql-demo") {
-    label: [String] @service(id:"hgql-demo")
-    country: Country @service(id:"hgql-demo")
-    leader: Person @service(id:"hgql-demo")
+type Company @service(id:"dbpedia-sparql") {
+    name: [String] @service(id:"dbpedia-sparql")
+    label: [String] @service(id:"dbpedia-sparql")
+    locationCity: City @service(id:"dbpedia-sparql")
+    owner: [Person] @service(id:"dbpedia-sparql")
 }
 
-type Country @service(id:"dbpedia") {
-    label: [String] @service(id:"dbpedia")
+type City @service(id:"dbpedia-sparql") {
+    label: [String] @service(id:"dbpedia-sparql")
+    country: Country @service(id:"dbpedia-sparql")
+    leader: Person @service(id:"dbpedia-sparql")
+}
+
+type Country @service(id:"dbpedia-sparql") {
+    label: [String] @service(id:"dbpedia-sparql")
 }
 ```
 
@@ -203,25 +213,12 @@ The following example presents a possible mapping for the schema above, where al
 ```json
 [
     {
-      "id": "dbpedia",
+      "id": "dbpedia-sparql",
       "type": "SPARQLEndpointService",
       "url": "http://dbpedia.org/sparql/",
       "graph": "http://dbpedia.org",
       "user": "",
       "password": ""
-    },
-    {
-      "id": "live-dbpedia",
-      "type": "SPARQLEndpointService",
-      "url": "http://live.dbpedia.org/sparql/",
-      "graph": "",
-      "user": "",
-      "password": ""
-    },
-    {
-      "id": "hgql-demo",
-      "type": "HGraphQLService",
-      "url": "http://hypergraphql.org/demo",
     }
 ]
 ```
