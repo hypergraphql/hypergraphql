@@ -77,6 +77,5 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
         this.localmodel = ModelFactory.createDefaultModel();
         this.localmodel.read(filepath,filetype);
 
-
     }
 }

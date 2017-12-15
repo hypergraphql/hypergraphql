@@ -127,21 +127,9 @@ public class HGraphQLConverter {
     private String getSelectNonRoot(ArrayNode jsonQuery, Set<String> input, String rootType) {
 
 
+        String topQueryFieldName = rootType + "_GET_BY_ID";
 
-        String typeUri = schema.getTypes().get(rootType).getId();
-        Map<String, FieldOfTypeConfig> fields = schema.getTypes().get("Query").getFields();
-        Set<String> queryFieldNames = fields.keySet();
-
-        String topQueryFieldName = null;
-
-        for (String queryFieldName : queryFieldNames) {
-
-            String targetId = schema.getTypes().get(fields.get(queryFieldName).getTargetName()).getId();
-
-            if (typeUri.equals(targetId) && schema.getQueryFields().get(queryFieldName).type().equals(HGQL_QUERY_GET_BY_ID_FIELD)) {
-                topQueryFieldName = queryFieldName;
-            }
-        };
+        System.out.println(topQueryFieldName);
 
         String key = topQueryFieldName + urisArgSTR(input);
 

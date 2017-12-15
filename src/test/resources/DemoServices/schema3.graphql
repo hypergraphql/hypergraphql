@@ -4,6 +4,7 @@ type __Context {
     label:          _@href(iri: "http://www.w3.org/2000/01/rdf-schema#label")
     comment:        _@href(iri: "http://www.w3.org/2000/01/rdf-schema#comment")
     country:        _@href(iri: "http://dbpedia.org/ontology/country")
+    capital:        _@href(iri: "http://dbpedia.org/ontology/capital")
     FaoCountry:     _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/self_governing")
     hasBorderWith:  _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/hasBorderWith")
     GeoRegion:      _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/geographical_region")
@@ -52,7 +53,7 @@ type City {
     comment: [String] @service(id:"dbpedia-hgql")
 }
 
-type Country {
+type Country  {
     label: [String] @service(id:"dbpedia-hgql")
     capital: [City] @service(id:"dbpedia-hgql")
     comment: [String] @service(id:"dbpedia-hgql")
