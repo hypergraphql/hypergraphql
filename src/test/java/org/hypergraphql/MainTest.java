@@ -18,8 +18,8 @@ public class MainTest {
 //
        public static void main(String[] args) {
 
-//       ServerStart server1 = new ServerStart("src/test/resources/properties.json");
-//       ServerStart server2 = new ServerStart("src/test/resources/externalHGQLserver/properties.json");
+//       ServerStart server1 = new ServerStart("src/test/resources/config.json");
+//       ServerStart server2 = new ServerStart("src/test/resources/externalHGQLserver/config.json");
 //       server1.run();
 //       server2.run();
 

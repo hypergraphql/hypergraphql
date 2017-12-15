@@ -25,7 +25,7 @@ class HGraphQLServiceTest {
     public void getModelFromHGQLService() throws IllegalAccessException, NoSuchFieldException, NoSuchMethodException, InvocationTargetException {
 
 
-        HGQLConfig config = new HGQLConfig("src/test/resources/properties.json");
+        HGQLConfig config = new HGQLConfig("src/test/resources/config.json");
         Controller controller = new Controller();
         controller.start(config);
 
@@ -34,7 +34,7 @@ class HGraphQLServiceTest {
 
         Field url = HGraphQLService.class.getDeclaredField("url");
         url.setAccessible(true);
-        url.set(hgqlService, "http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().path());
+        url.set(hgqlService, "http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphqlPath());
 
         Field user = HGraphQLService.class.getDeclaredField("user");
         user.setAccessible(true);

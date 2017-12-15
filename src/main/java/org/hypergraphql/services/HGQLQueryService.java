@@ -60,6 +60,7 @@ public class HGQLQueryService {
 
             ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 
+
             if (acceptType!=null) {
                 result.put("data", client.getDataOutput(acceptType));
             } else {

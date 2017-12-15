@@ -104,34 +104,32 @@ public class HGQLSchema {
             String typeUri = THIS_SCHEMA_NAMESPACE + typeName;
             rdfSchema.insertStringLiteralTriple(typeUri, HGQL_HAS_NAME, typeName);
             rdfSchema.insertObjectTriple(typeUri, HGQL_HREF, contextMap.get(typeName));
-
-
-            String getQueryUri = typeUri + "_GET";
-            String getByIdQueryUri = typeUri + "_GET_BY_ID";
-
             rdfSchema.insertObjectTriple(typeUri, RDF_TYPE, HGQL_OBJECT_TYPE);
 
-            rdfSchema.insertObjectTriple(getQueryUri, RDF_TYPE, HGQL_QUERY_FIELD);
-            rdfSchema.insertObjectTriple(getQueryUri, RDF_TYPE, HGQL_QUERY_GET_FIELD);
-            rdfSchema.insertObjectTriple(THIS_SCHEMA_NAMESPACE + "query", HGQL_HAS_FIELD, getQueryUri);
-            rdfSchema.insertStringLiteralTriple(getQueryUri, HGQL_HAS_NAME, typeName + "_GET");
-            rdfSchema.insertObjectTriple(getByIdQueryUri, RDF_TYPE, HGQL_QUERY_FIELD);
-            rdfSchema.insertObjectTriple(getByIdQueryUri, RDF_TYPE, HGQL_QUERY_GET_BY_ID_FIELD);
-            rdfSchema.insertObjectTriple(THIS_SCHEMA_NAMESPACE + "query", HGQL_HAS_FIELD, getByIdQueryUri);
-            rdfSchema.insertStringLiteralTriple(getByIdQueryUri, HGQL_HAS_NAME, typeName + "_GET_BY_ID");
-
-            String outputListTypeURI = THIS_SCHEMA_NAMESPACE + UUID.randomUUID();
-
-            rdfSchema.insertObjectTriple(outputListTypeURI, RDF_TYPE, HGQL_LIST_TYPE);
-            rdfSchema.insertObjectTriple(outputListTypeURI, HGQL_OF_TYPE, typeUri);
-
-            rdfSchema.insertObjectTriple(getQueryUri, HGQL_OUTPUT_TYPE, outputListTypeURI);
-            rdfSchema.insertObjectTriple(getByIdQueryUri, HGQL_OUTPUT_TYPE, outputListTypeURI);
 
             TypeDefinition type = types.get(typeName);
 
             for (Directive dir : type.getDirectives()) {
                 if (dir.getName().equals("service")) {
+                    String getQueryUri = typeUri + "_GET";
+                    String getByIdQueryUri = typeUri + "_GET_BY_ID";
+
+                    rdfSchema.insertObjectTriple(getQueryUri, RDF_TYPE, HGQL_QUERY_FIELD);
+                    rdfSchema.insertObjectTriple(getQueryUri, RDF_TYPE, HGQL_QUERY_GET_FIELD);
+                    rdfSchema.insertObjectTriple(THIS_SCHEMA_NAMESPACE + "query", HGQL_HAS_FIELD, getQueryUri);
+                    rdfSchema.insertStringLiteralTriple(getQueryUri, HGQL_HAS_NAME, typeName + "_GET");
+                    rdfSchema.insertObjectTriple(getByIdQueryUri, RDF_TYPE, HGQL_QUERY_FIELD);
+                    rdfSchema.insertObjectTriple(getByIdQueryUri, RDF_TYPE, HGQL_QUERY_GET_BY_ID_FIELD);
+                    rdfSchema.insertObjectTriple(THIS_SCHEMA_NAMESPACE + "query", HGQL_HAS_FIELD, getByIdQueryUri);
+                    rdfSchema.insertStringLiteralTriple(getByIdQueryUri, HGQL_HAS_NAME, typeName + "_GET_BY_ID");
+
+                    String outputListTypeURI = THIS_SCHEMA_NAMESPACE + UUID.randomUUID();
+
+                    rdfSchema.insertObjectTriple(outputListTypeURI, RDF_TYPE, HGQL_LIST_TYPE);
+                    rdfSchema.insertObjectTriple(outputListTypeURI, HGQL_OF_TYPE, typeUri);
+
+                    rdfSchema.insertObjectTriple(getQueryUri, HGQL_OUTPUT_TYPE, outputListTypeURI);
+                    rdfSchema.insertObjectTriple(getByIdQueryUri, HGQL_OUTPUT_TYPE, outputListTypeURI);
                     String serviceId = ((StringValue) dir.getArgument("id").getValue()).getValue();
 
                     String serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
@@ -143,7 +141,7 @@ public class HGQLSchema {
             List<Node> typeChildren = type.getChildren();
 
             for (Node node : typeChildren) {
-                    if (node.getClass().getSimpleName().equals("FieldDefinition")) {
+                if (node.getClass().getSimpleName().equals("FieldDefinition")) {
                     FieldDefinition field = (FieldDefinition) node;
                     String fieldURI = THIS_SCHEMA_NAMESPACE + typeName + "/" + field.getName();
 
@@ -165,7 +163,7 @@ public class HGQLSchema {
             }
         }
 
-       generateConfigs(services);
+        generateConfigs(services);
 
     }
 
@@ -288,12 +286,12 @@ public class HGQLSchema {
     private String getOutputType(Type type) {
 
         if (type.getClass()==TypeName.class) {
-           TypeName castType = (TypeName) type;
-           String name = castType.getName();
+            TypeName castType = (TypeName) type;
+            String name = castType.getName();
 
-           if (SCALAR_TYPES.containsKey(name)) {
-               return SCALAR_TYPES.get(name);
-           } else return THIS_SCHEMA_NAMESPACE + name;
+            if (SCALAR_TYPES.containsKey(name)) {
+                return SCALAR_TYPES.get(name);
+            } else return THIS_SCHEMA_NAMESPACE + name;
         }
 
         String dummyNode = THIS_SCHEMA_NAMESPACE + UUID.randomUUID();

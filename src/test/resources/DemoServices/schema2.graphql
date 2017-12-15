@@ -1,0 +1,43 @@
+type __Context {
+    Scheme:         _@href(iri: "http://www.w3.org/2004/02/skos/core#ConceptScheme")
+    Concept:        _@href(iri: "http://www.w3.org/2004/02/skos/core#Concept")
+    hasTopConcept:        _@href(iri: "http://www.w3.org/2004/02/skos/core#hasTopConcept")
+    prefLabel:        _@href(iri: "http://www.w3.org/2004/02/skos/core#prefLabel")
+    altLabel:        _@href(iri: "http://www.w3.org/2004/02/skos/core#altLabel")
+    hiddenLabel:        _@href(iri: "http://www.w3.org/2004/02/skos/core#hiddenLabel")
+    broader:        _@href(iri: "http://www.w3.org/2004/02/skos/core#broader")
+    narrower:        _@href(iri: "http://www.w3.org/2004/02/skos/core#narrower")
+    related:        _@href(iri: "http://www.w3.org/2004/02/skos/core#related")
+    broadMatch:        _@href(iri: "http://www.w3.org/2004/02/skos/core#broadMatch")
+    closeMatch:        _@href(iri: "http://www.w3.org/2004/02/skos/core#closeMatch")
+    narrowMatch:        _@href(iri: "http://www.w3.org/2004/02/skos/core#narrowMatch")
+    relatedMatch:        _@href(iri: "http://www.w3.org/2004/02/skos/core#relatedMatch")
+    exactMatch:        _@href(iri: "http://www.w3.org/2004/02/skos/core#exactMatch")
+    note:        _@href(iri: "http://www.w3.org/2004/02/skos/core#note")
+    definition:        _@href(iri: "http://www.w3.org/2004/02/skos/core#definition")
+    inScheme:        _@href(iri: "http://www.w3.org/2004/02/skos/core#inScheme")
+    topConceptOf:        _@href(iri: "http://www.w3.org/2004/02/skos/core#topConceptOf")
+}
+
+type Scheme @service(id:"agrovoc-local") {
+    hasTopConcept: [Concept] @service(id:"agrovoc-local")
+    prefLabel: [String] @service(id:"agrovoc-local")
+  }
+
+type Concept @service(id:"agrovoc-local") {
+    prefLabel: [String] @service(id:"agrovoc-local")
+    altLabel: [String] @service(id:"agrovoc-local")
+    hiddenLabel: [String] @service(id:"agrovoc-local")
+    broader: [Concept] @service(id:"agrovoc-local")
+    narrower: [Concept] @service(id:"agrovoc-local")
+    related: [Concept] @service(id:"agrovoc-local")
+    broadMatch: [Concept] @service(id:"agrovoc-local")
+    closeMatch: [Concept] @service(id:"agrovoc-local")
+    narrowMatch: [Concept] @service(id:"agrovoc-local")
+    relatedMatch: [Concept] @service(id:"agrovoc-local")
+    exactMatch: [Concept] @service(id:"agrovoc-local")
+    note: [String] @service(id:"agrovoc-local")
+    definition: [String] @service(id:"agrovoc-local")
+    inScheme: [Scheme] @service(id:"agrovoc-local")
+    topConceptOf: [Scheme] @service(id:"agrovoc-local")
+}

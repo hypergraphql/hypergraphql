@@ -51,21 +51,20 @@ public class Controller {
 
 
     public void start(HGQLConfig config) {
-        System.out.println("GraphQL server started at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().path());
-        System.out.println("GraphiQL UI available at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphiql());
 
-        Service service1 = Service.ignite().port(config.getGraphqlConfig().port());
+        System.out.println("HGQL service name: " + config.getName());
+        System.out.println("GraphQL server started at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphqlPath());
+        System.out.println("GraphiQL UI available at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphiqlPath());
 
-        //port(config.getGraphqlConfig().port());
-
+        Service hgqlService = Service.ignite().port(config.getGraphqlConfig().port());
 
         // get method for accessing the GraphiQL UI
 
-        service1.get(config.getGraphqlConfig().graphiql(), (req, res) -> {
+        hgqlService.get(config.getGraphqlConfig().graphiqlPath(), (req, res) -> {
 
             Map<String, String> model = new HashMap<>();
 
-            model.put("template", String.valueOf(config.getGraphqlConfig().path()));
+            model.put("template", String.valueOf(config.getGraphqlConfig().graphqlPath()));
 
             return new VelocityTemplateEngine().render(
                     new ModelAndView(model, "graphiql.vtl")
@@ -75,7 +74,7 @@ public class Controller {
 
         // post method for accessing the GraphQL getSetvice
 
-        service1.post(config.getGraphqlConfig().path(), (req, res) -> {
+        hgqlService.post(config.getGraphqlConfig().graphqlPath(), (req, res) -> {
             ObjectMapper mapper = new ObjectMapper();
             HGQLQueryService service = new HGQLQueryService(config);
 
@@ -122,7 +121,7 @@ public class Controller {
 
         //Return the internal HGQL schema representation as rdf.
 
-        get(config.getGraphqlConfig().path() , (req, res) -> {
+        hgqlService.get(config.getGraphqlConfig().graphqlPath() , (req, res) -> {
 
             String acceptType = req.headers("accept");
 

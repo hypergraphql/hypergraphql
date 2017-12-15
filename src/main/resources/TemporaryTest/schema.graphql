@@ -1,4 +1,4 @@
-type __Vocabulary {
+type __Context {
     Scheme:         _@href(iri: "http://www.w3.org/2004/02/skos/core#ConceptScheme")
     Concept:        _@href(iri: "http://www.w3.org/2004/02/skos/core#Concept")
     hasTopConcept:        _@href(iri: "http://www.w3.org/2004/02/skos/core#hasTopConcept")

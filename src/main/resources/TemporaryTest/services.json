@@ -1,8 +1,0 @@
-[
-    {
-      "id": "agrovoc-local",
-      "type": "LocalModelSPARQLService",
-      "filepath": "stw.rdf",
-      "filetype": "RDF/XML"
-    }
-]

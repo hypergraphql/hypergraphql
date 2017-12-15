@@ -38,7 +38,6 @@ import static graphql.Scalars.*;
 public class HGQLConfig {
 
     private String name;
-    private String serviceFile;
     private String schemaFile;
     private GraphqlConfig graphqlConfig;
     private List<ServiceConfig> serviceConfigs;
@@ -46,30 +45,6 @@ public class HGQLConfig {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public void setServiceFile(String serviceFile) {
-        this.serviceFile = serviceFile;
-    }
-
-    public String getSchemaFile() {
-        return schemaFile;
-    }
-
-    public void setSchemaFile(String schemaFile) {
-        this.schemaFile = schemaFile;
-    }
-
-    public void setGraphqlConfig(GraphqlConfig graphqlConfig) {
-        this.graphqlConfig = graphqlConfig;
-    }
-
-    public void setServiceConfigs(List<ServiceConfig> serviceConfigs) {
-        this.serviceConfigs = serviceConfigs;
-    }
-
-    public void setRegistry(TypeDefinitionRegistry registry) {
-        this.registry = registry;
     }
 
     public GraphQLSchema getSchema() {
@@ -82,10 +57,6 @@ public class HGQLConfig {
 
     public HGQLSchema getHgqlSchema() {
         return hgqlSchema;
-    }
-
-    public void setHgqlSchema(HGQLSchema hgqlSchema) {
-        this.hgqlSchema = hgqlSchema;
     }
 
     public static Logger getLogger() {
@@ -104,17 +75,15 @@ public class HGQLConfig {
     @JsonCreator
     private  HGQLConfig(
             @JsonProperty("name") String name,
-            @JsonProperty("serviceFile") String serviceFile,
-            @JsonProperty("schemaFile") String schemaFile,
-            @JsonProperty("graphql") GraphqlConfig graphql
+            @JsonProperty("schema") String schemaFile,
+            @JsonProperty("server") GraphqlConfig graphqlConfig,
+            @JsonProperty("services") List<ServiceConfig> services
     ) {
         this.name = name;
-        this.serviceFile = serviceFile;
         this.schemaFile = schemaFile;
-        this.graphqlConfig = graphql;
+        this.graphqlConfig = graphqlConfig;
+        this.serviceConfigs = services;
     }
-
-
 
     public HGQLConfig(String propertyFilepath) {
 
@@ -123,26 +92,12 @@ public class HGQLConfig {
         try {
             HGQLConfig config = mapper.readValue(new File(propertyFilepath), HGQLConfig.class);
 
-            if (config != null) {
-
-                try {
-
-                    this.serviceConfigs = mapper.readValue(new File(config.serviceFile), new TypeReference<List<ServiceConfig>>(){});
-
-                } catch (IOException e) {
-                    logger.error(e);
-                }
-            }
-
-
-
-
             SchemaParser schemaParser = new SchemaParser();
             this.registry = schemaParser.parse(new File(config.schemaFile));
 
             this.name = config.name;
             this.schemaFile = config.schemaFile;
-            this.serviceFile = config.serviceFile;
+            this.serviceConfigs = config.serviceConfigs;
             this.graphqlConfig = config.graphqlConfig;
             HGQLSchemaWiring wiring = new HGQLSchemaWiring(this.registry,this.name,this.serviceConfigs);
             this.schema = wiring.getSchema();
@@ -168,9 +123,6 @@ public class HGQLConfig {
         return name;
     }
 
-    public String getServiceFile() {
-        return serviceFile;
-    }
 
     public TypeDefinitionRegistry getRegistry() {
         return registry;

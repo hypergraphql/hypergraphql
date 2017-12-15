@@ -17,17 +17,11 @@ public class Main {
     public static void main(String[] args) {
 
         PropertyConfigurator.configure("log4j.properties");
-        HGQLConfig config = new HGQLConfig("src/main/resources/TemporaryTest/properties.json");
-        logger.info("Server started at http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().path());
+        HGQLConfig config = new HGQLConfig("src/main/resources/TemporaryTest/config.json");
+        logger.info("Server started at http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphqlPath());
 
         Controller controller = new Controller();
         controller.start(config);
-
-
-
-
-
-
 
     }
 }

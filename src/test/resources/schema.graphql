@@ -1,4 +1,4 @@
-type __Vocabulary {
+type __Context {
     Person:         _@href(iri: "http://dbpedia.org/ontology/Person")
     City:           _@href(iri: "http://dbpedia.org/ontology/City")
     name:           _@href(iri: "http://xmlns.com/foaf/0.1/name")

@@ -6,26 +6,26 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class GraphqlConfig {
 
     private Integer port;
-    private String path;
-    private String graphiql;
+    private String graphqlPath;
+    private String graphiqlPath;
 
     @JsonCreator
     public GraphqlConfig(@JsonProperty("port") Integer port,
-                         @JsonProperty("path") String path,
-                         @JsonProperty("graphiql") String graphiql
+                         @JsonProperty("graphql") String graphqlPath,
+                         @JsonProperty("graphiql") String graphiqlPath
     ) {
         this.port = port;
-        this.path = path;
-        this.graphiql = graphiql;
+        this.graphqlPath = graphqlPath;
+        this.graphiqlPath = graphiqlPath;
     }
 
     public Integer port() {
         return port;
     }
-    public String path() {
-        return path;
+    public String graphqlPath() {
+        return graphqlPath;
     }
-    public String graphiql() {
-        return graphiql;
+    public String graphiqlPath() {
+        return graphiqlPath;
     }
 }
