@@ -18,7 +18,7 @@ permalink: /tutorial/
 
 In this tutorial we will demonstrate the end-to-end process of defining and linking several linked data services and datasets using HyperGraphQL.
 
-<img src="https://semantic-integration.github.io/hypergraphql/sources/service-linking.svg" alt="diagram">
+<img src="https://semantic-integration.github.io/hypergraphql/sources/service-linking.png" alt="diagram">
 
 
 ## Service 1: DBpedia SPARQL endpoint
