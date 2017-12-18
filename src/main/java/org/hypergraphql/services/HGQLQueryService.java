@@ -54,7 +54,7 @@ public class HGQLQueryService {
             return result;
         }
 
-        if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
+         if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
             ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery(), hgqlSchema);
 
