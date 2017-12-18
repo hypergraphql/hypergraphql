@@ -17,10 +17,28 @@ permalink: /tutorial/
 
 # Tutorial
 
-In this tutorial we will demonstrate the end-to-end process of defining and linking several linked data services and datasets using HyperGraphQL.
+In this tutorial we outline all the steps neccessary to define and link several linked data services and datasets using HyperGraphQL. The resulting architecture consists of three HyperGraphQL instances:
+1. an instance exposing a fragment of [DBpedia](http://wiki.dbpedia.org/) dataset accessed via DBpedia's SPARQL endpoint;
+2. an instance serving a subset of [AGROVOC SKOS taxonomy](http://aims.fao.org/vest-registry/vocabularies/agrovoc-multilingual-agricultural-thesaurus) accessed from a local file;
+3. an instance serving a superset of the [FAO Geopolitical Ontology](http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/) accessed from a local file, and moreover, linked fragments of data exposed by the other two HyperGraphQL instances. 
+
 
 <img src="https://semantic-integration.github.io/hypergraphql/sources/service-linking.png" alt="diagram">
 
+All the resources, including configuration files, GraphQL schemas and RDF datasets, are included in the [src/test/resources/DemoServices](https://github.com/semantic-integration/hypergraphql/tree/master/src/test/resources/DemoServices) directory of the project's GitHub repository. 
+
+In order to start all three instances described in this turorial at once, you can replace the content of the `Main.main(String[] args)` method in your local repository of HyperGraphQL with the following code, and execute the method:
+
+```java
+HGQLConfig config1 = new HGQLConfig("src/test/resources/DemoServices/config1.json");
+new Controller().start(config1); //dbpedia-hgql
+HGQLConfig config2 = new HGQLConfig("src/test/resources/DemoServices/config2.json");
+new Controller().start(config2); //agrovoc-hgql
+HGQLConfig config3 = new HGQLConfig("src/test/resources/DemoServices/config3.json");
+new Controller().start(config3); //fao-go-hgql
+```
+
+<br>
 
 ## Service 1: DBpedia SPARQL endpoint
 
