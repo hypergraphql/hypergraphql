@@ -17,6 +17,7 @@ import java.util.*;
 
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_NAMESPACE;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_URI;
+import static org.hypergraphql.config.schema.HGQLVocabulary.RDF_TYPE;
 
 public abstract class Service {
 
@@ -133,6 +134,7 @@ public abstract class Service {
         if (node!=null && !node.isNull())
              paths = getQueryPaths(node, schema);
 
+
         for (LinkedList<QueryNode> path : paths) {
 
             if (hasMarkerLeaf(path, markers)) {
@@ -144,8 +146,30 @@ public abstract class Service {
 
         }
 
+        if (markers.contains(query.get("nodeId").asText())){
+            resultset.put(query.get("nodeId").asText(),findRootIdentifiers(model,schema.getTypes().get(query.get("targetName").asText())));
+
+
+
+        }
+
 
         return resultset;
+    }
+
+    private Set<String> findRootIdentifiers(Model model, TypeConfig targetName) {
+
+        Set<String> identifiers = new HashSet<>();
+        Model currentmodel = ModelFactory.createDefaultModel();
+        Resource res = currentmodel.createResource(targetName.getId());
+        Property property = currentmodel.createProperty(RDF_TYPE);
+
+        ResIterator iterator = model.listResourcesWithProperty(property, res);
+
+        while (iterator.hasNext()) {
+            identifiers.add(iterator.nextResource().toString());
+        }
+        return identifiers;
     }
 
     protected String getLeafMarker(LinkedList<QueryNode> path) {
