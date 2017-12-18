@@ -123,7 +123,7 @@ The result of initiating this instance should be a GraphiQL interface as below:
 
 ## Service 2: AGROVOC taxonomy file
 
-Next, we define another instance which is used to access the AGROVOC SKOS taxonomy, originally supplied from a local file. The file `agrovoc.ttl` used here, containinf dat in the turtle format, is a subset of the original AGROVOC dataset, covering only the fragment expressed exclusively in the [SKOS vocabulary](https://www.w3.org/TR/skos-reference/). Here, the service type is set to `LocalModelSPARQLService` and the instance is initiated on port 8082. ....The file is further closed 
+Next, we define another instance which is used to access the AGROVOC SKOS taxonomy, originally supplied from a local file. The file `agrovoc.ttl` used here, containinf dat in the turtle format, is a subset of the original AGROVOC dataset, covering only the fragment expressed exclusively in the [SKOS vocabulary](https://www.w3.org/TR/skos-reference/). Here, the service type is set to `LocalModelSPARQLService` and the instance is initiated on port 8082. 
 
 ```json
 {
@@ -145,7 +145,7 @@ Next, we define another instance which is used to access the AGROVOC SKOS taxono
 }
 ```
 
-Note that the schema below is in fact generic, and suitable for exposing any SKOS taxonomy, not only AGROVOC.  
+Note that the schema below is in fact generic, and suitable for exposing any SKOS taxonomy, not only AGROVOC.  However, since HyperGraphQL is not able to infer any new relationships on its own, it has to be ensured that the relevant inferences are materialized in advance. For instance, since the AGROVOC taxonomy originally does not include and `skos:narrower` relationships, these have to be first included in the file whenever the inverse `skos:broader` links are present.  
 
 ```
 type __Context {
