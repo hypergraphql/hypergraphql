@@ -145,7 +145,7 @@ Next, we define another instance which is used to access the AGROVOC SKOS taxono
 }
 ```
 
-Note that the schema below is in fact generic, and suitable for exposing any SKOS taxonomy, not only AGROVOC.  However, since HyperGraphQL is not able to infer any new relationships on its own, it has to be ensured that the relevant inferences are materialized in advance. For instance, since the AGROVOC taxonomy originally does not include and `skos:narrower` relationships, these have to be first included in the file whenever the inverse `skos:broader` links are present.  
+Note that the schema below is in fact generic, and suitable for exposing any SKOS taxonomy, not only AGROVOC.  However, since HyperGraphQL is not able to infer any new relationships on its own, it has to be ensured that the relevant inferences are materialized in advance. For instance, since the AGROVOC taxonomy originally does not include any `skos:narrower` relationships, these have to be first included in the RDF graph whenever the inverse, `skos:broader`, links are present. 
 
 ```
 type __Context {
@@ -224,7 +224,7 @@ As a result, the GraphiQL interface exposes fields allowing for querying SKOS co
 
 ## Service 3: Geopolitical Ontology file + HGQL services 1 & 2
 
-Finally, we define the last HyperGraphQL instance, which employs some extra RDF data from FAO Geopolitical Ontology and links all three data sources together. In the configuration file we specify the references to both previously defined HyperGraphQL services of type `HGraphQLService` and exposed at URL, respectively, `http://localhost:8081/graphql` and `http://localhost:8082/graphql`. The third service of type `LocalModelSPARQLService` is defined as the one involved in the case of AGROVOC, and references the local file `fao.ttl`, again in turtle format. 
+Finally, we define the last HyperGraphQL instance, which employs some extra RDF data from the Geopolitical Ontology and links all three data sources together. In the configuration file we specify the references to both previously defined HyperGraphQL instances of type `HGraphQLService` and exposed with URLs `http://localhost:8081/graphql` and `http://localhost:8082/graphql`, respectively. The third service of type `LocalModelSPARQLService` is defined analogically to the the case of AGROVOC, with a reference to a local file `fao.ttl`, again in turtle format. 
 
 ```json
 {
@@ -256,7 +256,7 @@ Finally, we define the last HyperGraphQL instance, which employs some extra RDF 
 }
 ```
 
-The FAO Geopolitical Ontology contains outgoing `owl:sameAs` linkes to both DBpedia and AGROVOC taxonomy. These links are critical to linking all datasets, which is clearly reflected in the resulting GraphQL schema. The schema ...
+The schema directly reuses certain parts of the schemas of the previously defined HyperGraphQL instances, e.g., `City`, `Country` and `Concept`, with selected subsets of their original fields. It is important that the labels and IRIs of such reused parts match exactly those from the original HyperGraphQL instances, as this warrants correct linking of services and semantically faithful communication between them. Parts of the original schemas that are not relevant for the current service can be safely skipped. Also, whenever a type from a target HyperGraphQL service is to be used in the current schema, but not made directly quereable, ths `@service(id:"...")` annotation should be skipped, as in the case of `City`, `Country` and `Concept`.
 
 ```
 type __Context {
@@ -328,6 +328,9 @@ type Concept {
     related: [Concept] @service(id:"agrovoc-hgql")
 }
 ```
+
+The Geopolitical Ontology contains outgoing `owl:sameAs` links to both DBpedia and AGROVOC taxonomy. These links are critical to connecting the three datasets. This is captured in the schema where type `SelfGoverning`, corresponding to `http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/self_governing` in  the Geopolitical Ontology, has two field definitions: `sameInDBpedia: Country @service(id:"fao-local")` and `sameInAgrovoc: Concept @service(id:"fao-local")`. 
+
 
 <graphiql id="tutorial3" graphql="graphql3" graphiql="graphiql3" query=
 '{
