@@ -83,7 +83,7 @@ Below we list a few example queries via embedded GraphiQL interfaces. Feel free 
 <br>
 
 
-### Countries and their capitals' leaders
+### Countries and the leaders of their capital cities
 
 <graphiql id="demo3" graphql="graphql4" graphiql="graphiql4" query=
 '{
