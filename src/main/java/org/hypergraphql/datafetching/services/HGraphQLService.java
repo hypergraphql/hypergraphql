@@ -46,8 +46,8 @@ public class HGraphQLService extends Service {
 
         ObjectNode bodyParam = mapper.createObjectNode();
 
-        bodyParam.set("operationName", null);
-        bodyParam.set("variables", null);
+//        bodyParam.set("operationName", null);
+//        bodyParam.set("variables", null);
         bodyParam.put("query", graphQlQuery);
 
         Model model = ModelFactory.createDefaultModel();

@@ -1,12 +1,15 @@
 package org.hypergraphql;
 
 
+import org.apache.jena.ext.com.google.common.graph.Graph;
+import org.apache.jena.fuseki.embedded.FusekiServer;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.hypergraphql.Test.ServerStart;
 import org.junit.jupiter.api.Test;
 
+import java.io.*;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,7 +58,15 @@ public class MainTest {
 
 
            Model model1 = qExe.execConstruct();
-
+//           File file = new File("src/test/resources/TestServices/dbpedia1.ttl");
+//           try (OutputStream stream = new FileOutputStream(file)) {
+//               model1.write(stream,"TTL");
+//
+//           } catch (FileNotFoundException e) {
+//               e.printStackTrace();
+//           } catch (IOException e) {
+//               e.printStackTrace();
+//           }
 
 
            System.out.println(model1);
@@ -76,7 +87,7 @@ public class MainTest {
                pss.setCommandText("PREFIX dbpedia: <http://dbpedia.org/ontology/>\n" +
                        "PREFIX  foaf: <http://xmlns.com/foaf/0.1/>\n" +
                        "PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                       "CONSTRUCT { ?person dbpedia:birthPlace ?birthplace . \n" +
+                       "CONSTRUCT { ?person dbpedia:birthPlace ?birthplace . ?birthplace a dbpedia:City . \n" +
                                          "?birthplace rdfs:label ?birthplaceLabel  } \n" +
                        "WHERE\n" +
                        "  { ?person dbpedia:birthPlace ?birthplace . \n" +
@@ -92,20 +103,29 @@ public class MainTest {
 
 
 
-
-
-
            }
+
+
 
            model2.write(System.out, "NTRIPLE");
 
+//           File file2 = new File("src/test/resources/TestServices/cities1.ttl");
+//           try (OutputStream stream = new FileOutputStream(file2)) {
+//               model2.write(stream,"TTL");
+//
+//           } catch (FileNotFoundException e) {
+//               e.printStackTrace();
+//           } catch (IOException e) {
+//               e.printStackTrace();
+//           }
 
+           Dataset ds = DatasetFactory.createTxnMem() ;
 
-
-
-
-
-
+           FusekiServer server = FusekiServer.create()
+                   .add("/ds", ds)
+                   .build() ;
+           server.start() ;
+           server.stop() ;
 
 
 

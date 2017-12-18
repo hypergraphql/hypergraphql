@@ -1,0 +1,24 @@
+{
+    "name": "main",
+    "schema": "src/test/resources/TestServices/mainschema.graphql",
+    "server": {
+        "port": 8080,
+        "graphql": "/graphql",
+        "graphiql": "/graphiql"
+    },
+    "services": [
+        {
+            "id": "dbpedia-hgql",
+            "type": "HGraphQLService",
+            "url": "http://localhost:8081/graphql"
+        },
+        {
+            "id": "dbpedia-sparql",
+            "type": "SPARQLEndpointService",
+            "url": "http://localhost:3330/ds/sparql",
+            "graph": "",
+            "user": "",
+            "password": ""
+        }
+    ]
+}

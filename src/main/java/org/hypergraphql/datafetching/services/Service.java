@@ -24,7 +24,7 @@ public abstract class Service {
     protected String id;
 
 
-    protected Class SPARQLEndpointService;
+
 
     public String getType() {
         return type;
