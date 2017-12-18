@@ -17,10 +17,10 @@ permalink: /tutorial/
 
 # Tutorial
 
-In this tutorial we outline all the steps neccessary to define and link several linked data services and datasets using HyperGraphQL. The resulting architecture consists of three HyperGraphQL instances:
+In this tutorial we outline all the steps required to define and link several linked data services and datasets using HyperGraphQL. The resulting architecture consists of three HyperGraphQL instances:
 1. an instance exposing a fragment of [DBpedia](http://wiki.dbpedia.org/) dataset accessed via DBpedia's SPARQL endpoint;
-2. an instance serving a subset of [AGROVOC SKOS taxonomy](http://aims.fao.org/vest-registry/vocabularies/agrovoc-multilingual-agricultural-thesaurus) accessed from a local file;
-3. an instance serving a superset of the [FAO Geopolitical Ontology](http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/) accessed from a local file, and moreover, linked fragments of data exposed by the other two HyperGraphQL instances. 
+2. an instance serving the [AGROVOC SKOS taxonomy](http://aims.fao.org/vest-registry/vocabularies/agrovoc-multilingual-agricultural-thesaurus) provided from a local file;
+3. an instance serving the [FAO Geopolitical Ontology](http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/) provided from a local file, and furthermore linked to data exposed by the other two HyperGraphQL instances. 
 
 
 <img src="https://semantic-integration.github.io/hypergraphql/sources/service-linking.png" alt="diagram">
@@ -41,6 +41,8 @@ new Controller().start(config3); //fao-go-hgql
 <br>
 
 ## Service 1: DBpedia SPARQL endpoint
+
+The HyperGraphQL instance querying the DBpedia SPARQL endpoint is defined exactly as described in the [Documentation](/documentation) section and initiated on port 8081. Notably, the service type is `SPARQLEndpointService` and the endpoint's URL is set to `http://dbpedia.org/sparql/`.
 
 ```json
 {
@@ -63,6 +65,8 @@ new Controller().start(config3); //fao-go-hgql
     ]
 }
 ```
+
+The schema is focused around just two types - `Country` and `City` - with a few basic properties. 
 
 ```
 type __Context {
@@ -87,6 +91,7 @@ type Country @service(id:"dbpedia-sparql") {
 }
 ```
 
+The result of initiating this instance should be a GraphiQL interface as below:
 
 <graphiql id="tutorial1" graphql="graphql1" graphiql="graphiql1" query=
 '{
@@ -118,6 +123,8 @@ type Country @service(id:"dbpedia-sparql") {
 
 ## Service 2: AGROVOC taxonomy file
 
+Next, we define another instance which is used to access the AGROVOC SKOS taxonomy, originally supplied from a local file. The file `agrovoc.ttl` used here, containinf dat in the turtle format, is a subset of the original AGROVOC dataset, covering only the fragment expressed exclusively in the [SKOS vocabulary](https://www.w3.org/TR/skos-reference/). Here, the service type is set to `LocalModelSPARQLService` and the instance is initiated on port 8082. ....The file is further closed 
+
 ```json
 {
     "name": "agrovoc-hgql",
@@ -137,6 +144,8 @@ type Country @service(id:"dbpedia-sparql") {
     ]
 }
 ```
+
+Note that the schema below is in fact generic, and suitable for exposing any SKOS taxonomy, not only AGROVOC.  
 
 ```
 type __Context {
@@ -184,6 +193,7 @@ type Concept @service(id:"agrovoc-local") {
 }
 ```
 
+As a result, the GraphiQL interface exposes fields allowing for querying SKOS concepts, their relationships and labels.
 
 <graphiql id="tutorial2" graphql="graphql2" graphiql="graphiql2" query=
 '{
@@ -214,6 +224,8 @@ type Concept @service(id:"agrovoc-local") {
 
 ## Service 3: Geopolitical Ontology file + HGQL services 1 & 2
 
+Finally, we define the last HyperGraphQL instance, which employs some extra RDF data from FAO Geopolitical Ontology and links all three data sources together. In the configuration file we specify the references to both previously defined HyperGraphQL services of type `HGraphQLService` and exposed at URL, respectively, `http://localhost:8081/graphql` and `http://localhost:8082/graphql`. The third service of type `LocalModelSPARQLService` is defined as the one involved in the case of AGROVOC, and references the local file `fao.ttl`, again in turtle format. 
+
 ```json
 {
     "name": "fao-go-hgql",
@@ -243,6 +255,8 @@ type Concept @service(id:"agrovoc-local") {
     ]
 }
 ```
+
+The FAO Geopolitical Ontology contains outgoing `owl:sameAs` linkes to both DBpedia and AGROVOC taxonomy. These links are critical to linking all datasets, which is clearly reflected in the resulting GraphQL schema. The schema ...
 
 ```
 type __Context {
