@@ -29,7 +29,7 @@ Below we list a few example queries via embedded GraphiQL interfaces. Feel free 
 
 <graphiql id="demo1" graphql="graphql4" graphiql="graphiql4" query=
 '{
-  Person_GET(limit: 1, offset: 6) {
+  Person_GET(limit:10, offset:10) {
     _id
     _type
     name
@@ -83,7 +83,7 @@ Below we list a few example queries via embedded GraphiQL interfaces. Feel free 
 <br>
 
 
-### Countries, their capitals, and leaders of the capitals
+### Countries and their capitals' leaders
 
 <graphiql id="demo3" graphql="graphql4" graphiql="graphiql4" query=
 '{
