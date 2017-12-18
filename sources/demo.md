@@ -25,7 +25,7 @@ A live demo of the HyperGraphQL instance pointing at DBpedia SPARQL endpoint and
 
 Below we list a few example queries via embedded GraphiQL interfaces. Feel free to edit them!
 
-### People and their personal detail
+### People and their personal details
 
 <graphiql id="demo1" graphql="graphql4" graphiql="graphiql4" query=
 '{
@@ -83,7 +83,7 @@ Below we list a few example queries via embedded GraphiQL interfaces. Feel free 
 <br>
 
 
-### Countries and their capitals
+### Countries, their capitals, and leaders of the capitals
 
 <graphiql id="demo3" graphql="graphql4" graphiql="graphiql4" query=
 '{
@@ -117,6 +117,8 @@ Below we list a few example queries via embedded GraphiQL interfaces. Feel free 
 <br>
 
 ### Introspection query
+
+Introspection queries allow for accessing the schema of a GraphQL instance using designated GraphQL vocabulary.
 
 <graphiql id="demo4" graphql="graphql4" graphiql="graphiql4" query=
 '{

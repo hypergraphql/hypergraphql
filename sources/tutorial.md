@@ -66,7 +66,10 @@ The HyperGraphQL instance querying the DBpedia SPARQL endpoint is defined exactl
 }
 ```
 
+<br>
+
 The schema is focused around just two types - `Country` and `City` - with a few basic properties. 
+
 
 ```
 type __Context {
@@ -91,7 +94,12 @@ type Country @service(id:"dbpedia-sparql") {
 }
 ```
 
-The result of initiating this instance should be a GraphiQL interface as below:
+<br>
+
+The result of setting up this instance correctly should be a GraphiQL interface as below:
+
+
+
 
 <graphiql id="tutorial1" graphql="graphql1" graphiql="graphiql1" query=
 '{
@@ -145,28 +153,31 @@ Next, we define another instance which is used to access the AGROVOC SKOS taxono
 }
 ```
 
-Note that the schema below is in fact generic, and suitable for exposing any SKOS taxonomy, not only AGROVOC.  However, since HyperGraphQL is not able to infer any new relationships on its own, it has to be ensured that the relevant inferences are materialized in advance. For instance, since the AGROVOC taxonomy originally does not include any `skos:narrower` relationships, these have to be first included in the RDF graph whenever the inverse, `skos:broader`, links are present. 
+<br>
+
+Note that the schema below is in fact SKOS-generic, in the sense that it is suitable for exposing any SKOS taxonomy, not only AGROVOC. However, since HyperGraphQL is not able to infer any new relationships by its own, it has to be ensured that the relevant inferences are materialized in advance. For instance, since the AGROVOC taxonomy originally does not contain any `skos:narrower` relationships (only their inverses `skos:broader` are present) these have to be first included explicitly in the RDF graph.
+
 
 ```
 type __Context {
     Scheme:         _@href(iri: "http://www.w3.org/2004/02/skos/core#ConceptScheme")
     Concept:        _@href(iri: "http://www.w3.org/2004/02/skos/core#Concept")
-    hasTopConcept:        _@href(iri: "http://www.w3.org/2004/02/skos/core#hasTopConcept")
-    prefLabel:        _@href(iri: "http://www.w3.org/2004/02/skos/core#prefLabel")
-    altLabel:        _@href(iri: "http://www.w3.org/2004/02/skos/core#altLabel")
-    hiddenLabel:        _@href(iri: "http://www.w3.org/2004/02/skos/core#hiddenLabel")
+    hasTopConcept:  _@href(iri: "http://www.w3.org/2004/02/skos/core#hasTopConcept")
+    prefLabel:      _@href(iri: "http://www.w3.org/2004/02/skos/core#prefLabel")
+    altLabel:       _@href(iri: "http://www.w3.org/2004/02/skos/core#altLabel")
+    hiddenLabel:    _@href(iri: "http://www.w3.org/2004/02/skos/core#hiddenLabel")
     broader:        _@href(iri: "http://www.w3.org/2004/02/skos/core#broader")
-    narrower:        _@href(iri: "http://www.w3.org/2004/02/skos/core#narrower")
+    narrower:       _@href(iri: "http://www.w3.org/2004/02/skos/core#narrower")
     related:        _@href(iri: "http://www.w3.org/2004/02/skos/core#related")
-    broadMatch:        _@href(iri: "http://www.w3.org/2004/02/skos/core#broadMatch")
-    closeMatch:        _@href(iri: "http://www.w3.org/2004/02/skos/core#closeMatch")
-    narrowMatch:        _@href(iri: "http://www.w3.org/2004/02/skos/core#narrowMatch")
-    relatedMatch:        _@href(iri: "http://www.w3.org/2004/02/skos/core#relatedMatch")
-    exactMatch:        _@href(iri: "http://www.w3.org/2004/02/skos/core#exactMatch")
-    note:        _@href(iri: "http://www.w3.org/2004/02/skos/core#note")
-    definition:        _@href(iri: "http://www.w3.org/2004/02/skos/core#definition")
-    inScheme:        _@href(iri: "http://www.w3.org/2004/02/skos/core#inScheme")
-    topConceptOf:        _@href(iri: "http://www.w3.org/2004/02/skos/core#topConceptOf")
+    broadMatch:     _@href(iri: "http://www.w3.org/2004/02/skos/core#broadMatch")
+    closeMatch:     _@href(iri: "http://www.w3.org/2004/02/skos/core#closeMatch")
+    narrowMatch:    _@href(iri: "http://www.w3.org/2004/02/skos/core#narrowMatch")
+    relatedMatch:   _@href(iri: "http://www.w3.org/2004/02/skos/core#relatedMatch")
+    exactMatch:     _@href(iri: "http://www.w3.org/2004/02/skos/core#exactMatch")
+    note:           _@href(iri: "http://www.w3.org/2004/02/skos/core#note")
+    definition:     _@href(iri: "http://www.w3.org/2004/02/skos/core#definition")
+    inScheme:       _@href(iri: "http://www.w3.org/2004/02/skos/core#inScheme")
+    topConceptOf:   _@href(iri: "http://www.w3.org/2004/02/skos/core#topConceptOf")
 }
 
 type Scheme @service(id:"agrovoc-local") {
@@ -193,7 +204,10 @@ type Concept @service(id:"agrovoc-local") {
 }
 ```
 
-As a result, the GraphiQL interface exposes fields allowing for querying SKOS concepts, their relationships and labels.
+<br>
+
+As a result, the GraphiQL interface exposes fields intended for querying SKOS concepts, their relationships and labels, as shown below.
+
 
 <graphiql id="tutorial2" graphql="graphql2" graphiql="graphiql2" query=
 '{
@@ -224,7 +238,8 @@ As a result, the GraphiQL interface exposes fields allowing for querying SKOS co
 
 ## Service 3: Geopolitical Ontology file + HGQL services 1 & 2
 
-Finally, we define the last HyperGraphQL instance, which employs some extra RDF data from the Geopolitical Ontology and links all three data sources together. In the configuration file we specify the references to both previously defined HyperGraphQL instances of type `HGraphQLService` and exposed with URLs `http://localhost:8081/graphql` and `http://localhost:8082/graphql`, respectively. The third service of type `LocalModelSPARQLService` is defined analogically to the the case of AGROVOC, with a reference to a local file `fao.ttl`, again in turtle format. 
+Finally, we define the last HyperGraphQL instance, which employs some extra RDF data from the Geopolitical Ontology and connects all three data sources together. In the configuration file, we provide the references to both previously defined HyperGraphQL instances of type `HGraphQLService` and exposed with URLs `http://localhost:8081/graphql` and `http://localhost:8082/graphql`, respectively. The third service, of type `LocalModelSPARQLService`, is specified analogically to the case of AGROVOC, using a reference to a local file `fao.ttl`, again in turtle format. The insance is initiated on port 8083.
+
 
 ```json
 {
@@ -256,7 +271,10 @@ Finally, we define the last HyperGraphQL instance, which employs some extra RDF 
 }
 ```
 
-The schema directly reuses certain parts of the schemas of the previously defined HyperGraphQL instances, e.g., `City`, `Country` and `Concept`, with selected subsets of their original fields. It is important that the labels and IRIs of such reused parts match exactly those from the original HyperGraphQL instances, as this warrants correct linking of services and semantically faithful communication between them. Parts of the original schemas that are not relevant for the current service can be safely skipped. Also, whenever a type from a target HyperGraphQL service is to be used in the current schema, but not made directly quereable, ths `@service(id:"...")` annotation should be skipped, as in the case of `City`, `Country` and `Concept`.
+<br>
+
+The schema directly reuses certain parts of the schemas of the previously defined HyperGraphQL instances, e.g., `City`, `Country` and `Concept`, with selected subsets of their original fields. It is crucial that the labels and IRIs of such reused parts match exactly those from the original HyperGraphQL instances, as this warrants correct linking of services and semantically faithful communication between them. Parts of the original schemas that are not relevant for the current service can be safely skipped. Also, whenever a type from a target HyperGraphQL service is to be used in the current schema, but not made directly quereable, its corresponding `@service(id:"...")` annotation should be skipped, as it is done below in the case of `City`, `Country` and `Concept`.
+
 
 ```
 type __Context {
@@ -329,7 +347,12 @@ type Concept {
 }
 ```
 
-The Geopolitical Ontology contains outgoing `owl:sameAs` links to both DBpedia and AGROVOC taxonomy. These links are critical to connecting the three datasets. This is captured in the schema where type `SelfGoverning`, corresponding to `http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/self_governing` in  the Geopolitical Ontology, has two field definitions: `sameInDBpedia: Country @service(id:"fao-local")` and `sameInAgrovoc: Concept @service(id:"fao-local")`. 
+<br>
+
+The Geopolitical Ontology contains outgoing `owl:sameAs` links to both DBpedia and AGROVOC taxonomy. These links are critical to connecting the three datasets, and are captured in the schema within the type `SelfGoverning` (roughly corresponding to a country in teh Geopolitical Ontology), which includes fields `sameInDBpedia` and `sameInAgrovoc`, both mapped on the IRI `owl:sameAs`. Using these links one can naturally construct queries seamlessly spanning all three datasets and HyperGraphQL instances. Note, that since currently each instance individually applies strinct type checking, the Geopolitical Ontology had to be extended with the missing `rdf:type` assertions over the objects of `owl:sameAs` property. Consequently, each DBpedia identifier of a country had to be asserted as an instance of `dbo:Country` and each AGROVOC identifier as an instance of `skos:Concept`. This restriction should be likely relaxed in the future versions of HyperGraphQL. 
+
+The working example of the this instance is embedded below.
+
 
 
 <graphiql id="tutorial3" graphql="graphql3" graphiql="graphiql3" query=
