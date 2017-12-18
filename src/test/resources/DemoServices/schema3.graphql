@@ -53,7 +53,7 @@ type City {
     comment: [String] @service(id:"dbpedia-hgql")
 }
 
-type Country @service(id:"dbpedia-hgql") {
+type Country  {
     label: [String] @service(id:"dbpedia-hgql")
     capital: [City] @service(id:"dbpedia-hgql")
     comment: [String] @service(id:"dbpedia-hgql")
