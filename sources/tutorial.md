@@ -15,6 +15,7 @@ permalink: /tutorial/
 </graphiqlconfig>
 
 
+# Tutorial
 
 In this tutorial we will demonstrate the end-to-end process of defining and linking several linked data services and datasets using HyperGraphQL.
 
@@ -111,7 +112,7 @@ type Country @service(id:"dbpedia-sparql") {
     "services": [
         {
             "id": "agrovoc-local",
-            "type": "LocalModelService",
+            "type": "LocalModelSPARQLService",
             "filepath": "agrovoc.ttl",
             "filetype": "TTL"
         }
@@ -217,7 +218,7 @@ type Concept @service(id:"agrovoc-local") {
         },
         {
             "id": "fao-local",
-            "type": "LocalModelService",
+            "type": "LocalModelSPARQLService",
             "filepath": "fao.ttl",
             "filetype": "TTL"
         }
@@ -233,7 +234,7 @@ type __Context {
     comment:        _@href(iri: "http://www.w3.org/2000/01/rdf-schema#comment")
     country:        _@href(iri: "http://dbpedia.org/ontology/country")
     capital:        _@href(iri: "http://dbpedia.org/ontology/capital")
-    FaoCountry:     _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/self_governing")
+    SelfGoverning:  _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/self_governing")
     hasBorderWith:  _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/hasBorderWith")
     GeoRegion:      _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/geographical_region")
     EconomicRegion: _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/economic_region")
@@ -248,14 +249,14 @@ type __Context {
     related:        _@href(iri: "http://www.w3.org/2004/02/skos/core#related")
     sameInDBpedia:  _@href(iri: "http://www.w3.org/2002/07/owl#sameAs")
     sameInAgrovoc:  _@href(iri: "http://www.w3.org/2002/07/owl#sameAs")
-    faoName:        _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/nameOfficial")
+    name:           _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/nameOfficial")
     population:     _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/populationTotal")
 
 }
 
-type FaoCountry @service(id:"fao-local") {
-    faoName: [String] @service(id:"fao-local")
-    hasBorderWith: FaoCountry @service(id:"fao-local")
+type SelfGoverning @service(id:"fao-local") {
+    name: [String] @service(id:"fao-local")
+    hasBorderWith: [SelfGoverning] @service(id:"fao-local")
     sameInDBpedia: Country @service(id:"fao-local")
     sameInAgrovoc: Concept @service(id:"fao-local")
     inEconomicRegion: [EconomicRegion] @service(id:"fao-local")
@@ -264,15 +265,15 @@ type FaoCountry @service(id:"fao-local") {
 }
 
 type EconomicRegion @service(id:"fao-local") {
-    faoName: [String] @service(id:"fao-local")
+    name: [String] @service(id:"fao-local")
     sameInAgrovoc: Concept @service(id:"fao-local")
-    hasMemberCountry: [FaoCountry] @service(id:"fao-local")
+    hasMemberCountry: [SelfGoverning] @service(id:"fao-local")
 }
 
 type GeoRegion @service(id:"fao-local") {
-    faoName: [String] @service(id:"fao-local")
+    name: [String] @service(id:"fao-local")
     sameInAgrovoc: Concept @service(id:"fao-local")
-    hasMemberCountry: [FaoCountry] @service(id:"fao-local")
+    hasMemberCountry: [SelfGoverning] @service(id:"fao-local")
 }
 
 type City {
@@ -281,7 +282,7 @@ type City {
     comment: [String] @service(id:"dbpedia-hgql")
 }
 
-type Country {
+type Country  {
     label: [String] @service(id:"dbpedia-hgql")
     capital: [City] @service(id:"dbpedia-hgql")
     comment: [String] @service(id:"dbpedia-hgql")
@@ -298,19 +299,19 @@ type Concept {
 
 <graphiql id="tutorial3" graphql="graphql3" graphiql="graphiql3" query=
 '{
-  FaoCountry_GET_BY_ID(uris:[
+  SelfGoverning_GET_BY_ID(uris:[
     "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/Afghanistan"
   ]) {
     _id
     _type
-    faoName(lang:"en")
+    name(lang:"en")
     population
     hasBorderWith {
       _id
     }
     inEconomicRegion {
       _id
-      faoName(lang:"en")
+      name(lang:"en")
     }
     sameInAgrovoc {
       _id
