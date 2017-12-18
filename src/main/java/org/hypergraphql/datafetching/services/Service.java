@@ -146,11 +146,10 @@ public abstract class Service {
 
         }
 
+        //todo query happens to be an array sometimes - then the following line fails.
+
         if (markers.contains(query.get("nodeId").asText())){
             resultset.put(query.get("nodeId").asText(),findRootIdentifiers(model,schema.getTypes().get(query.get("targetName").asText())));
-
-
-
         }
 
 

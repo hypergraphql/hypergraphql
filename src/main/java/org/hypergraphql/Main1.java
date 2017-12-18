@@ -43,8 +43,8 @@ public class Main1 {
         new Controller().start(config2);
         HGQLConfig config3 = new HGQLConfig("src/test/resources/DemoServices/config3.json");
         new Controller().start(config3);
-//        HGQLConfig config4 = new HGQLConfig("src/test/resources/DemoServices/config4.json");
-//        new Controller().start(config4);
+        HGQLConfig config4 = new HGQLConfig("src/test/resources/DemoServices/config4.json");
+        new Controller().start(config4);
 
     }
 }
