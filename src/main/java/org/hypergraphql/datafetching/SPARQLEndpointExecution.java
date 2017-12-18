@@ -70,6 +70,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
         HttpOp.setDefaultHttpClient(httpclient);
 
         Query jenaQuery = QueryFactory.create(sparqlQuery);
+        System.out.println(sparqlQuery);
         QueryEngineHTTP qEngine = QueryExecutionFactory.createServiceRequest(this.sparqlEndpointService.getUrl(), jenaQuery);
         qEngine.setClient(httpclient);
 

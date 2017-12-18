@@ -40,9 +40,9 @@ public class HGraphQLConverter {
         return String.format(ARG, uriSequence);
     }
 
-    private String getArgsSTR(ObjectNode getArgs) {
+    private String getArgsSTR(JsonNode getArgs) {
 
-        if (getArgs.isNull()) return "";
+        if (getArgs!=null) return "";
 
         final String LIM = "limit:%s ";
         final String OFF = "offset:%s ";
@@ -116,7 +116,7 @@ public class HGraphQLConverter {
 
     private String getSelectRoot_GET(JsonNode jsonQuery) {
 
-        String key = jsonQuery.get("name").asText() + getArgsSTR((ObjectNode) jsonQuery.get("args"));
+        String key = jsonQuery.get("name").asText() + getArgsSTR(jsonQuery.get("args"));
 
         String content = getSubQuery(jsonQuery.get("fields"), jsonQuery.get("targetName").asText());
 
@@ -149,7 +149,7 @@ public class HGraphQLConverter {
             subQueryStrings.add("_type");
         }
 
-        if (fieldsJson.isNull()) {
+        if (fieldsJson==null || fieldsJson.isNull()) {
             if (subQueryStrings.isEmpty()) {
                 return "";
             } else {

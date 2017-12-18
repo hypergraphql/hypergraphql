@@ -87,7 +87,7 @@ public class MainTest {
                pss.setCommandText("PREFIX dbpedia: <http://dbpedia.org/ontology/>\n" +
                        "PREFIX  foaf: <http://xmlns.com/foaf/0.1/>\n" +
                        "PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                       "CONSTRUCT { ?person dbpedia:birthPlace ?birthplace . ?birthplace a dbpedia:City . \n" +
+                       "CONSTRUCT { ?person a dbpedia:Person . ?person dbpedia:birthPlace ?birthplace . ?birthplace a dbpedia:City . \n" +
                                          "?birthplace rdfs:label ?birthplaceLabel  } \n" +
                        "WHERE\n" +
                        "  { ?person dbpedia:birthPlace ?birthplace . \n" +
@@ -109,15 +109,15 @@ public class MainTest {
 
            model2.write(System.out, "NTRIPLE");
 
-//           File file2 = new File("src/test/resources/TestServices/cities1.ttl");
-//           try (OutputStream stream = new FileOutputStream(file2)) {
-//               model2.write(stream,"TTL");
-//
-//           } catch (FileNotFoundException e) {
-//               e.printStackTrace();
-//           } catch (IOException e) {
-//               e.printStackTrace();
-//           }
+           File file2 = new File("src/test/resources/TestServices/cities1.ttl");
+           try (OutputStream stream = new FileOutputStream(file2)) {
+               model2.write(stream,"TTL");
+
+           } catch (FileNotFoundException e) {
+               e.printStackTrace();
+           } catch (IOException e) {
+               e.printStackTrace();
+           }
 
            Dataset ds = DatasetFactory.createTxnMem() ;
 
