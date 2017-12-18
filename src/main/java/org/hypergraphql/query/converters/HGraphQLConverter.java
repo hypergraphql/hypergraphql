@@ -108,7 +108,7 @@ public class HGraphQLConverter {
 
         String key = jsonQuery.get("name").asText() + urisArgSTR(uris);
 
-        String content = getSubQuery((ArrayNode) jsonQuery.get("fields"), jsonQuery.get("targetName").asText());
+        String content = getSubQuery(jsonQuery.get("fields"), jsonQuery.get("targetName").asText());
 
         return querySTR(key + content);
     }
@@ -118,7 +118,7 @@ public class HGraphQLConverter {
 
         String key = jsonQuery.get("name").asText() + getArgsSTR((ObjectNode) jsonQuery.get("args"));
 
-        String content = getSubQuery((ArrayNode) jsonQuery.get("fields"), jsonQuery.get("targetName").asText());
+        String content = getSubQuery(jsonQuery.get("fields"), jsonQuery.get("targetName").asText());
 
         return querySTR(key + content);
 
@@ -140,7 +140,7 @@ public class HGraphQLConverter {
     }
 
 
-    private String getSubQuery(ArrayNode fieldsJson, String parentType) {
+    private String getSubQuery(JsonNode fieldsJson, String parentType) {
 
         Set<String> subQueryStrings = new HashSet<>();
 
@@ -149,7 +149,7 @@ public class HGraphQLConverter {
             subQueryStrings.add("_type");
         }
 
-        if (fieldsJson==null) {
+        if (fieldsJson.isNull()) {
             if (subQueryStrings.isEmpty()) {
                 return "";
             } else {
@@ -159,7 +159,8 @@ public class HGraphQLConverter {
 
         else {
 
-            Iterator<JsonNode> fields = fieldsJson.elements();
+
+            Iterator<JsonNode> fields = ((ArrayNode) fieldsJson).elements();
 
             fields.forEachRemaining(field -> {
                 ArrayNode fieldsArray = (field.get("fields").isNull()) ? null : (ArrayNode) field.get("fields");

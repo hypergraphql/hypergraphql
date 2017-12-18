@@ -129,7 +129,9 @@ public abstract class Service {
             node = query.get("fields");
         else
             node = query;
-        Set<LinkedList<QueryNode>> paths = getQueryPaths(node , schema);
+        Set<LinkedList<QueryNode>> paths = new HashSet<>();
+        if (node!=null && !node.isNull())
+             paths = getQueryPaths(node, schema);
 
         for (LinkedList<QueryNode> path : paths) {
 
