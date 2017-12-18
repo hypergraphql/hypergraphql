@@ -5,7 +5,7 @@ type __Context {
     comment:        _@href(iri: "http://www.w3.org/2000/01/rdf-schema#comment")
     country:        _@href(iri: "http://dbpedia.org/ontology/country")
     capital:        _@href(iri: "http://dbpedia.org/ontology/capital")
-    FaoCountry:     _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/self_governing")
+    SelfGoverning:  _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/self_governing")
     hasBorderWith:  _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/hasBorderWith")
     GeoRegion:      _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/geographical_region")
     EconomicRegion: _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/economic_region")
@@ -20,14 +20,14 @@ type __Context {
     related:        _@href(iri: "http://www.w3.org/2004/02/skos/core#related")
     sameInDBpedia:  _@href(iri: "http://www.w3.org/2002/07/owl#sameAs")
     sameInAgrovoc:  _@href(iri: "http://www.w3.org/2002/07/owl#sameAs")
-    faoName:        _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/nameOfficial")
+    name:           _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/nameOfficial")
     population:     _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/populationTotal")
 
 }
 
-type FaoCountry @service(id:"fao-local") {
-    faoName: [String] @service(id:"fao-local")
-    hasBorderWith: [FaoCountry] @service(id:"fao-local")
+type SelfGoverning @service(id:"fao-local") {
+    name: [String] @service(id:"fao-local")
+    hasBorderWith: [SelfGoverning] @service(id:"fao-local")
     sameInDBpedia: Country @service(id:"fao-local")
     sameInAgrovoc: Concept @service(id:"fao-local")
     inEconomicRegion: [EconomicRegion] @service(id:"fao-local")
@@ -36,15 +36,15 @@ type FaoCountry @service(id:"fao-local") {
 }
 
 type EconomicRegion @service(id:"fao-local") {
-    faoName: [String] @service(id:"fao-local")
+    name: [String] @service(id:"fao-local")
     sameInAgrovoc: Concept @service(id:"fao-local")
-    hasMemberCountry: [FaoCountry] @service(id:"fao-local")
+    hasMemberCountry: [SelfGoverning] @service(id:"fao-local")
 }
 
 type GeoRegion @service(id:"fao-local") {
-    faoName: [String] @service(id:"fao-local")
+    name: [String] @service(id:"fao-local")
     sameInAgrovoc: Concept @service(id:"fao-local")
-    hasMemberCountry: [FaoCountry] @service(id:"fao-local")
+    hasMemberCountry: [SelfGoverning] @service(id:"fao-local")
 }
 
 type City {
