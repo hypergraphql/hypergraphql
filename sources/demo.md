@@ -18,20 +18,14 @@ permalink: /demo/
 
 # Demo
 
-A live demo of the HyperGraphQL instance configured as in the main GitHub repository is available at:
+A live demo of the HyperGraphQL instance pointing at DBpedia SPARQL endpoint and configured as in the main GitHub repository (also used as a running example in the [Documentation](/documentation) section) is available at:
+
 - [GraphQL server](/service/graphql4)
 - [GraphiQL UI](/service/graphiql4)
 
-You can also try the following predefined queries:
+Below we list a few example queries via embedded GraphiQL interfaces. Feel free to edit them!
 
-* [people and their personal data](http://hypergraphql.org/graphiql?query=%7B%0A%20%20people(limit%3A50%2C%20offset%3A1000)%20%7B%0A%20%20%20%20_id%0A%20%20%20%20_type%0A%20%20%20%20name%0A%20%20%20%20birthDate%0A%20%20%20%20birthPlace%20%7B%0A%20%20%20%20%20%20_id%0A%20%20%20%20%20%20_type%0A%20%20%20%20%20%20label%20(lang%3A%22en%22)%0A%20%20%20%20%7D%0A%20%20%20%20deathDate%0A%20%20%20%20deathPlace%20%7B%0A%20%20%20%20%20%20_id%0A%20%20%20%20%20%20_type%0A%20%20%20%20%20%20label%20(lang%3A%22en%22)%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A)
-* [companies and their locations](http://hypergraphql.org/graphiql?query=%7B%0A%20%20companies(limit%3A%20100)%20%7B%0A%20%20%20%20_id%0A%20%20%20%20_type%0A%20%20%20%20name%0A%20%20%20%20locationCity%20%7B%0A%20%20%20%20%20%20_id%0A%20%20%20%20%20%20label(lang%3A%20%22en%22)%0A%20%20%20%20%20%20country%20%7B%0A%20%20%20%20%20%20%20%20_id%0A%20%20%20%20%20%20%20%20label(lang%3A%20%22en%22)%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A)
-* [mountains and first ascents](http://hypergraphql.org/graphiql?query=%7B%0A%20%20mountains(limit%3A%20100%2C%20offset%3A%20100)%20%7B%0A%20%20%20%20_id%0A%20%20%20%20_type%0A%20%20%20%20label%20(lang%3A%22en%22)%0A%20%20%20%20firstAscentPerson%20%7B%0A%20%20%20%20%20%20_id%0A%20%20%20%20%20%20name%0A%20%20%20%20%20%20%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A)
-
-We will try three queries on the same endpoint:
-
-We can also take a look at the internal representation of the RDF schema:
-[See the rdf schema](/service/graphql4)
+### People and their personal detail
 
 <graphiql id="demo1" graphql="graphql4" graphiql="graphiql4" query=
 '{
@@ -56,8 +50,9 @@ We can also take a look at the internal representation of the RDF schema:
   </script>
 </graphiql>
 <br>
-test test
 
+
+### Data about the BMW company
 
 <graphiql id="demo2" graphql="graphql4" graphiql="graphiql4" query=
 '{
@@ -87,6 +82,8 @@ test test
 </graphiql>
 <br>
 
+
+### Countries and their capitals
 
 <graphiql id="demo3" graphql="graphql4" graphiql="graphiql4" query=
 '{
@@ -119,7 +116,7 @@ test test
 </graphiql>
 <br>
 
-Introspection query
+### Introspection query
 
 <graphiql id="demo4" graphql="graphql4" graphiql="graphiql4" query=
 '{
@@ -148,3 +145,5 @@ Introspection query
 </script>
 </graphiql>
 <br>
+The internal representation of the schema in Turtle format can be also accessed at:
+[link to schema](/service/graphql4).

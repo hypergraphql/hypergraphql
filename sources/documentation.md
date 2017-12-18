@@ -20,6 +20,8 @@ To facilitate exploration, each HyperGraphQL instance is by default accompanied 
 
 The core response object of HyperGraphQL is [JSON-LD](https://json-ld.org) (embedded in the standard GraphQL response), which extends JSON with the [JSON-LD context](https://json-ld.org/spec/latest/json-ld-api-best-practices/#dfn-json-ld-context) enabling semantic disambiguation of the served data. Support for other RDF serialisation formats is also provided.
 
+<br>
+
 # Running
 
 Clone the Git repository into a local directory. In the root of the project execute the following: 
@@ -48,11 +50,13 @@ The [GraphiQL](https://github.com/graphql/graphiql) UI is initiated at:
 http://localhost:8080/graphiql
 ```
 
+<br>
+
 # Example
 
 The following query requests a single person instance with its URI (`_id`) and RDF type (`_type`), its name, birth date, birth place with the URI, an English label, and the country in which it is located, also including its URI and an English label. 
 
-## HyperGraphQL query:
+### HyperGraphQL query
 ```
 {
   Person_GET(limit: 1, offset: 6) {
@@ -74,7 +78,7 @@ The following query requests a single person instance with its URI (`_id`) and R
 
 The response to this query consists of the usual GraphQL JSON object, further augmented with a JSON-LD context, included as the value of the property `@context` on the `data` object.
 
-## HyperGraphQL response:
+### HyperGraphQL response
 ```json
 {
   "extensions": {},
@@ -127,6 +131,8 @@ _:b0 <http://hypergraphql.org/query/Person_GET> <http://dbpedia.org/resource/San
 <http://dbpedia.org/resource/Iran> <http://www.w3.org/2000/01/rdf-schema#label> "Iran" .
 ```
 This graph (except for the first triple, added by HyperGraphQL) is a subset of the DBpedia dataset. 
+
+<br>
 
 # HyperGraphQL instance = configuration + annotated GraphQL schema
 
@@ -287,6 +293,8 @@ The `Query` type of the type is generated automatically by the service. Addition
 - `_type:String` field, attached to each type in the schema, returning the `rdf:type` of the parent type of this resource in the schema;
 - `lang:String` argument, attached to each field in the schema with the value type `String`, which allows to specify the language of the literal to be fetched for the respective field. The recommended argument values follow the convention used in `rdf:langString` (e.g. `en`, `fr`, `de`, etc.)  
 
+<br>
+
 # Request and response formats
 
 Currently, HyperGraphQL accepts POST requests complying with the formatting convention of GraphQL, i.e., including the body of the form:
@@ -297,8 +305,7 @@ Currently, HyperGraphQL accepts POST requests complying with the formatting conv
 }
 ```
 
-
-The default content type is set to `application/json`. In such case the response fromat is a standard, GraphQL JSON-based response that includes a JSON-LD object as a value of the `data` property, e.g.:
+The default content type is set to `application/json` for an accept header `application/json`. In such case the response fromat is a standard GraphQL, JSON-based response that includes a JSON-LD object as a value of the `data` property, e.g.:
 
 ```json
 {
@@ -350,7 +357,12 @@ Other supported content types enable replacing the `data` element of the the res
 
 For instance, the response above in `application/json+rdf+xml` is served as:
 
-```
+```json
+{
+    "extensions": {},
+    "data": "<rdf:RDF\n    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n    xmlns:j.0=\"http://hypergraphql.org/query/\"\n    xmlns:j.1=\"http://dbpedia.org/ontology/\"\n    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n    xmlns:j.2=\"http://xmlns.com/foaf/0.1/\">\n  <rdf:Description rdf:about=\"http://hypergraphql.org/query\">\n    <j.0:Person_GET>\n      <j.1:Person rdf:about=\"http://dbpedia.org/resource/Sani_ol_molk\">\n        <j.1:birthDate rdf:datatype=\"http://www.w3.org/2001/XMLSchema#date\"\n        >1814-1-1</j.1:birthDate>\n        <j.1:birthPlace>\n          <j.1:City rdf:about=\"http://dbpedia.org/resource/Kashan\">\n            <j.1:country>\n              <j.1:Country rdf:about=\"http://dbpedia.org/resource/Iran\">\n                <rdfs:label xml:lang=\"en\">Iran</rdfs:label>\n              </j.1:Country>\n            </j.1:country>\n            <rdfs:label xml:lang=\"en\">Kashan</rdfs:label>\n          </j.1:City>\n        </j.1:birthPlace>\n        <j.2:name xml:lang=\"en\">Mirza Abolhassan Khan Ghaffari</j.2:name>\n      </j.1:Person>\n    </j.0:Person_GET>\n  </rdf:Description>\n</rdf:RDF>\n",
+    "errors": []
+}
 ```
 
 ## Pure RDF content types
@@ -366,19 +378,51 @@ For instance, the response above in `application/json+rdf+xml` is served as:
 For instance, the response above in `application/rdf+xml` is served as:
 
 ```
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:j.0="http://hypergraphql.org/query/"
+    xmlns:j.1="http://dbpedia.org/ontology/"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:j.2="http://xmlns.com/foaf/0.1/">
+    <rdf:Description rdf:about="http://hypergraphql.org/query">
+        <j.0:Person_GET>
+            <j.1:Person rdf:about="http://dbpedia.org/resource/Sani_ol_molk">
+                <j.1:birthPlace>
+                    <j.1:City rdf:about="http://dbpedia.org/resource/Kashan">
+                        <j.1:country>
+                            <j.1:Country rdf:about="http://dbpedia.org/resource/Iran">
+                                <rdfs:label xml:lang="en">Iran</rdfs:label>
+                            </j.1:Country>
+                        </j.1:country>
+                        <rdfs:label xml:lang="en">Kashan</rdfs:label>
+                    </j.1:City>
+                </j.1:birthPlace>
+                <j.2:name xml:lang="en">Mirza Abolhassan Khan Ghaffari</j.2:name>
+                <j.1:birthDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+        >1814-1-1</j.1:birthDate>
+            </j.1:Person>
+        </j.0:Person_GET>
+    </rdf:Description>
+</rdf:RDF>
 ```
+
+<br>
 
 # Data fetching and query execution
 
-GraphQL queries are rewritten into SPARQL construct queries and executed against the designated SPARQL endpoints. 
+By principle, HyperGraphQL aims to make as few roundtrips between the local instance and the remote services as possible. On posting the query, the query is  partitioned into maximal subqueries that can be executed independently over respective remote services. After the execution, once the entire relevant data is brought into the local instance, it is then processed using the standard GraphQL fetchers, running locally, in order to construct the final response. 
 
-All fields of the **Query** type are rewritten into instance subqueries, for intance:
+Depending on the type of the target service the query is either rewritten to SPARQL (remote SPARQL endpoints and local RDF files) or to GraphQL (remote HyperGraphQL instances).
+
+### Rewritting to SPARQL
+
+All top-level query fields are rewritten into instance subqueries as follows:
 
 ```
 {
-people (limit:1, offset:6) {
-  ...
-}
+  PERSON_GET(limit:1, offset:6) {
+    ...
+  }
 }
 ```
 is rewritten into:
@@ -392,29 +436,67 @@ is rewritten into:
 ...
 ```
 
-Fields are translated into optional SPARQL triple patterns, additionally filtered with the RDF type associated with the output type of the field, provided such URI is specified in the mapping, for instance:
 ```
 {
-... {
-  birthplace 
-  ...
+  PERSON_GET_BY_ID(uris:["http://dbpedia.org/resource/Sani_ol_molk"]) {
+    ...
+  }
 }
+```
+is rewritten into:
+```
+  VALUES ?subject { <http://dbpedia.org/resource/Sani_ol_molk> }
+  {
+    ?subject a <http://dbpedia.org/ontology/Person> .
+    ...
+  }
+```
+
+Fields are translated into optional SPARQL triple patterns, additionally filtered with the RDF type associated with the output type of the field, for instance:
+```
+{
+  ... 
+  {
+    birthplace 
+    ...
+  }
 }
 ```
 is rewritten:
 
 ```
 ...
-OPTIONAL {
-    ?subject <http://dbpedia.org/ontology/birthPlace> ?object .
-    ?object a <http://dbpedia.org/ontology/City> .
-    ...
-}
+  OPTIONAL {
+      ?subject <http://dbpedia.org/ontology/birthPlace> ?object .
+      ?object a <http://dbpedia.org/ontology/City> .
+      ...
+  }
 ```
 
-To minimise the number of return trips between HyperGraphQL server and RDF stores, the original GraphQL query is translated into possibly few SPARQL CONSTRUCT queries necessary to fetch all the relevant RDF data. The further transformation of the data into  HyperGraphQL responses is done locally by the HyperGraphQL server. When the query requests data from a single SPARQL endpoint, only one SPARQL CONSTRUCT query is issued. 
+### Rewritting to GraphQL
+
+Currently, the rewrting to GraphQL is conducted under the assumption that the schemas of the local and the remote HyperGraphQL instances are aligned, meaning that the same types/fields are mapped to the same IRIs, and the output types are associated with the same fields in both schemas. This assumption will be dropped in the future versions of HyperGraphQL.
 
 
-## Other references
+<br>
+
+# Accessing the schema
+
+Similarly to GraphQL, HyperGraphQL supports introspection queries, following the exact same [GraphQL syntax](http://graphql.org/learn/introspection/) (see: [Demo](/demo) section for an example). Additionally, it also exposes its own, internal representation of the schema in the RDF format, which captures also the mapping of types/fields to IRIs and respective services. This representation can be accessed by making a GET request to the HyperGraphQL server endpoint with either of the following accept headers:
+
+- `application/rdf+xml`
+- `application/turtle`
+- `text/turtle`
+- `application/ntriples`
+- `text/ntriples`
+- `application/n3`
+- `text/n3`
+
+In the future versions, this representation will also be made available via corresponding introspection queries.
+
+<br>
+
+
+# Other references
 
 * S. Klarman, [Querying DBpedia with GraphQL](https://medium.com/@sklarman/querying-linked-data-with-graphql-959e28aa8013), blog post, Semantic Integration, 2017.
