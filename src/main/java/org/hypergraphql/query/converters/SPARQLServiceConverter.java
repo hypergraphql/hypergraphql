@@ -171,7 +171,7 @@ public class SPARQLServiceConverter {
 
 
         JsonNode firstField = jsonQuery.elements().next();
-        String graphID = ((SPARQLEndpointService) schema.getFields().get(firstField.get("name").asText()).getSetvice()).getGraph();
+        String graphID = ((SPARQLEndpointService) schema.getFields().get(firstField.get("name").asText()).getService()).getGraph();
         String parentId = firstField.get("parentId").asText();
         String valueSTR = valuesSTR(parentId, input);
 
