@@ -17,10 +17,10 @@ permalink: /tutorial/
 
 # Tutorial
 
-In this tutorial we outline all the steps required to define and link several linked data services and datasets using HyperGraphQL. The resulting architecture consists of three HyperGraphQL instances:
-1. an instance exposing a fragment of [DBpedia](http://wiki.dbpedia.org/) dataset accessed via DBpedia's SPARQL endpoint;
-2. an instance serving the [AGROVOC SKOS taxonomy](http://aims.fao.org/vest-registry/vocabularies/agrovoc-multilingual-agricultural-thesaurus) provided from a local file;
-3. an instance serving the [FAO Geopolitical Ontology](http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/) provided from a local file, and furthermore linked to data exposed by the other two HyperGraphQL instances. 
+In this tutorial we outline all the steps required to define and connect several linked data services and datasets using HyperGraphQL. The resulting architecture consists of three HyperGraphQL instances:
+1. an instance exposing a fragment of [DBpedia](http://wiki.dbpedia.org/) dataset accessed via the SPARQL endpoint of DBpedia;
+2. an instance serving the [AGROVOC SKOS taxonomy](http://aims.fao.org/vest-registry/vocabularies/agrovoc-multilingual-agricultural-thesaurus) uploaded from a local file;
+3. an instance serving the [FAO Geopolitical Ontology](http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/) uploaded from a local file, containing `owl:sameAs` links to RDF resources exposed by the other two HyperGraphQL instances. 
 
 
 <img src="https://semantic-integration.github.io/hypergraphql/sources/service-linking.png" alt="diagram">
@@ -68,7 +68,7 @@ The HyperGraphQL instance querying the DBpedia SPARQL endpoint is defined exactl
 
 <br>
 
-The schema is focused around just two types - `Country` and `City` - with a few basic properties. 
+The schema is focused around just two types - `Country` and `City` - with a few basic properties. Note that all types/field are associated with unique IRIs in the `__Context` type.
 
 
 ```
@@ -97,8 +97,6 @@ type Country @service(id:"dbpedia-sparql") {
 <br>
 
 The result of setting up this instance correctly should be a GraphiQL interface as below:
-
-
 
 
 <graphiql id="tutorial1" graphql="graphql1" graphiql="graphiql1" query=
@@ -131,7 +129,7 @@ The result of setting up this instance correctly should be a GraphiQL interface 
 
 ## Service 2: AGROVOC taxonomy file
 
-Next, we define another instance which is used to access the AGROVOC SKOS taxonomy, originally supplied from a local file. The file `agrovoc.ttl` used here, containinf dat in the turtle format, is a subset of the original AGROVOC dataset, covering only the fragment expressed exclusively in the [SKOS vocabulary](https://www.w3.org/TR/skos-reference/). Here, the service type is set to `LocalModelSPARQLService` and the instance is initiated on port 8082. 
+Next, we define another instance which is used to access the AGROVOC SKOS taxonomy, originally uploaded from a local file. The file `agrovoc.ttl`, used here, contains RDF data in the turtle format, which is a subset of the original AGROVOC dataset expressed exclusively in the [SKOS vocabulary](https://www.w3.org/TR/skos-reference/). In the configuration file, the service type is set to `LocalModelSPARQLService` and the instance is initiated on port 8082. 
 
 ```json
 {
@@ -155,7 +153,7 @@ Next, we define another instance which is used to access the AGROVOC SKOS taxono
 
 <br>
 
-Note that the schema below is in fact SKOS-generic, in the sense that it is suitable for exposing any SKOS taxonomy, not only AGROVOC. However, since HyperGraphQL is not able to infer any new relationships by its own, it has to be ensured that the relevant inferences are materialized in advance. For instance, since the AGROVOC taxonomy originally does not contain any `skos:narrower` relationships (only their inverses `skos:broader` are present) these have to be first included explicitly in the RDF graph.
+Note that the schema below is in fact SKOS-generic, in the sense that it is suitable for exposing any SKOS taxonomy, not only AGROVOC. However, since HyperGraphQL is not able to infer any new relationships by its own, it has to be ensured that the relevant inferences are materialized in advance. For instance, since the AGROVOC taxonomy originally does not contain any `skos:narrower` relationships (only their inverses, `skos:broader`, are present) these have to be first included explicitly in the RDF graph.
 
 
 ```
@@ -238,7 +236,7 @@ As a result, the GraphiQL interface exposes fields intended for querying SKOS co
 
 ## Service 3: Geopolitical Ontology file + HGQL services 1 & 2
 
-Finally, we define the last HyperGraphQL instance, which employs some extra RDF data from the Geopolitical Ontology and connects all three data sources together. In the configuration file, we provide the references to both previously defined HyperGraphQL instances of type `HGraphQLService` and exposed with URLs `http://localhost:8081/graphql` and `http://localhost:8082/graphql`, respectively. The third service, of type `LocalModelSPARQLService`, is specified analogically to the case of AGROVOC, using a reference to a local file `fao.ttl`, again in turtle format. The insance is initiated on port 8083.
+Finally, we define the last HyperGraphQL instance, which employs some suplementary RDF data from the Geopolitical Ontology and connects all three data sources together. In the configuration file we include references to both previously defined HyperGraphQL instances of type `HGraphQLService` and exposed with URLs `http://localhost:8081/graphql` and `http://localhost:8082/graphql`, respectively. The third service, of type `LocalModelSPARQLService`, is specified analogically to the case of AGROVOC, using a reference to a local file `fao.ttl`, again in turtle format. The insance is initiated on port 8083.
 
 
 ```json
@@ -349,9 +347,9 @@ type Concept {
 
 <br>
 
-The Geopolitical Ontology contains outgoing `owl:sameAs` links to both DBpedia and AGROVOC taxonomy. These links are critical to connecting the three datasets, and are captured in the schema within the type `SelfGoverning` (roughly corresponding to a country in teh Geopolitical Ontology), which includes fields `sameInDBpedia` and `sameInAgrovoc`, both mapped on the IRI `owl:sameAs`. Using these links one can naturally construct queries seamlessly spanning all three datasets and HyperGraphQL instances. Note, that since currently each instance individually applies strinct type checking, the Geopolitical Ontology had to be extended with the missing `rdf:type` assertions over the objects of `owl:sameAs` property. Consequently, each DBpedia identifier of a country had to be asserted as an instance of `dbo:Country` and each AGROVOC identifier as an instance of `skos:Concept`. This restriction should be likely relaxed in the future versions of HyperGraphQL. 
+The Geopolitical Ontology contains outgoing `owl:sameAs` links to both DBpedia and AGROVOC taxonomy. These links are critical to connecting the three datasets, and are captured in the schema within the type `SelfGoverning` (roughly corresponding to "Country" in the Geopolitical Ontology), which includes fields `sameInDBpedia` and `sameInAgrovoc`, both mapped on the IRI `owl:sameAs`. Using these links one can naturally construct queries seamlessly spanning all three datasets and HyperGraphQL instances. Note, that since currently each instance applies individually strinct type checking on the values of the fields, the Geopolitical Ontology must be first extended with the missing `rdf:type` assertions over the objects of `owl:sameAs` property. Consequently, each DBpedia identifier of a country must be asserted as an instance of `dbo:Country` and each AGROVOC identifier as an instance of `skos:Concept`. This restriction should be likely relaxed in the future versions of HyperGraphQL. 
 
-The working example of the this instance is embedded below.
+The working example of this instance is embedded below.
 
 
 

@@ -297,7 +297,7 @@ The `Query` type of the type is generated automatically by the service. Addition
 
 # Request and response formats
 
-Currently, HyperGraphQL accepts POST requests complying with the formatting convention of GraphQL, i.e., including the body of the form:
+HyperGraphQL accepts POST requests with the body of the form:
 
 ```
 {
@@ -305,7 +305,7 @@ Currently, HyperGraphQL accepts POST requests complying with the formatting conv
 }
 ```
 
-The default content type is set to `application/json` for an accept header `application/json`. In such case the response fromat is a standard GraphQL, JSON-based response that includes a JSON-LD object as a value of the `data` property, e.g.:
+The default content type is `application/json` for an accept header `application/json`. In such case the response fromat is a standard GraphQL, JSON-based response that includes a JSON-LD object as a value of the `data` property, e.g.:
 
 ```json
 {
@@ -346,7 +346,7 @@ The default content type is set to `application/json` for an accept header `appl
 }
 ```
 
-Other supported content types enable replacing the `data` element of the the response above with a string of RDF data in selected serialisation format, or serving the entire response merely as RDF data. 
+Other supported content types enable replacing the `data` object of the response above with a string of RDF data in selected serialisation format, or serving the entire response purely as RDF data. 
 
 ## GraphQL-compatible content types
 
@@ -475,7 +475,7 @@ is rewritten:
 
 ### Rewritting to GraphQL
 
-Currently, the rewrting to GraphQL is conducted under the assumption that the schemas of the local and the remote HyperGraphQL instances are aligned, meaning that the same types/fields are mapped to the same IRIs, and the output types are associated with the same fields in both schemas. This assumption will be dropped in the future versions of HyperGraphQL.
+Currently, the rewrting to GraphQL is conducted under the assumption that the schemas of the local and the remote HyperGraphQL instances are aligned, meaning that types/fields with the same lables are mapped to the same IRIs, and the output types are associated with the same fields in both schemas. This assumption will be relaxed in the future versions of HyperGraphQL.
 
 
 <br>
@@ -492,7 +492,7 @@ Similarly to GraphQL, HyperGraphQL supports introspection queries, following the
 - `application/n3`
 - `text/n3`
 
-In the future versions, this representation will also be made available via corresponding introspection queries.
+In the future versions, this representation will also be made available via suitable introspection queries.
 
 <br>
 
