@@ -44,7 +44,7 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
                 i++;
             }
             ExecutorService executor = Executors.newFixedThreadPool(50);
-            LocalSPARQLExecution execution = new LocalSPARQLExecution(query,inputSubset,markers,this, schema , this.localmodel);
+            LocalSPARQLExecution execution = new LocalSPARQLExecution(query,inputSubset,markers,this, schema , this.localmodel, rootType);
             futureSPARQLresults.add(executor.submit(execution));
 
         } while (inputList.size()>VALUES_SIZE_LIMIT);

@@ -62,7 +62,7 @@ public class SPARQLEndpointService extends SPARQLService {
                 i++;
             }
             ExecutorService executor = Executors.newFixedThreadPool(50);
-            SPARQLEndpointExecution execution = new SPARQLEndpointExecution(query,inputSubset,markers,this, schema);
+            SPARQLEndpointExecution execution = new SPARQLEndpointExecution(query,inputSubset,markers,this, schema, rootType);
             futureSPARQLresults.add(executor.submit(execution));
 
         } while (inputList.size()>VALUES_SIZE_LIMIT);

@@ -108,7 +108,7 @@ public class SPARQLServiceConverter {
     }
 
 
-    public String getSelectQuery(JsonNode jsonQuery, Set<String> input) {
+    public String getSelectQuery(JsonNode jsonQuery, Set<String> input, String rootType) {
 
         Map<String, QueryFieldConfig> queryFields = schema.getQueryFields();
 
@@ -121,7 +121,7 @@ public class SPARQLServiceConverter {
                 return getSelectRoot_GET_BY_ID(jsonQuery);
             }
         } else {
-            return getSelectNonRoot((ArrayNode) jsonQuery, input);
+            return getSelectNonRoot((ArrayNode) jsonQuery, input, rootType);
         }
     }
 
@@ -167,11 +167,11 @@ public class SPARQLServiceConverter {
     }
 
 
-    private String getSelectNonRoot(ArrayNode jsonQuery, Set<String> input) {
+    private String getSelectNonRoot(ArrayNode jsonQuery, Set<String> input, String rootType) {
 
 
         JsonNode firstField = jsonQuery.elements().next();
-        String graphID = ((SPARQLEndpointService) schema.getFields().get(firstField.get("name").asText()).getService()).getGraph();
+        String graphID = ((SPARQLEndpointService) schema.getTypes().get(rootType).getFields().get(firstField.get("name").asText()).getService()).getGraph();
         String parentId = firstField.get("parentId").asText();
         String valueSTR = valuesSTR(parentId, input);
 
