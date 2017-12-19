@@ -32,7 +32,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
     protected Set<String> markers;
     protected SPARQLEndpointService sparqlEndpointService;
     protected HGQLSchema schema ;
-    protected static Logger logger = Logger.getLogger(SPARQLEndpointExecution.class);
+    protected Logger logger = Logger.getLogger(SPARQLEndpointExecution.class);
     protected String rootType;
 
 
