@@ -5,12 +5,12 @@ import org.hypergraphql.datafetching.services.Service;
 public class FieldConfig {
 
     private String id;
-    private Service service;
+  //  private Service service;
 
     public FieldConfig(String id, Service service) {
 
         this.id = id;
-        this.service = service;
+    //    this.service = service;
 
     }
 

@@ -12,6 +12,7 @@ import org.hypergraphql.config.schema.FieldConfig;
 import org.hypergraphql.config.schema.FieldOfTypeConfig;
 import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.config.schema.TypeConfig;
+import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.services.Service;
 
 import java.util.*;
@@ -197,6 +198,7 @@ public class HGQLSchema {
             String type = (queryGetFieldNodes.contains(queryFieldNode)) ? HGQL_QUERY_GET_FIELD : HGQL_QUERY_GET_BY_ID_FIELD;
             QueryFieldConfig fieldConfig = new QueryFieldConfig(services.get(serviceId), type);
             queryFields.put(name, fieldConfig);
+
         }
 
         List<RDFNode> typeNodes = rdfSchema.getSubjectsOfObjectProperty(RDF_TYPE, HGQL_OBJECT_TYPE);

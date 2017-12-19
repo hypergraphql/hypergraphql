@@ -211,29 +211,34 @@ public class ExecutionTreeNode {
 
             Set<Service> serviceCalls = splitFields.keySet();
 
+
             for (Service serviceCall : serviceCalls) {
-
-                if (serviceCall==this.service) {
-
-                    Set<Field> subfields = splitFields.get(serviceCall);
-                    JsonNode fields = getFieldsJson(subfields, parentId, targetName);
-                    return fields;
-
-                } else {
-                    ExecutionTreeNode childNode = new ExecutionTreeNode(serviceCall, splitFields.get(serviceCall), parentId, targetName , hgqlSchema);
+                if (serviceCall != this.service) {
+                    ExecutionTreeNode childNode = new ExecutionTreeNode(serviceCall, splitFields.get(serviceCall), parentId, targetName, hgqlSchema);
 
                     if (this.childrenNodes.containsKey(parentId)) {
                         try {
                             this.childrenNodes.get(parentId).getForest().add(childNode);
-                        } catch (Exception e) { logger.error(e); }
+                        } catch (Exception e) {
+                            logger.error(e);
+                        }
                     } else {
                         ExecutionForest forest = new ExecutionForest();
                         forest.getForest().add(childNode);
                         try {
                             this.childrenNodes.put(parentId, forest);
-                        } catch (Exception e) { logger.error(e); }
+                        } catch (Exception e) {
+                            logger.error(e);
+                        }
                     }
                 }
+            }
+
+            if (serviceCalls.contains(this.service)) {
+
+                Set<Field> subfields = splitFields.get(this.service);
+                JsonNode fields = getFieldsJson(subfields, parentId, targetName);
+                return fields;
             }
         }
         return null;

@@ -61,99 +61,6 @@ public class GeneralTest {
         Controller controller = new Controller();
         controller.start(config);
 
-        boolean test= true;
-        while (test) {
-            test=false;
-
-
-            Query query = QueryFactory.create("SELECT * WHERE { ?x ?y ?z }") ;
-
-            QueryEngineHTTP qexec = QueryExecutionFactory.createServiceRequest("http://localhost:3330/ds/sparql", query);
-
-            ResultSet resultSet = qexec.execSelect();
-            int count = 0;
-            while (resultSet.hasNext()) {
-                resultSet.next();
-                count++;
-            }
-            System.out.println("count " + count);
-
-            if (count!=39)
-                test=true;
-
-            ObjectMapper mapper = new ObjectMapper();
-
-            ObjectNode bodyParam = mapper.createObjectNode();
-
-            bodyParam.put("query", "{\n" +
-                    "  City_GET {\n" +
-                    "    _id\n" +
-                    "    label\n" +
-                    "  }\n" +
-                    "}");
-
-
-
-            try {
-                HttpResponse<String> response = Unirest.post("http://localhost:8080/graphql")
-                        .header("Accept", "application/rdf+xml")
-                        .body(bodyParam.toString())
-                        .asString();
-
-
-                System.out.println(response.getBody());
-                System.out.println(response.getStatus());
-
-
-
-                if (response.getStatus()!=200) {
-                    System.out.println(response);
-                    test = true;
-                }
-
-
-            } catch (UnirestException e) {
-                e.printStackTrace();
-//                test=true;
-            }
-
-            mapper = new ObjectMapper();
-
-            bodyParam = mapper.createObjectNode();
-
-            bodyParam.put("query", "{\n" +
-                    "  Person_GET {\n" +
-                    "    _id\n" +
-                    "    label\n" +
-                    "  }\n" +
-                    "}");
-
-
-
-            try {
-                HttpResponse<String> response = Unirest.post("http://localhost:8081/graphql")
-                        .header("Accept", "application/rdf+xml")
-                        .body(bodyParam.toString())
-                        .asString();
-
-
-                System.out.println(response.getBody());
-                System.out.println(response.getStatus());
-
-
-
-                if (response.getStatus()!=200) {
-                    System.out.println(response);
-                    test = true;
-                }
-
-
-            } catch (UnirestException e) {
-                e.printStackTrace();
-//                test=true;
-            }
-
-        }
 
 
 
@@ -201,10 +108,7 @@ public class GeneralTest {
 
         for (Statement statement : statements)
             returnedModel.remove(statement);
-        returnedModel.write(System.out, "NTRIPLE");
 
-
-        System.out.println("...\n\n");
         StmtIterator iterator2 = expectedModel.listStatements();
         while (iterator2.hasNext()) {
             Statement currentstatement = iterator2.next();

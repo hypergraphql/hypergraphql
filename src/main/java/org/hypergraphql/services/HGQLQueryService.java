@@ -30,9 +30,6 @@ public class HGQLQueryService {
         this.graphql = GraphQL.newGraphQL(config.getSchema()).build();
     }
 
-    //  static Logger logger = Logger.getLogger(HGQLQueryService.class);
-
-
     public Map<String, Object> results(String query, String acceptType) {
 
         Map<String, Object> result = new HashMap<>();
@@ -57,7 +54,6 @@ public class HGQLQueryService {
          if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
             ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery(), hgqlSchema);
-
 
             ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 
