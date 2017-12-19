@@ -57,7 +57,7 @@ public class HGQLQueryService {
          if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
             ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery(), hgqlSchema);
-             System.out.println(queryExecutionForest.toString());
+
 
             ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 

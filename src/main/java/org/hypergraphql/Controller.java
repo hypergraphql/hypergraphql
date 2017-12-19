@@ -58,6 +58,7 @@ public class Controller {
 
         Service hgqlService = Service.ignite().port(config.getGraphqlConfig().port());
 
+
         // get method for accessing the GraphiQL UI
 
         hgqlService.get(config.getGraphqlConfig().graphiqlPath(), (req, res) -> {
