@@ -29,8 +29,8 @@ public class LocalSPARQLExecution extends SPARQLEndpointExecution {
     private Model model;
 
 
-    public LocalSPARQLExecution(JsonNode query, Set<String> inputSubset, Set<String> markers, SPARQLEndpointService sparqlEndpointService, HGQLSchema schema , Model localmodel) {
-        super(query, inputSubset, markers, sparqlEndpointService, schema);
+    public LocalSPARQLExecution(JsonNode query, Set<String> inputSubset, Set<String> markers, SPARQLEndpointService sparqlEndpointService, HGQLSchema schema , Model localmodel, String rootType) {
+        super(query, inputSubset, markers, sparqlEndpointService, schema, rootType);
         this.model = localmodel;
     }
 
@@ -45,7 +45,7 @@ public class LocalSPARQLExecution extends SPARQLEndpointExecution {
 
 
         SPARQLServiceConverter converter = new SPARQLServiceConverter(schema);
-        String sparqlQuery = converter.getSelectQuery(query, inputSubset);
+        String sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);
         logger.info(sparqlQuery);
         Query jenaQuery = QueryFactory.create(sparqlQuery);
 
