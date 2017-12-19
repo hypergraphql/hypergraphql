@@ -13,6 +13,7 @@ import org.hypergraphql.Controller;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.junit.jupiter.api.Test;
 
+import javax.jws.soap.SOAPBinding;
 import java.io.InputStream;
 
 public class GeneralTest {
@@ -27,6 +28,9 @@ public class GeneralTest {
 
        Model citiesModel = ModelFactory.createDefaultModel();
        citiesModel.read("src/test/resources/TestServices/cities.ttl", "TTL");
+       Model expectedModel = ModelFactory.createDefaultModel();
+       expectedModel.add(mainModel).add(citiesModel);
+       expectedModel.write(System.out,"NTRIPLE");
 
         Dataset ds = DatasetFactory.createTxnMem() ;
         ds.setDefaultModel(citiesModel);
@@ -35,10 +39,7 @@ public class GeneralTest {
                 .build() ;
         server.start() ;
 
-        QueryExecution qExe = QueryExecutionFactory.sparqlService( "http://localhost:3330/ds/sparql", "SELECT * WHERE { ?x ?y ?z } " );
-        ResultSet results = qExe.execSelect();
-        System.out.println("results = \n" );
-        ResultSetFormatter.out(System.out,results);
+
 
         HGQLConfig configext = new HGQLConfig("src/test/resources/TestServices/externalconfig.json");
 
@@ -51,28 +52,44 @@ public class GeneralTest {
         controller.start(config);
 
 
-//
-//        ObjectMapper mapper = new ObjectMapper();
-//
-//        ObjectNode bodyParam = mapper.createObjectNode();
-//
-////        bodyParam.set("operationName", null);
-////        bodyParam.set("variables", null);
-//        bodyParam.put("query", graphQlQuery);
-//
-//        Model model = ModelFactory.createDefaultModel();
-//
-//        try {
-//            HttpResponse<InputStream> response = Unirest.post(url)
-//                    .header("Accept", "application/ttl")
-//                    .body(bodyParam.toString())
-//                    .asBinary();
-//
-//            model.read(response.getBody(), "RDF/XML");
-//
-//        } catch (UnirestException e) {
-//            e.printStackTrace();
-//        }
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        ObjectNode bodyParam = mapper.createObjectNode();
+
+        bodyParam.put("query", "{\n" +
+                "  Person_GET {\n" +
+                "    _id\n" +
+                "    label\n" +
+                "    birthPlace{\n" +
+                "      _id\n" +
+                "      label\n" +
+                "    }\n" +
+                "    \n" +
+                "  }\n" +
+                "  City_GET {\n" +
+                "    _id\n" +
+                "    label\n" +
+                "  }\n" +
+                "  \n" +
+                "}");
+
+        Model returnedModel = ModelFactory.createDefaultModel();
+
+        try {
+            HttpResponse<InputStream> response = Unirest.post("http://localhost:8080/graphql")
+                    .header("Accept", "application/rdf+xml")
+                    .body(bodyParam.toString())
+                    .asBinary();
+
+            System.out.println(response.getBody());
+            returnedModel.read(response.getBody(), "RDF/XML");
+
+        } catch (UnirestException e) {
+            e.printStackTrace();
+        }
+
+        returnedModel.write(System.out, "NTRIPLE");
 
 
 
