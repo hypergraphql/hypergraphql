@@ -9,16 +9,16 @@ permalink: /documentation/
 HyperGraphQL is a [GraphQL](http://graphql.org) interface for querying and serving [linked data](https://www.w3.org/standards/semanticweb/data) on the Web. It  serves several key objectives and application scenarios:
 
 - hiding the complexities of the Semantic Web stack behind the GraphQL interface, thus enabling access to linked data via a simpler and more familiar to many clients GraphQL interface;
-- enforcing a uniform, strict view over heterogenous linked data sources residing in disconnected multiple services, while preserving the original URIs and links between them; 
-- restricting access to RDF stores (as one of supported services) down to naturally definable subsets of (tree-shaped) queries, which can be more efficiently handled, thus minimising the impact on the stores' availability;
+- enforcing a uniform, strict view over heterogenous linked data sources residing in disconnected multiple services, while preserving the original URIs and semantic links between them; 
+- restricting access to linked data services (particularly RDF stores, as one of supported services) down to naturally definable subsets of (tree-shaped) queries, which can be more efficiently handled, thus minimising the impact on the service's availability;
 - enabling easy deployment of reasonably sized linked datasets via embedded, in-memory [Apache Jena](https://jena.apache.org/) storage, and exposing them via GraphQL endpoints;
-- facilitating construction of micorservice-based linked data solutions in a plug-and-play fashion.
+- facilitating construction of micorservice-based linked data architectures in a plug-and-play fashion.
 
 To facilitate exploration, each HyperGraphQL instance is by default accompanied by a [GraphiQL](https://github.com/graphql/graphiql) interface:
 
 ![HyperGraphQL-screenshot](../sources/screenshot.png)
 
-The core response object of HyperGraphQL is [JSON-LD](https://json-ld.org) (embedded in the standard GraphQL response), which extends JSON with the [JSON-LD context](https://json-ld.org/spec/latest/json-ld-api-best-practices/#dfn-json-ld-context) enabling semantic disambiguation of the served data. Support for other RDF serialisation formats is also provided.
+The core response object of HyperGraphQL is [JSON-LD](https://json-ld.org) (embedded in the standard GraphQL response), which extends JSON with a [JSON-LD context](https://json-ld.org/spec/latest/json-ld-api-best-practices/#dfn-json-ld-context) enabling semantic disambiguation of the served data. Support for other RDF serialisation formats is also provided.
 
 <br>
 
@@ -54,7 +54,7 @@ http://localhost:8080/graphiql
 
 # Example
 
-The following query requests a single person instance with its URI (`_id`) and RDF type (`_type`), its name, birth date, birth place with the URI, an English label, and the country in which it is located, also including its URI and an English label. 
+The following query requests a single person instance with its URI (`_id`) and RDF type (`_type`), its name, birth date, birth place with its URI, an English label, and the country in which it is located, also including its URI and an English label. 
 
 ### HyperGraphQL query
 ```
@@ -76,7 +76,7 @@ The following query requests a single person instance with its URI (`_id`) and R
 }
 ```
 
-The response to this query consists of the usual GraphQL JSON object, further augmented with a JSON-LD context, included as the value of the property `@context` on the `data` object.
+The response to this query consists of the usual GraphQL JSON object, further augmented with a JSON-LD context included as the value of the property `@context` in the `data` object.
 
 ### HyperGraphQL response
 ```json
@@ -136,11 +136,11 @@ This graph (except for the first triple, added by HyperGraphQL) is a subset of t
 
 # HyperGraphQL instance = configuration + annotated GraphQL schema
 
-To set up a HyperGraphQL instance you only need to provide the top-level configuration, including specification of the linked data services from which the data is to be fetched, and define your GraphQL type schema. The schema has to be annotated with the URIs associated with every field and type in the schema, and with the pointers to the respective linked data services. The complete GraphQL wiring is done automatically on initiating the instance. 
+To set up a HyperGraphQL instance one only has to provide the top-level configuration, including specification of the linked data services from which the data is to be fetched, and a GraphQL schema. The schema must be annotated with the URIs associated with every field and type in the schema, and with the pointers to the respective linked data services. The complete GraphQL wiring is done automatically on initiating the instance. 
 
 ## Service configuration
 
-The configuration of an instance is defined in *config.json* file. For example, the following configuration describes an instance pointing at DBpedia's SPARQL endpoint:
+The configuration of an instance is defined in *config.json* file, located in the root directory of the repository. For example, the following configuration describes an instance pointing at DBpedia's SPARQL endpoint:
 
 ```js
 {
@@ -164,17 +164,17 @@ The configuration of an instance is defined in *config.json* file. For example, 
 }
 ```
 
-The meaning of the properties is as follows:
+The meaning of the JSON properties is as follows:
 
 * `name`: the name of the instance (currently used only internally for defining schema resources);  
-* `schema`: the name (possibly including the whole path) of the file containing GraphQL schema of the instance;
+* `schema`: the name (possibly including the path, if not placed in the root) of the file containing GraphQL schema of the instance;
 * `server`: the HTTP settings of the instance:
   - `port`: the port on which the instance is initiated;
   - `graphql`: the path of the GraphQL server;
   - `graphiql`: the path of the GraphiQL UI;
-* `services`: the specification of all services from which the instances is to fetch the data.
+* `services`: the specification of all services from which the instance is to fetch the data.
 
-HyperGraphQL currently supports three types of linked data services: remote SPARQL endpoints (`SPARQLEndpointService`), local RDF files (`LocalModelSPARQLService`) and remote HyperGraphQL instances (`HGraphQLService`).
+Currently, HyperGraphQL supports three types of linked data services: (remote) SPARQL endpoints (`SPARQLEndpointService`), local RDF files (`LocalModelSPARQLService`) and (remote) HyperGraphQL instances (`HGraphQLService`).
 
 ### Remote SPARQL endpoints
 
