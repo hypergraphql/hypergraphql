@@ -207,7 +207,7 @@ public class ExecutionTreeNode {
             FieldOfTypeConfig fieldConfig = hgqlSchema.getTypes().get(parentType).getField(field.getName());
             String targetName = fieldConfig.getTargetName();
 
-            Map<Service, Set<Field>> splitFields = getPartitionedFields(parentType, subFields);
+            Map<Service, Set<Field>> splitFields = getPartitionedFields(targetName, subFields);
 
             Set<Service> serviceCalls = splitFields.keySet();
 
@@ -299,9 +299,10 @@ public class ExecutionTreeNode {
 
                 if (hgqlSchema.getFields().containsKey(field.getName())) {
 
-               //     Service serviceConfig = hgqlSchema.getTypes().get(parentType).getFields().get(field.getName()).getService();
+                    Service serviceConfig;
 
-                    Service serviceConfig = hgqlSchema.getFields().get(field.getName()).getSetvice();
+                    serviceConfig = hgqlSchema.getTypes().get(parentType).getFields().get(field.getName()).getService();
+
 
                     if (result.containsKey(serviceConfig)) {
 
