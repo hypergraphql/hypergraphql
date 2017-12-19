@@ -1,5 +1,5 @@
 {
-    "name": "mydemo",
+    "name": "dbpedia-sparql-hgql-demo",
     "schema": "schema.graphql",
     "server": {
         "port": 8080,
