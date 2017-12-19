@@ -136,7 +136,7 @@ This graph (except for the first triple, added by HyperGraphQL) is a subset of t
 
 # HyperGraphQL instance = configuration + annotated GraphQL schema
 
-To set up a HyperGraphQL instance one only has to provide the top-level configuration, including specification of the linked data services from which the data is to be fetched, and a GraphQL schema. The schema must be annotated with the URIs associated with every field and type in the schema, and with the pointers to the respective linked data services. The complete GraphQL wiring is done automatically on initiating the instance. 
+To set up a HyperGraphQL instance you only need to provide the top-level configuration, including specification of the linked data services from which the data is to be fetched, and a GraphQL schema. The schema must be annotated with the URIs associated with every field and type in the schema, and with the pointers to the respective linked data services. The complete GraphQL wiring is done automatically on initiating the instance. 
 
 ## Service configuration
 
@@ -190,7 +190,7 @@ Currently, HyperGraphQL supports three types of linked data services: (remote) S
 ```
 
 * `id`: identifier of the service, used in the GraphQL schema annotations;
-* `type`: constant value of `SPARQLEndpointService`;
+* `type`: type of the service - here the constant value of `SPARQLEndpointService`;
 * `url`: the URL of the SPARQL endpoint;
 * `graph`: the name of the RDF graph to be queried; if the graph is unnamed (default) this property should be set to an empty string `""`;
 * `user`, `password`: the basic authentication details; if not applicable these properteis should be set to empty strings `"'`.
@@ -207,7 +207,7 @@ Currently, HyperGraphQL supports three types of linked data services: (remote) S
 ```
 
 * `id`: identifier of the service, used in the GraphQL schema annotations;
-* `type`: constant value of `LocalModelSPARQLService`;
+* `type`: type of the service - here the constant value of `LocalModelSPARQLService`;
 * `filepath`: the local path to the file with the RDF data;
 * `filetype`: the serialisation format of the RDF data; the acronyms follow the convention used in [Jena](https://jena.apache.org/documentation/io/rdf-output.html#jena_model_write_formats) `RDF/XML` (for RDF/XML), `TTL` (for Turtle), `NTRIPLE` (for n-triple).
 
@@ -222,7 +222,7 @@ Currently, HyperGraphQL supports three types of linked data services: (remote) S
 ```
 
 * `id`: identifier of the service, used in the GraphQL schema annotations;
-* `type`: constant value of `HGraphQLService`;
+* `type`: type of the service - here the constant value of `HGraphQLService`;
 * `url`: the URL of the GraphQL server of the HyperGraphQL instance.
 
 
@@ -274,19 +274,19 @@ type Country @service(id:"dbpedia-sparql") {
 }
 ```
 
-A HyperGraphQL schema must contain a designated type called `__Context`, which encodes the mapping from every object type and every field to a corresponding IRI via which the data is to be queried from the target services. For instance, the following line from the schema above informs the instance that the field `name` corresponds to the IRI `http://xmlns.com/foaf/0.1/name`: 
+A HyperGraphQL schema must contain a designated type called `__Context`, which encodes the mapping from every object type and every field to a corresponding IRI used in the target services. For instance, the following line from the schema above informs the instance that the field `name` corresponds to the IRI `http://xmlns.com/foaf/0.1/name`, and therefore this IRI will be used when fetching the values for the field `name` from designated services.
 
 ```
 name:      _@href(iri: "http://xmlns.com/foaf/0.1/name")
 ```
 
-Note that each type/field must be mapped to a unique such IRI. Intuitively, GraphQL types should be mapped to IRIs corresponding RDF/OWL classes, while fields to OWL data properties (whenever the values of the field are scalars, e.g., `String`, `Int`, `Boolean`, `ID`) and OWL object properties (whenever the values of the field are objects).
+Note that each type/field must be mapped to a unique such IRI. Intuitively, GraphQL types should be mapped to IRIs representing RDF/OWL classes, while fields to OWL data properties (whenever the values of the field are scalars, e.g., `String`, `Int`, `Boolean`, `ID`) and OWL object properties (whenever the values of the field are IRI resources).
 
-Furthermore, types and fields in the schema are annotated with the designated directives of the form:
+Furthermore, types and fields in the schema are annotated with the directives of the form:
 ```
 @service(id:"dbpedia-sparql")
 ```
-which inform the instance where the data for given type/field should be fetched. The ids must correspond to those declared in the `services` section of the configuration file. Currently, only one service can be associated with each type and field. Types annotated with a service id are automatically made quereable, i.e., the HyperGraphQL instance automatically exposes two query fields named: `TypeName_GET` and `TypeName_GET_BY_ID`, e.g.: `Person_GET` and `Person_GET_BY_ID`. Query fields of type `*_GET` are parametrised with arguments `limit:Int` and `offset:Int`, while those of type `*_GET_BY_ID` with the argument `uris:[String]` (see: the [Demo](/demo) section for examples). Annotation of selected types in the schema (and only types) can be skipped. In such cases the type will not become quereable. 
+which inform the instance from which service the data for given type/field should be fetched. The `id` must correspond to those declared in the `services` section of the configuration file. Currently, only one service can be associated with each type and field. Types annotated with a service id are automatically made quereable, i.e., the HyperGraphQL instance automatically exposes two query fields named: `TypeName_GET` and `TypeName_GET_BY_ID`, e.g.: `Person_GET` and `Person_GET_BY_ID`. Query fields of type `*_GET` are parametrised with arguments `limit:Int` and `offset:Int`, while those of type `*_GET_BY_ID` with the argument `uris:[String]` (see: the [Demo](/demo) section for examples). Annotation of selected types in the schema (and only types) can be skipped. In such cases the type will not become quereable. 
 
 The `Query` type of the type is generated automatically by the service. Additional fields and arguments that are introduced automatically are:
 - `_id:String` field, attached to each type in the schema, returning the URI of the resource;
