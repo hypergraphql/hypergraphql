@@ -7,21 +7,26 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.jena.fuseki.embedded.FusekiServer;
 import org.apache.jena.query.*;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.*;
+import org.apache.jena.rdf.model.impl.SelectorImpl;
+import org.apache.jena.rdf.model.impl.StatementImpl;
 import org.hypergraphql.Controller;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.junit.jupiter.api.Test;
 
 import javax.jws.soap.SOAPBinding;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GeneralTest {
 
 
 
-    //@Test
-    public static void main (String[] args) {
+    @Test
+    public  void mainTest(){
 
        Model mainModel = ModelFactory.createDefaultModel();
        mainModel.read("src/test/resources/TestServices/dbpedia.ttl", "TTL");
@@ -30,7 +35,7 @@ public class GeneralTest {
        citiesModel.read("src/test/resources/TestServices/cities.ttl", "TTL");
        Model expectedModel = ModelFactory.createDefaultModel();
        expectedModel.add(mainModel).add(citiesModel);
-       expectedModel.write(System.out,"NTRIPLE");
+
 
         Dataset ds = DatasetFactory.createTxnMem() ;
         ds.setDefaultModel(citiesModel);
@@ -61,7 +66,8 @@ public class GeneralTest {
                 "  Person_GET {\n" +
                 "    _id\n" +
                 "    label\n" +
-                "    birthPlace{\n" +
+                "    name\n" +
+                "    birthPlace {\n" +
                 "      _id\n" +
                 "      label\n" +
                 "    }\n" +
@@ -69,9 +75,7 @@ public class GeneralTest {
                 "  }\n" +
                 "  City_GET {\n" +
                 "    _id\n" +
-                "    label\n" +
-                "  }\n" +
-                "  \n" +
+                "    label}\n" +
                 "}");
 
         Model returnedModel = ModelFactory.createDefaultModel();
@@ -82,14 +86,33 @@ public class GeneralTest {
                     .body(bodyParam.toString())
                     .asBinary();
 
-            System.out.println(response.getBody());
+
             returnedModel.read(response.getBody(), "RDF/XML");
 
         } catch (UnirestException e) {
             e.printStackTrace();
         }
 
-        returnedModel.write(System.out, "NTRIPLE");
+
+
+        String query = "DELETE { <http://hypergraphql.org/query>  ?x ?y }\n" +
+
+                "WHERE\n" +
+                "  { <http://hypergraphql.org/query>  ?x ?y }";
+        Resource res = ResourceFactory.createResource("http://hypergraphql.org/query");
+        Selector sel = new SelectorImpl(res,null, (Object) null);
+        StmtIterator iterator = returnedModel.listStatements(sel);
+        Set<Statement> statements = new HashSet<>();
+        while (iterator.hasNext())
+            statements.add(iterator.nextStatement());
+
+        for (Statement statement : statements)
+            returnedModel.remove(statement);
+
+
+
+        assertTrue(expectedModel.isIsomorphicWith(returnedModel));
+
 
 
 
