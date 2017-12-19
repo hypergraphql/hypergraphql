@@ -299,9 +299,9 @@ public class ExecutionTreeNode {
 
                 if (hgqlSchema.getFields().containsKey(field.getName())) {
 
-                    Service serviceConfig = hgqlSchema.getTypes().get(parentType).getFields().get(field.getName()).getService();
+               //     Service serviceConfig = hgqlSchema.getTypes().get(parentType).getFields().get(field.getName()).getService();
 
-                 //   Service serviceConfig = hgqlSchema.getFields().get(field.getName()).getSetvice();
+                    Service serviceConfig = hgqlSchema.getFields().get(field.getName()).getSetvice();
 
                     if (result.containsKey(serviceConfig)) {
 
