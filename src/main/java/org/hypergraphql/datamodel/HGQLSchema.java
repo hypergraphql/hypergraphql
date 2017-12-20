@@ -12,12 +12,10 @@ import org.hypergraphql.config.schema.FieldConfig;
 import org.hypergraphql.config.schema.FieldOfTypeConfig;
 import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.config.schema.TypeConfig;
-import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.services.Service;
 
 import java.util.*;
 
-import static org.apache.jena.enhanced.BuiltinPersonalities.model;
 import static org.hypergraphql.config.schema.HGQLVocabulary.*;
 
 

@@ -6,10 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.*;
 import org.apache.log4j.Logger;
 import org.hypergraphql.config.schema.HGQLVocabulary;
@@ -22,7 +18,7 @@ public class ModelContainer {
 
     protected Model model;
 
-    //protected static Logger logger = Logger.getLogger(ModelContainer.class);
+    protected static Logger logger = Logger.getLogger(ModelContainer.class);
 
     public String getDataOutput(String format) {
 

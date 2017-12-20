@@ -4,7 +4,6 @@ import graphql.*;
 import graphql.schema.GraphQLSchema;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datamodel.HGQLSchema;
-import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.datafetching.ExecutionForest;
 import org.hypergraphql.datafetching.ExecutionForestFactory;
 import org.hypergraphql.datamodel.ModelContainer;
