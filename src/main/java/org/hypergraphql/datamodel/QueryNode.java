@@ -1,7 +1,6 @@
 package org.hypergraphql.datamodel;
 
 import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
 
 public class QueryNode {
 

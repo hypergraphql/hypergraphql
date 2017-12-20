@@ -7,8 +7,6 @@ import graphql.schema.GraphQLSchema;
 import graphql.validation.ValidationError;
 import graphql.validation.ValidationErrorType;
 import graphql.validation.Validator;
-import org.hypergraphql.datamodel.HGQLSchema;
-import org.hypergraphql.datamodel.HGQLSchemaWiring;
 
 import java.util.ArrayList;
 import java.util.List;

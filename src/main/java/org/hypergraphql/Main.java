@@ -1,13 +1,7 @@
 package org.hypergraphql;
 
-
-
-import org.apache.jena.fuseki.embedded.FusekiServer;
-import org.apache.jena.query.Dataset;
-import org.apache.jena.query.DatasetFactory;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.config.system.HGQLConfig;
 
 public class Main {

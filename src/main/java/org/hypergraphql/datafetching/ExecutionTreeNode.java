@@ -9,7 +9,6 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.log4j.Logger;
 import org.hypergraphql.config.schema.FieldOfTypeConfig;
 import org.hypergraphql.datamodel.HGQLSchema;
-import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.datafetching.services.Service;
 

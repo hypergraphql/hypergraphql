@@ -14,8 +14,6 @@ import spark.ModelAndView;
 import spark.Service;
 import spark.template.velocity.VelocityTemplateEngine;
 
-import static spark.Spark.*;
-
 /**
  * Created by szymon on 05/09/2017.
  */
