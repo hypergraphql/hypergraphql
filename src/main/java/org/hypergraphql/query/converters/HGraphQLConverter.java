@@ -126,8 +126,6 @@ public class HGraphQLConverter {
 
         String topQueryFieldName = rootType + "_GET_BY_ID";
 
-        System.out.println(topQueryFieldName);
-
         String key = topQueryFieldName + urisArgSTR(input);
 
         String content = getSubQuery(jsonQuery, rootType);
