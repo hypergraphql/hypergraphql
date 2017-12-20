@@ -1,0 +1,44 @@
+@prefix dbo:   <http://dbpedia.org/ontology/> .
+@prefix dbr:   <http://dbpedia.org/resource/> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+
+dbr:Peter_Ceffons  a  dbo:Person ;
+        rdfs:label  "Peter Ceffons"@it , "Peter Ceffons"@en ;
+        foaf:name   "Peter Ceffons"@en .
+
+dbr:Nikolaos_Ventouras
+        a           dbo:Person ;
+        rdfs:label  "Nikolaos Ventouras"@en , "Nikolaos Ventouras"@it ;
+        foaf:name   "Nikolaos Ventouras"@en .
+
+dbr:Siniša_Žugić  a  dbo:Person ;
+        rdfs:label  "Siniša Žugić"@en , "Siniša Žugic"@it ;
+        foaf:name   "Siniša Žugic"@en .
+
+dbr:Megan_Lawrence  a  dbo:Person ;
+        rdfs:label  "Megan Lawrence"@en , "Megan Lawrence"@it ;
+        foaf:name   "Megan Lawrence"@en .
+
+dbr:Lorine_Livington_Pruette
+        a           dbo:Person ;
+        rdfs:label  "Lorine Livington Pruette"@fr , "Lorine Livington Pruette"@en , "Lorine Livington Pruette"@it ;
+        foaf:name   "Lorine Livington Pruette"@en .
+
+dbr:Danilo_Tognon  a  dbo:Person ;
+        rdfs:label  "Danilo Tognon"@en , "Danilo Tognon"@it ;
+        foaf:name   "Danilo Tognon"@en .
+
+dbr:Andreas_Ekberg  a  dbo:Person ;
+        rdfs:label  "Andreas Ekberg"@en , "Andreas Ekberg"@nl , "Andreas Ekberg"@it ;
+        foaf:name   "Andreas Ekberg"@en .
+
+<http://dbpedia.org/resource/William_Bagot,_2nd_Baron_Bagot>
+        a           dbo:Person ;
+        rdfs:label  "William Bagot, II barone Bagot"@it ;
+        foaf:name   "William Bagot, 2nd Baron Bagot"@en .
+
+dbr:Sani_ol_molk  a  dbo:Person ;
+        rdfs:label  "Sani ol molk"@it , "Sani ol molk"@en , "Абу-ль-Хасан Гаффари"@ru ;
+        foaf:name   "Mirza Abolhassan Khan Ghaffari"@en .

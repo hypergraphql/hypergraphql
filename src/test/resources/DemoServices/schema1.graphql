@@ -1,0 +1,20 @@
+type __Context {
+    City:           _@href(iri: "http://dbpedia.org/ontology/City")
+    Country:        _@href(iri: "http://dbpedia.org/ontology/Country")
+    label:          _@href(iri: "http://www.w3.org/2000/01/rdf-schema#label")
+    comment:        _@href(iri: "http://www.w3.org/2000/01/rdf-schema#comment")
+    country:        _@href(iri: "http://dbpedia.org/ontology/country")
+    capital:        _@href(iri: "http://dbpedia.org/ontology/capital")
+}
+
+type City @service(id:"dbpedia-sparql") {
+    label: [String] @service(id:"dbpedia-sparql")
+    country: Country @service(id:"dbpedia-sparql")
+    comment: [String] @service(id:"dbpedia-sparql")
+}
+
+type Country @service(id:"dbpedia-sparql") {
+    label: [String] @service(id:"dbpedia-sparql")
+    capital: City @service(id:"dbpedia-sparql")
+    comment: [String] @service(id:"dbpedia-sparql")
+}

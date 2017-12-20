@@ -1,0 +1,23 @@
+@prefix dbo:   <http://dbpedia.org/ontology/> .
+@prefix dbr:   <http://dbpedia.org/resource/> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+
+dbr:Kashan  a       dbo:City ;
+        rdfs:label  "Kashan"@nl , "Kashan"@en , "Kashan"@fr , "カーシャーン"@ja , "Kashan"@it , "Kashan"@es , "Kashan"@pt , "Kaschan (Stadt)"@de , "Kaszan"@pl , "كاشان"@ar .
+
+dbr:Corfu  a        dbo:City ;
+        rdfs:label  "Korfoe (eiland)"@nl , "ケルキラ島"@ja , "Corfou"@fr , "Korfu"@de , "Korfu"@pl , "كورفو"@ar , "Corfù"@it , "Corfú"@es , "Corfu"@en , "Corfu"@pt .
+
+dbr:Nikolaos_Ventouras
+        a               dbo:Person ;
+        dbo:birthPlace  dbr:Corfu .
+
+dbr:Malmö  a        dbo:City ;
+        rdfs:label  "Malmö"@pl , "Malmö"@de , "Malmö"@it , "Malmö"@en , "Malmö"@pt , "Malmö"@fr , "Malmö"@es , "مالمو"@ar , "マルメ"@ja , "Malmö (stad)"@nl .
+
+dbr:Andreas_Ekberg  a   dbo:Person ;
+        dbo:birthPlace  dbr:Malmö .
+
+dbr:Sani_ol_molk  a     dbo:Person ;
+        dbo:birthPlace  dbr:Kashan .

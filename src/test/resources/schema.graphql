@@ -1,0 +1,20 @@
+type __Context {
+    Person:         _@href(iri: "http://dbpedia.org/ontology/Person")
+    City:           _@href(iri: "http://dbpedia.org/ontology/City")
+    name:           _@href(iri: "http://xmlns.com/foaf/0.1/name")
+    label:          _@href(iri: "http://www.w3.org/2000/01/rdf-schema#label")
+    birthPlace:     _@href(iri: "http://dbpedia.org/ontology/birthPlace")
+}
+
+type Person @service(id:"local") {
+    name: String @service(id:"local")
+    label: [String] @service(id:"local")
+    birthPlace: City @service(id:"local")
+
+}
+
+type City @service(id:"dbpedia") {
+    label: [String] @service(id:"dbpedia")
+
+}
+

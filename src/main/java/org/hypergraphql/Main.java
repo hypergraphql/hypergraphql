@@ -1,25 +1,28 @@
 package org.hypergraphql;
 
+
+
+import org.apache.jena.fuseki.embedded.FusekiServer;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.hypergraphql.config.HGQLConfig;
+import org.hypergraphql.datamodel.HGQLSchemaWiring;
+import org.hypergraphql.config.system.HGQLConfig;
 
 public class Main {
 
-    static Logger logger = Logger.getLogger(Main.class);
-
-
+    private static Logger logger = Logger.getLogger(Main.class);
+    
     public static void main(String[] args) {
 
         PropertyConfigurator.configure("log4j.properties");
-        HGQLConfig config = new HGQLConfig("properties.json");
+        HGQLConfig config = new HGQLConfig("config.json");
 
-        System.out.println("GraphQL server started at: http://localhost:" + config.graphqlConfig().port() + config.graphqlConfig().path());
-        System.out.println("GraphiQL UI available at: http://localhost:" + config.graphqlConfig().port() + config.graphqlConfig().graphiql());
+        logger.info("Server started at http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphqlPath());
 
-        logger.info("Server started at http://localhost:" + config.graphqlConfig().port() + config.graphqlConfig().path());
-
-        Controller.start(config);
+        Controller controller = new Controller();
+        controller.start(config);
 
     }
 }
