@@ -8,7 +8,7 @@
     },
     "services": [
         {
-            "id": "dbpedia",
+            "id": "dbpedia-sparql",
             "type": "SPARQLEndpointService",
             "url": "http://dbpedia.org/sparql/",
             "graph": "http://dbpedia.org",
