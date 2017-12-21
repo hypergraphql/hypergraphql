@@ -240,12 +240,16 @@ hr {
 
 
 
-@media print, screen and (max-width: 960px) {
+@media print, screen and (max-width: 1060px) {
 
   outer {
         position: static;
         float: none;
         display: block;
+    }
+  
+  outer, sidebar {
+      height: auto;
     }
   
   div.wrapper {
