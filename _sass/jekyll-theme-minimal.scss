@@ -242,6 +242,12 @@ hr {
 
 @media print, screen and (max-width: 960px) {
 
+  outer {
+        position: static;
+        float: none;
+        display: block;
+    }
+  
   div.wrapper {
     width:auto;
     margin:0;
