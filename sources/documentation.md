@@ -12,7 +12,7 @@ HyperGraphQL is a [GraphQL](http://graphql.org) interface for querying and servi
 - enforcing a uniform, strict view over heterogeneous linked data sources residing in disconnected multiple services, while preserving the original URIs and semantic links between them; 
 - restricting access to linked data services (particularly RDF stores, as one of supported services) down to naturally definable subsets of (tree-shaped) queries, which can be more efficiently handled, thus minimising the impact on the service's availability;
 - enabling easy deployment of reasonably sized linked datasets via embedded, in-memory [Apache Jena](https://jena.apache.org/) storage, and exposing them via GraphQL endpoints;
-- facilitating construction of micorservice-based linked data architectures in a plug-and-play fashion.
+- facilitating construction of microservice-based linked data architectures in a plug-and-play fashion.
 
 To facilitate exploration, each HyperGraphQL instance is by default accompanied by a [GraphiQL](https://github.com/graphql/graphiql) interface:
 
