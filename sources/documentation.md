@@ -499,4 +499,5 @@ In the future versions, this representation will also be made available via suit
 
 # Other references
 
-* S. Klarman, [Querying DBpedia with GraphQL](https://medium.com/@sklarman/querying-linked-data-with-graphql-959e28aa8013), blog post, Semantic Integration, 2017.
+* [Querying DBpedia with GraphQL](https://medium.com/@sklarman/querying-linked-data-with-graphql-959e28aa8013), blog post, Semantic Integration, 2017.
+* [Weaving Linked Data Cloud with (Hyper)GraphQL](https://medium.com/@sklarman/weaving-linked-data-cloud-with-hypergraphql-d332d768a1fe), blog post, Semantic Integration, 2018.
