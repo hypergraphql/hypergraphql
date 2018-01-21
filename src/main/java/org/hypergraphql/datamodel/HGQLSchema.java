@@ -304,7 +304,7 @@ public class HGQLSchema {
         }
 
         if (type.getClass()==NonNullType.class) {
-            ListType castType = (ListType) type;
+            NonNullType castType = (NonNullType) type;
             String subTypeUri = getOutputType(castType.getType());
             rdfSchema.insertObjectTriple(dummyNode, RDF_TYPE, HGQL_NON_NULL_TYPE);
             rdfSchema.insertObjectTriple(dummyNode, HGQL_OF_TYPE, subTypeUri);
