@@ -35,7 +35,6 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
     protected Logger logger = Logger.getLogger(SPARQLEndpointExecution.class);
     protected String rootType;
 
-
     public SPARQLEndpointExecution(JsonNode query, Set<String> inputSubset, Set<String> markers, SPARQLEndpointService sparqlEndpointService, HGQLSchema schema, String rootType) {
         this.query = query;
         this.inputSubset = inputSubset;
@@ -43,13 +42,9 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
         this.sparqlEndpointService = sparqlEndpointService;
         this.schema = schema;
         this.rootType=rootType;
-
-
     }
 
-
     @Override
-
     public SPARQLExecutionResult call() throws Exception {
         Map<String, Set<String>> resultSet = new HashMap<>();
         for (String marker : markers) {
@@ -57,7 +52,6 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
         }
 
         Model unionModel = ModelFactory.createDefaultModel();
-
 
         SPARQLServiceConverter converter = new SPARQLServiceConverter(schema);
         String sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);

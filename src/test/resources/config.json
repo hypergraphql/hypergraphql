@@ -31,6 +31,15 @@
             "graph": "",
             "user": "",
             "password": ""
+        },
+
+        {
+            "id": "local",
+            "type": "HGraphQLService",
+            "url": "http://localhost:8080/graphql",
+            "graph": "",
+            "user": "",
+            "password": ""
         }
     ]
 }

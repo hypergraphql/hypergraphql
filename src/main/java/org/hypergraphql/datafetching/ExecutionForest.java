@@ -15,7 +15,7 @@ import java.util.concurrent.Future;
 
 public class ExecutionForest  {
 
-    static Logger logger = Logger.getLogger(ExecutionForest.class);
+    private final static Logger LOGGER = Logger.getLogger(ExecutionForest.class);
 
     private HashSet<ExecutionTreeNode> forest;
 
@@ -23,30 +23,26 @@ public class ExecutionForest  {
         this.forest = new HashSet<>();
     }
 
-
-
     public HashSet<ExecutionTreeNode> getForest() {
         return forest;
     }
 
     public Model generateModel() {
+
         ExecutorService executor = Executors.newFixedThreadPool(10);
         Model model = ModelFactory.createDefaultModel();
-        Set<Future<Model>> futuremodels = new HashSet<>();
-        for (ExecutionTreeNode node : this.forest) {
-            FetchingExecution fetchingExecution = new FetchingExecution(new HashSet<String>(), node);
-            futuremodels.add(executor.submit(fetchingExecution));
-
-
-        }
-        futuremodels.iterator().forEachRemaining(futureModel -> {
+        Set<Future<Model>> futureModels = new HashSet<>();
+        getForest().forEach(node -> {
+            FetchingExecution fetchingExecution = new FetchingExecution(new HashSet<>(), node);
+            futureModels.add(executor.submit(fetchingExecution));
+        });
+        futureModels.forEach(futureModel -> {
             try {
-                Model futuremodel = futureModel.get();
-                model.add(futuremodel);
-            } catch (InterruptedException e) {
-                logger.error(e);
-            } catch (ExecutionException e) {
-                logger.error(e);
+                Model m = futureModel.get();
+                model.add(m);
+            } catch (InterruptedException
+                    | ExecutionException e) {
+                LOGGER.error(e);
             }
         });
         return model;
@@ -58,27 +54,16 @@ public class ExecutionForest  {
 
     public String toString(int i) {
 
-        String result = "";
-
-        for (ExecutionTreeNode node : this.forest) {
-            result += node.toString(i);
-        }
-
-        return result;
+        StringBuilder result = new StringBuilder();
+        getForest().forEach(node -> result.append(node.toString(i)));
+        return result.toString();
     }
 
     public Map<String, String> getFullLdContext() {
 
         Map<String, String> result = new HashMap<>();
-
-        Set<ExecutionTreeNode> children = getForest();
-
-            for (ExecutionTreeNode child : children) {
-                    result.putAll(child.getFullLdContext());
-            }
-
+        getForest().forEach(child -> result.putAll(child.getFullLdContext()));
         return result;
-
     }
 
 }

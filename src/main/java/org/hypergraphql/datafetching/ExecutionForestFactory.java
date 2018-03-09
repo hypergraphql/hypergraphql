@@ -30,6 +30,14 @@ public class ExecutionForestFactory {
 
             }
         }
+
+//        if(queryFields.getSelections().stream().anyMatch(child -> child instanceof Field)) {
+//
+//            String nodeId = "x_" + i++;
+//                Field field = (Field) child;
+//            forest.getForest().add(new ExecutionTreeNode(field, nodeId , schema));
+//        }
+
         return forest;
     }
 }

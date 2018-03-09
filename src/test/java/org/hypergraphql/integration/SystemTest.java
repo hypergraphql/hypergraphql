@@ -1,4 +1,4 @@
-package org.hypergraphql.Test;
+package org.hypergraphql.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -9,60 +9,46 @@ import org.apache.jena.fuseki.embedded.FusekiServer;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.rdf.model.impl.SelectorImpl;
-import org.apache.jena.rdf.model.impl.StatementImpl;
-import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.hypergraphql.Controller;
 import org.hypergraphql.config.system.HGQLConfig;
-import org.hypergraphql.datafetching.SPARQLEndpointExecution;
 import org.junit.jupiter.api.Test;
 
-import javax.jws.soap.SOAPBinding;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class GeneralTest {
-
+class SystemTest {
 
 
     @Test
-    public  void mainTest() throws InterruptedException {
+    void integration_test() {
 
-       Model mainModel = ModelFactory.createDefaultModel();
-       mainModel.read("src/test/resources/TestServices/dbpedia.ttl", "TTL");
+        Model mainModel = ModelFactory.createDefaultModel();
+        mainModel.read("src/test/resources/TestServices/dbpedia.ttl", "TTL");
 
-       Model citiesModel = ModelFactory.createDefaultModel();
-       citiesModel.read("src/test/resources/TestServices/cities.ttl", "TTL");
-       Model expectedModel = ModelFactory.createDefaultModel();
-       expectedModel.add(mainModel).add(citiesModel);
+        Model citiesModel = ModelFactory.createDefaultModel();
+        citiesModel.read("src/test/resources/TestServices/cities.ttl", "TTL");
+        Model expectedModel = ModelFactory.createDefaultModel();
+        expectedModel.add(mainModel).add(citiesModel);
 
-
-        Dataset ds = DatasetFactory.createTxnMem() ;
+        Dataset ds = DatasetFactory.createTxnMem();
         ds.setDefaultModel(citiesModel);
         FusekiServer server = FusekiServer.create()
                 .add("/ds", ds)
-                .build() ;
-        server.start() ;
+                .build()
+                .start();
 
+        HGQLConfig externalConfig = new HGQLConfig("src/test/resources/TestServices/externalconfig.json");
 
-
-
-
-        HGQLConfig configext = new HGQLConfig("src/test/resources/TestServices/externalconfig.json");
-
-        Controller controllerext = new Controller();
-        controllerext.start(configext);
+        Controller externalController = new Controller();
+        externalController.start(externalConfig);
 
         HGQLConfig config = new HGQLConfig("src/test/resources/TestServices/mainconfig.json");
 
-
         Controller controller = new Controller();
         controller.start(config);
-
-
-
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -100,35 +86,26 @@ public class GeneralTest {
         }
 
         Resource res = ResourceFactory.createResource("http://hypergraphql.org/query");
-        Selector sel = new SelectorImpl(res,null, (Object) null);
+        Selector sel = new SelectorImpl(res, null, (Object) null);
         StmtIterator iterator = returnedModel.listStatements(sel);
         Set<Statement> statements = new HashSet<>();
-        while (iterator.hasNext())
+        while (iterator.hasNext()) {
             statements.add(iterator.nextStatement());
+        }
 
-        for (Statement statement : statements)
+        for (Statement statement : statements) {
             returnedModel.remove(statement);
+        }
 
         StmtIterator iterator2 = expectedModel.listStatements();
         while (iterator2.hasNext()) {
             Statement currentstatement = iterator2.next();
-            if (!returnedModel.contains(currentstatement))
+            if (!returnedModel.contains(currentstatement)) {
                 System.out.println(currentstatement);
-
-
+            }
         }
 
         assertTrue(expectedModel.isIsomorphicWith(returnedModel));
         server.stop();
-
-
-
-
-
-
-
-
-
-
     }
 }

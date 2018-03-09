@@ -13,22 +13,30 @@ repositories {
         
      maven { url "http://repo.maven.apache.org/maven2" }
 }
+
+ext {
+
+    jenaVersion = '3.6.0'
+}
+
 dependencies {
-    compile group: 'com.graphql-java', name: 'graphql-java', version:'6.0'
-    compile group: 'org.apache.jena', name: 'jena-arq', version:'3.5.0'
-    compile group: 'org.apache.jena', name: 'jena', version:'3.5.0'
-    compile group: 'org.apache.jena', name: 'jena-core', version:'3.5.0'
-    compile group: 'org.apache.jena', name: 'jena-fuseki-embedded', version:'3.5.0'
-    compile group: 'log4j', name: 'log4j', version:'1.2.17'
-    compile group: 'org.slf4j', name: 'slf4j-api', version:'1.7.5'
-    compile group: 'org.slf4j', name: 'slf4j-log4j12', version:'1.7.5'
-    compile group: 'com.sparkjava', name: 'spark-core', version:'2.5'
+    compile group: 'com.graphql-java', name: 'graphql-java', version: '6.0'
+    compile group: 'org.apache.jena', name: 'jena-arq', version: jenaVersion
+    compile group: 'org.apache.jena', name: 'jena', version: jenaVersion
+    compile group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
+    compile group: 'org.apache.jena', name: 'jena-fuseki-embedded', version: jenaVersion
+    compile group: 'log4j', name: 'log4j', version: '1.2.17'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
+    compile group: 'com.sparkjava', name: 'spark-core', version: '2.5'
     compile group: 'com.sparkjava', name: 'spark-template-velocity', version: '2.5.5'
     compile group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.9'
 
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.0.1'
     testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0")
     testRuntime("org.junit.platform:junit-platform-launcher:1.0.0")
+
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.11.0'
 }
 
 task execute(type:JavaExec) {

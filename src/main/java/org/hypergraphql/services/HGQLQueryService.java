@@ -1,6 +1,9 @@
 package org.hypergraphql.services;
 
-import graphql.*;
+import graphql.ExecutionInput;
+import graphql.ExecutionResult;
+import graphql.GraphQL;
+import graphql.GraphQLError;
 import graphql.schema.GraphQLSchema;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datamodel.HGQLSchema;
@@ -10,7 +13,10 @@ import org.hypergraphql.datamodel.ModelContainer;
 import org.hypergraphql.query.QueryValidator;
 import org.hypergraphql.query.ValidatedQuery;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by szymon on 01/11/2017.
@@ -22,7 +28,7 @@ public class HGQLQueryService {
     private HGQLSchema hgqlSchema;
 
 
-    public HGQLQueryService (HGQLConfig config) {
+    public HGQLQueryService(HGQLConfig config) {
         this.hgqlSchema = config.getHgqlSchema();
         this.schema = config.getSchema();
 
@@ -42,7 +48,6 @@ public class HGQLQueryService {
         ExecutionInput executionInput;
         ExecutionResult qlResult = null;
 
-
         ValidatedQuery validatedQuery = new QueryValidator(schema).validateQuery(query);
 
         if (!validatedQuery.getValid()) {
@@ -50,16 +55,14 @@ public class HGQLQueryService {
             return result;
         }
 
-         if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
+        if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
 
-            ExecutionForest queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery(), hgqlSchema);
+            ExecutionForest queryExecutionForest =
+                    new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery(), hgqlSchema);
 
             ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 
-
-            if (acceptType!=null) {
-                result.put("data", client.getDataOutput(acceptType));
-            } else {
+            if (acceptType == null) {
                 executionInput = ExecutionInput.newExecutionInput()
                         .query(query)
                         .context(client)
@@ -69,6 +72,8 @@ public class HGQLQueryService {
 
                 data.putAll(qlResult.getData());
                 data.put("@context", queryExecutionForest.getFullLdContext());
+            } else {
+                result.put("data", client.getDataOutput(acceptType));
             }
 
         } else {
@@ -77,7 +82,7 @@ public class HGQLQueryService {
 
         }
 
-        if (qlResult!=null) {
+        if (qlResult != null) {
             result.put("data", data);
             errors.addAll(qlResult.getErrors());
         }

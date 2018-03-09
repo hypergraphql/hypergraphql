@@ -99,7 +99,7 @@ public class HGQLConfig {
             this.schemaFile = config.schemaFile;
             this.serviceConfigs = config.serviceConfigs;
             this.graphqlConfig = config.graphqlConfig;
-            HGQLSchemaWiring wiring = new HGQLSchemaWiring(this.registry,this.name,this.serviceConfigs);
+            HGQLSchemaWiring wiring = new HGQLSchemaWiring(this.registry, this.name, this.serviceConfigs);
             this.schema = wiring.getSchema();
             this.hgqlSchema = wiring.getHgqlSchema();
 

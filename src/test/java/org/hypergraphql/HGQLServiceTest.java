@@ -21,7 +21,7 @@ public class HGQLServiceTest {
 //                    "    deathDate\n" +
 //                    "}}\n";
 //
-//    @Test
+//    @integration
 //    public void fetchingDataToLocalFromQuery() {
 ////        HGQLConfig config = HGQLConfig.getInstance();
 ////
@@ -60,7 +60,7 @@ public class HGQLServiceTest {
 //
 //    }
 //
-//    @Test
+//    @integration
 //    public void introspectionQuery() {
 ////        HGQLConfig config = HGQLConfig.getInstance();
 ////

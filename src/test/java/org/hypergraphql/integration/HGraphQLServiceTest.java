@@ -1,7 +1,7 @@
 //package org.hypergraphql.Test;
 //
 //import org.junit.Before;
-//import org.junit.Test;
+//import org.junit.integration;
 //
 //import static org.junit.Assert.*;
 //
@@ -13,7 +13,7 @@
 //
 //
 //
-//    @Test
+//    @integration
 //    public void getModelFromRemoteTest() {
 //
 //

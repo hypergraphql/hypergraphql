@@ -1,34 +1,24 @@
 package org.hypergraphql.datafetching.services;
 
-
-
-import org.apache.jena.query.Dataset;
-import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
-
-import org.apache.jena.sparql.core.DatasetGraph;
 import org.hypergraphql.Controller;
 import org.hypergraphql.config.system.HGQLConfig;
-import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HGraphQLServiceTest {
 
     @Test
-    public void getModelFromHGQLService() throws IllegalAccessException, NoSuchFieldException, NoSuchMethodException, InvocationTargetException {
-
+    void HGQLService_integration_test() throws Exception {
 
         HGQLConfig config = new HGQLConfig("src/test/resources/config.json");
         Controller controller = new Controller();
         controller.start(config);
-
 
         HGraphQLService hgqlService = new HGraphQLService();
 
@@ -63,8 +53,7 @@ class HGraphQLServiceTest {
         method.setAccessible(true);
         Model model = (Model) method.invoke(hgqlService, testQuery);
 
-        assertTrue(model.size()>10);
-
+        assertTrue(model.size() > 10);
     }
 
-    }
+}

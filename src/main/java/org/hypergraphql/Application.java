@@ -4,9 +4,9 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.hypergraphql.config.system.HGQLConfig;
 
-public class Main {
+public class Application {
 
-    private static Logger logger = Logger.getLogger(Main.class);
+    private static Logger logger = Logger.getLogger(Application.class);
     
     public static void main(String[] args) {
 

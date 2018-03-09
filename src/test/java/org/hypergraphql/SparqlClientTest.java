@@ -28,12 +28,12 @@ import java.io.InputStream;
  */
 class SparqlClientTest {
 //
-//    @Test
+//    @integration
 //    public void query_with_auth_11() {
 //
 //    }
 //
-//    @Test
+//    @integration
 //    public void unirestSparqlQuery() throws UnirestException {
 //
 ////        String queryString = "SELECT * WHERE { ?x ?y ?z } LIMIT 10";

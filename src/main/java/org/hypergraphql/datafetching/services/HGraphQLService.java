@@ -24,7 +24,6 @@ public class HGraphQLService extends Service {
     @Override
     public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers , String rootType, HGQLSchema schema) {
 
-
         Model model;
         Map<String, Set<String>> resultSet;
         String graphQlQuery = new HGraphQLConverter(schema).convertToHGraphQL(query, input, rootType);
@@ -46,8 +45,6 @@ public class HGraphQLService extends Service {
 
         ObjectNode bodyParam = mapper.createObjectNode();
 
-//        bodyParam.set("operationName", null);
-//        bodyParam.set("variables", null);
         bodyParam.put("query", graphQlQuery);
 
         Model model = ModelFactory.createDefaultModel();
@@ -58,6 +55,7 @@ public class HGraphQLService extends Service {
                     .body(bodyParam.toString())
                     .asBinary();
 
+            // problem seems to be here
             model.read(response.getBody(), "RDF/XML");
 
         } catch (UnirestException e) {

@@ -1,4 +1,4 @@
-package org.hypergraphql.Test;
+package org.hypergraphql.integration;
 
 import org.hypergraphql.Controller;
 import org.hypergraphql.config.system.HGQLConfig;
