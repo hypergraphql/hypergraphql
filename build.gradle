@@ -1,13 +1,12 @@
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'findbugs'
 
 group = 'org.hypergraphql'
 version = '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-
-
 
 repositories {
         
@@ -17,6 +16,10 @@ repositories {
 ext {
 
     jenaVersion = '3.6.0'
+}
+
+findbugs {
+    sourceSets = [sourceSets.main]
 }
 
 dependencies {
@@ -37,6 +40,14 @@ dependencies {
     testRuntime("org.junit.platform:junit-platform-launcher:1.0.0")
 
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.11.0'
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled false
+        html.enabled true
+        html.stylesheet resources.text.fromFile('findbugs/xsl/default.xsl')
+    }
 }
 
 task execute(type:JavaExec) {
