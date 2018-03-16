@@ -276,8 +276,6 @@ public class HGQLSchema {
             this.types.put(typeName, typeConfig);
 
         }
-
-
     }
 
     private String getTargetTypeName(RDFNode outputTypeNode) {
@@ -353,5 +351,13 @@ public class HGQLSchema {
         }
 
         return dummyNode;
+    }
+
+    public String getSchemaUri() {
+        return schemaUri;
+    }
+
+    public String getSchemaNamespace() {
+        return schemaNamespace;
     }
 }

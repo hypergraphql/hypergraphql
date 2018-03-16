@@ -11,17 +11,33 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.riot.RDFDataMgr;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
+
+import static org.apache.jena.riot.Lang.TURTLE;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ApplicationTest {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ApplicationTest.class);
+
+    private static final String OUTPUT_FILE_PATH = "src/test/resources/test_services/output/cities1.ttl";
+
+    @AfterAll
+    static void cleanUp() {
+
+        final File outputTurtle = new File(OUTPUT_FILE_PATH);
+        outputTurtle.deleteOnExit();
+    }
 
     @Test
     void server_test() throws Exception {
@@ -40,16 +56,16 @@ class ApplicationTest {
         Query query = QueryFactory.create(construct); //s2 = the query above
         QueryExecution qExe = QueryExecutionFactory.sparqlService("http://dbpedia.org/sparql", query);
 
-        Model model1 = qExe.execConstruct();
+        Model constructedModel = qExe.execConstruct();
 
-        LOGGER.debug(model1.toString());
+        LOGGER.debug(constructedModel.toString());
 
-        Property property = model1.createProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
-        RDFNode node = model1.createResource("http://dbpedia.org/ontology/Person");
+        Property property = constructedModel.createProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+        RDFNode node = constructedModel.createResource("http://dbpedia.org/ontology/Person");
 
-        ResIterator nodes = model1.listResourcesWithProperty(property, node);
+        ResIterator nodes = constructedModel.listResourcesWithProperty(property, node);
 
-        Model model2 = ModelFactory.createDefaultModel();
+        Model fromDBPedia = ModelFactory.createDefaultModel();
 
         while (nodes.hasNext()) {
 
@@ -70,14 +86,30 @@ class ApplicationTest {
             LOGGER.debug(pss.toString());
             query = QueryFactory.create(pss.toString());
             qExe = QueryExecutionFactory.sparqlService("http://dbpedia.org/sparql", query);
-            model2.add(qExe.execConstruct());
+            fromDBPedia.add(qExe.execConstruct());
         }
 
-        model2.write(System.out, "NTRIPLE");
+        fromDBPedia.write(System.out, "NTRIPLE");
 
-        File file2 = new File("src/test/resources/TestServices/cities1.ttl");
-        try (OutputStream stream = new FileOutputStream(file2)) {
-            model2.write(stream, "TTL");
+        File outputTurtle = new File(OUTPUT_FILE_PATH);
+        try (OutputStream stream = new FileOutputStream(outputTurtle)) {
+            fromDBPedia.write(stream, "TTL");
         }
+
+        final InputStream citiesTurtle = getClass().getClassLoader().getResourceAsStream("test_services/cities.ttl");
+
+        // read from this file to verify something happened then delete it
+        assertTrue(modelsAreEquivalent(citiesTurtle, new FileInputStream(outputTurtle)));
+    }
+
+    private boolean modelsAreEquivalent(final InputStream lhsStream, final InputStream rhsStream) {
+
+        final Model lhs = ModelFactory.createDefaultModel();
+        final Model rhs = ModelFactory.createDefaultModel();
+
+        RDFDataMgr.read(lhs, lhsStream, "", TURTLE);
+        RDFDataMgr.read(rhs, rhsStream, "", TURTLE);
+
+        return lhs.isIsomorphicWith(rhs) && rhs.isIsomorphicWith(lhs);
     }
 }

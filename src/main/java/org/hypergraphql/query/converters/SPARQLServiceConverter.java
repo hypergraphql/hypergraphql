@@ -3,6 +3,7 @@ package org.hypergraphql.query.converters;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.apache.commons.lang3.StringUtils;
 import org.hypergraphql.config.schema.QueryFieldConfig;
 
 import org.hypergraphql.datamodel.HGQLSchema;
@@ -17,14 +18,12 @@ import java.util.Set;
 
 public class SPARQLServiceConverter {
 
-
+    private final static String RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
     private final HGQLSchema schema;
 
     public SPARQLServiceConverter(HGQLSchema schema) {
         this.schema = schema;
     }
-
-    private final String RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
 
     private String optionalSTR(String sparqlPattern) {
         final String PATTERN = " OPTIONAL { %s } ";
@@ -43,14 +42,13 @@ public class SPARQLServiceConverter {
 
     private String graphSTR(String graphID, String whereSTR) {
         final String PATTERN = "GRAPH <%s> { %s } ";
-        String result = (graphID==null || graphID.equals("")) ? whereSTR : String.format(PATTERN, graphID, whereSTR);
-        return result;
+        return (StringUtils.isEmpty(graphID)) ? whereSTR : String.format(PATTERN, graphID, whereSTR);
     }
 
     private String valuesSTR(String id, Set<String> input) {
         final String PATTERN = "VALUES " + varSTR(id) + " { %s } ";
         Set<String> uris = new HashSet<>();
-        for (String uri : input) uris.add(uriSTR(uri));
+        input.forEach(uri -> uris.add(uriSTR(uri)));
 
         String urisConcat = String.join(" ", uris);
 
@@ -61,9 +59,13 @@ public class SPARQLServiceConverter {
         JsonNode args = jsonQuery.get("args");
         String limitSTR = "";
         String offsetSTR = "";
-        if (args!=null) {
-            if (args.has("limit")) limitSTR = limitSTR(args.get("limit").asInt());
-            if (args.has("offset")) offsetSTR = offsetSTR(args.get("offset").asInt());
+        if (args != null) {
+            if (args.has("limit")) {
+                limitSTR = limitSTR(args.get("limit").asInt());
+            }
+            if (args.has("offset")) {
+                offsetSTR = offsetSTR(args.get("offset").asInt());
+            }
         }
         return limitSTR + offsetSTR;
     }
@@ -97,8 +99,7 @@ public class SPARQLServiceConverter {
         final String PATTERN = "FILTER (lang(%s) = \"%s\") . ";
         String nodeVar = varSTR(field.get("nodeId").asText());
         JsonNode args = field.get("args");
-        String langPattern = (args.has("lang")) ? String.format(PATTERN, nodeVar, args.get("lang").asText()) : "";
-        return langPattern;
+        return (args.has("lang")) ? String.format(PATTERN, nodeVar, args.get("lang").asText()) : "";
     }
 
     private String fieldPattern(String parentId, String nodeId, String predicateURI, String typeURI) {
@@ -106,7 +107,6 @@ public class SPARQLServiceConverter {
         String typeTriple = (typeURI.equals("")) ? "" : tripleSTR(varSTR(nodeId), RDF_TYPE_URI, uriSTR(typeURI));
         return predicateTriple + typeTriple;
     }
-
 
     public String getSelectQuery(JsonNode jsonQuery, Set<String> input, String rootType) {
 
@@ -143,9 +143,7 @@ public class SPARQLServiceConverter {
         JsonNode subfields = queryField.get("fields");
         String subQuery = getSubQueries(subfields);
 
-        String selectQuery = selectQuerySTR(valueSTR + selectTriple + subQuery, graphID);
-
-        return selectQuery;
+        return selectQuerySTR(valueSTR + selectTriple + subQuery, graphID);
     }
 
     private String getSelectRoot_GET(JsonNode queryField) {
@@ -161,11 +159,8 @@ public class SPARQLServiceConverter {
         JsonNode subfields = queryField.get("fields");
         String whereClause = getSubQueries(subfields);
 
-        String selectQuery = selectQuerySTR(rootSubquery + whereClause, graphID);
-
-        return selectQuery;
+        return selectQuerySTR(rootSubquery + whereClause, graphID);
     }
-
 
     private String getSelectNonRoot(ArrayNode jsonQuery, Set<String> input, String rootType) {
 
@@ -177,7 +172,7 @@ public class SPARQLServiceConverter {
 
         Iterator<JsonNode> queryFieldsIterator = jsonQuery.elements();
 
-        String whereClause = "";
+        StringBuilder whereClause = new StringBuilder();
 
         while (queryFieldsIterator.hasNext()) {
 
@@ -185,13 +180,10 @@ public class SPARQLServiceConverter {
 
             String subquery = getFieldSubquery(field);
 
-            whereClause += subquery;
+            whereClause.append(subquery);
         }
 
-        String selectQuery = selectQuerySTR(valueSTR + whereClause, graphID);
-
-        return selectQuery;
-
+        return selectQuerySTR(valueSTR + (whereClause.toString()), graphID);
     }
 
 
@@ -199,7 +191,9 @@ public class SPARQLServiceConverter {
 
         String fieldName = fieldJson.get("name").asText();
 
-        if (HGQLVocabulary.JSONLD.containsKey(fieldName)) return "";
+        if (HGQLVocabulary.JSONLD.containsKey(fieldName)) {
+            return "";
+        }
 
         String fieldURI = schema.getFields().get(fieldName).getId();
         String targetName = fieldJson.get("targetName").asText();
@@ -216,33 +210,25 @@ public class SPARQLServiceConverter {
 
         String rest = getSubQueries(subfields);
 
-
-
-        String whereClause = optionalSTR(fieldPattern + langFilter + rest);
-
-        return whereClause;
+        return optionalSTR(fieldPattern + langFilter + rest);
     }
 
 
     private String getSubQueries(JsonNode subfields) {
 
-        if (subfields.isNull()) return "";
+        if (subfields.isNull()) {
+            return "";
+        }
 
         Iterator<JsonNode> queryFieldsIterator = subfields.elements();
 
-        String whereClause = "";
+        StringBuilder whereClause = new StringBuilder();
 
         while (queryFieldsIterator.hasNext()) {
 
             JsonNode field = queryFieldsIterator.next();
-
-            whereClause += getFieldSubquery(field);
-
+            whereClause.append(getFieldSubquery(field));
         }
-
-        return whereClause;
-
+        return whereClause.toString();
     }
-
-
 }

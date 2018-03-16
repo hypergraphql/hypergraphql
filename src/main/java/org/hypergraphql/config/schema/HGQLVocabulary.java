@@ -2,10 +2,14 @@ package org.hypergraphql.config.schema;
 
 import graphql.schema.GraphQLOutputType;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static graphql.Scalars.*;
+import static graphql.Scalars.GraphQLBoolean;
+import static graphql.Scalars.GraphQLID;
+import static graphql.Scalars.GraphQLInt;
+import static graphql.Scalars.GraphQLString;
 
 public class HGQLVocabulary {
 
@@ -44,25 +48,23 @@ public class HGQLVocabulary {
     public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
 
-    public static final Map<String, String> SCALAR_TYPES = new HashMap<String, String>() {{
+    public static final Map<String, String> SCALAR_TYPES = Collections.unmodifiableMap(new HashMap<String, String>() {{
         put("String", HGQL_STRING);
         put("Int", HGQL_Int);
         put("Boolean", HGQL_Boolean);
         put("ID", HGQL_ID);
-    }};
+    }});
 
-    public static final Map<String, GraphQLOutputType> SCALAR_TYPES_TO_GRAPHQL_OUTPUT = new HashMap<String, GraphQLOutputType>() {{
+    public static final Map<String, GraphQLOutputType> SCALAR_TYPES_TO_GRAPHQL_OUTPUT =
+            Collections.unmodifiableMap(new HashMap<String, GraphQLOutputType>() {{
         put(HGQL_STRING, GraphQLString);
         put(HGQL_Int, GraphQLInt);
         put(HGQL_Boolean, GraphQLBoolean);
         put(HGQL_ID, GraphQLID);
-    }};
+    }});
 
-    public static final Map<String, String> JSONLD = new HashMap<String, String>() {{
+    public static final Map<String, String> JSONLD = Collections.unmodifiableMap(new HashMap<String, String>() {{
         put("_id", "@id");
         put("_type", "@type");
-    }};
-
-
-
+    }});
 }

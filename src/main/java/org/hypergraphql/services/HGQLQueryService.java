@@ -55,7 +55,12 @@ public class HGQLQueryService {
             return result;
         }
 
-        if (!query.contains("IntrospectionQuery") && !query.contains("__")) {
+        if (query.contains("IntrospectionQuery") || query.contains("__")) {
+
+            qlResult = graphql.execute(query);
+            data.putAll(qlResult.getData());
+
+        } else {
 
             ExecutionForest queryExecutionForest =
                     new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery(), hgqlSchema);
@@ -75,11 +80,6 @@ public class HGQLQueryService {
             } else {
                 result.put("data", client.getDataOutput(acceptType));
             }
-
-        } else {
-            qlResult = graphql.execute(query);
-            data.putAll(qlResult.getData());
-
         }
 
         if (qlResult != null) {

@@ -41,7 +41,7 @@ import static org.hypergraphql.config.schema.HGQLVocabulary.SCALAR_TYPES;
 
 public class HGQLSchemaWiring {
 
-    static Logger logger = Logger.getLogger(HGQLSchemaWiring.class);
+    private static final Logger LOGGER = Logger.getLogger(HGQLSchemaWiring.class);
 
     public GraphQLSchema getSchema() {
 
@@ -57,11 +57,11 @@ public class HGQLSchemaWiring {
     private HGQLSchema hgqlSchema;
 
 
-    public String getRdfSchemaOutput(String format) {
-
-        return hgqlSchema.getRdfSchemaOutput(format);
-
-    }
+//    public String getRdfSchemaOutput(String format) {
+//
+//        return hgqlSchema.getRdfSchemaOutput(format);
+//
+//    }
 
     private Map<String, GraphQLArgument> defaultArguments = new HashMap<String, GraphQLArgument>() {{
         put("limit", new GraphQLArgument("limit", GraphQLInt));
@@ -113,7 +113,8 @@ public class HGQLSchemaWiring {
                     | InstantiationException
                     | ClassNotFoundException
                     | InvocationTargetException e) {
-                logger.error(e);
+                LOGGER.error(e);
+//                throw new HGQLConfigurationException("Error wiring up services", e);
             }
         }
 
@@ -268,7 +269,11 @@ public class HGQLSchemaWiring {
 
         final QueryFieldConfig queryFieldConfig = this.hgqlSchema.getQueryFields().get(field.getName());
 
-        String serviceId = queryFieldConfig.service().getId();
+        Service service = queryFieldConfig.service();
+        if(service == null) {
+            throw new HGQLConfigurationException("Service for field '" + queryFieldConfig.type() + "' not specified (null)");
+        }
+        String serviceId = service.getId();
         String description = (queryFieldConfig.type().equals(HGQL_QUERY_GET_FIELD)) ?
                 "Get instances of " + field.getTargetName() + " (service: " + serviceId + ")" : "Get instances of " + field.getTargetName() + " by URIs (service: " + serviceId + ")";
 

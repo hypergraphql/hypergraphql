@@ -25,7 +25,7 @@ public class FetchingExecution implements Callable<Model> {
     }
     
     @Override
-    public Model call() throws Exception {
+    public Model call() {
         return node.generateTreeModel(inputValues);
     }
 }

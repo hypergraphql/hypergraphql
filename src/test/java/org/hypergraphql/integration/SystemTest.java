@@ -6,8 +6,15 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.jena.fuseki.embedded.FusekiServer;
-import org.apache.jena.query.*;
-import org.apache.jena.rdf.model.*;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.rdf.model.Selector;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.rdf.model.impl.SelectorImpl;
 import org.hypergraphql.Controller;
 import org.hypergraphql.config.system.HGQLConfig;
@@ -21,15 +28,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SystemTest {
 
-
     @Test
     void integration_test() {
 
         Model mainModel = ModelFactory.createDefaultModel();
-        mainModel.read("src/test/resources/TestServices/dbpedia.ttl", "TTL");
+        mainModel.read("src/test/resources/test_services/dbpedia.ttl", "TTL");
 
         Model citiesModel = ModelFactory.createDefaultModel();
-        citiesModel.read("src/test/resources/TestServices/cities.ttl", "TTL");
+        citiesModel.read("src/test/resources/test_services/cities.ttl", "TTL");
         Model expectedModel = ModelFactory.createDefaultModel();
         expectedModel.add(mainModel).add(citiesModel);
 
@@ -40,18 +46,17 @@ class SystemTest {
                 .build()
                 .start();
 
-        HGQLConfig externalConfig = new HGQLConfig("src/test/resources/TestServices/externalconfig.json");
+        HGQLConfig externalConfig = new HGQLConfig("src/test/resources/test_services/externalconfig.json");
 
         Controller externalController = new Controller();
         externalController.start(externalConfig);
 
-        HGQLConfig config = new HGQLConfig("src/test/resources/TestServices/mainconfig.json");
+        HGQLConfig config = new HGQLConfig("src/test/resources/test_services/mainconfig.json");
 
         Controller controller = new Controller();
         controller.start(config);
 
         ObjectMapper mapper = new ObjectMapper();
-
         ObjectNode bodyParam = mapper.createObjectNode();
 
         bodyParam.put("query", "{\n" +
@@ -99,13 +104,12 @@ class SystemTest {
 
         StmtIterator iterator2 = expectedModel.listStatements();
         while (iterator2.hasNext()) {
-            Statement currentstatement = iterator2.next();
-            if (!returnedModel.contains(currentstatement)) {
-                System.out.println(currentstatement);
-            }
+            assertTrue(returnedModel.contains(iterator2.next()));
         }
 
         assertTrue(expectedModel.isIsomorphicWith(returnedModel));
+        externalController.stop();
+        controller.stop();
         server.stop();
     }
 }

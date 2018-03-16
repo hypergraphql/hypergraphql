@@ -66,17 +66,7 @@ public class SPARQLEndpointService extends SPARQLService {
 
         } while (inputList.size()>VALUES_SIZE_LIMIT);
 
-        for (Future<SPARQLExecutionResult> futureexecutionResult : futureSPARQLresults) {
-            try {
-                SPARQLExecutionResult result = futureexecutionResult.get();
-                unionModel.add(result.getModel());
-                resultSet.putAll(result.getResultSet());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-        }
+        iterateFutureResults(futureSPARQLresults, unionModel, resultSet);
 
         TreeExecutionResult treeExecutionResult = new TreeExecutionResult();
         treeExecutionResult.setResultSet(resultSet);
@@ -85,7 +75,25 @@ public class SPARQLEndpointService extends SPARQLService {
         return treeExecutionResult;
     }
 
-    protected List<String> getStrings(JsonNode query, Set<String> input, Set<String> markers, String rootType, HGQLSchema schema, Map<String, Set<String>> resultSet) {
+    void iterateFutureResults (
+            final Set<Future<SPARQLExecutionResult>> futureSPARQLResults,
+            final Model unionModel,
+            Map<String, Set<String>> resultSet
+    ) {
+
+        for (Future<SPARQLExecutionResult> futureExecutionResult : futureSPARQLResults) {
+            try {
+                SPARQLExecutionResult result = futureExecutionResult.get();
+                unionModel.add(result.getModel());
+                resultSet.putAll(result.getResultSet());
+            } catch (InterruptedException
+                    | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    List<String> getStrings(JsonNode query, Set<String> input, Set<String> markers, String rootType, HGQLSchema schema, Map<String, Set<String>> resultSet) {
         for (String marker : markers) {
             resultSet.put(marker, new HashSet<>());
         }

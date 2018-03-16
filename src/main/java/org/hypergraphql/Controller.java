@@ -10,6 +10,8 @@ import java.util.Map;
 import graphql.GraphQLError;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.services.HGQLQueryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spark.ModelAndView;
 import spark.Service;
 import spark.template.velocity.VelocityTemplateEngine;
@@ -18,6 +20,10 @@ import spark.template.velocity.VelocityTemplateEngine;
  * Created by szymon on 05/09/2017.
  */
 public class Controller {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(Controller.class);
+
+    private Service hgqlService;
 
     private static final Map<String, String> MIME_MAP = new HashMap<String, String>() {{
         put("application/json+rdf+xml", "RDF/XML");
@@ -54,8 +60,7 @@ public class Controller {
         System.out.println("GraphQL server started at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphqlPath());
         System.out.println("GraphiQL UI available at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphiqlPath());
 
-        Service hgqlService = Service.ignite().port(config.getGraphqlConfig().port());
-
+        hgqlService = Service.ignite().port(config.getGraphqlConfig().port());
 
         // get method for accessing the GraphiQL UI
 
@@ -70,22 +75,20 @@ public class Controller {
             );
         });
 
-
-        // post method for accessing the GraphQL getSetvice
-
+        // post method for accessing the GraphQL getService
         hgqlService.post(config.getGraphqlConfig().graphqlPath(), (req, res) -> {
             ObjectMapper mapper = new ObjectMapper();
             HGQLQueryService service = new HGQLQueryService(config);
 
-            JsonNode requestObject = mapper.readTree(req.body().toString());
+            JsonNode requestObject = mapper.readTree(req.body());
 
             String query = requestObject.get("query").asText();
 
             String acceptType = req.headers("accept");
 
-            String mime = MIME_MAP.containsKey(acceptType) ? MIME_MAP.get(acceptType) : null;
+            String mime = MIME_MAP.getOrDefault(acceptType, null);
             String contentType = MIME_MAP.containsKey(acceptType) ? acceptType : "application/json";
-            Boolean graphQLcompatible = (GRAPHQL_COMPATIBLE_TYPE.containsKey(acceptType)) ? GRAPHQL_COMPATIBLE_TYPE.get(acceptType) : true;
+            Boolean graphQLCompatible = GRAPHQL_COMPATIBLE_TYPE.getOrDefault(acceptType, true);
 
             res.type(contentType);
 
@@ -96,26 +99,16 @@ public class Controller {
                 res.status(400);
             }
 
-            if (graphQLcompatible) {
-
-                JsonNode resultJson = mapper.readTree(new ObjectMapper().writeValueAsString(result));
-                return resultJson;
-
+            if (graphQLCompatible) {
+                return mapper.readTree(new ObjectMapper().writeValueAsString(result));
             } else {
-                String resultString;
-
                 if (result.containsKey("data")) {
-                    resultString = result.get("data").toString();
+                    return result.get("data").toString();
                 } else {
-
                     JsonNode errorsJson = mapper.readTree(new ObjectMapper().writeValueAsString(errors));
-                    resultString = errorsJson.toString();
-
+                    return errorsJson.toString();
                 }
-
-                return resultString;
             }
-
         });
 
         //Return the internal HGQL schema representation as rdf.
@@ -134,6 +127,13 @@ public class Controller {
         });
     }
 
+    public void stop() {
+
+        if(hgqlService != null) {
+
+            hgqlService.stop();
+        }
+    }
 
 
 }

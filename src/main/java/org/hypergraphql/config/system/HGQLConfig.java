@@ -2,34 +2,17 @@ package org.hypergraphql.config.system;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import graphql.ExecutionInput;
-import graphql.ExecutionResult;
-import graphql.GraphQL;
-import graphql.language.TypeDefinition;
-import graphql.schema.*;
-import graphql.schema.idl.RuntimeWiring;
-import graphql.schema.idl.SchemaGenerator;
+import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-
 import org.apache.log4j.Logger;
-
-import org.hypergraphql.datafetching.services.Service;
-import org.hypergraphql.config.schema.FieldConfig;
-import org.hypergraphql.config.schema.QueryFieldConfig;
-import org.hypergraphql.config.schema.TypeConfig;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.datamodel.HGQLSchemaWiring;
 
-import static graphql.Scalars.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by szymon on 05/09/2017.
@@ -110,11 +93,6 @@ public class HGQLConfig {
 
     }
 
-
-    public List<ServiceConfig> getServiceConfigs() {
-        return serviceConfigs;
-    }
-
     public GraphqlConfig getGraphqlConfig() {
         return graphqlConfig;
     }
@@ -128,6 +106,9 @@ public class HGQLConfig {
         return registry;
     }
 
+    public String getSchemaFile() {
+        return schemaFile;
+    }
 }
 
 
