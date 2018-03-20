@@ -22,10 +22,18 @@ public class GraphqlConfig {
     public Integer port() {
         return port;
     }
+    @Deprecated
     public String graphqlPath() {
+        return graphQLPath();
+    }
+    public String graphQLPath() {
         return graphqlPath;
     }
+    @Deprecated
     public String graphiqlPath() {
+        return graphiQLPath();
+    }
+    public String graphiQLPath() {
         return graphiqlPath;
     }
 }
