@@ -46,12 +46,12 @@ class SystemTest {
                 .build()
                 .start();
 
-        HGQLConfig externalConfig = new HGQLConfig("src/test/resources/test_services/externalconfig.json");
+        HGQLConfig externalConfig = HGQLConfig.fromFileSystemPath("src/test/resources/test_services/externalconfig.json");
 
         Controller externalController = new Controller();
         externalController.start(externalConfig);
 
-        HGQLConfig config = new HGQLConfig("src/test/resources/test_services/mainconfig.json");
+        HGQLConfig config = HGQLConfig.fromFileSystemPath("src/test/resources/test_services/mainconfig.json");
 
         Controller controller = new Controller();
         controller.start(config);

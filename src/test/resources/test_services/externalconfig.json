@@ -1,6 +1,6 @@
 {
     "name": "external",
-    "schema": "src/test/resources/TestServices/externalschema.graphql",
+    "schema": "src/test/resources/test_services/externalschema.graphql",
     "server": {
         "port": 8081,
         "graphql": "/graphql",
@@ -10,7 +10,7 @@
         {
             "id": "dbpedia-local",
             "type": "LocalModelSPARQLService",
-            "filepath": "src/test/resources/TestServices/dbpedia.ttl",
+            "filepath": "src/test/resources/test_services/dbpedia.ttl",
             "filetype": "TTL"
         }
     ]

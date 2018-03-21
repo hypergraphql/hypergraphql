@@ -14,7 +14,7 @@ class HGQLQueryServiceTest {
     @Test
     void results_with_no_accept_type() {
 
-        HGQLConfig config = new HGQLConfig("config.json");
+        HGQLConfig config = HGQLConfig.fromClasspathConfig("config.json");
         HGQLQueryService service = new HGQLQueryService(config);
 
         final String query = "" +
@@ -36,10 +36,4 @@ class HGQLQueryServiceTest {
         assertFalse(actual.isEmpty());
         assertTrue(actual.containsKey("data"));
     }
-
-    private void queryValidation() {
-
-
-    }
-
 }

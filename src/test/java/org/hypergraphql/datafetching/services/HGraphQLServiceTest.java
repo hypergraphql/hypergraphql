@@ -11,14 +11,13 @@ import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-//@Disabled("For the time being") // TODO - enable and fix!
 class HGraphQLServiceTest {
 
     @Test
-    @Disabled("For the time being")
+    @Disabled("This is a recursive test")
     void integration_test() throws Exception {
 
-        HGQLConfig config = new HGQLConfig("src/test/resources/config.json");
+        HGQLConfig config = HGQLConfig.fromFileSystemPath("src/test/resources/config.json");
         final Controller controller = new Controller();
         controller.start(config);
 

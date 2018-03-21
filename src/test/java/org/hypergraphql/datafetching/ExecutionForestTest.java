@@ -19,4 +19,17 @@ class ExecutionForestTest {
         assertNotNull(model);
         assertTrue(model.isEmpty());
     }
+
+    @Test
+    @DisplayName("Verify toString methods work correctly")
+    void should_toString_with_depth() {
+
+    }
+
+    @Test
+    @DisplayName("Verify toString methods work correctly")
+    void should_toString_with_no_args() {
+
+
+    }
 }

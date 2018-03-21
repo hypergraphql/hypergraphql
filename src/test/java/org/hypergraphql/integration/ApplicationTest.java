@@ -12,6 +12,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFDataMgr;
+import org.hypergraphql.Application;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -37,6 +38,13 @@ class ApplicationTest {
 
         final File outputTurtle = new File(OUTPUT_FILE_PATH);
         outputTurtle.deleteOnExit();
+    }
+
+    @Test
+    void startup_test() throws Exception {
+
+        final String[] args = {"-config", "src/test/resources/config.json"};
+        Application.main(args);
     }
 
     @Test
