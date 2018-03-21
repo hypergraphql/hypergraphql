@@ -1,22 +1,37 @@
 package org.hypergraphql;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.hypergraphql.config.system.HGQLConfig;
 
 public class Application {
 
-    private static Logger logger = Logger.getLogger(Application.class);
-    
-    public static void main(String[] args) {
+    private final static Logger logger = Logger.getLogger(Application.class);
 
-        PropertyConfigurator.configure("log4j.properties");
-        HGQLConfig config = new HGQLConfig("config.json");
+    private final static String DEFAULT_CONFIG_FILE = "config.json";
 
-        logger.info("Server started at http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphqlPath());
+    public static void main(String[] args) throws Exception {
 
-        Controller controller = new Controller();
+        CommandLineParser parser = new DefaultParser();
+        Options options = new Options()
+                .addOption(
+                        Option.builder()
+                            .argName("config")
+                            .longOpt("config")
+                            .required(false)
+                            .build()
+                );
+        CommandLine commandLine = parser.parse(options, args);
+
+        HGQLConfig config = HGQLConfig.fromFileSystemPath(commandLine.getOptionValue("config", DEFAULT_CONFIG_FILE));
+
+        logger.info("Server started at http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphQLPath());
+
+        final Controller controller = new Controller();
         controller.start(config);
-
     }
 }
