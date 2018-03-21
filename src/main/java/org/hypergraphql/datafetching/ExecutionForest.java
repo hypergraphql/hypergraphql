@@ -38,10 +38,8 @@ public class ExecutionForest  {
         });
         futureModels.forEach(futureModel -> {
             try {
-                Model m = futureModel.get();
-                model.add(m);
-            } catch (InterruptedException
-                    | ExecutionException e) {
+                model.add(futureModel.get());
+            } catch (InterruptedException | ExecutionException e) {
                 LOGGER.error(e);
             }
         });
