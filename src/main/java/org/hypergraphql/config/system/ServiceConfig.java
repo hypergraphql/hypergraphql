@@ -59,4 +59,7 @@ public class ServiceConfig {
         return password;
     }
 
+    protected void setUrl(final String url) {
+        this.url = url;
+    }
 }
