@@ -44,8 +44,7 @@ public class HGraphQLService extends Service {
         return treeExecutionResult;
     }
 
-
-    private Model getModelFromRemote(String graphQlQuery) {
+    Model getModelFromRemote(String graphQlQuery) {
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -65,7 +64,6 @@ public class HGraphQLService extends Service {
                     .body(bodyParam.toString())
                     .asBinary();
 
-            // problem seems to be here
             model.read(response.getBody(), "RDF/XML");
 
         } catch (UnirestException e) {
