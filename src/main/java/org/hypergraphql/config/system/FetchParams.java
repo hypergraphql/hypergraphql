@@ -80,7 +80,11 @@ public class FetchParams {
             throw new HGQLConfigurationException("'name' is a required field for HGQL types");
         }
 
-        if (!parentTypeName.equals("Query")) {
+        if (parentTypeName.equals("Query")) {
+
+            return null;
+
+        } else {
 
             final TypeConfig typeConfig = schema.getTypes().get(parentTypeName);
 
@@ -95,8 +99,6 @@ public class FetchParams {
                 throw new HGQLConfigurationException("schema must have a value for '" + targetName + "'");
             }
         }
-
-        return null;
     }
 
 }

@@ -1,7 +1,5 @@
 package org.hypergraphql.config.schema;
 
-import org.hypergraphql.datafetching.services.Service;
-
 import java.util.Map;
 
 public class TypeConfig  {
