@@ -4,6 +4,7 @@ import graphql.language.*;
 import org.hypergraphql.datamodel.HGQLSchema;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExecutionForestFactory {
 
@@ -15,29 +16,18 @@ public class ExecutionForestFactory {
         SelectionSet queryFields = opDef.getSelectionSet();
         List<Selection> selections = queryFields.getSelections();
 
-        int i = 0;
-
-        for (Selection child : selections) {
+        final AtomicInteger counter = new AtomicInteger(0);
+        selections.forEach(child -> {
 
             if (child.getClass().getSimpleName().equals("Field")) {
 
-                i++;
-
-                String nodeId = "x_" + i;
+                String nodeId = "x_" + counter.incrementAndGet();
                 Field field = (Field) child;
 
                 forest.getForest().add(new ExecutionTreeNode(field, nodeId , schema));
 
             }
-        }
-
-//        if(queryFields.getSelections().stream().anyMatch(child -> child instanceof Field)) {
-//
-//            String nodeId = "x_" + i++;
-//                Field field = (Field) child;
-//            forest.getForest().add(new ExecutionTreeNode(field, nodeId , schema));
-//        }
-
+        });
         return forest;
     }
 }

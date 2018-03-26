@@ -72,20 +72,12 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
 
         ResultSet results = qEngine.execSelect();
 
-        while (results.hasNext()) {
-            QuerySolution solution = results.next();
-
+        results.forEachRemaining(solution -> {
             markers.stream().filter(solution::contains).forEach(marker ->
                     resultSet.get(marker).add(solution.get(marker).asResource().getURI()));
 
-//            for (String marker : markers) {
-//                if (solution.contains(marker)) {
-//                    resultSet.get(marker).add(solution.get(marker).asResource().getURI());
-//                }
-//            }
-
             unionModel.add(this.sparqlEndpointService.getModelFromResults(query, solution, schema));
-        }
+        });
 
         SPARQLExecutionResult sparqlExecutionResult = new SPARQLExecutionResult(resultSet, unionModel);
         logger.info(sparqlExecutionResult);
