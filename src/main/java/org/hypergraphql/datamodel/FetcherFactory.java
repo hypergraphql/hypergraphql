@@ -25,9 +25,7 @@ public class FetcherFactory {
             RDFNode thisNode = environment.getSource();
 
             if (thisNode.asResource().isURIResource()) {
-
                 return thisNode.asResource().getURI();
-
             } else {
                 return "_:" + thisNode.asNode().getBlankNodeLabel();
             }
