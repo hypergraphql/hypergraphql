@@ -65,12 +65,12 @@ public abstract class Service {
 
             while (nodesIterator.hasNext()) {
                 JsonNode currentNode = nodesIterator.next();
-                Model currentmodel = buildmodel(results, currentNode , schema);
-                model.add(currentmodel);
+                Model currentModel = buildModel(results, currentNode , schema);
+                model.add(currentModel);
                 model.add(getModelFromResults(currentNode.get("fields"), results ,schema));
             }
         } else {
-            Model currentModel = buildmodel(results, query , schema);
+            Model currentModel = buildModel(results, query , schema);
             model.add(currentModel);
             model.add(getModelFromResults(query.get("fields"), results, schema));
         }
@@ -78,7 +78,7 @@ public abstract class Service {
 
     }
 
-    private Model buildmodel(QuerySolution results, JsonNode currentNode , HGQLSchema schema) {
+    private Model buildModel(QuerySolution results, JsonNode currentNode , HGQLSchema schema) {
 
         Model model = ModelFactory.createDefaultModel();
 
@@ -101,7 +101,6 @@ public abstract class Service {
     }
 
     protected Map<String, Set<String>> getResultset(Model model, JsonNode query, Set<String> input, Set<String> markers , HGQLSchema schema) {
-
 
         Map<String, Set<String>> resultset = new HashMap<>();
         JsonNode node;
@@ -154,15 +153,15 @@ public abstract class Service {
 
     protected Set<String> findIdentifiers(Model model, Set<String> input, LinkedList<QueryNode> path) {
 
-
-        Set<String> objects;
         Set<String> subjects;
+        Set<String> objects;
         if (input == null) {
             objects = new HashSet<>();
         } else {
             objects = input;
         }
 
+        // NB: This hasn't been converted to use the NIO streaming API as it uses reentrant recursion
         for (QueryNode queryNode : path) {
             subjects = new HashSet<>(objects);
             objects = new HashSet<>();
@@ -203,7 +202,7 @@ public abstract class Service {
         return paths;
     }
 
-    protected void getQueryPathsRecursive(JsonNode query, Set<LinkedList<QueryNode>> paths, LinkedList<QueryNode> path , HGQLSchema schema) {
+    protected void getQueryPathsRecursive(JsonNode query, Set<LinkedList<QueryNode>> paths, LinkedList<QueryNode> path, HGQLSchema schema) {
 
         Model model = ModelFactory.createDefaultModel();
 
