@@ -167,10 +167,10 @@ public abstract class Service {
             objects = new HashSet<>();
             if (!subjects.isEmpty()) {
                 for (String subject : subjects) {
-                    Resource subjectresoource = model.createResource(subject);
-                    NodeIterator partialobjects = model.listObjectsOfProperty(subjectresoource, queryNode.getNode());
-                    while (partialobjects.hasNext()) {
-                        objects.add(partialobjects.next().toString());
+                    Resource subjectResource = model.createResource(subject);
+                    NodeIterator partialObjects = model.listObjectsOfProperty(subjectResource, queryNode.getNode());
+                    while (partialObjects.hasNext()) {
+                        objects.add(partialObjects.next().toString());
                     }
                 }
 
@@ -197,7 +197,6 @@ public abstract class Service {
 
     protected Set<LinkedList<QueryNode>> getQueryPaths(JsonNode query , HGQLSchema schema) {
         Set<LinkedList<QueryNode>> paths = new HashSet<>();
-
         getQueryPathsRecursive(query, paths, null ,  schema);
         return paths;
     }
@@ -226,7 +225,7 @@ public abstract class Service {
 
     private void getFieldPath(Set<LinkedList<QueryNode>> paths, LinkedList<QueryNode> path, HGQLSchema schema, Model model, JsonNode currentNode) {
 
-        LinkedList<QueryNode> newPath = new LinkedList<QueryNode>(path);
+        LinkedList<QueryNode> newPath = new LinkedList<>(path);
         String nodeMarker = currentNode.get("nodeId").asText();
         String nodeName = currentNode.get("name").asText();
         FieldConfig field = schema.getFields().get(nodeName);
@@ -256,15 +255,17 @@ public abstract class Service {
             Property predicate = model.createProperty("", propertyString.getId());
             Resource subject = results.getResource(currentNode.get("parentId").asText());
             RDFNode object = results.get(currentNode.get("nodeId").asText());
-            if (predicate != null && subject != null && object != null)
+            if (predicate != null && subject != null && object != null) {
                 model.add(subject, predicate, object);
+            }
         }
 
         if (targetTypeString != null) {
             Resource subject = results.getResource(currentNode.get("nodeId").asText());
             Resource object = model.createResource(targetTypeString.getId());
-            if (subject != null && object != null)
+            if (subject != null && object != null) {
                 model.add(subject, RDF.type, object);
+            }
         }
     }
 }
