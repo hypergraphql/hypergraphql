@@ -1,6 +1,5 @@
 package org.hypergraphql.datamodel;
 
-import graphql.language.Directive;
 import graphql.language.FieldDefinition;
 import graphql.language.ListType;
 import graphql.language.Node;
@@ -122,25 +121,25 @@ public class HGQLSchema {
 
         Map<String, String> contextMap = new HashMap<>();
 
-        for (Node node : children) {
+        children.forEach(node -> {
             FieldDefinition field = ((FieldDefinition) node);
             String iri = ((StringValue) field.getDirective("href").getArgument("iri").getValue()).getValue();
             contextMap.put(field.getName(), iri);
-        }
+        });
 
         Set<String> typeNames = types.keySet();
         typeNames.remove("__Context");
 
         Set<String> serviceIds = services.keySet();
 
-        for (String serviceId : serviceIds) {
+        serviceIds.forEach(serviceId -> {
             String serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
             rdfSchema.insertObjectTriple(serviceURI, RDF_TYPE, HGQL_SERVICE);
             rdfSchema.insertStringLiteralTriple(serviceURI, HGQL_HAS_ID, serviceId);
-        }
+        });
 
 
-        for (String typeName : typeNames) {
+        typeNames.forEach(typeName -> {
 
             String typeUri = schemaNamespace + typeName;
             rdfSchema.insertStringLiteralTriple(typeUri, HGQL_HAS_NAME, typeName);
@@ -150,7 +149,7 @@ public class HGQLSchema {
 
             TypeDefinition type = types.get(typeName);
 
-            for (Directive dir : type.getDirectives()) {
+            type.getDirectives().forEach(dir -> {
                 if (dir.getName().equals("service")) {
                     String getQueryUri = typeUri + "_GET";
                     String getByIdQueryUri = typeUri + "_GET_BY_ID";
@@ -177,11 +176,11 @@ public class HGQLSchema {
                     rdfSchema.insertObjectTriple(getQueryUri, HGQL_HAS_SERVICE, serviceURI);
                     rdfSchema.insertObjectTriple(getByIdQueryUri, HGQL_HAS_SERVICE, serviceURI);
                 }
-            }
+            });
 
             List<Node> typeChildren = type.getChildren();
 
-            for (Node node : typeChildren) {
+            typeChildren.forEach(node -> {
                 if (node.getClass().getSimpleName().equals("FieldDefinition")) {
                     FieldDefinition field = (FieldDefinition) node;
                     String fieldURI = schemaNamespace + typeName + "/" + field.getName();
@@ -201,8 +200,8 @@ public class HGQLSchema {
                     rdfSchema.insertObjectTriple(fieldURI, HGQL_OUTPUT_TYPE, outputTypeUri);
 
                 }
-            }
-        }
+            });
+        });
 
         generateConfigs(services);
 
@@ -215,51 +214,50 @@ public class HGQLSchema {
 
         List<RDFNode> fieldNodes = rdfSchema.getSubjectsOfObjectProperty(RDF_TYPE, HGQL_FIELD);
 
-        for (RDFNode fieldNode : fieldNodes) {
+        fieldNodes.forEach(rdfNode -> {
 
-            String name = rdfSchema.getValueOfDataProperty(fieldNode, HGQL_HAS_NAME);
-            RDFNode href = rdfSchema.getValueOfObjectProperty(fieldNode, HGQL_HREF);
-            RDFNode serviceNode = rdfSchema.getValueOfObjectProperty(fieldNode, HGQL_HAS_SERVICE);
+            String name = rdfSchema.getValueOfDataProperty(rdfNode, HGQL_HAS_NAME);
+            RDFNode href = rdfSchema.getValueOfObjectProperty(rdfNode, HGQL_HREF);
+            RDFNode serviceNode = rdfSchema.getValueOfObjectProperty(rdfNode, HGQL_HAS_SERVICE);
             String serviceId = rdfSchema.getValueOfDataProperty(serviceNode, HGQL_HAS_ID);
 
-            FieldConfig fieldConfig = new FieldConfig(href.asResource().getURI(), services.get(serviceId));
+            FieldConfig fieldConfig = new FieldConfig(href.asResource().getURI());
             fields.put(name, fieldConfig);
-        }
+        });
 
         List<RDFNode> queryFieldNodes = rdfSchema.getSubjectsOfObjectProperty(RDF_TYPE, HGQL_QUERY_FIELD);
         List<RDFNode> queryGetFieldNodes = rdfSchema.getSubjectsOfObjectProperty(RDF_TYPE, HGQL_QUERY_GET_FIELD);
 
-        for (RDFNode queryFieldNode : queryFieldNodes) {
+        queryFieldNodes.forEach(node -> {
 
-            String name = rdfSchema.getValueOfDataProperty(queryFieldNode, HGQL_HAS_NAME);
-            RDFNode serviceNode = rdfSchema.getValueOfObjectProperty(queryFieldNode, HGQL_HAS_SERVICE);
+            String name = rdfSchema.getValueOfDataProperty(node, HGQL_HAS_NAME);
+            RDFNode serviceNode = rdfSchema.getValueOfObjectProperty(node, HGQL_HAS_SERVICE);
             String serviceId = rdfSchema.getValueOfDataProperty(serviceNode, HGQL_HAS_ID);
 
-            String type = (queryGetFieldNodes.contains(queryFieldNode)) ? HGQL_QUERY_GET_FIELD : HGQL_QUERY_GET_BY_ID_FIELD;
+            String type = (queryGetFieldNodes.contains(node)) ? HGQL_QUERY_GET_FIELD : HGQL_QUERY_GET_BY_ID_FIELD;
             QueryFieldConfig fieldConfig = new QueryFieldConfig(services.get(serviceId), type);
             queryFields.put(name, fieldConfig);
-
-        }
+        });
 
         List<RDFNode> typeNodes = rdfSchema.getSubjectsOfObjectProperty(RDF_TYPE, HGQL_OBJECT_TYPE);
         typeNodes.addAll(rdfSchema.getSubjectsOfObjectProperty(RDF_TYPE, HGQL_QUERY_TYPE));
 
-        for (RDFNode typeNode : typeNodes) {
-            String typeName = rdfSchema.getValueOfDataProperty(typeNode, HGQL_HAS_NAME);
-            RDFNode typeHref = rdfSchema.getValueOfObjectProperty(typeNode, HGQL_HREF);
+        typeNodes.forEach(rdfNode -> {
+            String typeName = rdfSchema.getValueOfDataProperty(rdfNode, HGQL_HAS_NAME);
+            RDFNode typeHref = rdfSchema.getValueOfObjectProperty(rdfNode, HGQL_HREF);
             String typeURI = (typeHref!=null) ? typeHref.asResource().getURI() : null;
 
-            List<RDFNode> fieldsOfType = rdfSchema.getValuesOfObjectProperty(typeNode, HGQL_HAS_FIELD);
+            List<RDFNode> fieldsOfType = rdfSchema.getValuesOfObjectProperty(rdfNode, HGQL_HAS_FIELD);
             Map<String, FieldOfTypeConfig> fields = new HashMap<>();
 
-            for (RDFNode fieldOfType : fieldsOfType) {
+            fieldsOfType.forEach(field -> {
 
-                String fieldOfTypeName = rdfSchema.getValueOfDataProperty(fieldOfType, HGQL_HAS_NAME);
-                RDFNode href = rdfSchema.getValueOfObjectProperty(fieldOfType, HGQL_HREF);
+                String fieldOfTypeName = rdfSchema.getValueOfDataProperty(field, HGQL_HAS_NAME);
+                RDFNode href = rdfSchema.getValueOfObjectProperty(field, HGQL_HREF);
                 String hrefURI = (href!=null) ? href.asResource().getURI() : null;
-                RDFNode serviceNode = rdfSchema.getValueOfObjectProperty(fieldOfType, HGQL_HAS_SERVICE);
+                RDFNode serviceNode = rdfSchema.getValueOfObjectProperty(field, HGQL_HAS_SERVICE);
                 String serviceId = rdfSchema.getValueOfDataProperty(serviceNode, HGQL_HAS_ID);
-                RDFNode outputTypeNode = rdfSchema.getValueOfObjectProperty(fieldOfType, HGQL_OUTPUT_TYPE);
+                RDFNode outputTypeNode = rdfSchema.getValueOfObjectProperty(field, HGQL_OUTPUT_TYPE);
                 GraphQLOutputType graphqlOutputType = getGraphQLOutputType(outputTypeNode);
                 Boolean isList = getIsList(outputTypeNode);
                 String targetTypeName = getTargetTypeName(outputTypeNode);
@@ -267,15 +265,13 @@ public class HGQLSchema {
                 FieldOfTypeConfig fieldOfTypeConfig = new FieldOfTypeConfig(fieldOfTypeName, hrefURI, services.get(serviceId), graphqlOutputType, isList, targetTypeName);
                 fields.put(fieldOfTypeName, fieldOfTypeConfig);
 
-            }
-
-
+            });
 
             TypeConfig typeConfig = new TypeConfig(typeName, typeURI, fields);
 
             this.types.put(typeName, typeConfig);
 
-        }
+        });
     }
 
     private String getTargetTypeName(RDFNode outputTypeNode) {
