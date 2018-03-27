@@ -41,10 +41,12 @@ class ApplicationTest {
     }
 
     @Test
+//    @Disabled("This is here really for coverage - it doesn't really test much and causes downstream failures")
     void startup_test() throws Exception {
 
         final String[] args = {"-config", "src/test/resources/config.json"};
         Application.main(args);
+        Application.stop();
     }
 
     @Test
@@ -61,7 +63,7 @@ class ApplicationTest {
                 "LIMIT   20\n" +
                 "";
 
-        Query query = QueryFactory.create(construct); //s2 = the query above
+        Query query = QueryFactory.create(construct);
         QueryExecution qExe = QueryExecutionFactory.sparqlService("http://dbpedia.org/sparql", query);
 
         Model constructedModel = qExe.execConstruct();

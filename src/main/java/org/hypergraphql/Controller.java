@@ -18,12 +18,18 @@ import spark.template.velocity.VelocityTemplateEngine;
 
 /**
  * Created by szymon on 05/09/2017.
+ *
+ * This is the primary &quot;Controller&quot; used by the application.
+ * The handler methods are in the get() and post() lambdas
  */
 public class Controller {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Controller.class);
 
     private Service hgqlService;
+
+    private static final String DEFAULT_MIME_TYPE = "RDF/XML";
+    private static final String DEFAULT_ACCEPT_TYPE = "application/rdf+xml";
 
     private static final Map<String, String> MIME_MAP = new HashMap<String, String>() {{
         put("application/json+rdf+xml", "RDF/XML");
@@ -53,22 +59,21 @@ public class Controller {
         put("text/n3", false);
     }};
 
-
     public void start(HGQLConfig config) {
 
         System.out.println("HGQL service name: " + config.getName());
-        System.out.println("GraphQL server started at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphqlPath());
-        System.out.println("GraphiQL UI available at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphiqlPath());
+        System.out.println("GraphQL server started at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphQLPath());
+        System.out.println("GraphiQL UI available at: http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphiQLPath());
 
         hgqlService = Service.ignite().port(config.getGraphqlConfig().port());
 
         // get method for accessing the GraphiQL UI
 
-        hgqlService.get(config.getGraphqlConfig().graphiqlPath(), (req, res) -> {
+        hgqlService.get(config.getGraphqlConfig().graphiQLPath(), (req, res) -> {
 
             Map<String, String> model = new HashMap<>();
 
-            model.put("template", String.valueOf(config.getGraphqlConfig().graphqlPath()));
+            model.put("template", String.valueOf(config.getGraphqlConfig().graphQLPath()));
 
             return new VelocityTemplateEngine().render(
                     new ModelAndView(model, "graphiql.vtl")
@@ -76,7 +81,7 @@ public class Controller {
         });
 
         // post method for accessing the GraphQL getService
-        hgqlService.post(config.getGraphqlConfig().graphqlPath(), (req, res) -> {
+        hgqlService.post(config.getGraphqlConfig().graphQLPath(), (req, res) -> {
             ObjectMapper mapper = new ObjectMapper();
             HGQLQueryService service = new HGQLQueryService(config);
 
@@ -113,13 +118,16 @@ public class Controller {
 
         //Return the internal HGQL schema representation as rdf.
 
-        hgqlService.get(config.getGraphqlConfig().graphqlPath() , (req, res) -> {
+        hgqlService.get(config.getGraphqlConfig().graphQLPath() , (req, res) -> {
 
             String acceptType = req.headers("accept");
 
-            Boolean rdfContentType = (MIME_MAP.containsKey(acceptType) && GRAPHQL_COMPATIBLE_TYPE.containsKey(acceptType) && !GRAPHQL_COMPATIBLE_TYPE.get(acceptType));
-            String mime = rdfContentType ? MIME_MAP.get(acceptType) : "RDF/XML";
-            String contentType = rdfContentType ? acceptType : "application/rdf+xml";
+            Boolean isRdfContentType =
+                    (MIME_MAP.containsKey(acceptType)
+                            && GRAPHQL_COMPATIBLE_TYPE.containsKey(acceptType)
+                            && !GRAPHQL_COMPATIBLE_TYPE.get(acceptType));
+            String mime = isRdfContentType ? MIME_MAP.get(acceptType) : DEFAULT_MIME_TYPE;
+            String contentType = isRdfContentType ? acceptType : DEFAULT_ACCEPT_TYPE;
 
             res.type(contentType);
 
@@ -130,10 +138,9 @@ public class Controller {
     public void stop() {
 
         if(hgqlService != null) {
-
+            LOGGER.info("Attempting to shut down service at http://localhost:" + hgqlService.port() + "...");
             hgqlService.stop();
+            LOGGER.info("Shut down server");
         }
     }
-
-
 }
