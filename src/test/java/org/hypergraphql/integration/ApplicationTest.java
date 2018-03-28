@@ -43,7 +43,7 @@ class ApplicationTest {
     @Test
     void startup_test() throws Exception {
 
-        final String[] args = {"-config", "src/test/resources/config.json"};
+        final String[] args = {"-config", "src/test/resources/test_config.json"};
         Application.main(args);
         Application.stop();
     }
