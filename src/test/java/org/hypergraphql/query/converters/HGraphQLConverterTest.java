@@ -21,8 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HGraphQLConverterTest {
 
-    // write some proper tests!
-
     private final static Logger LOGGER = LoggerFactory.getLogger(HGraphQLConverterTest.class);
 
     private Controller controller;
@@ -31,7 +29,7 @@ class HGraphQLConverterTest {
     @BeforeEach
     void startUp() {
 
-        config = HGQLConfig.fromFileSystemPath("src/test/resources/config.json");
+        config = HGQLConfig.fromClasspathConfig("test_config.json");
         if(controller == null) {
             controller = new Controller();
             controller.start(config);
@@ -112,8 +110,7 @@ class HGraphQLConverterTest {
         assertTrue(test);
     }
 
-    // TODO - sort these out
-
+    // TODO - These methods seem a little complicated
     private boolean generateRewritingForRootReturnValidity(String inputQuery) {
 
         HGraphQLConverter converter = new HGraphQLConverter(config.getHgqlSchema());
@@ -128,7 +125,6 @@ class HGraphQLConverterTest {
         ValidatedQuery testQueryValidation = new QueryValidator(config.getSchema()).validateQuery(gqlQuery);
 
         return testQueryValidation.getValid();
-
     }
 
     private boolean generateRewritingForNonRootReturnValidity(String inputQuery, Set<String> inputSet) {
