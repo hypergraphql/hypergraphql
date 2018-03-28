@@ -26,7 +26,7 @@
         {
             "id": "hgraphql",
             "type": "HGraphQLService",
-            "url": "http://localhost:12345/graphql",
+            "url": "http://localhost:0/graphql",
             "graph": "",
             "user": "",
             "password": ""
@@ -34,7 +34,7 @@
         {
             "id": "local",
             "type": "HGraphQLService",
-            "url": "http://localhost:12345/graphql",
+            "url": "http://localhost:0/graphql",
             "graph": "",
             "user": "",
             "password": ""

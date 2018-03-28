@@ -43,25 +43,17 @@ public class HGQLSchemaWiring {
 
     private static final Logger LOGGER = Logger.getLogger(HGQLSchemaWiring.class);
 
+    private HGQLSchema hgqlSchema;
+    private GraphQLSchema schema;
+
     public GraphQLSchema getSchema() {
 
         return schema;
     }
 
-    private GraphQLSchema schema;
-
     public HGQLSchema getHgqlSchema() {
         return hgqlSchema;
     }
-
-    private HGQLSchema hgqlSchema;
-
-
-//    public String getRdfSchemaOutput(String format) {
-//
-//        return hgqlSchema.getRdfSchemaOutput(format);
-//
-//    }
 
     private Map<String, GraphQLArgument> defaultArguments = new HashMap<String, GraphQLArgument>() {{
         put("limit", new GraphQLArgument("limit", GraphQLInt));
@@ -114,7 +106,7 @@ public class HGQLSchemaWiring {
                     | ClassNotFoundException
                     | InvocationTargetException e) {
                 LOGGER.error(e);
-//                throw new HGQLConfigurationException("Error wiring up services", e);
+                throw new HGQLConfigurationException("Error wiring up services", e);
             }
         }
 
