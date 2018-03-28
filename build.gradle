@@ -40,9 +40,6 @@ dependencies {
     testRuntime("org.junit.platform:junit-platform-launcher:1.0.0")
 
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.11.0'
-
-    testCompile group: 'org.powermock', name: 'powermock-core', version: '1.7.3'
-    testCompile group: 'org.powermock', name: 'powermock-api-mockito2', version: '1.7.3'
 }
 
 tasks.withType(FindBugs) {

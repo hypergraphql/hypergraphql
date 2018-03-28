@@ -41,7 +41,6 @@ class ApplicationTest {
     }
 
     @Test
-//    @Disabled("This is here really for coverage - it doesn't really test much and causes downstream failures")
     void startup_test() throws Exception {
 
         final String[] args = {"-config", "src/test/resources/config.json"};
