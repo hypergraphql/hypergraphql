@@ -238,6 +238,10 @@ public class HGQLSchemaWiring {
             args.add(defaultArguments.get("lang"));
         }
 
+        if(field.getService() == null) {
+            throw new HGQLConfigurationException("Value of 'service' for field '" + field.getName() + "' cannot be null");
+        }
+
         String description = field.getId() + " (source: " + field.getService().getId() + ").";
 
         return newFieldDefinition()
