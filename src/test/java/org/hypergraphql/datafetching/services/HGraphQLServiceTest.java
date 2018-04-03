@@ -1,23 +1,22 @@
 package org.hypergraphql.datafetching.services;
 
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.Controller;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.config.system.ServiceConfig;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Method;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HGraphQLServiceTest {
 
     @Test
-    @Disabled("This is a recursive test")
-    void integration_test() throws Exception {
+    @Disabled("This is a recursive test - fix is WIP")
+    void integration_test() {
 
-        HGQLConfig config = HGQLConfig.fromFileSystemPath("src/test/resources/config.json");
+        HGQLConfig config = HGQLConfig.fromFileSystemPath("src/test/resources/test_config.json");
         final Controller controller = new Controller();
         controller.start(config);
 
@@ -41,9 +40,11 @@ class HGraphQLServiceTest {
                 "  }\n" +
                 "}";
 
-        Method method = HGraphQLService.class.getDeclaredMethod("getModelFromRemote", String.class);
-        method.setAccessible(true);
-        Model model = (Model) method.invoke(hgqlService, testQuery);
+        Model model = hgqlService.getModelFromRemote(testQuery);
+
+//  Load an expected model and compare with that
+//        final Model expectedModel = ModelFactory.createDefaultModel();
+//        expectedModel.read()
 
         assertTrue(model.size() > 10); // TODO - this looks a bit vague
 
@@ -55,7 +56,7 @@ class HGraphQLServiceTest {
         return new ServiceConfig(
                 null,
                 null,
-                "http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphqlPath(),
+                "http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphQLPath(),
                 null,
                 "",
                 "",
