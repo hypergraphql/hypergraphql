@@ -28,13 +28,12 @@ import java.util.concurrent.Callable;
 public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> {
 
     protected JsonNode query;
-    protected Set<String> inputSubset;
-    protected Set<String> markers;
-    protected SPARQLEndpointService sparqlEndpointService;
+    Set<String> inputSubset;
+    Set<String> markers;
+    SPARQLEndpointService sparqlEndpointService;
     protected HGQLSchema schema ;
     protected Logger logger = Logger.getLogger(SPARQLEndpointExecution.class);
-    protected String rootType;
-
+    String rootType;
 
     public SPARQLEndpointExecution(JsonNode query, Set<String> inputSubset, Set<String> markers, SPARQLEndpointService sparqlEndpointService, HGQLSchema schema, String rootType) {
         this.query = query;
@@ -43,28 +42,23 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
         this.sparqlEndpointService = sparqlEndpointService;
         this.schema = schema;
         this.rootType=rootType;
-
-
     }
 
-
     @Override
-
-    public SPARQLExecutionResult call() throws Exception {
+    public SPARQLExecutionResult call() {
         Map<String, Set<String>> resultSet = new HashMap<>();
-        for (String marker : markers) {
-            resultSet.put(marker, new HashSet<>());
-        }
+
+        markers.forEach(marker -> resultSet.put(marker, new HashSet<>()));
 
         Model unionModel = ModelFactory.createDefaultModel();
-
 
         SPARQLServiceConverter converter = new SPARQLServiceConverter(schema);
         String sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);
         logger.info(sparqlQuery);
 
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
-        Credentials credentials = new UsernamePasswordCredentials(this.sparqlEndpointService.getUser(), this.sparqlEndpointService.getPassword());
+        Credentials credentials =
+                new UsernamePasswordCredentials(this.sparqlEndpointService.getUser(), this.sparqlEndpointService.getPassword());
         credsProvider.setCredentials(AuthScope.ANY, credentials);
         HttpClient httpclient = HttpClients.custom()
                 .setDefaultCredentialsProvider(credsProvider)
@@ -78,19 +72,12 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
 
         ResultSet results = qEngine.execSelect();
 
-        while (results.hasNext()) {
-            QuerySolution solution = results.next();
+        results.forEachRemaining(solution -> {
+            markers.stream().filter(solution::contains).forEach(marker ->
+                    resultSet.get(marker).add(solution.get(marker).asResource().getURI()));
 
-            for (String marker : markers) {
-                if (solution.contains(marker)) resultSet.get(marker).add(solution.get(marker).asResource().getURI());
-
-            }
-
-            Model model = this.sparqlEndpointService.getModelFromResults(query, solution, schema);
-            unionModel.add(model);
-
-
-        }
+            unionModel.add(this.sparqlEndpointService.getModelFromResults(query, solution, schema));
+        });
 
         SPARQLExecutionResult sparqlExecutionResult = new SPARQLExecutionResult(resultSet, unionModel);
         logger.info(sparqlExecutionResult);

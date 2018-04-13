@@ -2,7 +2,6 @@
     "name": "mydemo",
     "schema": "src/test/resources/schema.graphql",
     "server": {
-        "port": 8080,
         "graphql": "/graphql",
         "graphiql": "/graphiql"
     },
@@ -27,7 +26,15 @@
         {
             "id": "hgraphql",
             "type": "HGraphQLService",
-            "url": "http://localhost:8080/graphql",
+            "url": "http://localhost:0/graphql",
+            "graph": "",
+            "user": "",
+            "password": ""
+        },
+        {
+            "id": "local",
+            "type": "HGraphQLService",
+            "url": "http://localhost:0/graphql",
             "graph": "",
             "user": "",
             "password": ""

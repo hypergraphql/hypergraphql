@@ -20,7 +20,9 @@ queryTranslation\.txt
 build/
 *.iml
 
-
 _site/
 docs/_site/
 
+src/test/resources/TestServices/output/*.ttl
+out/
+*.class

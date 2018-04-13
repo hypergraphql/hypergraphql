@@ -1,7 +1,11 @@
 package org.hypergraphql.datafetching;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.jena.query.*;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
@@ -24,14 +28,12 @@ public class LocalSPARQLExecution extends SPARQLEndpointExecution {
     }
 
     @Override
-    public SPARQLExecutionResult call() throws Exception {
+    public SPARQLExecutionResult call() {
+
         Map<String, Set<String>> resultSet = new HashMap<>();
-        for (String marker : markers) {
-            resultSet.put(marker, new HashSet<>());
-        }
+        markers.forEach(marker -> resultSet.put(marker, new HashSet<>()));
 
         Model unionModel = ModelFactory.createDefaultModel();
-
 
         SPARQLServiceConverter converter = new SPARQLServiceConverter(schema);
         String sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);
@@ -39,27 +41,21 @@ public class LocalSPARQLExecution extends SPARQLEndpointExecution {
         Query jenaQuery = QueryFactory.create(sparqlQuery);
 
         QueryExecution qexec = QueryExecutionFactory.create(jenaQuery, model);
-            ResultSet results = qexec.execSelect();
+        ResultSet results = qexec.execSelect();
 
+        results.forEachRemaining(solution -> {
 
-        while (results.hasNext()) {
-            QuerySolution solution = results.next();
-
-            for (String marker : markers) {
-                if (solution.contains(marker)) resultSet.get(marker).add(solution.get(marker).asResource().getURI());
-
-            }
+            markers.forEach(marker ->{
+                if(solution.contains(marker)) {
+                    resultSet.get(marker).add(solution.get(marker).asResource().getURI());
+                }
+            });
 
             Model model = this.sparqlEndpointService.getModelFromResults(query, solution, schema);
             unionModel.add(model);
+        });
 
-
-        }
-
-        SPARQLExecutionResult sparqlExecutionResult = new SPARQLExecutionResult(resultSet, unionModel);
-        logger.info(sparqlExecutionResult);
-
-        return sparqlExecutionResult;
+        return new SPARQLExecutionResult(resultSet, unionModel);
     }
 
 }

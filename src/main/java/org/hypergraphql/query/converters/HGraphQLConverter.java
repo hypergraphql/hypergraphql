@@ -16,7 +16,6 @@ import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_GET_FIELD
 public class HGraphQLConverter {
     private HGQLSchema schema;
 
-
     public  HGraphQLConverter(HGQLSchema schema ) {
 
         this.schema = schema;
@@ -39,47 +38,44 @@ public class HGraphQLConverter {
 
     private String getArgsSTR(JsonNode getArgs) {
 
-        if (getArgs!=null) return "";
+        if (getArgs != null) {
+            return "";
+        }
 
-        final String LIM = "limit:%s ";
-        final String OFF = "offset:%s ";
+//        final String LIM = "limit:%s ";
+//        final String OFF = "offset:%s ";
         final String ARG = "(%s)";
 
         String argsStr = "";
 
-        if (getArgs.has("limit")) {
-            argsStr += String.format(LIM, getArgs.get("limit").asInt());
-        }
-        if (getArgs.has("offset")) {
-            argsStr += String.format(OFF, getArgs.get("offset").asInt());
-        }
-
-
+//        if (getArgs.has("limit")) {
+//            argsStr += String.format(LIM, getArgs.get("limit").asInt());
+//        }
+//        if (getArgs.has("offset")) {
+//            argsStr += String.format(OFF, getArgs.get("offset").asInt());
+//        }
         return String.format(ARG, argsStr);
     }
 
     private String langSTR(ObjectNode langArg) {
 
-        if (langArg.isNull()) return "";
-
+        if (langArg.isNull()) {
+            return "";
+        }
         final String LANGARG = "(lang:\"%s\")";
-
         return String.format(LANGARG, langArg.get("lang").asText());
     }
 
     private String querySTR(String content) {
 
         final String QUERY = "{ %s }";
-
         return String.format(QUERY, content);
-
     }
 
 
     public String convertToHGraphQL(JsonNode jsonQuery, Set<String> input, String rootType) {
 
         Map<String, QueryFieldConfig> queryFields = schema.getQueryFields();
-
         Boolean root = (!jsonQuery.isArray() && queryFields.containsKey(jsonQuery.get("name").asText()));
 
         if (root) {
@@ -90,23 +86,16 @@ public class HGraphQLConverter {
             }
         } else {
             return getSelectNonRoot((ArrayNode) jsonQuery, input, rootType);
-
         }
-
     }
 
     private String getSelectRoot_GET_BY_ID(JsonNode jsonQuery) {
 
         Set<String> uris = new HashSet<>();
-
         ArrayNode urisArray = (ArrayNode) jsonQuery.get("args").get("uris");
-
         urisArray.elements().forEachRemaining(el -> uris.add(el.asText()));
-
         String key = jsonQuery.get("name").asText() + urisArgSTR(uris);
-
         String content = getSubQuery(jsonQuery.get("fields"), jsonQuery.get("targetName").asText());
-
         return querySTR(key + content);
     }
 
@@ -114,26 +103,17 @@ public class HGraphQLConverter {
     private String getSelectRoot_GET(JsonNode jsonQuery) {
 
         String key = jsonQuery.get("name").asText() + getArgsSTR(jsonQuery.get("args"));
-
         String content = getSubQuery(jsonQuery.get("fields"), jsonQuery.get("targetName").asText());
-
         return querySTR(key + content);
-
     }
 
     private String getSelectNonRoot(ArrayNode jsonQuery, Set<String> input, String rootType) {
 
-
         String topQueryFieldName = rootType + "_GET_BY_ID";
-
         String key = topQueryFieldName + urisArgSTR(input);
-
         String content = getSubQuery(jsonQuery, rootType);
-
         return querySTR(key + content);
-
     }
-
 
     private String getSubQuery(JsonNode fieldsJson, String parentType) {
 
@@ -148,14 +128,11 @@ public class HGraphQLConverter {
             if (subQueryStrings.isEmpty()) {
                 return "";
             } else {
-                querySTR(String.join(" ", subQueryStrings));
+                return querySTR(String.join(" ", subQueryStrings));
             }
-        }
+        } else {
 
-        else {
-
-
-            Iterator<JsonNode> fields = ((ArrayNode) fieldsJson).elements();
+            Iterator<JsonNode> fields = fieldsJson.elements();
 
             fields.forEachRemaining(field -> {
                 ArrayNode fieldsArray = (field.get("fields").isNull()) ? null : (ArrayNode) field.get("fields");

@@ -5,12 +5,15 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.LocalSPARQLExecution;
-import org.hypergraphql.datafetching.SPARQLEndpointExecution;
 import org.hypergraphql.datafetching.SPARQLExecutionResult;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.HGQLSchema;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,8 +22,6 @@ import java.util.concurrent.Future;
 public class LocalModelSPARQLService extends SPARQLEndpointService{
 
 
-    private String filetype;
-    private String filepath;
     private Model localmodel;
 
     @Override
@@ -49,17 +50,7 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
 
         } while (inputList.size()>VALUES_SIZE_LIMIT);
 
-        for (Future<SPARQLExecutionResult> futureexecutionResult : futureSPARQLresults) {
-            try {
-                SPARQLExecutionResult result = futureexecutionResult.get();
-                unionModel.add(result.getModel());
-                resultSet.putAll(result.getResultSet());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-        }
+        iterateFutureResults(futureSPARQLresults, unionModel, resultSet);
 
         TreeExecutionResult treeExecutionResult = new TreeExecutionResult();
         treeExecutionResult.setResultSet(resultSet);
@@ -72,10 +63,10 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
     public void setParameters(ServiceConfig serviceConfig) {
         super.setParameters(serviceConfig);
         this.id = serviceConfig.getId();
-        this.filetype = serviceConfig.getFiletype();
-        this.filepath = serviceConfig.getFilepath();
+        String filetype = serviceConfig.getFiletype();
+        String filepath = serviceConfig.getFilepath();
         this.localmodel = ModelFactory.createDefaultModel();
-        this.localmodel.read(filepath,filetype);
+        this.localmodel.read(filepath, filetype);
 
     }
 }

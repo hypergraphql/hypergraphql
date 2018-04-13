@@ -17,7 +17,7 @@ public class FieldOfTypeConfig {
         return graphqlOutputType;
     }
 
-    public Boolean getIsList() {
+    public Boolean isList() {
         return isList;
     }
 

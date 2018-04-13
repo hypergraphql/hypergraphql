@@ -1,18 +1,22 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.jena.query.*;
-import org.apache.jena.rdf.model.*;
-import org.apache.jena.vocabulary.RDF;
-import org.hypergraphql.config.schema.*;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.SPARQLEndpointExecution;
 import org.hypergraphql.datafetching.SPARQLExecutionResult;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.HGQLSchema;
-import org.hypergraphql.datamodel.HGQLSchemaWiring;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,7 +27,7 @@ public class SPARQLEndpointService extends SPARQLService {
     private String url;
     private String user;
     private String password;
-    protected int VALUES_SIZE_LIMIT = 100;
+    final static int VALUES_SIZE_LIMIT = 100;
 
     public String getUrl() {
         return url;
@@ -37,13 +41,8 @@ public class SPARQLEndpointService extends SPARQLService {
         return password;
     }
 
-    public SPARQLEndpointService() {
-
-    }
-
     @Override
-
-    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers , String rootType ,HGQLSchema schema) {
+    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers , String rootType , HGQLSchema schema) {
 
 
         Map<String, Set<String>> resultSet = new HashMap<>();
@@ -67,17 +66,7 @@ public class SPARQLEndpointService extends SPARQLService {
 
         } while (inputList.size()>VALUES_SIZE_LIMIT);
 
-        for (Future<SPARQLExecutionResult> futureexecutionResult : futureSPARQLresults) {
-            try {
-                SPARQLExecutionResult result = futureexecutionResult.get();
-                unionModel.add(result.getModel());
-                resultSet.putAll(result.getResultSet());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-        }
+        iterateFutureResults(futureSPARQLresults, unionModel, resultSet);
 
         TreeExecutionResult treeExecutionResult = new TreeExecutionResult();
         treeExecutionResult.setResultSet(resultSet);
@@ -86,7 +75,25 @@ public class SPARQLEndpointService extends SPARQLService {
         return treeExecutionResult;
     }
 
-    protected List<String> getStrings(JsonNode query, Set<String> input, Set<String> markers, String rootType, HGQLSchema schema, Map<String, Set<String>> resultSet) {
+    void iterateFutureResults (
+            final Set<Future<SPARQLExecutionResult>> futureSPARQLResults,
+            final Model unionModel,
+            Map<String, Set<String>> resultSet
+    ) {
+
+        for (Future<SPARQLExecutionResult> futureExecutionResult : futureSPARQLResults) {
+            try {
+                SPARQLExecutionResult result = futureExecutionResult.get();
+                unionModel.add(result.getModel());
+                resultSet.putAll(result.getResultSet());
+            } catch (InterruptedException
+                    | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    List<String> getStrings(JsonNode query, Set<String> input, Set<String> markers, String rootType, HGQLSchema schema, Map<String, Set<String>> resultSet) {
         for (String marker : markers) {
             resultSet.put(marker, new HashSet<>());
         }
@@ -98,81 +105,7 @@ public class SPARQLEndpointService extends SPARQLService {
                 input.add(uri);
             }
         }
-
-        return (List<String>) new ArrayList(input);
-    }
-
-    public Model getModelFromResults(JsonNode query, QuerySolution results , HGQLSchema schema) {
-
-        Model model = ModelFactory.createDefaultModel();
-        if (query.isNull()) return model;
-
-        if (query.isArray()) {
-
-
-            Iterator<JsonNode> nodesIterator = query.elements();
-
-            while (nodesIterator.hasNext()) {
-
-
-                JsonNode currentNode = nodesIterator.next();
-
-                Model currentmodel = buildmodel(results, currentNode , schema);
-                model.add(currentmodel);
-
-                model.add(getModelFromResults(currentNode.get("fields"), results, schema));
-
-
-            }
-        }
-
-        else {
-
-            Model currentModel = buildmodel(results,query ,schema);
-            model.add(currentModel);
-
-            model.add(getModelFromResults(query.get("fields"), results, schema));
-
-
-        }
-
-        return model;
-
-    }
-
-    private Model buildmodel(QuerySolution results, JsonNode currentNode , HGQLSchema schema) {
-
-        Model model = ModelFactory.createDefaultModel();
-
-        FieldConfig propertyString = schema.getFields().get(currentNode.get("name").asText());
-        TypeConfig targetTypeString = schema.getTypes().get(currentNode.get("targetName").asText());
-
-        if (propertyString != null && !(currentNode.get("parentId").asText().equals("null"))) {
-            Property predicate = model.createProperty("", propertyString.getId());
-            Resource subject = results.getResource(currentNode.get("parentId").asText());
-            RDFNode object = results.get(currentNode.get("nodeId").asText());
-            if (predicate!=null&&subject!=null&&object!=null)
-            model.add(subject, predicate, object);
-        }
-
-        if (targetTypeString != null) {
-            Resource subject = results.getResource(currentNode.get("nodeId").asText());
-            Resource object = model.createResource(targetTypeString.getId());
-            if (subject!=null&&object!=null)
-            model.add(subject, RDF.type, object);
-        }
-
-        QueryFieldConfig queryField = schema.getQueryFields().get(currentNode.get("name").asText());
-
-        if (queryField!=null) {
-
-            String typeName = (currentNode.get("alias").isNull()) ? currentNode.get("name").asText() : currentNode.get("alias").asText();
-            Resource object = results.getResource(currentNode.get("nodeId").asText());
-            Resource subject = model.createResource(HGQLVocabulary.HGQL_QUERY_URI);
-            Property predicate = model.createProperty("", HGQLVocabulary.HGQL_QUERY_NAMESPACE + typeName);
-            model.add(subject, predicate, object);
-        }
-        return model;
+        return new ArrayList<>(input);
     }
 
     @Override
