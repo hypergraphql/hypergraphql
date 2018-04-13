@@ -27,7 +27,9 @@ In this tutorial we outline all the steps required to define and connect several
 
 All the resources, including configuration files, GraphQL schemas and RDF datasets, are included in the [src/test/resources/DemoServices](https://github.com/semantic-integration/hypergraphql/tree/master/src/test/resources/DemoServices) directory of the project's GitHub repository. 
 
-In order to start all three instances described in this turorial at once, you can replace the content of the `Main.main(String[] args)` method in your local repository of HyperGraphQL with the following code, and execute the method:
+In order to start all three instances described in this turorial at once, you can run the `GenericDemoApplication` or `Demo` executable classes in your local repository of HyperGraphQL.
+
+These effectively spin up several instances of HyperGraphQL pointing at different sources:
 
 ```java
 HGQLConfig config1 = new HGQLConfig("src/test/resources/DemoServices/config1.json");
