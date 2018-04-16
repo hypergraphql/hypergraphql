@@ -12,7 +12,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFDataMgr;
-import org.hypergraphql.Application;
+import org.hypergraphql.OldApplication;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -27,9 +27,9 @@ import java.io.OutputStream;
 import static org.apache.jena.riot.Lang.TURTLE;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ApplicationTest {
+class OldApplicationTest {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ApplicationTest.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(OldApplicationTest.class);
 
     private static final String OUTPUT_FILE_PATH = "src/test/resources/test_services/output/cities1.ttl";
 
@@ -44,8 +44,8 @@ class ApplicationTest {
     void startup_test() throws Exception {
 
         final String[] args = {"-config", "src/test/resources/test_config.json"};
-        Application.main(args);
-        Application.stop();
+        OldApplication.main(args);
+        OldApplication.stop();
     }
 
     @Test
