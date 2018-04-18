@@ -1,0 +1,19 @@
+{
+    "name": "dbpedia-sparql-demo",
+    "schema": "src/test/resources/demo_services/schema4.graphql",
+    "server": {
+        "port": 8084,
+        "graphql": "/graphql",
+        "graphiql": "/graphiql"
+    },
+    "services": [
+        {
+            "id": "dbpedia-sparql",
+            "type": "SPARQLEndpointService",
+            "url": "http://dbpedia.org/sparql/",
+            "graph": "http://dbpedia.org",
+            "user": "",
+            "password": ""
+        }
+    ]
+}

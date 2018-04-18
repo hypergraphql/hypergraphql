@@ -1,0 +1,27 @@
+{
+    "name": "fao-go-hgql",
+    "schema": "src/test/resources/demo_services/schema3.graphql",
+    "server": {
+        "port": 8083,
+        "graphql": "/graphql",
+        "graphiql": "/graphiql"
+    },
+    "services": [
+        {
+            "id": "dbpedia-hgql",
+            "type": "HGraphQLService",
+            "url": "http://localhost:8081/graphql"
+        },
+        {
+            "id": "agrovoc-hgql",
+            "type": "HGraphQLService",
+            "url": "http://localhost:8082/graphql"
+        },
+        {
+            "id": "fao-local",
+            "type": "LocalModelSPARQLService",
+            "filepath": "src/test/resources/demo_services/fao.ttl",
+            "filetype": "TTL"
+        }
+    ]
+}

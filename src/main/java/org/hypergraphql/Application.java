@@ -46,32 +46,27 @@ public class Application {
                 );
         CommandLine commandLine = parser.parse(options, args);
 
+        final ApplicationConfigurationService service = new ApplicationConfigurationService();
 
         final List<File> configurations;
         if(commandLine.hasOption("classpath")) {
 
-            final String[] resourcePaths = commandLine.getOptionValues("config");
-            configurations = getConfigResources(resourcePaths);
-
+            configurations = service.getConfigResources(commandLine.getOptionValues("config"));
         } else {
 
-            configurations = getConfigFiles(commandLine.getOptionValues("config"));
+            configurations = service.getConfigFiles(commandLine.getOptionValues("config"));
         }
 
         configurations.forEach(file -> {
-
             LOGGER.info("Starting with " + file.getPath());
             new Controller().start(HGQLConfig.fromFileSystemPath(file.getPath()));
         });
     }
+}
 
-    private static List<File> getConfigFiles(final String[] configPathStrings) {
+class ApplicationConfigurationService {
 
-        // File system
-        return getConfigPaths(configPathStrings);
-    }
-
-    private static List<File> getConfigPaths(final String[] configPathStrings) {
+    List<File> getConfigFiles(final String ... configPathStrings) {
 
         final List<File> configFiles = new ArrayList<>();
         for(final String configPathString : configPathStrings) {
@@ -80,7 +75,7 @@ public class Application {
         return configFiles;
     }
 
-    private static List<File> getConfigurations(final String configPathString) {
+    private List<File> getConfigurations(final String configPathString) {
 
         final List<File> configFiles = new ArrayList<>();
         final File configPath = new File(configPathString); // it always has this
@@ -96,7 +91,7 @@ public class Application {
         return configFiles;
     }
 
-    private static List<File> getConfigResources(final String[] resourcePaths) {
+    List<File> getConfigResources(final String ... resourcePaths) {
 
         final List<File> configFiles = new ArrayList<>();
 

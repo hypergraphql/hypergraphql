@@ -21,6 +21,7 @@ import org.hypergraphql.config.system.HGQLConfig;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,10 +33,17 @@ class SystemTest {
     void integration_test() {
 
         Model mainModel = ModelFactory.createDefaultModel();
-        mainModel.read("src/test/resources/test_services/dbpedia.ttl", "TTL");
+        final URL dbpediaContentUrl = getClass().getClassLoader().getResource("test_services/dbpedia.ttl");
+        if(dbpediaContentUrl != null) {
+            mainModel.read(dbpediaContentUrl.toString(), "TTL");
+        }
 
         Model citiesModel = ModelFactory.createDefaultModel();
-        citiesModel.read("src/test/resources/test_services/cities.ttl", "TTL");
+        final URL citiesContentUrl = getClass().getClassLoader().getResource("test_services/cities.ttl");
+        if(citiesContentUrl != null) {
+            citiesModel.read(citiesContentUrl.toString(), "TTL");
+        }
+
         Model expectedModel = ModelFactory.createDefaultModel();
         expectedModel.add(mainModel).add(citiesModel);
 
@@ -46,12 +54,12 @@ class SystemTest {
                 .build()
                 .start();
 
-        HGQLConfig externalConfig = HGQLConfig.fromFileSystemPath("src/test/resources/test_services/externalconfig.json");
+        HGQLConfig externalConfig = HGQLConfig.fromClasspathConfig("test_services/externalconfig.json");
 
         Controller externalController = new Controller();
         externalController.start(externalConfig);
 
-        HGQLConfig config = HGQLConfig.fromFileSystemPath("src/test/resources/test_services/mainconfig.json");
+        HGQLConfig config = HGQLConfig.fromClasspathConfig("test_services/mainconfig.json");
 
         Controller controller = new Controller();
         controller.start(config);
