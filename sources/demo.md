@@ -147,5 +147,4 @@ Introspection queries allow for accessing the schema of a GraphQL instance using
 </script>
 </graphiql>
 <br>
-The internal representation of the schema as an RDF graph in turtle format can be also accessed at:
-[link to schema](/service/graphql4).
+The internal representation of the schema as an RDF graph in [TURTLE format can be also accessed here](/service/graphql4).
