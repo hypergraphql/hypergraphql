@@ -1,0 +1,68 @@
+type __Context {
+    City:           _@href(iri: "http://dbpedia.org/ontology/City")
+    Country:        _@href(iri: "http://dbpedia.org/ontology/Country")
+    label:          _@href(iri: "http://www.w3.org/2000/01/rdf-schema#label")
+    comment:        _@href(iri: "http://www.w3.org/2000/01/rdf-schema#comment")
+    country:        _@href(iri: "http://dbpedia.org/ontology/country")
+    capital:        _@href(iri: "http://dbpedia.org/ontology/capital")
+    SelfGoverning:  _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/self_governing")
+    hasBorderWith:  _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/hasBorderWith")
+    GeoRegion:      _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/geographical_region")
+    EconomicRegion: _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/economic_region")
+    inEconomicRegion: _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/isInGroup")
+    inGeoRegion:    _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/isInGroup")
+    hasMemberCountry: _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/hasMember")
+    Concept:        _@href(iri: "http://www.w3.org/2004/02/skos/core#Concept")
+    prefLabel:      _@href(iri: "http://www.w3.org/2004/02/skos/core#prefLabel")
+    altLabel:       _@href(iri: "http://www.w3.org/2004/02/skos/core#altLabel")
+    broader:        _@href(iri: "http://www.w3.org/2004/02/skos/core#broader")
+    narrower:       _@href(iri: "http://www.w3.org/2004/02/skos/core#narrower")
+    related:        _@href(iri: "http://www.w3.org/2004/02/skos/core#related")
+    sameInDBpedia:  _@href(iri: "http://www.w3.org/2002/07/owl#sameAs")
+    sameInAgrovoc:  _@href(iri: "http://www.w3.org/2002/07/owl#sameAs")
+    name:           _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/nameOfficial")
+    population:     _@href(iri: "http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/populationTotal")
+
+}
+
+type SelfGoverning @service(id:"fao-local") {
+    name: [String] @service(id:"fao-local")
+    hasBorderWith: [SelfGoverning] @service(id:"fao-local")
+    sameInDBpedia: Country @service(id:"fao-local")
+    sameInAgrovoc: Concept @service(id:"fao-local")
+    inEconomicRegion: [EconomicRegion] @service(id:"fao-local")
+    inGeoRegion: [GeoRegion] @service(id:"fao-local")
+    population: Int @service(id:"fao-local")
+}
+
+type EconomicRegion @service(id:"fao-local") {
+    name: [String] @service(id:"fao-local")
+    sameInAgrovoc: Concept @service(id:"fao-local")
+    hasMemberCountry: [SelfGoverning] @service(id:"fao-local")
+}
+
+type GeoRegion @service(id:"fao-local") {
+    name: [String] @service(id:"fao-local")
+    sameInAgrovoc: Concept @service(id:"fao-local")
+    hasMemberCountry: [SelfGoverning] @service(id:"fao-local")
+}
+
+type City {
+    label: [String] @service(id:"dbpedia-hgql")
+    country: Country @service(id:"dbpedia-hgql")
+    comment: [String] @service(id:"dbpedia-hgql")
+}
+
+type Country  {
+    label: [String] @service(id:"dbpedia-hgql")
+    capital: [City] @service(id:"dbpedia-hgql")
+    comment: [String] @service(id:"dbpedia-hgql")
+}
+
+type Concept {
+    prefLabel: [String] @service(id:"agrovoc-hgql")
+    altLabel: [String] @service(id:"agrovoc-hgql")
+    broader: [Concept] @service(id:"agrovoc-hgql")
+    narrower: [Concept] @service(id:"agrovoc-hgql")
+    related: [Concept] @service(id:"agrovoc-hgql")
+}

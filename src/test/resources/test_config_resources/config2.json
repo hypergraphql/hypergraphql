@@ -1,0 +1,17 @@
+{
+    "name": "agrovoc-hgql",
+    "schema": "src/test/resources/demo_services/schema2.graphql",
+    "server": {
+        "port": 8082,
+        "graphql": "/graphql",
+        "graphiql": "/graphiql"
+    },
+    "services": [
+        {
+            "id": "agrovoc-local",
+            "type": "LocalModelSPARQLService",
+            "filepath": "src/test/resources/demo_services/agrovoc.ttl",
+            "filetype": "TTL"
+        }
+    ]
+}

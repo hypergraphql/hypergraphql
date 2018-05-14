@@ -3,38 +3,107 @@ package org.hypergraphql;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.log4j.Logger;
+import org.apache.commons.io.FilenameUtils;
 import org.hypergraphql.config.system.HGQLConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * This class looks for files on the filesystem.
+ * See 'Demo' and 'ClasspathDemo' in test root for an example of using the classpath to access classpath resources
+ */
 public class Application {
 
-    private final static Logger LOGGER = Logger.getLogger(Application.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
-    private final static String DEFAULT_CONFIG_FILE = "config.json";
-
-    private static Controller controller;
-
-    public static void main(String[] args) throws Exception {
+    public static void main(final String[] args) throws Exception {
 
         CommandLineParser parser = new DefaultParser();
         Options options = new Options()
-                .addOption("c", "config", true, "Location of config file");
+                .addOption(
+                        Option.builder("config")
+                            .longOpt("config")
+                            .hasArgs()
+                            .numberOfArgs(Option.UNLIMITED_VALUES)
+                            .desc("Location of config files (or absolute paths to config files)")
+                            .required()
+                            .build()
+                )
+                .addOption(
+                        Option.builder("classpath")
+                                .longOpt("classpath")
+                                .hasArg(false)
+                                .desc("Look on classpath instead of file system")
+                                .build()
+                );
         CommandLine commandLine = parser.parse(options, args);
 
-        final String configPath = commandLine.getOptionValue("config");
-        HGQLConfig config = HGQLConfig.fromFileSystemPath(configPath);
+        final ApplicationConfigurationService service = new ApplicationConfigurationService();
 
-        controller = new Controller();
-        controller.start(config);
+        final List<File> configurations;
+        if(commandLine.hasOption("classpath")) {
 
-        LOGGER.info("Server started at http://localhost:" + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphQLPath());
+            configurations = service.getConfigResources(commandLine.getOptionValues("config"));
+        } else {
+
+            configurations = service.getConfigFiles(commandLine.getOptionValues("config"));
+        }
+
+        configurations.forEach(file -> {
+            LOGGER.info("Starting with " + file.getPath());
+            new Controller().start(HGQLConfig.fromFileSystemPath(file.getPath()));
+        });
+    }
+}
+
+class ApplicationConfigurationService {
+
+    List<File> getConfigFiles(final String ... configPathStrings) {
+
+        final List<File> configFiles = new ArrayList<>();
+        for(final String configPathString : configPathStrings) {
+            configFiles.addAll(getConfigurations(configPathString));
+        }
+        return configFiles;
     }
 
-    public static void stop() {
+    private List<File> getConfigurations(final String configPathString) {
 
-        if(controller != null) {
-            controller.stop();
+        final List<File> configFiles = new ArrayList<>();
+        final File configPath = new File(configPathString); // it always has this
+        if (configPath.isDirectory()) {
+            final File[] jsonFiles = configPath.listFiles(pathname ->
+                    FilenameUtils.isExtension(pathname.getName(), "json"));
+            if(jsonFiles != null) {
+                configFiles.addAll(Arrays.asList(jsonFiles));
+            }
+        } else { // assume regular file
+            configFiles.add(configPath);
         }
+        return configFiles;
+    }
+
+    List<File> getConfigResources(final String ... resourcePaths) {
+
+        final List<File> configFiles = new ArrayList<>();
+
+        for(final String resourcePath : resourcePaths) {
+
+            final URL sourceUrl = Application.class.getClassLoader().getResource(resourcePath);
+
+            if(sourceUrl != null) {
+                configFiles.addAll(getConfigurations(sourceUrl.getFile()));
+            }
+        }
+
+        return configFiles;
     }
 }

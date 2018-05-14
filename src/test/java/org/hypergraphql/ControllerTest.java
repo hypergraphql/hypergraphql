@@ -11,6 +11,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -63,6 +64,7 @@ class ControllerTest {
     @Test
     void should_get_for_graphiql() throws Exception {
 
+        Thread.sleep(1000);
         final String path = basePath + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphiQLPath();
         final Envelope envelope = getPath(path, "application/json");
         final String contentType = envelope.getContentType();

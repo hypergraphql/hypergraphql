@@ -156,7 +156,7 @@ public class HGQLSchemaWiring {
     private GraphQLObjectType registerGraphQLQueryType(TypeConfig type) {
 
         String typeName = type.getName();
-        String description = "Top querable predicates. " +
+        String description = "Top queryable predicates. " +
                 "_GET queries return all objects of a given type, possibly restricted by limit and offset values. " +
                 "_GET_BY_ID queries require a set of URIs to be specified.";
 

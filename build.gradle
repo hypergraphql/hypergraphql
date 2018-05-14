@@ -3,7 +3,7 @@ apply plugin: 'maven'
 apply plugin: 'findbugs'
 
 group = 'org.hypergraphql'
-version = '1.1.2'
+version = '1.1.3'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8

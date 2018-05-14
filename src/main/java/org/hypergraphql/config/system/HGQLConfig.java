@@ -32,7 +32,6 @@ public class HGQLConfig {
     private String schemaFile;
     private GraphqlConfig graphqlConfig;
     private List<ServiceConfig> serviceConfigs;
-    private TypeDefinitionRegistry registry;
 
     public void setName(String name) {
         this.name = name;
@@ -79,6 +78,9 @@ public class HGQLConfig {
     public static HGQLConfig fromClasspathConfig(final String path) {
 
         final InputStream in = HGQLConfig.class.getClassLoader().getResourceAsStream(path);
+        if(in == null) {
+            throw new HGQLConfigurationException("Unable to find config file/path");
+        }
         return new HGQLConfig(in);
     }
 
@@ -87,7 +89,7 @@ public class HGQLConfig {
         try {
             return new HGQLConfig(new FileInputStream(path));
         } catch (FileNotFoundException e) {
-            throw new HGQLConfigurationException("Unable to find config file", e);
+            throw new HGQLConfigurationException("Unable to find config file/path", e);
         }
     }
 
@@ -103,14 +105,14 @@ public class HGQLConfig {
             HGQLConfig config = mapper.readValue(inputStream, HGQLConfig.class);
 
             SchemaParser schemaParser = new SchemaParser();
-            this.registry = schemaParser.parse(new File(config.schemaFile));
+            TypeDefinitionRegistry registry = schemaParser.parse(new File(config.schemaFile));
 
             this.name = config.name;
             this.schemaFile = config.schemaFile;
             this.graphqlConfig = config.graphqlConfig;
             checkServicePorts(config.serviceConfigs);
             this.serviceConfigs = config.serviceConfigs;
-            HGQLSchemaWiring wiring = new HGQLSchemaWiring(this.registry, this.name, this.serviceConfigs);
+            HGQLSchemaWiring wiring = new HGQLSchemaWiring(registry, name, serviceConfigs);
             this.schema = wiring.getSchema();
             this.hgqlSchema = wiring.getHgqlSchema();
         } catch (IOException e) {
