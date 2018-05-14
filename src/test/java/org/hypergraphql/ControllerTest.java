@@ -64,6 +64,7 @@ class ControllerTest {
     @Test
     void should_get_for_graphiql() throws Exception {
 
+        Thread.sleep(1000);
         final String path = basePath + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphiQLPath();
         final Envelope envelope = getPath(path, "application/json");
         final String contentType = envelope.getContentType();

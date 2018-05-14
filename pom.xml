@@ -20,9 +20,9 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
+                <version>1.2.2</version>
                 <configuration>
-                    <mainClass>org.hypergraphql.OldApplication</mainClass>
+                    <mainClass>org.hypergraphql.Application</mainClass>
                 </configuration>
             </plugin>
         </plugins>

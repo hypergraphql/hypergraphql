@@ -1,6 +1,6 @@
 {
     "name": "mydemo",
-    "schema": "src/test/resources/schema.graphql",
+    "schema": "src/test/resources/test_schema.graphql",
     "server": {
         "graphql": "/graphql",
         "graphiql": "/graphiql"
