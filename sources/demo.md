@@ -67,10 +67,10 @@ Below we list a few example queries via embedded GraphiQL interfaces. Feel free 
     }
     locationCity {
       _id
-      label
+      label(lang:"en")
       country {
         _id
-        label
+        label(lang:"en")
       }
     }
   }
