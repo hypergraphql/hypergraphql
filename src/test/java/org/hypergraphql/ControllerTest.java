@@ -51,6 +51,7 @@ class ControllerTest {
     @Test
     void should_get_for_graphql() throws Exception {
 
+        Thread.sleep(1000);
         final String path = basePath + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphQLPath();
 
         final Envelope envelope = getPath(path, "text/turtle");

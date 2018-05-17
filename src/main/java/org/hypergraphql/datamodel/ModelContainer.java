@@ -63,11 +63,26 @@ public class ModelContainer {
 
     public String getValueOfDataProperty(RDFNode subject, String predicateURI, Map<String, Object> args) {
 
-        final List<String> values = getValuesOfDataProperty(subject, predicateURI, args);
-        if(values == null || values.isEmpty()) {
-            return null;
+//        final List<String> values = getValuesOfDataProperty(subject, predicateURI, args);
+//        if(values == null || values.isEmpty()) {
+//            return null;
+//        }
+//        return values.get(0);
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
+        while (iterator.hasNext()) {
+
+            RDFNode data = iterator.next();
+            if (data.isLiteral()) {
+
+                if (args.containsKey("lang")) {
+                    if (data.asLiteral().getLanguage().toString().equals(args.get("lang").toString()))
+                        return data.asLiteral().getString();
+                } else {
+                    return data.asLiteral().getString();
+                }
+            }
         }
-        return values.get(0);
+        return null;
     }
 
     public List<String> getValuesOfDataProperty(RDFNode subject, String predicateURI, Map<String, Object> args) {
@@ -129,17 +144,31 @@ public class ModelContainer {
     }
 
     public RDFNode getValueOfObjectProperty(RDFNode subject, String predicateURI, String targetURI) {
-        NodeIterator iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
+//        NodeIterator iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
 
-        do { // I _think_ this was the intention here
-            RDFNode next = iterator.next();
-            if (!next.isLiteral()) {
-                if (targetURI!=null && this.model.contains(next.asResource(), getPropertyFromUri(HGQLVocabulary.RDF_TYPE), getResourceFromUri(targetURI))) {
-                    return next;
+//        do { // I _think_ this was the intention here
+//            RDFNode next = iterator.next();
+//            if (!next.isLiteral()) {
+//                if (targetURI!=null && this.model.contains(next.asResource(), getPropertyFromUri(HGQLVocabulary.RDF_TYPE), getResourceFromUri(targetURI))) {
+//                    return next;
+//                }
+//            }
+//        }
+//        while (iterator.hasNext());
+//        return null;
+
+        NodeIterator iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
+        while (iterator.hasNext()) {
+
+            while (iterator.hasNext()) {
+                RDFNode next = iterator.next();
+                if (!next.isLiteral()) {
+                    if (targetURI != null && this.model.contains(next.asResource(), getPropertyFromUri(HGQLVocabulary.RDF_TYPE), getResourceFromUri(targetURI))) {
+                        return next;
+                    }
                 }
             }
         }
-        while (iterator.hasNext());
         return null;
     }
 

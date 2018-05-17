@@ -69,8 +69,9 @@ class ApplicationConfigurationService {
     List<File> getConfigFiles(final String ... configPathStrings) {
 
         final List<File> configFiles = new ArrayList<>();
-        for(final String configPathString : configPathStrings) {
-            configFiles.addAll(getConfigurations(configPathString));
+        if(configPathStrings != null) {
+            Arrays.stream(configPathStrings).forEach(configPathString ->
+                    configFiles.addAll(getConfigurations(configPathString)));
         }
         return configFiles;
     }
@@ -95,13 +96,16 @@ class ApplicationConfigurationService {
 
         final List<File> configFiles = new ArrayList<>();
 
-        for(final String resourcePath : resourcePaths) {
+        if(resourcePaths != null) {
+            Arrays.stream(resourcePaths).forEach(
+                    resourcePath -> {
+                        final URL sourceUrl = getClass().getClassLoader().getResource(resourcePath);
 
-            final URL sourceUrl = Application.class.getClassLoader().getResource(resourcePath);
-
-            if(sourceUrl != null) {
-                configFiles.addAll(getConfigurations(sourceUrl.getFile()));
-            }
+                        if(sourceUrl != null) {
+                            configFiles.addAll(getConfigurations(sourceUrl.getFile()));
+                        }
+                    }
+            );
         }
 
         return configFiles;
