@@ -3,6 +3,7 @@ package org.hypergraphql.services;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.junit.jupiter.api.Test;
 
+import java.io.InputStream;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -11,10 +12,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HGQLQueryServiceTest {
 
+    private HGQLConfigService configService = new HGQLConfigService();
+
     @Test
     void results_with_no_accept_type() {
 
-        HGQLConfig config = HGQLConfig.fromClasspathConfig("test_config.json");
+        final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("test_config.json");
+        HGQLConfig config = configService.loadHGQLConfig(inputStream);
         HGQLQueryService service = new HGQLQueryService(config);
 
         final String query = "" +

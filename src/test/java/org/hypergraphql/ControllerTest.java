@@ -9,6 +9,7 @@ import org.apache.jena.atlas.web.MediaType;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.services.HGQLConfigService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -36,8 +37,10 @@ class ControllerTest {
     @BeforeEach
     void startServer() {
 
+        final HGQLConfigService configService = new HGQLConfigService();
+
         controller = new Controller();
-        config = HGQLConfig.from(getClass().getClassLoader().getResourceAsStream("test_config.json"));
+        config = configService.loadHGQLConfig(getClass().getClassLoader().getResourceAsStream("test_config.json"));
         controller.start(config);
     }
 

@@ -1,29 +1,32 @@
+//plugins {
+//    id "com.github.spotbugs" version "1.6.1"
+//}
+
 apply plugin: 'java'
 apply plugin: 'maven'
-//apply plugin: 'findbugs'
 
 group = 'org.hypergraphql'
-version = '1.1.3'
+version = '1.1.4'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
-
     mavenCentral()
     jcenter()
 }
 
 ext {
-
     jenaVersion = '3.6.0'
 }
 
-//findbugs {
+//spotbugs {
+//    toolVersion = '3.1.3'
 //    sourceSets = [sourceSets.main]
 //}
 
 dependencies {
+
     compile group: 'com.graphql-java', name: 'graphql-java', version: '6.0'
     compile group: 'org.apache.jena', name: 'jena-arq', version: jenaVersion
     compile group: 'org.apache.jena', name: 'jena', version: jenaVersion
@@ -35,6 +38,7 @@ dependencies {
     compile group: 'com.sparkjava', name: 'spark-core', version: '2.5'
     compile group: 'com.sparkjava', name: 'spark-template-velocity', version: '2.5.5'
     compile group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.9'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.327'
 
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.0.1'
     testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0")
@@ -51,7 +55,7 @@ test {
     }
 }
 
-//tasks.withType(FindBugs) {
+//tasks.withType(SpotBugs) {
 //    reports {
 //        xml.enabled false
 //        html.enabled true

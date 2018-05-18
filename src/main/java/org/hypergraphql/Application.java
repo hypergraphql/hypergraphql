@@ -5,15 +5,13 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.cli.ParseException;
 import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.services.ApplicationConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -26,16 +24,46 @@ public class Application {
 
     public static void main(final String[] args) throws Exception {
 
+        final CommandLine commandLine = readCommandLine(args);
+
+        final ApplicationConfigurationService service = new ApplicationConfigurationService();
+
+        final List<HGQLConfig> configurations;
+        if(commandLine.hasOption("s3")) {
+
+            final String s3url = commandLine.getOptionValue("s3");
+            final String accessKey = commandLine.getOptionValue('u');
+            final String secretKey = commandLine.getOptionValue('p');
+
+            // URL lookup
+            configurations = service.getConfigurationFromS3(s3url, accessKey, secretKey);
+        } else if(commandLine.hasOption("config")) {
+            if (commandLine.hasOption("classpath")) {
+                configurations = service.getConfigResources(commandLine.getOptionValues("config")); // TODO - as streams!
+            } else {
+                configurations = service.getConfigFiles(commandLine.getOptionValues("config"));
+            }
+        } else {
+            throw new IllegalArgumentException("One of 'config' or 's3' MUST be provided");
+        }
+
+
+        configurations.forEach(config -> {
+            LOGGER.info("Starting controller...");
+            new Controller().start(config);
+        });
+    }
+
+    private static CommandLine readCommandLine(final String ... args) throws ParseException {
         CommandLineParser parser = new DefaultParser();
         Options options = new Options()
                 .addOption(
                         Option.builder("config")
-                            .longOpt("config")
-                            .hasArgs()
-                            .numberOfArgs(Option.UNLIMITED_VALUES)
-                            .desc("Location of config files (or absolute paths to config files)")
-                            .required()
-                            .build()
+                                .longOpt("config")
+                                .hasArgs()
+                                .numberOfArgs(Option.UNLIMITED_VALUES)
+                                .desc("Location of config files (or absolute paths to config files)")
+                                .build()
                 )
                 .addOption(
                         Option.builder("classpath")
@@ -43,71 +71,26 @@ public class Application {
                                 .hasArg(false)
                                 .desc("Look on classpath instead of file system")
                                 .build()
+                ).addOption(
+                        Option.builder("s3")
+                                .longOpt("s3")
+                                .hasArg(true)
+                                .desc("Look at the provided URL for configuration")
+                                .build()
+                ).addOption(
+                        Option.builder("u") // access key
+                                .longOpt("username")
+                                .hasArg(true)
+                                .desc("Username (or access key ID for S3)")
+                                .build()
+                ).addOption(
+                        Option.builder("p") // secret key
+                                .longOpt("password")
+                                .hasArg(true)
+                                .desc("Password (or secret key for S3")
+                                .build()
                 );
-        CommandLine commandLine = parser.parse(options, args);
-
-        final ApplicationConfigurationService service = new ApplicationConfigurationService();
-
-        final List<File> configurations;
-        if(commandLine.hasOption("classpath")) {
-
-            configurations = service.getConfigResources(commandLine.getOptionValues("config"));
-        } else {
-
-            configurations = service.getConfigFiles(commandLine.getOptionValues("config"));
-        }
-
-        configurations.forEach(file -> {
-            LOGGER.info("Starting with " + file.getPath());
-            new Controller().start(HGQLConfig.fromFileSystemPath(file.getPath()));
-        });
+        return parser.parse(options, args);
     }
 }
 
-class ApplicationConfigurationService {
-
-    List<File> getConfigFiles(final String ... configPathStrings) {
-
-        final List<File> configFiles = new ArrayList<>();
-        if(configPathStrings != null) {
-            Arrays.stream(configPathStrings).forEach(configPathString ->
-                    configFiles.addAll(getConfigurations(configPathString)));
-        }
-        return configFiles;
-    }
-
-    private List<File> getConfigurations(final String configPathString) {
-
-        final List<File> configFiles = new ArrayList<>();
-        final File configPath = new File(configPathString); // it always has this
-        if (configPath.isDirectory()) {
-            final File[] jsonFiles = configPath.listFiles(pathname ->
-                    FilenameUtils.isExtension(pathname.getName(), "json"));
-            if(jsonFiles != null) {
-                configFiles.addAll(Arrays.asList(jsonFiles));
-            }
-        } else { // assume regular file
-            configFiles.add(configPath);
-        }
-        return configFiles;
-    }
-
-    List<File> getConfigResources(final String ... resourcePaths) {
-
-        final List<File> configFiles = new ArrayList<>();
-
-        if(resourcePaths != null) {
-            Arrays.stream(resourcePaths).forEach(
-                    resourcePath -> {
-                        final URL sourceUrl = getClass().getClassLoader().getResource(resourcePath);
-
-                        if(sourceUrl != null) {
-                            configFiles.addAll(getConfigurations(sourceUrl.getFile()));
-                        }
-                    }
-            );
-        }
-
-        return configFiles;
-    }
-}
