@@ -27,11 +27,6 @@
                 <version>1.6.0</version>
                 <configuration>
                     <mainClass>org.hypergraphql.Application</mainClass>
-                    <arguments>
-                        <argument>--classpath</argument>
-                        <argument>--config</argument>
-                        <argument>config.json</argument>
-                    </arguments>
                 </configuration>
             </plugin>
 
