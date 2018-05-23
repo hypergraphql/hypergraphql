@@ -12,7 +12,6 @@
 
     <root>
         <level value="INFO" />
-        <!--<level value="INFO" />-->
         <appender-ref ref="console" />
     </root>
 

@@ -1,7 +1,3 @@
-//plugins {
-//    id "com.github.spotbugs" version "1.6.1"
-//}
-
 buildscript {
     repositories {
         mavenLocal()
@@ -37,11 +33,6 @@ ext {
     implementationVersion = "${version}"
 }
 
-//spotbugs {
-//    toolVersion = '3.1.3'
-//    sourceSets = [sourceSets.main]
-//}
-
 dependencies {
 
     compile group: 'com.graphql-java', name: 'graphql-java', version: '6.0'
@@ -53,10 +44,6 @@ dependencies {
     compile group: 'log4j', name: 'log4j', version: '1.2.17'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
     compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
-
-    runtime group: 'log4j', name: 'log4j', version: '1.2.17'
-    runtime group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
-    runtime group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
 
     compile group: 'com.sparkjava', name: 'spark-core', version: '2.5'
     compile group: 'com.sparkjava', name: 'spark-template-velocity', version: '2.5.5'
@@ -79,14 +66,6 @@ test {
     }
 }
 
-//tasks.withType(SpotBugs) {
-//    reports {
-//        xml.enabled false
-//        html.enabled true
-//        html.stylesheet resources.text.fromFile('findbugs/xsl/default.xsl')
-//    }
-//}
-
 //task execute(type:JavaExec) {
 //    main = 'org.hypergraphql.Application'
 //    classpath = sourceSets.main.runtimeClasspath
@@ -95,7 +74,7 @@ test {
 
 shadowJar {
     zip64 = true
-    exclude 'META-INF/*', 'META-INF/**', 'LICENSE', 'LICENSE/**', 'license', 'license/**', 'org/slf4j/*'
+    exclude 'META-INF/*', 'META-INF/**', 'LICENSE', 'LICENSE/**', 'license', 'license/**'
     classifier = 'exe'
 
     manifest {

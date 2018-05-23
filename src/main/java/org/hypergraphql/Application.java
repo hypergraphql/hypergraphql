@@ -6,6 +6,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jena.sparql.algebra.Op;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.exception.HGQLConfigurationException;
 import org.hypergraphql.services.ApplicationConfigurationService;
@@ -33,7 +34,7 @@ public class Application {
 
         final List<HGQLConfig> configurations;
 
-        if(commandLine.hasOption("config")) {
+        if(commandLine.hasOption("config") || commandLine.hasOption("s3")) {
 
             configurations = getConfigurationFromArgs(service, commandLine);
         } else {
@@ -81,22 +82,30 @@ public class Application {
                                 .hasArg(true)
                                 .desc("Password (or secret key for S3")
                                 .build()
+                ).addOption(
+                        Option.builder("D")
+                                .longOpt( "property=value" )
+                                .hasArgs()
+                                .numberOfArgs(2)
+                                .valueSeparator()
+                                .desc( "use value for given property" )
+                                .build()
                 );
     }
 
     private static List<HGQLConfig> getConfigurationsFromEnvVars(final ApplicationConfigurationService service) {
 
         // look for environment variables
-        final String configPath = System.getenv("hgql.config");
+        final String configPath = System.getenv("hgql_config");
         if(StringUtils.isBlank(configPath)) {
             throw new HGQLConfigurationException("No configuration parameters seem to have been provided");
         }
-        final String username = System.getenv("hgql.username");
-        final String password = System.getenv("hgql.password");
+        final String username = System.getenv("hgql_username");
+        final String password = System.getenv("hgql_password");
 
-        LOGGER.info("Config path: {}", configPath);
-        LOGGER.info("Username: {}", username);
-        LOGGER.info("Password: {}", password == null ? "Not provided" : "**********");
+        LOGGER.debug("Config path: {}", configPath);
+        LOGGER.debug("Username: {}", username);
+        LOGGER.debug("Password: {}", password == null ? "Not provided" : "**********");
 
         return service.getConfigurationFromS3(configPath, username, password);
     }
