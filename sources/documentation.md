@@ -27,15 +27,17 @@ The core response object of HyperGraphQL is [JSON-LD](https://json-ld.org) (embe
 Clone the Git repository into a local directory. In the root of the project execute the following: 
 
 **Maven**: 
-1. **mvn install**
-2. **mvn exec:java**
+1. **`mvn install`**
+2. **`mvn exec:java [-Dexec.args="<command line options>"]`** 
+
+e.g.: `mvn exec:java -Dexec.args="--classpath --config config.json"`
 
 
 (*Note*: in Windows these must be executed in a *cmd* terminal, not *PowerShell*).
 
 **Gradle**: 
-1. **gradle build**
-2. **gradle execute**
+1. **`gradle build`**
+2. **`gradle execute`**
 
 
 By deafault, the HyperGraphQL server starts at: 
