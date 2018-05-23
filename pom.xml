@@ -6,7 +6,8 @@
 
     <groupId>org.hypergraphql</groupId>
     <artifactId>hypergraphql</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.3.3</version>
+    <packaging>${packaging.type}</packaging>
     <build>
         <plugins>
 
@@ -48,6 +49,21 @@
                 </dependencies>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.2.1</version>
+                <dependencies>
+
+                    <dependency>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <version>3.2.1</version>
+                    </dependency>
+
+                </dependencies>
+            </plugin>
+
         </plugins>
     </build>
 
@@ -55,12 +71,37 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-bom</artifactId>
+                <version>1.11.327</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
+
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-bom</artifactId>
+            <version>1.11.327</version>
+            <type>pom</type>
+        </dependency>
+
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-maven-plugin</artifactId>
             <version>9.4.10.v20180503</version>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
@@ -73,7 +114,6 @@
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.17</version>
-            <type>pom</type>
         </dependency>
 
         <dependency>
@@ -159,4 +199,24 @@
         </dependency>
 
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>jar</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <packaging.type>jar</packaging.type>
+            </properties>
+        </profile>
+        <profile>
+            <id>war</id>
+            <properties>
+                <packaging.type>war</packaging.type>
+            </properties>
+            <dependencies/>
+        </profile>
+    </profiles>
+
 </project>

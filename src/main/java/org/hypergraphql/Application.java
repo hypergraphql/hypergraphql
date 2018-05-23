@@ -5,48 +5,40 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.StringUtils;
 import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.exception.HGQLConfigurationException;
 import org.hypergraphql.services.ApplicationConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
 import java.util.List;
 
 /**
  * This class looks for files on the filesystem.
  * See 'Demo' and 'ClasspathDemo' in test root for an example of using the classpath to access classpath resources
  */
+
 public class Application {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
     public static void main(final String[] args) throws Exception {
 
-        final CommandLine commandLine = readCommandLine(args);
+        final Options options = buildOptions();
+        final CommandLineParser parser = new DefaultParser();
+        final CommandLine commandLine = parser.parse(options, args);
 
         final ApplicationConfigurationService service = new ApplicationConfigurationService();
 
         final List<HGQLConfig> configurations;
-        if(commandLine.hasOption("s3")) {
 
-            final String s3url = commandLine.getOptionValue("s3");
-            final String accessKey = commandLine.getOptionValue('u');
-            final String secretKey = commandLine.getOptionValue('p');
+        if(commandLine.hasOption("config")) {
 
-            // URL lookup
-            configurations = service.getConfigurationFromS3(s3url, accessKey, secretKey);
-        } else if(commandLine.hasOption("config")) {
-            if (commandLine.hasOption("classpath")) {
-                configurations = service.getConfigResources(commandLine.getOptionValues("config")); // TODO - as streams!
-            } else {
-                configurations = service.getConfigFiles(commandLine.getOptionValues("config"));
-            }
+            configurations = getConfigurationFromArgs(service, commandLine);
         } else {
-            throw new IllegalArgumentException("One of 'config' or 's3' MUST be provided");
+            configurations = getConfigurationsFromEnvVars(service);
         }
-
 
         configurations.forEach(config -> {
             LOGGER.info("Starting controller...");
@@ -54,9 +46,9 @@ public class Application {
         });
     }
 
-    private static CommandLine readCommandLine(final String ... args) throws ParseException {
-        CommandLineParser parser = new DefaultParser();
-        Options options = new Options()
+    private static Options buildOptions() {
+
+        return new Options()
                 .addOption(
                         Option.builder("config")
                                 .longOpt("config")
@@ -90,7 +82,49 @@ public class Application {
                                 .desc("Password (or secret key for S3")
                                 .build()
                 );
-        return parser.parse(options, args);
+    }
+
+    private static List<HGQLConfig> getConfigurationsFromEnvVars(final ApplicationConfigurationService service) {
+
+        // look for environment variables
+        final String configPath = System.getenv("hgql.config");
+        if(StringUtils.isBlank(configPath)) {
+            throw new HGQLConfigurationException("No configuration parameters seem to have been provided");
+        }
+        final String username = System.getenv("hgql.username");
+        final String password = System.getenv("hgql.password");
+
+        LOGGER.info("Config path: {}", configPath);
+        LOGGER.info("Username: {}", username);
+        LOGGER.info("Password: {}", password == null ? "Not provided" : "**********");
+
+        return service.getConfigurationFromS3(configPath, username, password);
+    }
+
+    private static List<HGQLConfig> getConfigurationFromArgs(
+            final ApplicationConfigurationService service,
+            final CommandLine commandLine
+    ) {
+        if(commandLine.hasOption("s3")) {
+
+            final String s3url = commandLine.getOptionValue("s3");
+            final String accessKey = commandLine.getOptionValue('u');
+            final String secretKey = commandLine.getOptionValue('p');
+
+            // URL lookup
+            return service.getConfigurationFromS3(s3url, accessKey, secretKey);
+        } else if(commandLine.hasOption("config")) {
+
+            if (commandLine.hasOption("classpath")) {
+                return service.getConfigResources(commandLine.getOptionValues("config"));
+            } else {
+                return service.getConfigFiles(commandLine.getOptionValues("config"));
+            }
+
+        } else {
+
+            throw new IllegalArgumentException("One of 'config' or 's3' MUST be provided");
+        }
     }
 }
 

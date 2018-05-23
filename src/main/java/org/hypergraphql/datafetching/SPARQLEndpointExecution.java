@@ -54,7 +54,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
 
         SPARQLServiceConverter converter = new SPARQLServiceConverter(schema);
         String sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);
-        logger.info(sparqlQuery);
+        logger.debug(sparqlQuery);
 
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         Credentials credentials =
@@ -80,7 +80,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
         });
 
         SPARQLExecutionResult sparqlExecutionResult = new SPARQLExecutionResult(resultSet, unionModel);
-        logger.info(sparqlExecutionResult);
+        logger.debug(sparqlExecutionResult);
 
         return sparqlExecutionResult;
     }
