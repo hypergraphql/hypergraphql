@@ -66,11 +66,10 @@ test {
     }
 }
 
-//task execute(type:JavaExec) {
-//    main = 'org.hypergraphql.Application'
-//    classpath = sourceSets.main.runtimeClasspath
-//    args '--classpath', '--config' ,'config.json'
-//}
+task execute(type:JavaExec) {
+    main = 'org.hypergraphql.Application'
+    classpath = sourceSets.main.runtimeClasspath
+}
 
 shadowJar {
     zip64 = true
