@@ -6,8 +6,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'org.ajoberstar:grgit:1.1.0'
-        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.0'
     }
 }
 
@@ -28,9 +27,6 @@ repositories {
 
 ext {
     jenaVersion = '3.6.0'
-
-    implementationTitle = 'hypergraphql'
-    implementationVersion = "${version}"
 }
 
 dependencies {
@@ -50,6 +46,8 @@ dependencies {
     compile group: 'com.sparkjava', name: 'spark-core', version: '2.5'
     compile group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.9'
     compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.327'
+
+    runtime group: 'org.eclipse.jetty', name: 'jetty-maven-plugin', version: '9.4.10.v20180503'
 
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.0.1'
     testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0")
@@ -71,14 +69,20 @@ task execute(type:JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
+sourceSets {
+    main {
+        resources {
+            include '**/*.json', '**/*.xml', '**/*.vtl', '**/*.properties'
+        }
+    }
+}
+
 shadowJar {
     zip64 = true
     exclude 'META-INF/*', 'META-INF/**', 'LICENSE', 'LICENSE/**', 'license', 'license/**'
     classifier = 'exe'
 
     manifest {
-        attributes("Implementation-Title": implementationTitle)
-        attributes("Implementation-Version": implementationVersion)
         attributes("Main-Class": "org.hypergraphql.Application")
     }
 }

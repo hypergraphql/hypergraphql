@@ -46,6 +46,17 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.1.1</version>
                 <configuration>
@@ -56,8 +67,17 @@
                         </transformer>
                     </transformers>
 
-                    <!--<shadedClassifierName>exe</shadedClassifierName>-->
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/maven/**</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+
                     <finalName>hypergraphql-${project.version}-exe</finalName>
+                    <minimizeJar>true</minimizeJar>
 
                 </configuration>
                 <executions>
