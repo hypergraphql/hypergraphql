@@ -7,7 +7,7 @@
     <groupId>org.hypergraphql</groupId>
     <artifactId>hypergraphql</artifactId>
     <version>1.3.3</version>
-    <packaging>${packaging.type}</packaging>
+    <packaging>jar</packaging>
     <build>
         <plugins>
 
@@ -41,21 +41,6 @@
                         <artifactId>spotbugs</artifactId>
                         <version>3.1.3</version>
                     </dependency>
-                </dependencies>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>3.2.1</version>
-                <dependencies>
-
-                    <dependency>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-war-plugin</artifactId>
-                        <version>3.2.1</version>
-                    </dependency>
-
                 </dependencies>
             </plugin>
 
@@ -217,24 +202,5 @@
         </dependency>
 
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>jar</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <packaging.type>jar</packaging.type>
-            </properties>
-        </profile>
-        <profile>
-            <id>war</id>
-            <properties>
-                <packaging.type>war</packaging.type>
-            </properties>
-            <dependencies/>
-        </profile>
-    </profiles>
 
 </project>
