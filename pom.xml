@@ -56,6 +56,9 @@
                         </transformer>
                     </transformers>
 
+                    <!--<shadedClassifierName>exe</shadedClassifierName>-->
+                    <finalName>hypergraphql-${project.version}-exe</finalName>
+
                 </configuration>
                 <executions>
                     <execution>
