@@ -6,7 +6,6 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.jena.sparql.algebra.Op;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.exception.HGQLConfigurationException;
 import org.hypergraphql.services.ApplicationConfigurationService;
