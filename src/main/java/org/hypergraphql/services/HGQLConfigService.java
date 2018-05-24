@@ -3,12 +3,16 @@ package org.hypergraphql.services;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.request.GetRequest;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
+import org.apache.http.util.EntityUtils;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.exception.HGQLConfigurationException;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +20,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 public class HGQLConfigService {
 
@@ -68,7 +71,19 @@ public class HGQLConfigService {
     private Reader getReaderForUrl(final String schemaPath, final String username, final String password)
             throws IOException {
 
-        return new InputStreamReader(new URL(schemaPath).openStream());
+        final GetRequest getRequest;
+        if(username == null && password == null) {
+            getRequest = Unirest.get(schemaPath);
+        } else {
+            getRequest = Unirest.get(schemaPath).basicAuth(username, password);
+        }
+        return new InputStreamReader(
+                new ByteArrayInputStream(
+                        EntityUtils.toByteArray(
+                                getRequest.getBody().getEntity()
+                        )
+                )
+        );
     }
 
     private Reader getReaderForS3(final String schemaPath, final String username, final String password)
