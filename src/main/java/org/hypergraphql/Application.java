@@ -12,7 +12,10 @@ import org.hypergraphql.services.ApplicationConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * This class looks for files on the filesystem.
@@ -37,7 +40,19 @@ public class Application {
 
             configurations = getConfigurationFromArgs(service, commandLine);
         } else {
-            configurations = getConfigurationsFromEnvVars(service);
+
+            final Map<String, String> properties;
+            if(commandLine.hasOption("D")) {
+                final Properties props = commandLine.getOptionProperties("D");
+
+                properties = new HashMap<>();
+                props.forEach((k, v) -> properties.put((String)k, (String)v));
+
+            } else {
+                properties = System.getenv();
+            }
+
+            configurations = getConfigurationsFromProperties(properties, service);
         }
 
         configurations.forEach(config -> {
@@ -92,15 +107,18 @@ public class Application {
                 );
     }
 
-    private static List<HGQLConfig> getConfigurationsFromEnvVars(final ApplicationConfigurationService service) {
+    private static List<HGQLConfig> getConfigurationsFromProperties(
+            final Map<String, String> properties,
+            final ApplicationConfigurationService service
+    ) {
 
         // look for environment variables
-        final String configPath = System.getenv("hgql_config");
+        final String configPath = properties.get("hgql_config");
         if(StringUtils.isBlank(configPath)) {
             throw new HGQLConfigurationException("No configuration parameters seem to have been provided");
         }
-        final String username = System.getenv("hgql_username");
-        final String password = System.getenv("hgql_password");
+        final String username = properties.get("hgql_username");
+        final String password = properties.get("hgql_password");
 
         LOGGER.debug("Config path: {}", configPath);
         LOGGER.debug("Username: {}", username);

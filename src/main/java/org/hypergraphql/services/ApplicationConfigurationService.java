@@ -24,11 +24,11 @@ public class ApplicationConfigurationService {
     private S3Service s3Service;
     private HGQLConfigService hgqlConfigService = new HGQLConfigService();
 
-    public List<HGQLConfig> getConfigurationFromS3(final String objectUri, final String username, final String password) {
+    public List<HGQLConfig> getConfigurationFromS3(final String configUri, final String username, final String password) {
 
         final URI uri;
         try {
-            uri = new URI(objectUri);
+            uri = new URI(configUri);
         } catch (URISyntaxException e) {
             throw new HGQLConfigurationException("Invalid S3 URL", e);
         }
@@ -40,11 +40,11 @@ public class ApplicationConfigurationService {
         final AmazonS3 s3 = s3Service.buildS3(uri, username, password);
 
         final String bucket = s3Service.extractBucket(uri);
-        final String objectName = s3Service.extractObjectName(uri);
-        final S3Object object = s3.getObject(bucket, objectName);
+        final String configName = s3Service.extractObjectName(uri);
+        final S3Object object = s3.getObject(bucket, configName);
 
         final InputStream inputStream = object.getObjectContent();
-        final HGQLConfig config = hgqlConfigService.loadHGQLConfig(inputStream, username, password);
+        final HGQLConfig config = hgqlConfigService.loadHGQLConfig(configName, inputStream, username, password);
 
         return Collections.singletonList(config);
     }
@@ -69,15 +69,16 @@ public class ApplicationConfigurationService {
                         FilenameUtils.isExtension(pathname.getName(), "json"));
                 if (jsonFiles != null) {
                     Arrays.stream(jsonFiles).forEach(file -> {
+                        final String path = file.getAbsolutePath();
                         try {
-                            configurations.add(hgqlConfigService.loadHGQLConfig(new FileInputStream(file)));
+                            configurations.add(hgqlConfigService.loadHGQLConfig(path, new FileInputStream(file)));
                         } catch (FileNotFoundException e) {
                             throw new HGQLConfigurationException("One or more config files not found", e);
                         }
                     });
                 }
             } else { // assume regular file
-                configurations.add(hgqlConfigService.loadHGQLConfig(new FileInputStream(configPath)));
+                configurations.add(hgqlConfigService.loadHGQLConfig(configPathString, new FileInputStream(configPath)));
             }
         } catch (IOException e) {
             throw new HGQLConfigurationException("One or more config files not found", e);

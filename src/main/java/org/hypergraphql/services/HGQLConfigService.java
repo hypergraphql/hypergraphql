@@ -7,6 +7,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.request.GetRequest;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.http.util.EntityUtils;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datamodel.HGQLSchemaWiring;
@@ -25,11 +26,14 @@ public class HGQLConfigService {
 
     private S3Service s3Service = new S3Service();
 
-    public HGQLConfig loadHGQLConfig(final InputStream inputStream) {
-        return loadHGQLConfig(inputStream, null, null);
+    private final String s3Regex = "(?i)^https?://s3.*\\.amazonaws\\.com/.*";
+    private final String normalUrlRegex = "(?i)^https?://.*";
+
+    public HGQLConfig loadHGQLConfig(final String hgqlConfigPath, final InputStream inputStream) {
+        return loadHGQLConfig(hgqlConfigPath, inputStream, null, null);
     }
 
-    public HGQLConfig loadHGQLConfig(final InputStream inputStream, final String username, final String password) {
+    public HGQLConfig loadHGQLConfig(final String hgqlConfigPath, final InputStream inputStream, final String username, final String password) {
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -37,8 +41,11 @@ public class HGQLConfigService {
             HGQLConfig config = mapper.readValue(inputStream, HGQLConfig.class);
 
             SchemaParser schemaParser = new SchemaParser();
+
+            final String fullSchemaPath = extractFullSchemaPath(hgqlConfigPath, config.getSchemaFile());
+
             TypeDefinitionRegistry registry =
-                    schemaParser.parse(selectAppropriateReader(config.getSchemaFile(), username, password));
+                    schemaParser.parse(selectAppropriateReader(fullSchemaPath, username, password));
 
             HGQLSchemaWiring wiring = new HGQLSchemaWiring(registry, config.getName(), config.getServiceConfigs());
             config.setGraphQLSchema(wiring.getSchema());
@@ -53,8 +60,6 @@ public class HGQLConfigService {
     private Reader selectAppropriateReader(final String schemaPath, final String username, final String password)
             throws IOException, URISyntaxException {
 
-        final String s3Regex = "(?i)^https?://s3.*\\.amazonaws\\.com/.*";
-        final String normalUrlRegex = "(?i)^https?://.*";
         if(schemaPath.matches(s3Regex)) {
 
             // create S3 bucket request, etc.
@@ -95,5 +100,24 @@ public class HGQLConfigService {
         final String objectName = s3Service.extractObjectName(uri);
         final S3Object s3Object = s3.getObject(bucket, objectName);
         return new InputStreamReader(s3Object.getObjectContent());
+    }
+
+    private String extractFullSchemaPath(final String hgqlConfigPath, final String schemaPath) {
+
+        if(isAbsolute(schemaPath)) { // FQ URL or absolute path
+            return schemaPath;
+        } else { // relative
+            if(isAbsolute(hgqlConfigPath)) {
+                final String parentPath = FilenameUtils.getPath(hgqlConfigPath);
+                return parentPath + (parentPath.endsWith("/") ? "" : "/") + schemaPath;
+            }
+            return schemaPath.startsWith("./") ? "" : "./" + schemaPath;
+        }
+    }
+
+    private boolean isAbsolute(final String path) {
+        final String fileUrlRegex = "^file://.*";
+        return path.matches(s3Regex) || path.matches(normalUrlRegex)
+                || path.matches(fileUrlRegex) || path.startsWith("/");
     }
 }

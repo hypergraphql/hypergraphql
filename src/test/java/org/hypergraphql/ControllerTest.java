@@ -39,8 +39,9 @@ class ControllerTest {
 
         final HGQLConfigService configService = new HGQLConfigService();
 
+        final String configPath = "test_config.json";
         controller = new Controller();
-        config = configService.loadHGQLConfig(getClass().getClassLoader().getResourceAsStream("test_config.json"));
+        config = configService.loadHGQLConfig(configPath, getClass().getClassLoader().getResourceAsStream(configPath));
         controller.start(config);
     }
 

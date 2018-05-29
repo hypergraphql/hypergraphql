@@ -17,8 +17,9 @@ class HGQLQueryServiceTest {
     @Test
     void results_with_no_accept_type() {
 
-        final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("test_config.json");
-        HGQLConfig config = configService.loadHGQLConfig(inputStream);
+        final String configPath = "test_config.json";
+        final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(configPath);
+        HGQLConfig config = configService.loadHGQLConfig(configPath, inputStream);
         HGQLQueryService service = new HGQLQueryService(config);
 
         final String query = "" +

@@ -31,9 +31,10 @@ class HGraphQLConverterTest {
     @BeforeEach
     void startUp() {
 
+        final String configPath = "test_config.json";
         final HGQLConfigService configService = new HGQLConfigService();
-        final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("test_config.json");
-        config = configService.loadHGQLConfig(inputStream);
+        final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(configPath);
+        config = configService.loadHGQLConfig(configPath, inputStream);
         if(controller == null) {
             controller = new Controller();
             controller.start(config);
