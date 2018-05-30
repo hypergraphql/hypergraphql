@@ -44,7 +44,7 @@ public class ApplicationConfigurationService {
         final S3Object object = s3.getObject(bucket, configName);
 
         final InputStream inputStream = object.getObjectContent();
-        final HGQLConfig config = hgqlConfigService.loadHGQLConfig(configName, inputStream, username, password);
+        final HGQLConfig config = hgqlConfigService.loadHGQLConfig(configUri, inputStream, username, password);
 
         return Collections.singletonList(config);
     }
