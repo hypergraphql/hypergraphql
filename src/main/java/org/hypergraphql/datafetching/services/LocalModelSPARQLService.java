@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -22,7 +21,7 @@ import java.util.concurrent.Future;
 public class LocalModelSPARQLService extends SPARQLEndpointService{
 
 
-    private Model localmodel;
+    protected Model model;
 
     @Override
 
@@ -45,7 +44,7 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
                 i++;
             }
             ExecutorService executor = Executors.newFixedThreadPool(50);
-            LocalSPARQLExecution execution = new LocalSPARQLExecution(query,inputSubset,markers,this, schema , this.localmodel, rootType);
+            LocalSPARQLExecution execution = new LocalSPARQLExecution(query,inputSubset,markers,this, schema , this.model, rootType);
             futureSPARQLresults.add(executor.submit(execution));
 
         } while (inputList.size()>VALUES_SIZE_LIMIT);
@@ -65,8 +64,7 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
         this.id = serviceConfig.getId();
         String filetype = serviceConfig.getFiletype();
         String filepath = serviceConfig.getFilepath();
-        this.localmodel = ModelFactory.createDefaultModel();
-        this.localmodel.read(filepath, filetype);
-
+        this.model = ModelFactory.createDefaultModel();
+        this.model.read(filepath, filetype);
     }
 }

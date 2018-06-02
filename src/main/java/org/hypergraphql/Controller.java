@@ -3,6 +3,7 @@ package org.hypergraphql;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.hypergraphql.services.HGQLQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.ModelAndView;
+import spark.Request;
 import spark.Service;
 import spark.template.velocity.VelocityTemplateEngine;
 
@@ -82,13 +84,10 @@ public class Controller {
 
         // post method for accessing the GraphQL getService
         hgqlService.post(config.getGraphqlConfig().graphQLPath(), (req, res) -> {
-            ObjectMapper mapper = new ObjectMapper();
+
             HGQLQueryService service = new HGQLQueryService(config);
 
-            JsonNode requestObject = mapper.readTree(req.body());
-
-            String query = requestObject.get("query").asText();
-
+            final String query = consumeRequest(req);
             String acceptType = req.headers("accept");
 
             String mime = MIME_MAP.getOrDefault(acceptType, null);
@@ -104,6 +103,7 @@ public class Controller {
                 res.status(400);
             }
 
+            ObjectMapper mapper = new ObjectMapper();
             if (graphQLCompatible) {
                 return mapper.readTree(new ObjectMapper().writeValueAsString(result));
             } else {
@@ -133,6 +133,32 @@ public class Controller {
 
             return config.getHgqlSchema().getRdfSchemaOutput(mime);
         });
+    }
+
+    private String consumeRequest(final Request request) throws IOException {
+
+        if(request.contentType().equalsIgnoreCase("application-x/graphql")) {
+            return consumeGraphQLBody(request.body());
+        } else {
+            return consumeJSONBody(request.body());
+        }
+    }
+
+    private String consumeJSONBody(final String body) throws IOException {
+
+        final ObjectMapper mapper = new ObjectMapper();
+        final JsonNode requestObject = mapper.readTree(body);
+        if(requestObject.get("query") == null) {
+            throw new IllegalArgumentException(
+                    "Body appears to be JSON but does not contain required 'query' attribute: " + body
+            );
+        }
+        return requestObject.get("query").asText();
+    }
+
+    private String consumeGraphQLBody(final String body) {
+
+        return body;
     }
 
     public void stop() {

@@ -1,17 +1,15 @@
 package org.hypergraphql.services;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.S3Object;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.request.GetRequest;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.http.util.EntityUtils;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.exception.HGQLConfigurationException;
+import org.hypergraphql.util.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,27 +99,11 @@ public class HGQLConfigService {
             throws URISyntaxException {
 
         final URI uri = new URI(schemaPath);
-        final AmazonS3 s3 = s3Service.buildS3(uri, username, password);
-        final String bucket = s3Service.extractBucket(uri);
-        final String objectName = s3Service.extractObjectName(uri);
-        final S3Object s3Object = s3.getObject(bucket, objectName);
-        return new InputStreamReader(s3Object.getObjectContent());
+        return new InputStreamReader(s3Service.openS3Stream(uri, username, password));
     }
 
     private String extractFullSchemaPath(final String hgqlConfigPath, final String schemaPath) {
 
-        if(isAbsolute(schemaPath)) { // FQ URL or absolute path
-            return schemaPath;
-        } else if(isAbsolute(hgqlConfigPath)) { // relative
-                final String parentPath = FilenameUtils.getPath(hgqlConfigPath);
-                return parentPath + (parentPath.endsWith("/") ? "" : "/") + schemaPath;
-        }
-        return schemaPath.startsWith("./") ? "" : "./" + schemaPath;
-    }
-
-    private boolean isAbsolute(final String path) {
-        final String fileUrlRegex = "^file://.*";
-        return path.matches(S3_REGEX) || path.matches(NORMAL_URL_REGEX)
-                || path.matches(fileUrlRegex) || path.startsWith("/");
+        return PathUtils.makeAbsolute(hgqlConfigPath, schemaPath);
     }
 }

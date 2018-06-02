@@ -6,7 +6,9 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.S3Object;
 
+import java.io.InputStream;
 import java.net.URI;
 
 public class S3Service {
@@ -23,6 +25,20 @@ public class S3Service {
                 .withRegion(region)
                 .withCredentials(new AWSStaticCredentialsProvider(credentials(key, secret)))
                 .build();
+    }
+
+    public InputStream openS3Stream(final URI uri, final String key, final String secret) {
+
+        S3Object s3Object = getObject(uri, key, secret);
+        return s3Object.getObjectContent();
+    }
+
+    private S3Object getObject(final URI uri, final String key, final String secret) {
+
+        final AmazonS3 s3 = buildS3(uri, key, secret);
+        final String bucketName = extractBucket(uri);
+        final String objectName = extractObjectName(uri);
+        return s3.getObject(bucketName, objectName);
     }
 
     String extractBucket(final URI uri) {

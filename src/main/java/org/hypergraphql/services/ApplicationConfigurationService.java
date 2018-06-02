@@ -1,7 +1,8 @@
 package org.hypergraphql.services;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.S3Object;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.request.GetRequest;
 import org.apache.commons.io.FilenameUtils;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.exception.HGQLConfigurationException;
@@ -24,7 +25,7 @@ public class ApplicationConfigurationService {
     private S3Service s3Service;
     private HGQLConfigService hgqlConfigService = new HGQLConfigService();
 
-    public List<HGQLConfig> getConfigurationFromS3(final String configUri, final String username, final String password) {
+    public List<HGQLConfig> readConfigurationFromS3(final String configUri, final String username, final String password) {
 
         final URI uri;
         try {
@@ -37,16 +38,28 @@ public class ApplicationConfigurationService {
             s3Service = new S3Service();
         }
 
-        final AmazonS3 s3 = s3Service.buildS3(uri, username, password);
-
-        final String bucket = s3Service.extractBucket(uri);
-        final String configName = s3Service.extractObjectName(uri);
-        final S3Object object = s3.getObject(bucket, configName);
-
-        final InputStream inputStream = object.getObjectContent();
+        final InputStream inputStream = s3Service.openS3Stream(uri, username, password);
         final HGQLConfig config = hgqlConfigService.loadHGQLConfig(configUri, inputStream, username, password);
 
         return Collections.singletonList(config);
+    }
+
+    public List<HGQLConfig> readConfigurationFromUrl(final String configUri, final String username, final String password) {
+
+        final GetRequest getRequest;
+        if(username == null && password == null) {
+            getRequest = Unirest.get(configUri);
+        } else {
+            getRequest = Unirest.get(configUri).basicAuth(username, password);
+        }
+
+        try {
+            final InputStream inputStream = getRequest.asBinary().getBody();
+            final HGQLConfig config = hgqlConfigService.loadHGQLConfig(configUri, inputStream, username, password);
+            return Collections.singletonList(config);
+        } catch (UnirestException e) {
+            throw new HGQLConfigurationException("Unable to read from remote URL", e);
+        }
     }
 
     public List<HGQLConfig> getConfigFiles(final String ... configPathStrings) {
