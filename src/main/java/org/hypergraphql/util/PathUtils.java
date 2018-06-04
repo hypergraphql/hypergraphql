@@ -13,7 +13,7 @@ public class PathUtils {
         if(isAbsolute(possiblyRelativePath)) { // FQ URL or absolute path
             return possiblyRelativePath;
         } else if(isAbsolute(absolutePath)) { // relative
-            final String parentPath = FilenameUtils.getPath(absolutePath);
+            final String parentPath = FilenameUtils.getFullPath(absolutePath);
             return parentPath + (parentPath.endsWith("/") ? "" : "/") + possiblyRelativePath;
         }
         return possiblyRelativePath.startsWith("./") ? "" : "./" + possiblyRelativePath;
