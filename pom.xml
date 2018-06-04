@@ -20,9 +20,13 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.2</version>
+                <version>1.6.0</version>
                 <configuration>
                     <mainClass>org.hypergraphql.Application</mainClass>
+                    <arguments>
+                        <argument>--config</argument>
+                        <argument>config.json</argument>
+                    </arguments>
                 </configuration>
             </plugin>
         </plugins>
@@ -132,6 +136,12 @@
             <artifactId>junit-platform-launcher</artifactId>
             <version>1.0.0</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>9.4.10.v20180503</version>
         </dependency>
 
     </dependencies>
