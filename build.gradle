@@ -51,6 +51,6 @@ tasks.withType(FindBugs) {
 }
 
 task execute(type:JavaExec) {
-    main = 'org.hypergraphql.Main'
+    main = 'org.hypergraphql.Application'
     classpath = sourceSets.main.runtimeClasspath
 }
