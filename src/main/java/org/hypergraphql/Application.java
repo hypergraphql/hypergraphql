@@ -26,9 +26,10 @@ public class Application {
 
         final ApplicationConfigurationService service = new ApplicationConfigurationService();
 
-        final List<HGQLConfig> configurations;
+        start(getConfigurationsFromProperties(System.getenv(), service));
+    }
 
-        configurations = getConfigurationsFromProperties(System.getenv(), service);
+    protected static void start(final List<HGQLConfig> configurations) {
         configurations.forEach(config -> {
             LOGGER.info("Starting controller...");
             new Controller().start(config);

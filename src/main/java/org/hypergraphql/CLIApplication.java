@@ -55,10 +55,7 @@ public class CLIApplication extends Application {
             configurations = getConfigurationsFromProperties(properties, service);
         }
 
-        configurations.forEach(config -> {
-            LOGGER.info("Starting controller...");
-            new Controller().start(config);
-        });
+        start(configurations);
     }
 
     private static Options buildOptions() {

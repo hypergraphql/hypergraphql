@@ -64,9 +64,20 @@ test {
     }
 }
 
-task execute(type:JavaExec) {
+task execute(type:JavaExec) { // TODO - HERE
     main = 'org.hypergraphql.Application'
     classpath = sourceSets.main.runtimeClasspath
+
+    if(project.hasProperty('a')){
+        args(a.split(','))
+    }
+    println("Properties:")
+    println(project.properties)
+    println("JVM Args:")
+    println(allJvmArgs)
+    println("Args:")
+    println(args)
+
 }
 
 sourceSets {
@@ -83,6 +94,6 @@ shadowJar {
     classifier = 'exe'
 
     manifest {
-        attributes("Main-Class": "org.hypergraphql.Application")
+        attributes("Main-Class": "org.hypergraphql.CLIApplication")
     }
 }
