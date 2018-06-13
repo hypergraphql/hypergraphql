@@ -25,18 +25,18 @@ In this tutorial we outline all the steps required to define and connect several
 
 <img src="https://semantic-integration.github.io/hypergraphql/sources/service-linking.png" alt="diagram">
 
-All the resources, including configuration files, GraphQL schemas and RDF datasets, are included in the [src/test/resources/DemoServices](https://github.com/semantic-integration/hypergraphql/tree/master/src/test/resources/DemoServices) directory of the project's GitHub repository. 
+All the resources, including configuration files, GraphQL schemas and RDF datasets, are included in the [src/test/resources/demo_services](https://github.com/semantic-integration/hypergraphql/tree/master/src/test/resources/demo_services) directory of the project's GitHub repository. 
 
-In order to start all three instances described in this turorial at once, you can run the `GenericDemoApplication` or `Demo` executable classes in your local repository of HyperGraphQL in the `test` source tree (within the `demo` package).
+In order to start all three instances described in this turorial at once, you can run the `ClasspathDemo` or `Demo` executable classes in your local repository of HyperGraphQL in the `test` source tree (within the `demo` package).
 
 These effectively spin up several instances of HyperGraphQL pointing at different sources:
 
 ```java
-HGQLConfig config1 = new HGQLConfig("src/test/resources/DemoServices/config1.json");
+HGQLConfig config1 = HGQLConfig.fromClasspathConfig("demo_services/config1.json");
 new Controller().start(config1); //dbpedia-hgql
-HGQLConfig config2 = new HGQLConfig("src/test/resources/DemoServices/config2.json");
+HGQLConfig config2 = HGQLConfig.fromClasspathConfig("demo_services/config2.json");
 new Controller().start(config2); //agrovoc-hgql
-HGQLConfig config3 = new HGQLConfig("src/test/resources/DemoServices/config3.json");
+HGQLConfig config3 = HGQLConfig.fromClasspathConfig("demo_services/config3.json");
 new Controller().start(config3); //fao-go-hgql
 ```
 
