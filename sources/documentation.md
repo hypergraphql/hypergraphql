@@ -37,10 +37,12 @@ e.g.: `mvn exec:java -Dexec.args="--classpath --config config.json"`
 
 **Gradle**: 
 1. **`gradle build`**
-2. **`gradle execute`**
+2. **`gradle execute [-Pa='<comma separated command line args>`**
+
+e.g.: `gradle execute -Pa='--classpath, --config, config.json''
 
 
-By deafault, the HyperGraphQL server starts at: 
+By default, the HyperGraphQL server starts at: 
 
 ```
 http://localhost:8080/graphql
