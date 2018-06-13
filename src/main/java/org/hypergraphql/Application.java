@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class looks for files on the filesystem.
@@ -25,6 +26,11 @@ public class Application {
     private final static Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
     public static void main(final String[] args) throws Exception {
+
+        System.out.println("Application: " + args.length + " args");
+        if(args.length > 0) {
+            Arrays.stream(args).forEach(System.out::println);
+        }
 
         CommandLineParser parser = new DefaultParser();
         Options options = new Options()
@@ -54,7 +60,14 @@ public class Application {
             configurations = service.getConfigResources(commandLine.getOptionValues("config"));
         } else {
 
-            configurations = service.getConfigFiles(commandLine.getOptionValues("config"));
+            final String[] rawConfigFilenames = commandLine.getOptionValues("config");
+
+            final String[] trimmedConfigFileNames = Arrays.stream(rawConfigFilenames)
+                    .map(String::trim)
+                    .collect(Collectors.toList())
+                    .toArray(new String[rawConfigFilenames.length]);
+
+            configurations = service.getConfigFiles(trimmedConfigFileNames);
         }
 
         configurations.forEach(file -> {
