@@ -27,11 +27,6 @@ public class Application {
 
     public static void main(final String[] args) throws Exception {
 
-        System.out.println("Application: " + args.length + " args");
-        if(args.length > 0) {
-            Arrays.stream(args).forEach(System.out::println);
-        }
-
         CommandLineParser parser = new DefaultParser();
         Options options = new Options()
                 .addOption(
