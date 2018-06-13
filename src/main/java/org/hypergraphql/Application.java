@@ -27,6 +27,8 @@ public class Application {
 
     public static void main(final String[] args) throws Exception {
 
+        final String[] trimmedArgs = trimValues(args);
+
         CommandLineParser parser = new DefaultParser();
         Options options = new Options()
                 .addOption(
@@ -45,7 +47,7 @@ public class Application {
                                 .desc("Look on classpath instead of file system")
                                 .build()
                 );
-        CommandLine commandLine = parser.parse(options, args);
+        CommandLine commandLine = parser.parse(options, trimmedArgs);
 
         final ApplicationConfigurationService service = new ApplicationConfigurationService();
 
@@ -54,21 +56,21 @@ public class Application {
 
             configurations = service.getConfigResources(commandLine.getOptionValues("config"));
         } else {
-
-            final String[] rawConfigFilenames = commandLine.getOptionValues("config");
-
-            final String[] trimmedConfigFileNames = Arrays.stream(rawConfigFilenames)
-                    .map(String::trim)
-                    .collect(Collectors.toList())
-                    .toArray(new String[rawConfigFilenames.length]);
-
-            configurations = service.getConfigFiles(trimmedConfigFileNames);
+            configurations = service.getConfigFiles(commandLine.getOptionValues("config"));
         }
 
         configurations.forEach(file -> {
             LOGGER.info("Starting with " + file.getPath());
             new Controller().start(HGQLConfig.fromFileSystemPath(file.getPath()));
         });
+    }
+
+    private static String[] trimValues(final String[] input) {
+
+        return Arrays.stream(input)
+                .map(String::trim)
+                .collect(Collectors.toList())
+                .toArray(new String[input.length]);
     }
 }
 
