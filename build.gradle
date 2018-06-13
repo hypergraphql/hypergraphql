@@ -71,10 +71,6 @@ task execute(type:JavaExec) { // TODO - HERE
     if(project.hasProperty('a')){
         args(a.split(','))
     }
-    println("Properties:")
-    println(project.properties)
-    println("JVM Args:")
-    println(allJvmArgs)
     println("Args:")
     println(args)
 
