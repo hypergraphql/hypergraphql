@@ -37,7 +37,6 @@ public class Application {
                             .hasArgs()
                             .numberOfArgs(Option.UNLIMITED_VALUES)
                             .desc("Location of config files (or absolute paths to config files)")
-                            .required()
                             .build()
                 )
                 .addOption(
@@ -48,6 +47,14 @@ public class Application {
                                 .build()
                 );
         CommandLine commandLine = parser.parse(options, trimmedArgs);
+
+        if(!commandLine.hasOption("config")) {
+            System.err.println("============ HyperGraphQL ============\n");
+            System.err.println("Error: '--config' option, with at least one argument, " +
+                    "e.g. '--config /home/hgql/configs/myconfig.json' is required");
+            System.err.println("\n============ HyperGraphQL ============");
+            return;
+        }
 
         final ApplicationConfigurationService service = new ApplicationConfigurationService();
 
