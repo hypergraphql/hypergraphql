@@ -131,15 +131,17 @@ public class ModelContainer {
     public RDFNode getValueOfObjectProperty(RDFNode subject, String predicateURI, String targetURI) {
         NodeIterator iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
 
-        do { // I _think_ this was the intention here
-            RDFNode next = iterator.next();
-            if (!next.isLiteral()) {
-                if (targetURI!=null && this.model.contains(next.asResource(), getPropertyFromUri(HGQLVocabulary.RDF_TYPE), getResourceFromUri(targetURI))) {
-                    return next;
+        if(iterator.hasNext()) {
+            do { // I _think_ this was the intention here
+                RDFNode next = iterator.next();
+                if (!next.isLiteral()) {
+                    if (targetURI != null && this.model.contains(next.asResource(), getPropertyFromUri(HGQLVocabulary.RDF_TYPE), getResourceFromUri(targetURI))) {
+                        return next;
+                    }
                 }
             }
+            while (iterator.hasNext());
         }
-        while (iterator.hasNext());
         return null;
     }
 
