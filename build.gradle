@@ -13,6 +13,7 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'findbugs'
 
 group = 'org.hypergraphql'
 version = '1.3.7'
@@ -21,12 +22,17 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
+    mavenLocal()
     mavenCentral()
     jcenter()
 }
 
 ext {
     jenaVersion = '3.7.0'
+}
+
+findbugs {
+    sourceSets = [sourceSets.main]
 }
 
 dependencies {
@@ -49,37 +55,49 @@ dependencies {
 
     runtime group: 'org.eclipse.jetty', name: 'jetty-maven-plugin', version: '9.4.10.v20180503'
 
-    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.0.1'
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0")
-    testRuntime("org.junit.platform:junit-platform-launcher:1.0.0")
-
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.11.0'
 
     testCompileOnly('org.apiguardian:apiguardian-api:1.0.0')
+
+    testImplementation(
+            'org.junit.jupiter:junit-jupiter-api:5.1.0'
+    )
+    testRuntimeOnly(
+            'org.junit.jupiter:junit-jupiter-engine:5.1.0'
+    )
 }
 
 test {
+    systemProperty 'hgql_version', project.version
+//    useJUnitPlatform()
     testLogging {
         events 'PASSED', 'FAILED', 'SKIPPED'
     }
 }
 
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled false
+        html.enabled true
+        html.stylesheet resources.text.fromFile('findbugs/xsl/default.xsl')
+    }
+}
+
 task execute(type:JavaExec) { // TODO - HERE
-    main = 'org.hypergraphql.Application'
+    systemProperty('hgql_version', project.version)
+    main = 'org.hypergraphql.CLIApplication'
+//    main = 'org.hypergraphql.Application'
     classpath = sourceSets.main.runtimeClasspath
 
     if(project.hasProperty('a')){
         args(a.split(','))
     }
-    println("Args:")
-    println(args)
-
 }
 
 sourceSets {
     main {
         resources {
-            include '**/*.json', '**/*.xml', '**/*.vtl', '**/*.properties'
+            include '**/*.json', '**/*.xml', '**/*.vtl', '**/*.properties', '**/*.txt'
         }
     }
 }
@@ -90,6 +108,6 @@ shadowJar {
     classifier = 'exe'
 
     manifest {
-        attributes("Main-Class": "org.hypergraphql.CLIApplication")
+        attributes("Main-Class": "org.hypergraphql.CombinedApplication") // TODO...
     }
 }

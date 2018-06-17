@@ -83,15 +83,19 @@ public class ApplicationConfigurationService {
                 if (jsonFiles != null) {
                     Arrays.stream(jsonFiles).forEach(file -> {
                         final String path = file.getAbsolutePath();
-                        try {
-                            configurations.add(hgqlConfigService.loadHGQLConfig(path, new FileInputStream(file)));
+                        try (InputStream in = new FileInputStream(file)) {
+                            configurations.add(hgqlConfigService.loadHGQLConfig(path, in));
                         } catch (FileNotFoundException e) {
                             throw new HGQLConfigurationException("One or more config files not found", e);
+                        } catch (IOException e) {
+                            throw new HGQLConfigurationException("Unable to load configuration", e);
                         }
                     });
                 }
             } else { // assume regular file
-                configurations.add(hgqlConfigService.loadHGQLConfig(configPathString, new FileInputStream(configPath)));
+                try(InputStream in = new FileInputStream(configPath)) {
+                    configurations.add(hgqlConfigService.loadHGQLConfig(configPathString, in));
+                }
             }
         } catch (IOException e) {
             throw new HGQLConfigurationException("One or more config files not found", e);

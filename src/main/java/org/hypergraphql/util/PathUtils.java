@@ -8,15 +8,16 @@ public class PathUtils {
     private static final String NORMAL_URL_REGEX = "(?i)^https?://.*";
     private static final String FILE_URL_REGEX = "^file://.*";
 
-    public static String makeAbsolute(final String absolutePath, final String possiblyRelativePath) {
+    public static String makeAbsolute(final String generalPath, final String possiblyRelativePath) {
 
         if(isAbsolute(possiblyRelativePath)) { // FQ URL or absolute path
             return possiblyRelativePath;
-        } else if(isAbsolute(absolutePath)) { // relative
-            final String parentPath = FilenameUtils.getFullPath(absolutePath);
+//        } else if(isAbsolute(generalPath)) { // relative
+        } else {
+            final String parentPath = FilenameUtils.getFullPath(generalPath);
             return parentPath + (parentPath.endsWith("/") ? "" : "/") + possiblyRelativePath;
         }
-        return possiblyRelativePath.startsWith("./") ? "" : "./" + possiblyRelativePath;
+//        return possiblyRelativePath.startsWith("./") ? "" : "./" + possiblyRelativePath;
     }
 
     public static boolean isAbsolute(final String path) {

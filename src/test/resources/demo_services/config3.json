@@ -1,6 +1,6 @@
 {
     "name": "fao-go-hgql",
-    "schema": "src/test/resources/demo_services/schema3.graphql",
+    "schema": "schema3.graphql",
     "server": {
         "port": 8083,
         "graphql": "/graphql",
@@ -20,7 +20,7 @@
         {
             "id": "fao-local",
             "type": "LocalModelSPARQLService",
-            "filepath": "src/test/resources/demo_services/fao.ttl",
+            "filepath": "build/libs/demo_sources/fao.ttl",
             "filetype": "TTL"
         }
     ]

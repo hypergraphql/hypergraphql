@@ -1,6 +1,6 @@
 package org.hypergraphql.demo;
 
-import org.hypergraphql.Application;
+import org.hypergraphql.CLIApplication;
 
 public class Demo {
 
@@ -11,9 +11,10 @@ public class Demo {
             "--config",
             "demo_services/config1.json",
             "demo_services/config2.json",
-            "demo_services/config3.json"
+            "demo_services/config3.json",
+            "demo_services/config4.json"
         };
 
-        Application.main(demoArguments);
+        CLIApplication.main(demoArguments);
     }
 }

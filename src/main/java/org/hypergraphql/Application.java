@@ -1,5 +1,6 @@
 package org.hypergraphql;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.exception.HGQLConfigurationException;
@@ -7,6 +8,8 @@ import org.hypergraphql.services.ApplicationConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -22,14 +25,23 @@ public class Application {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws Exception {
 
         final ApplicationConfigurationService service = new ApplicationConfigurationService();
 
         start(getConfigurationsFromProperties(System.getenv(), service));
     }
 
-    protected static void start(final List<HGQLConfig> configurations) {
+    protected static void start(final List<HGQLConfig> configurations) throws IOException {
+        start(configurations, true);
+    }
+
+    protected static void start(final List<HGQLConfig> configurations, final boolean showBanner) throws IOException {
+
+        if(showBanner) {
+            showBanner();
+        }
+
         configurations.forEach(config -> {
             LOGGER.info("Starting controller...");
             new Controller().start(config);
@@ -61,6 +73,23 @@ public class Application {
         } else {
             // assume it's a normal file
             return service.getConfigFiles(configPath);
+        }
+    }
+
+    private static void showBanner() throws IOException {
+
+        final String bannerFile = "banner.txt";
+        final InputStream bannerInputStream = Application.class.getClassLoader().getResourceAsStream(bannerFile);
+        if(bannerInputStream == null) {
+            System.out.println(Application.class.getClassLoader().getResource(bannerFile));
+            System.err.println("Banner is null");
+        }
+        IOUtils.copy(bannerInputStream, System.out);
+        final String version = System.getProperty("hgql_version");
+        if(version == null) {
+            System.out.println("----------------------------------------------------------------------\n");
+        } else {
+            System.out.printf("------------------------------- v%1$s -------------------------------%n%n", version);
         }
     }
 }

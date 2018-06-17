@@ -1,14 +1,24 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.jena.query.ARQ;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
 import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.LocalSPARQLExecution;
 import org.hypergraphql.datafetching.SPARQLExecutionResult;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.HGQLSchema;
+import org.hypergraphql.exception.HGQLConfigurationException;
+import org.hypergraphql.util.PathUtils;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,13 +30,10 @@ import java.util.concurrent.Future;
 
 public class LocalModelSPARQLService extends SPARQLEndpointService{
 
-
     protected Model model;
 
     @Override
-
     public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers , String rootType , HGQLSchema schema) {
-
 
         Map<String, Set<String>> resultSet = new HashMap<>();
         Model unionModel = ModelFactory.createDefaultModel();
@@ -61,10 +68,25 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
     @Override
     public void setParameters(ServiceConfig serviceConfig) {
         super.setParameters(serviceConfig);
+
+        ARQ.init();
+
         this.id = serviceConfig.getId();
-        String filetype = serviceConfig.getFiletype();
-        String filepath = serviceConfig.getFilepath();
-        this.model = ModelFactory.createDefaultModel();
-        this.model.read(filepath, filetype);
+
+//        String filepath = PathUtils.makeAbsolute(serviceConfig.getFilepath());
+        System.out.println("Current path: " + new File(".").getAbsolutePath());
+
+        final File cwd = new File(".");
+        try(final FileInputStream fis = new FileInputStream(new File(cwd, serviceConfig.getFilepath()));
+            final BufferedInputStream in = new BufferedInputStream(fis)) {
+            this.model = ModelFactory.createDefaultModel();
+//            this.model.read(in, serviceConfig.getFiletype());
+            final Lang lang = Lang.TTL; // TODO ***
+            RDFDataMgr.read(model, in, lang);
+        } catch (FileNotFoundException e) {
+            throw new HGQLConfigurationException("Unable to locate local RDF file", e);
+        } catch (IOException e) {
+            throw new HGQLConfigurationException("Nonspecific IO exception", e);
+        }
     }
 }
