@@ -32,6 +32,8 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
 
     protected Model model;
 
+    private String absoluteBasePath;
+
     @Override
     public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers , String rootType , HGQLSchema schema) {
 
@@ -88,5 +90,9 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
         } catch (IOException e) {
             throw new HGQLConfigurationException("Nonspecific IO exception", e);
         }
+    }
+
+    public void setAbsoluteBasePath(final String absoluteBasePath) {
+        this.absoluteBasePath = absoluteBasePath;
     }
 }

@@ -18,6 +18,7 @@ import org.hypergraphql.datafetching.services.Service;
 import org.hypergraphql.exception.HGQLConfigurationException;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -99,6 +100,12 @@ public class HGQLSchemaWiring {
 
                 service.setParameters(serviceConfig);
 
+//                try {
+//                    final Method setAbsoluteBasePath = serviceType.getDeclaredMethod("setAbsoluteBasePath", String.class);
+//                    setAbsoluteBasePath.invoke(service, hgqlSchema.)
+//                } catch (NoSuchMethodException e) {
+//                    e.printStackTrace(); // TODO ****
+//                }
 
                 services.put(serviceConfig.getId(), service);
             } catch (IllegalAccessException
