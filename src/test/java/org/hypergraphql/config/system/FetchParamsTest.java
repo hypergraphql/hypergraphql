@@ -119,8 +119,7 @@ class FetchParamsTest {
         when(fieldConfig.getId()).thenReturn(uri);
 
         Executable executable = () -> new FetchParams(environment, schema);
-        Throwable throwable = assertThrows(HGQLConfigurationException.class, executable);
-        assertEquals("Parent type cannot be null", throwable.getMessage());
+        assertThrows(NullPointerException.class, executable);
     }
 
     @Test
@@ -144,8 +143,7 @@ class FetchParamsTest {
         when(environment.getParentType()).thenReturn(parentType);
 
         Executable executable = () -> new FetchParams(environment, schema);
-        Throwable throwable = assertThrows(HGQLConfigurationException.class, executable);
-        assertEquals("'name' is a required field for HGQL types", throwable.getMessage());
+        assertThrows(NullPointerException.class, executable);
     }
 
     @Test
@@ -156,8 +154,7 @@ class FetchParamsTest {
                 mock(DataFetchingEnvironment.class),
                 mock(HGQLSchema.class)
         );
-        Throwable throwable = assertThrows(HGQLConfigurationException.class, executable);
-        assertEquals("Environment must have at least one field", throwable.getMessage());
+        assertThrows(ArrayIndexOutOfBoundsException.class, executable);
     }
 
     @Test
@@ -171,8 +168,7 @@ class FetchParamsTest {
                 environment,
                 mock(HGQLSchema.class)
         );
-        Throwable throwable = assertThrows(HGQLConfigurationException.class, executable);
-        assertEquals("Environment must have at least one field", throwable.getMessage());
+        assertThrows(ArrayIndexOutOfBoundsException.class, executable);
     }
 
     @Test
@@ -186,8 +182,7 @@ class FetchParamsTest {
                 environment,
                 mock(HGQLSchema.class)
         );
-        Throwable throwable = assertThrows(HGQLConfigurationException.class, executable);
-        assertEquals("Schema has no fields", throwable.getMessage());
+        assertThrows(NullPointerException.class, executable);
     }
 
     @Test
@@ -204,8 +199,7 @@ class FetchParamsTest {
                 environment,
                 schema
         );
-        Throwable throwable = assertThrows(HGQLConfigurationException.class, executable);
-        assertEquals("Schema has no fields", throwable.getMessage());
+        assertThrows(NullPointerException.class, executable);
     }
 
     @Test
@@ -225,7 +219,6 @@ class FetchParamsTest {
                 environment,
                 schema
         );
-        Throwable throwable = assertThrows(HGQLConfigurationException.class, executable);
-        assertEquals("No field configuration for 'field1'", throwable.getMessage());
+        assertThrows(NullPointerException.class, executable);
     }
 }
