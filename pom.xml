@@ -6,7 +6,7 @@
 
     <groupId>org.hypergraphql</groupId>
     <artifactId>hypergraphql</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1.4</version>
     <build>
         <plugins>
             <plugin>
@@ -23,10 +23,6 @@
                 <version>1.6.0</version>
                 <configuration>
                     <mainClass>org.hypergraphql.Application</mainClass>
-                    <arguments>
-                        <argument>--config</argument>
-                        <argument>config.json</argument>
-                    </arguments>
                 </configuration>
             </plugin>
         </plugins>

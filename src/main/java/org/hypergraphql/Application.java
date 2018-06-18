@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class looks for files on the filesystem.
@@ -26,6 +27,8 @@ public class Application {
 
     public static void main(final String[] args) throws Exception {
 
+        final String[] trimmedArgs = trimValues(args);
+
         CommandLineParser parser = new DefaultParser();
         Options options = new Options()
                 .addOption(
@@ -34,7 +37,6 @@ public class Application {
                             .hasArgs()
                             .numberOfArgs(Option.UNLIMITED_VALUES)
                             .desc("Location of config files (or absolute paths to config files)")
-                            .required()
                             .build()
                 )
                 .addOption(
@@ -44,7 +46,15 @@ public class Application {
                                 .desc("Look on classpath instead of file system")
                                 .build()
                 );
-        CommandLine commandLine = parser.parse(options, args);
+        CommandLine commandLine = parser.parse(options, trimmedArgs);
+
+        if(!commandLine.hasOption("config")) {
+            System.err.println("============ HyperGraphQL ============\n");
+            System.err.println("Error: '--config' option, with at least one argument, " +
+                    "e.g. '--config /home/hgql/configs/myconfig.json' is required");
+            System.err.println("\n============ HyperGraphQL ============");
+            return;
+        }
 
         final ApplicationConfigurationService service = new ApplicationConfigurationService();
 
@@ -53,7 +63,6 @@ public class Application {
 
             configurations = service.getConfigResources(commandLine.getOptionValues("config"));
         } else {
-
             configurations = service.getConfigFiles(commandLine.getOptionValues("config"));
         }
 
@@ -61,6 +70,14 @@ public class Application {
             LOGGER.info("Starting with " + file.getPath());
             new Controller().start(HGQLConfig.fromFileSystemPath(file.getPath()));
         });
+    }
+
+    private static String[] trimValues(final String[] input) {
+
+        return Arrays.stream(input)
+                .map(String::trim)
+                .collect(Collectors.toList())
+                .toArray(new String[input.length]);
     }
 }
 
