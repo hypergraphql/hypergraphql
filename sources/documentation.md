@@ -39,7 +39,7 @@ e.g.: `mvn exec:java -Dexec.args="--classpath --config config.json"`
 
 **Gradle**: 
 1. **`gradle build`**
-2. **`gradle execute [-Pa='<comma separated command line args>]`**
+2. **`gradle execute [-Pa='<comma separated command line args>']`**
 
 e.g.: `gradle execute -Pa='--classpath, --config, config.json'`
 
