@@ -80,14 +80,10 @@ class ApplicationConfigurationServiceTest {
     private void copyClasspathResourceToTemp(final File tempDirectory, final String path) {
 
         try {
-//            System.out.println("Trying to create temp file at:\n" + tempDirectory.getAbsolutePath());
-
             final File tempFile = File.createTempFile("hgql_", ".json", tempDirectory);
             final InputStream in = getClass().getClassLoader().getResourceAsStream(path);
             IOUtils.copy(in, new FileOutputStream(tempFile));
             tempFile.deleteOnExit();
-
-//            System.out.println("Created:\n" + tempFile.getAbsolutePath() + "\nFrom: " + path);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -95,7 +91,8 @@ class ApplicationConfigurationServiceTest {
 
     private File createTempDirectory() {
 
-        final File tempDirectory = new File(System.getenv("TMPDIR") + "hgql");
+        final String tmpDir = System.getProperty("java.io.tmpdir");
+        final File tempDirectory = new File(tmpDir + (tmpDir.endsWith("/") ? "" : "/") + "hgql");
         tempDirectory.mkdirs();
         tempDirectory.deleteOnExit();
         return tempDirectory;
