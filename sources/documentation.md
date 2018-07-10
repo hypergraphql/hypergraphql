@@ -34,15 +34,7 @@ Clone the Git repository into a local directory. In the root of the project exec
 
 e.g.: `mvn exec:java -Dexec.args="--classpath --config config.json"`
 
-
 (*Note*: in Windows these must be executed in a *cmd* terminal, not *PowerShell*).
-
-**Gradle**: 
-1. **`gradle build`**
-2. **`gradle execute [-Pa='<comma separated command line args>']`**
-
-e.g.: `gradle execute -Pa='--classpath, --config, config.json'`
-
 
 By default, the HyperGraphQL server starts at: 
 
