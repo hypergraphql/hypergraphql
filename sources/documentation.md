@@ -30,11 +30,9 @@ Clone the Git repository into a local directory. In the root of the project exec
 
 **Maven**: 
 1. **`mvn install`**
-2. **`mvn exec:java [-Dexec.args="<command line options>"]`** 
+2. **`mvn exec:java "[-Dexec.args=<command line options>]"`** 
 
-e.g.: `mvn exec:java -Dexec.args="--classpath --config config.json"`
-
-(**Note**: in Windows these must be executed in a *cmd* terminal, not *PowerShell*)
+e.g.: `mvn exec:java "-Dexec.args=--classpath --config config.json"`
 
 **Gradle**:
 1. **`gradle build`**
