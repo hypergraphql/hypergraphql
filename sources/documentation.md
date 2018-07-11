@@ -26,7 +26,7 @@ The core response object of HyperGraphQL is [JSON-LD](https://json-ld.org) (embe
 
 Clone the Git repository into a local directory. In the root of the project execute the following: 
 
-**NB** You _**MUST**_ provide at least one configuration file argument
+**NB**: You _**MUST**_ provide at least one configuration file argument
 
 **Maven**: 
 1. **`mvn install`**
@@ -34,7 +34,13 @@ Clone the Git repository into a local directory. In the root of the project exec
 
 e.g.: `mvn exec:java -Dexec.args="--classpath --config config.json"`
 
-(*Note*: in Windows these must be executed in a *cmd* terminal, not *PowerShell*).
+(**Note**: in Windows these must be executed in a *cmd* terminal, not *PowerShell*)
+
+**Gradle**:
+1. **`gradle build`**
+2. **`gradle execute [-Pa="<comma separated command line args>"]`**
+
+e.g.: `gradle execute -Pa="--classpath, --config, config.json"`
 
 By default, the HyperGraphQL server starts at: 
 
@@ -412,7 +418,7 @@ By principle, HyperGraphQL aims to make as few roundtrips between the local inst
 
 Depending on the type of the target service the query is either rewritten to SPARQL (remote SPARQL endpoints and local RDF files) or to GraphQL (remote HyperGraphQL instances).
 
-### Rewritting to SPARQL
+### Rewriting to SPARQL
 
 All top-level query fields are rewritten into instance subqueries as follows:
 
