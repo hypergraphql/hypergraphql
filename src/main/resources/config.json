@@ -1,6 +1,6 @@
 {
     "name": "hgql-example-with-sparql",
-    "schema": "schema.graphql",
+    "schema": "gql/schema.graphql",
     "server": {
         "port": 8080,
         "graphql": "/graphql",

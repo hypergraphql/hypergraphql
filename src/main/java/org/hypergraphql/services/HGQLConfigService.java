@@ -74,6 +74,10 @@ public class HGQLConfigService {
 
         } else if(schemaPath.matches(NORMAL_URL_REGEX)) {
             return getReaderForUrl(schemaPath, username, password);
+        } else if (schemaPath.contains(".jar!")) {
+            // classpath
+            System.out.println("Schema on classpath");
+            return getReaderForClasspath(schemaPath);
         } else {
             // file
             return new InputStreamReader(new FileInputStream(schemaPath), StandardCharsets.UTF_8);
@@ -110,5 +114,16 @@ public class HGQLConfigService {
 
         final String configPath = FilenameUtils.getPath(hgqlConfigPath);
         return PathUtils.makeAbsolute(configPath, schemaPath);
+    }
+
+    private Reader getReaderForClasspath(final String schemaPath) {
+
+        System.out.println("Obtaining reader: " + schemaPath);
+
+        final String fn = schemaPath.substring(schemaPath.lastIndexOf("!") + 1);
+        final String filename = fn.substring(fn.startsWith("/") ? 1 : 0);
+        System.out.println("For filename: " + filename);
+
+        return new InputStreamReader(getClass().getClassLoader().getResourceAsStream(filename));
     }
 }

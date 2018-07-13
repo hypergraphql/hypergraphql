@@ -75,7 +75,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
 
         QueryEngineHTTP qEngine = QueryExecutionFactory.createServiceRequest(this.sparqlEndpointService.getUrl(), jenaQuery);
         qEngine.setClient(httpclient);
-        qEngine.setSelectContentType(ResultsFormat.FMT_RS_XML.getSymbol());
+        //qEngine.setSelectContentType(ResultsFormat.FMT_RS_XML.getSymbol());
 
         ResultSet results = qEngine.execSelect();
 

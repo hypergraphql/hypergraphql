@@ -115,7 +115,8 @@ class ApplicationConfigurationServiceTest {
 
     private File createTempDirectory() {
 
-        final File tempDirectory = new File(System.getenv("TMPDIR") + "hgql");
+        final String tmpDir = System.getProperty("java.io.tmpdir");
+        final File tempDirectory = new File(tmpDir + (tmpDir.endsWith("/") ? "" : "/") + "hgql");
         tempDirectory.mkdirs();
         tempDirectory.deleteOnExit();
         return tempDirectory;

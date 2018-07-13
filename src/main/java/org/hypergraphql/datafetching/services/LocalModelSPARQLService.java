@@ -12,6 +12,7 @@ import org.hypergraphql.datafetching.SPARQLExecutionResult;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.exception.HGQLConfigurationException;
+import org.hypergraphql.util.LangUtils;
 import org.hypergraphql.util.PathUtils;
 
 import java.io.BufferedInputStream;
@@ -83,7 +84,7 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
             final BufferedInputStream in = new BufferedInputStream(fis)) {
             this.model = ModelFactory.createDefaultModel();
 //            this.model.read(in, serviceConfig.getFiletype());
-            final Lang lang = Lang.TTL; // TODO ***
+            final Lang lang = LangUtils.forName(serviceConfig.getFiletype());
             RDFDataMgr.read(model, in, lang);
         } catch (FileNotFoundException e) {
             throw new HGQLConfigurationException("Unable to locate local RDF file", e);
