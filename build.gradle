@@ -29,7 +29,6 @@ repositories {
 ext {
     jenaVersion = '3.8.0'
 }
-
 dependencies {
 
     compile group: 'com.graphql-java', name: 'graphql-java', version: '6.0'
