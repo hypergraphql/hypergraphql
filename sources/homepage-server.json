@@ -1,7 +1,7 @@
 {
   "port": 8080,
-  "gitpage": "https://semantic-integration.github.io/hypergraphql",
-  "gitdomain": "https://semantic-integration.github.io",
+  "gitpage": "https://hypergraphql.github.io/hypergraphql",
+  "gitdomain": "https://hypergraphql.github.io",
   "services": [
     {
       "port": 8081,
