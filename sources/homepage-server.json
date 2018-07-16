@@ -18,7 +18,7 @@
       "graphiql": "graphiql3"
     },
     {
-      "port": 8084,
+      "port": 8088,
       "graphql": "graphql4",
       "graphiql": "graphiql4"
     }
