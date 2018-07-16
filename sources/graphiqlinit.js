@@ -7,6 +7,7 @@ function getEditFunction(parameters, name) {
 };
 
 function getFetchingFunction(url) {
+    console.log(url);
     return function graphQLFetcher(graphQLParams) {
         return fetch(url, {
             method: 'post',
