@@ -1,5 +1,6 @@
 {
   "port": 8080,
+  "demoServerBase":"http://demo.hypergraphql.org",
   "services": [
     {
       "port": 8081,
