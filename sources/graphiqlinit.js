@@ -34,8 +34,6 @@ function graphiqlInit(name) {
     var graphql = gqlelement.attributes['graphql'].value;
     var graphiql = gqlelement.attributes['graphiql'].value;
     var queryString = gqlelement.attributes['query'].value;
-    console.log("graphql: " + graphql);
-    console.log("QS: " + queryString);
     var div = document.createElement('div');
     div.textContent = "Loading...";
     div.setAttribute('class', 'graphiql');
