@@ -15,13 +15,16 @@ function getFetchingFunction(url) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(graphQLParams),
-            credentials: 'include',
+            credentials: 'include',            
         }).then(function (response) {
+            console.log("r2");
             return response.text();
         }).then(function (responseBody) {
             try {
+                console.log("r3");
                 return JSON.parse(responseBody);
             } catch (error) {
+                console.log("r4");
                 return responseBody;
             }
         });
