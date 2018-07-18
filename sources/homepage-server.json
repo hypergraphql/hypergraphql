@@ -1,6 +1,8 @@
 {
   "port": 8080,
   "demoServerBase":"http://demo.hypergraphql.org",
+  "gitpage":"https://hypergraphql.github.io/hypergraphql",
+  "gitdomain":"https://hypergraphql.github.io",
   "services": [
     {
       "port": 8081,
@@ -18,7 +20,7 @@
       "graphiql": "graphiql3"
     },
     {
-      "port": 8088,
+      "port": 8084,
       "graphql": "graphql4",
       "graphiql": "graphiql4"
     }
