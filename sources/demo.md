@@ -11,67 +11,7 @@ permalink: /demo/
     <script src="//cdn.jsdelivr.net/react/15.4.2/react-dom.min.js"></script>
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.css" />
     <script src="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.js"></script>
-    <!--script type="application/javascript" src="/sources/graphiqlinit.js"></script-->
-    <script>
-    //<!--
-    var service = 'http://demo.hypergraphql.org:8084';
-    
-    function getEditFunction(parameters, name) {
-        return function onEditQuery(newQuery) {
-            parameters.query = newQuery;
-            document.getElementById(name + '_full').attributes['href'].value = service + '/graphiql?query=' + encodeURI(newQuery);
-        }
-    }
-    
-    function getFetchingFunction(url) {
-        console.log(url);
-        return function graphQLFetcher(graphQLParams) {
-            return fetch(url, {
-                method: 'post',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(graphQLParams),
-                credentials: 'include',
-                
-            }).then(function (response) {
-                return response.text();
-            }).then(function (responseBody) {
-                try {
-                    return JSON.parse(responseBody);
-                } catch (error) {
-                    return responseBody;
-                }
-            });
-        }
-    }
-    
-    function graphiqlInit(name) {
-        var gqlelement = document.getElementById(name);
-        var queryString = gqlelement.attributes['query'].value;
-        var div = document.createElement('div');
-        div.textContent = "Loading...";
-        div.setAttribute('class', 'graphiql');
-        div.setAttribute('id', name + '_dashboard');
-        gqlelement.appendChild(div);
-        var full = document.createElement('a');
-        full.textContent = "See in fullscreen mode.";
-        full.setAttribute('href', service + '/graphiql?query=' + encodeURI(queryString));
-        full.setAttribute('id', name + '_full');
-        gqlelement.appendChild(full);
-        var parameters = {query: queryString};
-        ReactDOM.render(
-            React.createElement(GraphiQL, {
-                fetcher: getFetchingFunction(service + '/graphql'),
-                query: parameters.query,
-                onEditQuery: getEditFunction(parameters, name)
-            }),
-            document.getElementById(name + '_dashboard')
-        );
-    }
-    // -->
-    </script>
+    <script type="application/javascript" src="/scripts/graphiqlinit.js"></script>
 </graphiqlconfig>
 
 
@@ -79,10 +19,7 @@ permalink: /demo/
 # Demo
 
 A live demo of the HyperGraphQL instance pointing at DBpedia SPARQL endpoint and configured as in the main GitHub repository (also used as a running example in the [Documentation](/documentation) section) is available at:
-{% comment %}
-- [GraphQL server](/service/graphql4)
-- [GraphiQL UI](/service/graphiql4)
-{% endcomment %}
+
 - [GraphQL server](http://demo.hypergraphql.org:8084/graphql)
 - [GraphiQL UI](http://demo.hypergraphql.org:8084/graphiql)
 

@@ -11,7 +11,7 @@ permalink: /tutorial/
     <script src="//cdn.jsdelivr.net/react/15.4.2/react-dom.min.js"></script>
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.css" />
     <script src="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.js"></script>
-    <script type="application/javascript" src="https://semantic-integration.github.io/hypergraphql/sources/graphiqlinit.js"></script>
+    <script type="application/javascript" src="/scripts/graphiqlinit.js"></script>
 </graphiqlconfig>
 
 
@@ -27,7 +27,7 @@ In this tutorial we outline all the steps required to define and connect several
 
 All the resources, including configuration files, GraphQL schemas and RDF datasets, are included in the [src/test/resources/demo_services](https://github.com/semantic-integration/hypergraphql/tree/master/src/test/resources/demo_services) directory of the project's GitHub repository. 
 
-In order to start all three instances described in this turorial at once, you can run the `ClasspathDemo` or `Demo` executable classes in your local repository of HyperGraphQL in the `test` source tree (within the `demo` package).
+In order to start all three instances described in this tutorial at once, you can run the `ClasspathDemo` or `Demo` executable classes in your local repository of HyperGraphQL in the `test` source tree (within the `demo` package).
 
 These effectively spin up several instances of HyperGraphQL pointing at different sources:
 
@@ -238,7 +238,7 @@ As a result, the GraphiQL interface exposes fields intended for querying SKOS co
 
 ## Service 3: Geopolitical Ontology file + HGQL services 1 & 2
 
-Finally, we define the last HyperGraphQL instance, which employs some suplementary RDF data from the Geopolitical Ontology and connects all three data sources together. In the configuration file we include references to both previously defined HyperGraphQL instances of type `HGraphQLService` and exposed with URLs `http://localhost:8081/graphql` and `http://localhost:8082/graphql`, respectively. The third service, of type `LocalModelSPARQLService`, is specified analogically to the case of AGROVOC, using a reference to a local file `fao.ttl`, again in turtle format. The insance is initiated on port 8083.
+Finally, we define the last HyperGraphQL instance, which employs some supplementary RDF data from the Geopolitical Ontology and connects all three data sources together. In the configuration file we include references to both previously defined HyperGraphQL instances of type `HGraphQLService` and exposed with URLs `http://localhost:8081/graphql` and `http://localhost:8082/graphql`, respectively. The third service, of type `LocalModelSPARQLService`, is specified analogically to the case of AGROVOC, using a reference to a local file `fao.ttl`, again in turtle format. The instance is initiated on port 8083.
 
 
 ```json
@@ -273,7 +273,7 @@ Finally, we define the last HyperGraphQL instance, which employs some suplementa
 
 <br>
 
-The schema directly reuses certain parts of the schemas of the previously defined HyperGraphQL instances, e.g., `City`, `Country` and `Concept`, with selected subsets of their original fields. It is crucial that the labels and IRIs of such reused parts match exactly those from the original HyperGraphQL instances, as this warrants correct linking of services and semantically faithful communication between them. Parts of the original schemas that are not relevant for the current service can be safely skipped. Also, whenever a type from a target HyperGraphQL service is to be used in the current schema, but not made directly quereable, its corresponding `@service(id:"...")` annotation should be skipped, as it is done below in the case of `City`, `Country` and `Concept`.
+The schema directly reuses certain parts of the schemas of the previously defined HyperGraphQL instances, e.g., `City`, `Country` and `Concept`, with selected subsets of their original fields. It is crucial that the labels and IRIs of such reused parts match exactly those from the original HyperGraphQL instances, as this warrants correct linking of services and semantically faithful communication between them. Parts of the original schemas that are not relevant for the current service can be safely skipped. Also, whenever a type from a target HyperGraphQL service is to be used in the current schema, but not made directly queryable, its corresponding `@service(id:"...")` annotation should be skipped, as it is done below in the case of `City`, `Country` and `Concept`.
 
 
 ```
@@ -349,7 +349,7 @@ type Concept {
 
 <br>
 
-The Geopolitical Ontology contains outgoing `owl:sameAs` links to both DBpedia and AGROVOC taxonomy. These links are critical to connecting the three datasets, and are captured in the schema within the type `SelfGoverning` (roughly corresponding to "Country" in the Geopolitical Ontology), which includes fields `sameInDBpedia` and `sameInAgrovoc`, both mapped on the IRI `owl:sameAs`. Using these links one can naturally construct queries seamlessly spanning all three datasets and HyperGraphQL instances. Note, that since currently each instance applies individually strinct type checking on the values of the fields, the Geopolitical Ontology must be first extended with the missing `rdf:type` assertions over the objects of `owl:sameAs` property. Consequently, each DBpedia identifier of a country must be asserted as an instance of `dbo:Country` and each AGROVOC identifier as an instance of `skos:Concept`. This restriction should be likely relaxed in the future versions of HyperGraphQL. 
+The Geopolitical Ontology contains outgoing `owl:sameAs` links to both DBpedia and AGROVOC taxonomy. These links are critical to connecting the three datasets, and are captured in the schema within the type `SelfGoverning` (roughly corresponding to "Country" in the Geopolitical Ontology), which includes fields `sameInDBpedia` and `sameInAgrovoc`, both mapped on the IRI `owl:sameAs`. Using these links one can naturally construct queries seamlessly spanning all three datasets and HyperGraphQL instances. Note, that since currently each instance applies individually strict type checking on the values of the fields, the Geopolitical Ontology must be first extended with the missing `rdf:type` assertions over the objects of `owl:sameAs` property. Consequently, each DBpedia identifier of a country must be asserted as an instance of `dbo:Country` and each AGROVOC identifier as an instance of `skos:Concept`. This restriction should be likely relaxed in the future versions of HyperGraphQL. 
 
 The working example of this instance is embedded below.
 
