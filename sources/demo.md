@@ -22,9 +22,10 @@ A live demo of the HyperGraphQL instance pointing at DBpedia SPARQL endpoint and
 {% comment %}
 - [GraphQL server](/service/graphql4)
 - [GraphiQL UI](/service/graphiql4)
+
 {% endcomment %}
-- [GraphQL server](http://demo.hypergraphql.org:8084/graphql)
-- [GraphiQL UI](http://demo.hypergraphql.org:8084/graphiql)
+- [GraphQL server](http://localhost:8084/graphql)
+- [GraphiQL UI](http://localhost:8084/graphiql)
 
 Below we list a few example queries via embedded GraphiQL interfaces. Feel free to edit them!
 

@@ -1,4 +1,5 @@
-var service = 'http://demo.hypergraphql.org:8084';
+var service = 'http://localhost:8084';
+// var service = 'http://demo.hypergraphql.org:8084';
 
 function getEditFunction(parameters, name) {
     return function onEditQuery(newQuery) {

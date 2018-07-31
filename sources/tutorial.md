@@ -11,7 +11,7 @@ permalink: /tutorial/
     <script src="//cdn.jsdelivr.net/react/15.4.2/react-dom.min.js"></script>
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.css" />
     <script src="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.js"></script>
-    <script type="application/javascript" src="https://semantic-integration.github.io/hypergraphql/sources/graphiqlinit.js"></script>
+    <script type="application/javascript" src="/scripts/graphiqlinit.js"></script>
 </graphiqlconfig>
 
 
