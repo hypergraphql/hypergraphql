@@ -18,6 +18,8 @@ import spark.Request;
 import spark.Service;
 import spark.template.velocity.VelocityTemplateEngine;
 
+import static spark.Spark.before;
+
 /**
  * Created by szymon on 05/09/2017.
  *
@@ -71,11 +73,26 @@ public class Controller {
 
         // get method for accessing the GraphiQL UI
 
+        before((request, response) -> {
+            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Allow-Methods", "OPTIONS,GET,POST");
+            response.header("Access-Control-Allow-Headers", "*");
+        });
+
+        hgqlService.options("/*", (req, res) -> {
+            res.header("Access-Control-Allow-Origin", "*");
+            res.header("Access-Control-Allow-Headers", "*");
+            return "";
+        });
+
         hgqlService.get(config.getGraphqlConfig().graphiQLPath(), (req, res) -> {
 
             Map<String, String> model = new HashMap<>();
 
             model.put("template", String.valueOf(config.getGraphqlConfig().graphQLPath()));
+
+            res.header("Access-Control-Allow-Origin", "*");
+            res.header("Access-Control-Allow-Headers", "*");
 
             return new VelocityTemplateEngine().render(
                     new ModelAndView(model, "graphiql.vtl")
@@ -102,6 +119,9 @@ public class Controller {
             if (!errors.isEmpty()) {
                 res.status(400);
             }
+
+            res.header("Access-Control-Allow-Origin", "*");
+            res.header("Access-Control-Allow-Headers", "*");
 
             ObjectMapper mapper = new ObjectMapper();
             if (graphQLCompatible) {
@@ -130,6 +150,9 @@ public class Controller {
             String contentType = isRdfContentType ? acceptType : DEFAULT_ACCEPT_TYPE;
 
             res.type(contentType);
+
+            res.header("Access-Control-Allow-Origin", "*");
+            res.header("Access-Control-Allow-Headers", "*");
 
             return config.getHgqlSchema().getRdfSchemaOutput(mime);
         });
