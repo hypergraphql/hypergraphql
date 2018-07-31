@@ -135,6 +135,8 @@ public class ApplicationConfigurationService {
                     resourcePath -> {
                         final URL sourceUrl = getClass().getClassLoader().getResource(resourcePath);
 
+                        System.out.println(resourcePath); // TODO
+
                         if(sourceUrl != null) {
                             configurations.addAll(getConfigurationsFromClasspath(sourceUrl.getFile()));
                         }
