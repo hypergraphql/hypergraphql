@@ -71,8 +71,7 @@ public class Controller {
 
         hgqlService = Service.ignite().port(config.getGraphqlConfig().port());
 
-        // get method for accessing the GraphiQL UI
-
+        // CORS
         before((request, response) -> {
             response.header("Access-Control-Allow-Origin", "*");
             response.header("Access-Control-Allow-Methods", "OPTIONS,GET,POST");
@@ -84,6 +83,8 @@ public class Controller {
             res.header("Access-Control-Allow-Headers", "*");
             return "";
         });
+
+        // get method for accessing the GraphiQL UI
 
         hgqlService.get(config.getGraphqlConfig().graphiQLPath(), (req, res) -> {
 
