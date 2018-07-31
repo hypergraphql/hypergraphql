@@ -195,7 +195,7 @@ Currently, HyperGraphQL supports three types of linked data services: (remote) S
 * `type`: type of the service - here the constant value of `SPARQLEndpointService`;
 * `url`: the URL of the SPARQL endpoint;
 * `graph`: the name of the RDF graph to be queried; if the graph is unnamed (default) this property should be set to an empty string `""`;
-* `user`, `password`: the basic authentication details; if not applicable these properteis should be set to empty strings `"'`.
+* `user`, `password`: the basic authentication details; if not applicable these properties should be set to empty strings `"'`.
 
 ### Local RDF files
 
@@ -288,7 +288,7 @@ Furthermore, types and fields in the schema are annotated with the directives of
 ```
 @service(id:"dbpedia-sparql")
 ```
-which inform the instance from which service the data for given type/field should be fetched. The `id` must correspond to those declared in the `services` section of the configuration file. Currently, only one service can be associated with each type and field. Types annotated with a service id are automatically made quereable, i.e., the HyperGraphQL instance automatically exposes two query fields named: `TypeName_GET` and `TypeName_GET_BY_ID`, e.g.: `Person_GET` and `Person_GET_BY_ID`. Query fields of type `*_GET` are parametrised with arguments `limit:Int` and `offset:Int`, while those of type `*_GET_BY_ID` with the argument `uris:[String]` (see: the [Demo](/demo) section for examples). Annotation of selected types in the schema (and only types) can be skipped. In such cases the type will not become quereable. 
+which inform the instance from which service the data for given type/field should be fetched. The `id` must correspond to those declared in the `services` section of the configuration file. Currently, only one service can be associated with each type and field. Types annotated with a service id are automatically made queryable, i.e., the HyperGraphQL instance automatically exposes two query fields named: `TypeName_GET` and `TypeName_GET_BY_ID`, e.g.: `Person_GET` and `Person_GET_BY_ID`. Query fields of type `*_GET` are parametrised with arguments `limit:Int` and `offset:Int`, while those of type `*_GET_BY_ID` with the argument `uris:[String]` (see: the [Demo](/demo) section for examples). Annotation of selected types in the schema (and only types) can be skipped. In such cases the type will not become queryable. 
 
 The `Query` type of the type is generated automatically by the service. Additional fields and arguments that are introduced automatically are:
 - `_id:String` field, attached to each type in the schema, returning the URI of the resource;
@@ -307,7 +307,7 @@ HyperGraphQL accepts POST requests with the body of the form:
 }
 ```
 
-The default content type is `application/json` for an accept header `application/json`. In such case the response fromat is a standard GraphQL, JSON-based response that includes a JSON-LD object as a value of the `data` property, e.g.:
+The default content type is `application/json` for an accept header `application/json`. In such case the response format is a standard GraphQL, JSON-based response that includes a JSON-LD object as a value of the `data` property, e.g.:
 
 ```json
 {
@@ -475,9 +475,9 @@ is rewritten:
   }
 ```
 
-### Rewritting to GraphQL
+### Rewriting to GraphQL
 
-Currently, the rewrting to GraphQL is conducted under the assumption that the schemas of the local and the remote HyperGraphQL instances are aligned, meaning that types/fields with the same lables are mapped to the same IRIs, and the output types are associated with the same fields in both schemas. This assumption will be relaxed in the future versions of HyperGraphQL.
+Currently, the rewriting to GraphQL is conducted under the assumption that the schemas of the local and the remote HyperGraphQL instances are aligned, meaning that types/fields with the same labels are mapped to the same IRIs, and the output types are associated with the same fields in both schemas. This assumption will be relaxed in the future versions of HyperGraphQL.
 
 
 <br>
