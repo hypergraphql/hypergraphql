@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.ModelAndView;
 import spark.Request;
+import spark.Response;
 import spark.Service;
 import spark.template.velocity.VelocityTemplateEngine;
 
@@ -73,14 +74,11 @@ public class Controller {
 
         // CORS
         before((request, response) -> {
-            response.header("Access-Control-Allow-Origin", "*");
             response.header("Access-Control-Allow-Methods", "OPTIONS,GET,POST");
-            response.header("Access-Control-Allow-Headers", "*");
         });
 
         hgqlService.options("/*", (req, res) -> {
-            res.header("Access-Control-Allow-Origin", "*");
-            res.header("Access-Control-Allow-Headers", "*");
+            setResponseHeaders(res);
             return "";
         });
 
@@ -92,8 +90,7 @@ public class Controller {
 
             model.put("template", String.valueOf(config.getGraphqlConfig().graphQLPath()));
 
-            res.header("Access-Control-Allow-Origin", "*");
-            res.header("Access-Control-Allow-Headers", "*");
+            setResponseHeaders(res);
 
             return new VelocityTemplateEngine().render(
                     new ModelAndView(model, "graphiql.vtl")
@@ -121,8 +118,7 @@ public class Controller {
                 res.status(400);
             }
 
-            res.header("Access-Control-Allow-Origin", "*");
-            res.header("Access-Control-Allow-Headers", "*");
+            setResponseHeaders(res);
 
             ObjectMapper mapper = new ObjectMapper();
             if (graphQLCompatible) {
@@ -152,8 +148,7 @@ public class Controller {
 
             res.type(contentType);
 
-            res.header("Access-Control-Allow-Origin", "*");
-            res.header("Access-Control-Allow-Headers", "*");
+            setResponseHeaders(res);
 
             return config.getHgqlSchema().getRdfSchemaOutput(mime);
         });
@@ -192,5 +187,11 @@ public class Controller {
             hgqlService.stop();
             LOGGER.info("Shut down server");
         }
+    }
+
+    private void setResponseHeaders(final Response response) {
+
+        response.header("Access-Control-Allow-Origin", "*");
+        response.header("Access-Control-Allow-Headers", "*");
     }
 }
