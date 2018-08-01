@@ -12,6 +12,7 @@ permalink: /tutorial/
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.css" />
     <script src="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.js"></script>
     <script type="application/javascript" src="/scripts/graphiqlinit.js"></script>
+    <script type="application/javascript" src="/scripts/homepage-server.js"></script>
 </graphiqlconfig>
 
 

@@ -1,6 +1,5 @@
-var service = 'http://demo.hypergraphql.org:8084';
+function getEditFunction(parameters, name, service) {
 
-function getEditFunction(parameters, name) {
   return function onEditQuery(newQuery) {
     parameters.query = newQuery;
     document.getElementById(name + '_full').attributes['href'].value = service + '/graphiql?query=' + encodeURI(newQuery);
@@ -8,7 +7,6 @@ function getEditFunction(parameters, name) {
 }
 
 function getFetchingFunction(url) {
-  console.log(url);
   return function graphQLFetcher(graphQLParams) {
     return fetch(url, {
       method: 'post',
@@ -16,7 +14,7 @@ function getFetchingFunction(url) {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(graphQLParams),
+      body: JSON.stringify(graphQLParams)
       // credentials: 'include'
     }).then(function (response) {
       return response.text();
@@ -31,6 +29,7 @@ function getFetchingFunction(url) {
 }
 
 function graphiqlInit(name) {
+  var service = getService(name)
   var gqlelement = document.getElementById(name);
   var queryString = gqlelement.attributes['query'].value;
   var div = document.createElement('div');
@@ -48,8 +47,21 @@ function graphiqlInit(name) {
     React.createElement(GraphiQL, {
       fetcher: getFetchingFunction(service + '/graphql'),
       query: parameters.query,
-      onEditQuery: getEditFunction(parameters, name)
+      onEditQuery: getEditFunction(parameters, name, service)
     }),
     document.getElementById(name + '_dashboard')
   );
+}
+
+function getService(name) {
+
+  var graphql = document.getElementById(name).getAttribute("graphql");
+  var service = config.demoServerBase;
+  config.services.forEach(function (svc) {
+      if(svc.graphql === graphql) {
+        service += ':' + svc.port;
+      }
+    }
+  );
+  return service;
 }
