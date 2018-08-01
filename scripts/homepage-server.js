@@ -1,4 +1,4 @@
-{
+var config = {
   "port": 8080,
   "demoServerBase":"http://demo.hypergraphql.org",
   "gitpage":"https://hypergraphql.github.io/hypergraphql",
