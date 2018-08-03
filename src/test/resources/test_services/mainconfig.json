@@ -1,6 +1,6 @@
 {
     "name": "main",
-    "schema": "src/test/resources/test_services/mainschema.graphql",
+    "schema": "mainschema.graphql",
     "server": {
         "port": 8080,
         "graphql": "/graphql",

@@ -43,7 +43,7 @@ public class ApplicationConfigurationService {
         }
 
         final InputStream inputStream = s3Service.openS3Stream(uri, username, password);
-        final HGQLConfig config = hgqlConfigService.loadHGQLConfig(configUri, inputStream, username, password);
+        final HGQLConfig config = hgqlConfigService.loadHGQLConfig(configUri, inputStream, username, password, false);
 
         return Collections.singletonList(config);
     }
@@ -59,7 +59,7 @@ public class ApplicationConfigurationService {
 
         try {
             final InputStream inputStream = getRequest.asBinary().getBody();
-            final HGQLConfig config = hgqlConfigService.loadHGQLConfig(configUri, inputStream, username, password);
+            final HGQLConfig config = hgqlConfigService.loadHGQLConfig(configUri, inputStream, username, password, false);
             return Collections.singletonList(config);
         } catch (UnirestException e) {
             throw new HGQLConfigurationException("Unable to read from remote URL", e);
@@ -76,7 +76,7 @@ public class ApplicationConfigurationService {
         return configFiles;
     }
 
-    private List<HGQLConfig> getConfigurationsFromFile(final String configPathString) {
+    List<HGQLConfig> getConfigurationsFromFile(final String configPathString) {
 
         final File configPath = new File(configPathString); // it always has this
         final List<HGQLConfig> configurations = new ArrayList<>();
@@ -89,7 +89,7 @@ public class ApplicationConfigurationService {
                     Arrays.stream(jsonFiles).forEach(file -> {
                         final String path = file.getAbsolutePath();
                         try (InputStream in = new FileInputStream(file)) {
-                            configurations.add(hgqlConfigService.loadHGQLConfig(path, in));
+                            configurations.add(hgqlConfigService.loadHGQLConfig(path, in, false));
                         } catch (FileNotFoundException e) {
                             throw new HGQLConfigurationException("One or more config files not found", e);
                         } catch (IOException e) {
@@ -100,7 +100,7 @@ public class ApplicationConfigurationService {
             } else { // assume regular file
                 LOGGER.debug("Regular File");
                 try(InputStream in = new FileInputStream(configPath)) {
-                    configurations.add(hgqlConfigService.loadHGQLConfig(configPathString, in));
+                    configurations.add(hgqlConfigService.loadHGQLConfig(configPathString, in, false));
                 }
             }
         } catch (IOException e) {
@@ -111,19 +111,25 @@ public class ApplicationConfigurationService {
 
     private List<HGQLConfig> getConfigurationsFromClasspath(final String configPathString) {
 
-        // assuming single file
-        final String fn = configPathString.substring(configPathString.lastIndexOf("!") + 1);
-        final String filename = fn.substring(fn.indexOf("/") + 1);
+        final String filename = getConfigFilename(configPathString);
 
         try(final InputStream in = getClass().getClassLoader().getResourceAsStream(filename)) {
 
-            return Collections.singletonList(hgqlConfigService.loadHGQLConfig(configPathString, in)); // TODO ...?
+            return Collections.singletonList(hgqlConfigService.loadHGQLConfig(configPathString, in, true));
 
         } catch (IOException e) {
 
             e.printStackTrace();
         }
         return Collections.emptyList();
+    }
+
+    private String getConfigFilename(final String configPathString) {
+
+        final String fn = configPathString.contains("!")
+                ? configPathString.substring(configPathString.lastIndexOf("!") + 1)
+                : configPathString;
+        return configPathString.startsWith("/") ? fn : fn.substring(fn.indexOf("/") + 1);
     }
 
     public List<HGQLConfig> getConfigResources(final String ... resourcePaths) {
@@ -135,8 +141,7 @@ public class ApplicationConfigurationService {
                     resourcePath -> {
                         final URL sourceUrl = getClass().getClassLoader().getResource(resourcePath);
 
-                        System.out.println(resourcePath); // TODO
-
+                        LOGGER.info("Resource path: {}", resourcePath);
                         if(sourceUrl != null) {
                             configurations.addAll(getConfigurationsFromClasspath(sourceUrl.getFile()));
                         }

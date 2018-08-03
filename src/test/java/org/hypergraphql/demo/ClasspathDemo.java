@@ -13,13 +13,13 @@ public class ClasspathDemo {
         final HGQLConfigService service = new HGQLConfigService();
 
         final String cfg1 = "demo_services/config1.json";
-        HGQLConfig config1 = service.loadHGQLConfig(cfg1, classpathInputStream(cfg1));
+        HGQLConfig config1 = service.loadHGQLConfig(cfg1, classpathInputStream(cfg1), true);
         new Controller().start(config1); //dbpedia-hgql
         final String cfg2 = "demo_services/config2.json";
-        HGQLConfig config2 = service.loadHGQLConfig(cfg2, classpathInputStream(cfg2));
+        HGQLConfig config2 = service.loadHGQLConfig(cfg2, classpathInputStream(cfg2), true);
         new Controller().start(config2); //agrovoc-hgql
         final String cfg3 = "demo_services/config3.json";
-        HGQLConfig config3 = service.loadHGQLConfig(cfg3, classpathInputStream(cfg3));
+        HGQLConfig config3 = service.loadHGQLConfig(cfg3, classpathInputStream(cfg3), true);
         new Controller().start(config3); //fao-go-hgql
     }
 

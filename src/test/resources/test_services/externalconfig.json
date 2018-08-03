@@ -1,6 +1,6 @@
 {
     "name": "external",
-    "schema": "src/test/resources/test_services/externalschema.graphql",
+    "schema": "externalschema.graphql",
     "server": {
         "port": 8081,
         "graphql": "/graphql",

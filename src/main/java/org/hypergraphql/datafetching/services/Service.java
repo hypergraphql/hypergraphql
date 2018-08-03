@@ -1,6 +1,7 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -107,13 +108,13 @@ public abstract class Service {
         Map<String, Set<String>> resultset = new HashMap<>();
         JsonNode node;
 
-        if (!query.isArray()) {
+        if (query.isArray()) {
+            node = query; // TODO - in this situation, we should iterate over the array
+        } else {
             node = query.get("fields");
             if (markers.contains(query.get("nodeId").asText())){
                 resultset.put(query.get("nodeId").asText(),findRootIdentifiers(model,schema.getTypes().get(query.get("targetName").asText())));
             }
-        } else {
-            node = query;
         }
         Set<LinkedList<QueryNode>> paths = new HashSet<>();
         if (node != null && !node.isNull()) {
@@ -128,7 +129,7 @@ public abstract class Service {
             }
         });
 
-        //todo query happens to be an array sometimes - then the following line fails.
+        // TODO query happens to be an array sometimes - then the following line fails.
 
         return resultset;
     }

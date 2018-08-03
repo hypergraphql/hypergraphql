@@ -19,7 +19,7 @@ class HGQLQueryServiceTest {
 
         final String configPath = "test_config.json";
         final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(configPath);
-        HGQLConfig config = configService.loadHGQLConfig(configPath, inputStream);
+        HGQLConfig config = configService.loadHGQLConfig(configPath, inputStream, true);
         HGQLQueryService service = new HGQLQueryService(config);
 
         final String query = "" +

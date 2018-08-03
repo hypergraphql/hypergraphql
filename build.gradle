@@ -93,6 +93,6 @@ shadowJar {
     classifier = 'exe'
 
     manifest {
-        attributes("Main-Class": "org.hypergraphql.Application") // TODO...
+        attributes("Main-Class": "org.hypergraphql.Application")
     }
 }

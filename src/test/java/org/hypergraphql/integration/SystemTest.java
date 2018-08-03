@@ -133,6 +133,6 @@ class SystemTest {
         }
 
         final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(configPath);
-        return configService.loadHGQLConfig(configPath, inputStream);
+        return configService.loadHGQLConfig(configPath, inputStream, true);
     }
 }

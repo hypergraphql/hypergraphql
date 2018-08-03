@@ -80,7 +80,6 @@ public class HGQLSchemaWiring {
             this.schema = generateSchema();
 
         } catch (Exception e) {
-            e.printStackTrace(); // TODO!!!
             throw new HGQLConfigurationException("Unable to perform schema wiring", e);
         }
     }
@@ -99,13 +98,6 @@ public class HGQLSchemaWiring {
                 Service service = (Service) serviceType.getConstructors()[0].newInstance();
 
                 service.setParameters(serviceConfig);
-
-//                try {
-//                    final Method setAbsoluteBasePath = serviceType.getDeclaredMethod("setAbsoluteBasePath", String.class);
-//                    setAbsoluteBasePath.invoke(service, hgqlSchema.)
-//                } catch (NoSuchMethodException e) {
-//                    e.printStackTrace(); // TODO ****
-//                }
 
                 services.put(serviceConfig.getId(), service);
             } catch (IllegalAccessException

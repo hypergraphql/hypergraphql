@@ -12,7 +12,6 @@ import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.services.HGQLConfigService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -41,7 +40,7 @@ class ControllerTest {
 
         final String configPath = "test_config.json";
         controller = new Controller();
-        config = configService.loadHGQLConfig(configPath, getClass().getClassLoader().getResourceAsStream(configPath));
+        config = configService.loadHGQLConfig(configPath, getClass().getClassLoader().getResourceAsStream(configPath), true);
         controller.start(config);
     }
 

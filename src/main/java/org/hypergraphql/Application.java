@@ -109,7 +109,6 @@ public class Application {
         LOGGER.debug("Username: {}", username);
         LOGGER.debug("Password: {}", password == null ? "Not provided" : "**********");
 
-        // TODO - check for URL, S3, file://, 'file' and 'classpath:'
         if(isS3(configPath)) {
             return service.readConfigurationFromS3(configPath, username, password);
         } else if(isNormalURL(configPath)) {

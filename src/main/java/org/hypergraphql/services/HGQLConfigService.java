@@ -2,11 +2,12 @@ package org.hypergraphql.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.GetRequest;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.http.util.EntityUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datamodel.HGQLSchemaWiring;
 import org.hypergraphql.exception.HGQLConfigurationException;
@@ -14,13 +15,12 @@ import org.hypergraphql.util.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -33,11 +33,11 @@ public class HGQLConfigService {
 
     private S3Service s3Service = new S3Service();
 
-    public HGQLConfig loadHGQLConfig(final String hgqlConfigPath, final InputStream inputStream) {
-        return loadHGQLConfig(hgqlConfigPath, inputStream, null, null);
+    public HGQLConfig loadHGQLConfig(final String hgqlConfigPath, final InputStream inputStream, final boolean classpath) {
+        return loadHGQLConfig(hgqlConfigPath, inputStream, null, null, classpath);
     }
 
-    HGQLConfig loadHGQLConfig(final String hgqlConfigPath, final InputStream inputStream, final String username, final String password) {
+    HGQLConfig loadHGQLConfig(final String hgqlConfigPath, final InputStream inputStream, final String username, final String password, boolean classpath) {
 
         final ObjectMapper mapper = new ObjectMapper();
 
@@ -50,7 +50,7 @@ public class HGQLConfigService {
 
             LOGGER.info("Schema config path: " + fullSchemaPath);
 
-            final Reader reader = selectAppropriateReader(fullSchemaPath, username, password);
+            final Reader reader = selectAppropriateReader(fullSchemaPath, username, password, classpath);
             final TypeDefinitionRegistry registry =
                     schemaParser.parse(reader);
 
@@ -64,7 +64,7 @@ public class HGQLConfigService {
         }
     }
 
-    private Reader selectAppropriateReader(final String schemaPath, final String username, final String password)
+    private Reader selectAppropriateReader(final String schemaPath, final String username, final String password, final boolean classpath)
             throws IOException, URISyntaxException {
 
         if(schemaPath.matches(S3_REGEX)) {
@@ -74,7 +74,7 @@ public class HGQLConfigService {
 
         } else if(schemaPath.matches(NORMAL_URL_REGEX)) {
             return getReaderForUrl(schemaPath, username, password);
-        } else if (schemaPath.contains(".jar!")) {
+        } else if (schemaPath.contains(".jar!") || classpath) {
             // classpath
             System.out.println("Schema on classpath");
             return getReaderForClasspath(schemaPath);
@@ -84,8 +84,7 @@ public class HGQLConfigService {
         }
     }
 
-    private Reader getReaderForUrl(final String schemaPath, final String username, final String password)
-            throws IOException {
+    private Reader getReaderForUrl(final String schemaPath, final String username, final String password) {
 
         final GetRequest getRequest;
         if(username == null && password == null) {
@@ -93,14 +92,13 @@ public class HGQLConfigService {
         } else {
             getRequest = Unirest.get(schemaPath).basicAuth(username, password);
         }
-        return new InputStreamReader(
-                new ByteArrayInputStream(
-                        EntityUtils.toByteArray(
-                                getRequest.getBody().getEntity()
-                        )
-                ),
-                StandardCharsets.UTF_8
-        );
+
+        try {
+            final String body = getRequest.asString().getBody();
+            return new StringReader(body);
+        } catch (UnirestException e) {
+            throw new HGQLConfigurationException("Unable to load configuration", e);
+        }
     }
 
     private Reader getReaderForS3(final String schemaPath, final String username, final String password)
@@ -112,18 +110,23 @@ public class HGQLConfigService {
 
     private String extractFullSchemaPath(final String hgqlConfigPath, final String schemaPath) {
 
-        final String configPath = FilenameUtils.getPath(hgqlConfigPath);
-        return PathUtils.makeAbsolute(configPath, schemaPath);
+        final String configPath = '/' + FilenameUtils.getPath(hgqlConfigPath);
+        if(StringUtils.isBlank(configPath)) {
+            return schemaPath;
+        } else {
+            return PathUtils.makeAbsolute(configPath, schemaPath);
+        }
     }
 
     private Reader getReaderForClasspath(final String schemaPath) {
 
-        System.out.println("Obtaining reader: " + schemaPath);
+        LOGGER.debug("Obtaining reader for: {}", schemaPath);
 
-        final String fn = schemaPath.substring(schemaPath.lastIndexOf("!") + 1);
-        final String filename = fn.substring(fn.startsWith("/") ? 1 : 0);
-        System.out.println("For filename: " + filename);
-
+        final String fn = schemaPath.contains("!")
+                ? schemaPath.substring(schemaPath.lastIndexOf("!") + 1)
+                : schemaPath;
+        final String filename = schemaPath.startsWith("/") ? fn.substring(fn.indexOf("/") + 1) : fn;
+        LOGGER.debug("For filename: {}", filename);
         return new InputStreamReader(getClass().getClassLoader().getResourceAsStream(filename));
     }
 }

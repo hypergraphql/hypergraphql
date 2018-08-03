@@ -3,23 +3,17 @@ package org.hypergraphql.services;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.hypergraphql.config.system.HGQLConfig;
-import org.hypergraphql.services.ApplicationConfigurationService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -30,50 +24,48 @@ class ApplicationConfigurationServiceTest {
 
     private ApplicationConfigurationService service = new ApplicationConfigurationService();
 
-//    @Test
-//    void should_parse_file_paths_as_files() {
-//
-//        final File tempDirectory = copyTestResourcesToFileSystem();
-//        final List<HGQLConfig> configurations = service.getConfigFiles(tempDirectory.getAbsolutePath());
-//        assertNotNull(configurations);
-//
-//        final List<HGQLConfig> expectedStreams = new ArrayList<>();
-//        Arrays.asList(tempDirectory.listFiles(file -> file.getName().endsWith(".json"))).forEach(file -> {
-//                    try {
-//                        expectedStreams.add(new FileInputStream(file));
-//                    } catch (FileNotFoundException e) {
-//                        throw new RuntimeException("Test error: file not found", e);
-//                    }
-//                });
-//
-//        final List<String> expected = readStreams(expectedStreams);
-//        final List<String> actual = readStreams(configurations);
-//
-//        assertIterableEquals(expected, actual);
-//    }
+    @Test
+    void should_parse_file_paths_as_files() {
+
+        final File tempDirectory = copyTestResourcesToFileSystem();
+        final List<HGQLConfig> configurations = service.getConfigFiles(tempDirectory.getAbsolutePath());
+        assertNotNull(configurations);
+
+        final List<HGQLConfig> expectedConfigs = new ArrayList<>();
+        final String[] filenames = tempDirectory.list((directory, filename) -> filename.endsWith(".json"));
+        Arrays.asList(filenames).forEach(filename -> {
+            final File file = new File(tempDirectory, filename);
+                expectedConfigs.add(service.getConfigurationsFromFile(file.getAbsolutePath()).get(0));
+            });
+
+        final List<String> expected = readConfigs(expectedConfigs);
+        final List<String> actual = readConfigs(configurations);
+
+        assertIterableEquals(expected, actual);
+    }
 
 //    @Test
 //    void should_parse_individual_file() throws Exception {
 //
-//        final File tempFile = copyTestResourceToFileSystem("test_config_resources/config4.json");
+//        final File tempFile = copyTestResourceToFileSystem("test_configurations/config4.json");
 //        final List<HGQLConfig> configurations = service.getConfigFiles(tempFile.getAbsolutePath());
 //        assertNotNull(configurations);
 //
 //        final List<InputStream> expected = Collections.singletonList(new FileInputStream(tempFile));
 //
-//        assertEquals(readStreams(expected), readStreams(configurations));
+//        assertEquals(readConfigs(expected), readConfigs(configurations));
 //    }
 
 //    @Test
 //    void should_load_classpath_resources() {
 //
 //        final String[] resources = {
-//                "test_config_resources/config1.json",
-//                "test_config_resources/config2.json",
-//                "test_config_resources/config3.json",
-//                "test_config_resources/config4.json"
+//                "test_configurations/config1.json",
+//                "test_configurations/config2.json",
+//                "test_configurations/config3.json",
+//                "test_configurations/config4.json"
 //        };
-//        final List<InputStream> actual = service.getConfigResources(resources);
+//        final List<HGQLConfig> actual = service.getConfigResources(resources);
 //
 //        assertEquals(4, actual.size());
 //    }
@@ -83,10 +75,14 @@ class ApplicationConfigurationServiceTest {
         final File tempDirectory = createTempDirectory();
         // copy input streams to temp files
         Arrays.asList(
-                "test_config_resources/config1.json",
-                "test_config_resources/config2.json",
-                "test_config_resources/config3.json",
-                "test_config_resources/config4.json"
+                "test_configurations/config1.json",
+                "test_configurations/config2.json",
+                "test_configurations/config3.json",
+                "test_configurations/config4.json",
+                "test_configurations/schema1.graphql",
+                "test_configurations/schema2.graphql",
+                "test_configurations/schema3.graphql",
+                "test_configurations/schema4.graphql"
         ).forEach(path -> copyClasspathResourceToTemp(tempDirectory, path));
         return tempDirectory;
     }
@@ -122,15 +118,11 @@ class ApplicationConfigurationServiceTest {
         return tempDirectory;
     }
 
-    private List<String> readStreams(final List<InputStream> streams) {
+    private List<String> readConfigs(final List<HGQLConfig> configs) {
 
         final List<String> strings = new ArrayList<>();
-        streams.forEach(stream -> {
-            try {
-                strings.add(IOUtils.toString(stream, StandardCharsets.UTF_8));
-            } catch (IOException e) {
-                throw new RuntimeException("Parse to String failed", e);
-            }
+        configs.forEach(config -> {
+            strings.add(config.getName() + config.getSchemaFile());
         });
         return strings;
     }
