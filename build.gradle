@@ -51,6 +51,8 @@ dependencies {
 
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.11.0'
 
+    testCompile group: 'org.junit.platform', name: 'junit-platform-gradle-plugin', version: '1.2.0'
+
     testCompileOnly('org.apiguardian:apiguardian-api:1.0.0')
 
     testImplementation(
@@ -63,7 +65,7 @@ dependencies {
 
 test {
     systemProperty 'hgql_version', project.version
-//    useJUnitPlatform()
+    useJUnitPlatform()
     testLogging {
         events 'PASSED', 'FAILED', 'SKIPPED'
     }
