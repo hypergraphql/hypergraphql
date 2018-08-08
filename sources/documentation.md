@@ -24,21 +24,37 @@ The core response object of HyperGraphQL is [JSON-LD](https://json-ld.org) (embe
 
 # Running
 
-Clone the Git repository into a local directory. In the root of the project execute the following: 
+Clone the Git repository into a local directory.
+
+## Running from source
+
+In the root of the project execute the following: 
 
 **NB**: You _**MUST**_ provide at least one configuration file argument
 
-**Maven**: 
-1. **`mvn install`**
-2. **`mvn exec:java "[-Dexec.args=<command line options>]"`** 
-
-e.g.: `mvn exec:java "-Dexec.args=--classpath --config config.json"`
-
 **Gradle**:
-1. **`gradle build`**
-2. **`gradle execute [-Pa="<comma separated command line args>"]`**
+1. `gradle build`
+2. `gradle execute [-Pa="<comma separated command line args>"]`
 
 e.g.: `gradle execute -Pa="--classpath, --config, config.json"`
+
+## Running from an executable JAR (this is the preferred mechanism)
+
+**Gradle**
+1. `gradle clean build shadowJar` 
+This will build two JAR files in `build/libs`:
+    - `hypergraphql-<version>.jar`, <br/>
+    e.g.: `hypergraphql-1.3.7.jar`
+    - `hypergraphql-<version>-exe.jar`, <br/>
+    e.g. `hypergraphql-1.3.7-exe.jar`
+2. Run the executable JAR<br/>
+`java -jar build/libs/<exe-jar> [<args>]`, 
+<br/>e.g.: `java -jar build/libs/hypergraphql-1.3.7-exe.jar --config /hgql/config/config.json`<br/> 
+where `/hgql/config` refers to an absolute server location
+3. Deploy this executable JAR onto another container, such as AWS ElasticBeanstalk, see [this section on running in a container](/container/)
+4. For an explanation of remote configuration options, see [this section on running in a container](/container/)
+
+The latest (v1.3.7) version of the executable JAR [can be downloaded here]()
 
 By default, the HyperGraphQL server starts at: 
 
@@ -169,7 +185,7 @@ The configuration of an instance is defined in *config.json* file, located in th
 The meaning of the JSON properties is as follows:
 
 * `name`: the name of the instance (currently used only internally for defining schema resources);  
-* `schema`: the name (possibly including the path, if not placed in the root) of the file containing GraphQL schema of the instance;
+* `schema`: the name (possibly including the path, if not placed in the root) of the file containing GraphQL schema of the instance (see note below); 
 * `server`: the HTTP settings of the instance:
   - `port`: the port on which the instance is initiated;
   - `graphql`: the path of the GraphQL server;
@@ -177,6 +193,24 @@ The meaning of the JSON properties is as follows:
 * `services`: the specification of all services from which the instance is to fetch the data.
 
 Currently, HyperGraphQL supports three types of linked data services: (remote) SPARQL endpoints (`SPARQLEndpointService`), local RDF files (`LocalModelSPARQLService`) and (remote) HyperGraphQL instances (`HGraphQLService`).
+
+#### Short note about `schema` paths
+
+The value of the path in `schema` can be either relative to the path of the containing configuration, or absolute.<br/>
+Given the file structure:
+```
+/
+|_hgql
+   |_cfg
+      |_config.json
+      |_schema
+         |_schema.graphql         
+```
+The `schema` could be specified in `config.json` as either:<br/>
+Relative:<br/>
+`schema: schema/schema.graphql`<br/>
+Absolute:<br/>
+`schema: /hgql/cfg/schema/schema.graphql`<br/>
 
 ### Remote SPARQL endpoints
 
@@ -497,6 +531,7 @@ Similarly to GraphQL, HyperGraphQL supports introspection queries, following the
 In the future versions, this representation will also be made available via suitable introspection queries.
 
 <br>
+
 
 
 # Other references
