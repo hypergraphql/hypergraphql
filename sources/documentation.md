@@ -138,7 +138,7 @@ The response to this query consists of the usual GraphQL JSON object, further au
 }
 ```
 
-It is easy to find out, using e.g. [JSON-LD playground](https://json-ld.org/playground/), that the `data` node in this response is in fact a valid JSON-LD object encoding the following RDF graph (in N-TRIPLE notation):
+It is easy to find out (using e.g. [JSON-LD playground](https://json-ld.org/playground/)) that the `data` node in this response is in fact a valid JSON-LD object encoding the following RDF graph (in N-TRIPLE notation):
 
 ```
 _:b0 <http://hypergraphql.org/query/Person_GET> <http://dbpedia.org/resource/Sani_ol_molk> .
@@ -213,6 +213,9 @@ Relative:<br/>
 `schema: schema/schema.graphql`<br/>
 Absolute:<br/>
 `schema: /hgql/cfg/schema/schema.graphql`<br/>
+
+It is also completely possible to reference a schema on a different protocol, for example to point to an S3 URL from a 
+configuration file on a local filesystem.
 
 ### Remote SPARQL endpoints
 
