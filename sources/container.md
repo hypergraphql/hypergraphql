@@ -26,17 +26,19 @@ These files can reside in a number of places:
 
 Command-line parameters are:
 
-**`--classpath`** - (Optional) - If present, look for the configuration files on the classpath<br/>
-**`--config`** - (Either this or the `--s3` parameter **_must_** be present) - location(s) of the configuration files - 
-can be a directory, a file or a list of files, e.g.:<br/>
-- `--config /hgql/config`
-- `--config /hgql/config/config1.json` 
-- `--config /hgql/config/config1.json /hgql/config/config2.json`
+*NB*: parameters can be specified as `-<parameter>` or `--<parameter>`
 
-**`--s3`** - (Required if `--config` isn't provided) - Location of a configuration file on AWS S3<br/>
-**`--u`** - (Required if `--s3` is set) - accessKey<br/>
-**`--p`** - (Required if `--s3` is set) - accessSecretKey<br/>
-**`--nobanner`** - (Optional) - omit banner on startup  
+**`-classpath`** - (Optional) - If present, look for the configuration files on the classpath<br/>
+**`-config`** - (Either this or the `--s3` parameter **_must_** be present) - location(s) of the configuration files - 
+can be a directory, a file or a list of files, e.g.:<br/>
+- `-config /hgql/config`
+- `-config /hgql/config/config1.json` 
+- `-config /hgql/config/config1.json /hgql/config/config2.json`
+
+**`-s3`** - (Required if `--config` isn't provided) - Location of a configuration file on AWS S3<br/>
+**`-u`** - (Required if `--s3` is set) - accessKey<br/>
+**`-p`** - (Required if `--s3` is set) - accessSecretKey<br/>
+**`-nobanner`** - (Optional) - omit banner on startup  
 
 ### Environment Variables
 

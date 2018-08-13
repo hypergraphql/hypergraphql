@@ -32,6 +32,8 @@ In the root of the project execute the following:
 
 **NB**: You _**MUST**_ provide at least one configuration file argument
 
+**NB**: Requires Gradle v4.6+
+
 **Gradle**:
 1. `gradle build`
 2. `gradle execute [-Pa="<comma separated command line args>"]`
@@ -44,17 +46,17 @@ e.g.: `gradle execute -Pa="--classpath, --config, config.json"`
 1. `gradle clean build shadowJar` 
 This will build two JAR files in `build/libs`:
     - `hypergraphql-<version>.jar`, <br/>
-    e.g.: `hypergraphql-1.3.7.jar`
+    e.g.: `hypergraphql-1.0.0.jar`
     - `hypergraphql-<version>-exe.jar`, <br/>
-    e.g. `hypergraphql-1.3.7-exe.jar`
+    e.g. `hypergraphql-1.0.0-exe.jar`
 2. Run the executable JAR<br/>
 `java -jar build/libs/<exe-jar> [<args>]`, 
-<br/>e.g.: `java -jar build/libs/hypergraphql-1.3.7-exe.jar --config /hgql/config/config.json`<br/> 
+<br/>e.g.: `java -jar build/libs/hypergraphql-1.0.0-exe.jar --config /hgql/config/config.json`<br/> 
 where `/hgql/config` refers to an absolute server location
 3. Deploy this executable JAR onto another container, such as AWS ElasticBeanstalk, see [this section on running in a container](/container/)
 4. For an explanation of remote configuration options, see [this section on running in a container](/container/)
 
-The latest (v1.3.7) version of the executable JAR [can be downloaded here]()
+The latest (v1.0.0) version of the executable JAR [can be downloaded here](/resources/hypergraphql-1.0.0-exe.jar)
 
 By default, the HyperGraphQL server starts at: 
 
