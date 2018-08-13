@@ -137,7 +137,7 @@ public class Application {
                                 .desc("Look on classpath instead of file system")
                                 .build()
                 ).addOption(
-                        Option.builder("s3")
+                        Option.builder("s")
                                 .longOpt("s3")
                                 .hasArg(true)
                                 .desc("Look at the provided URL for configuration")

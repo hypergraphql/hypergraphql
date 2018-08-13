@@ -115,6 +115,10 @@ public class ApplicationConfigurationService {
 
         try(final InputStream in = getClass().getClassLoader().getResourceAsStream(filename)) {
 
+            if(in == null) {
+                // try to get from file - probably being run from an IDE with CP as filesystem
+                return getConfigurationsFromFile(configPathString);
+            }
             return Collections.singletonList(hgqlConfigService.loadHGQLConfig(configPathString, in, true));
 
         } catch (IOException e) {

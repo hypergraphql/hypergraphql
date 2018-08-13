@@ -14,10 +14,14 @@ public class PathUtils {
             return path;
         } else {
             final String parentPath = FilenameUtils.getFullPath(generalPath);
-            return  parentPath +
+            return parentPath +
                     (parentPath.endsWith("/") ? "" : "/") +
                     path;
         }
+    }
+
+    public static boolean hasProtocol(final String path) {
+        return isS3(path) || isNormalURL(path) || isFileUrl(path);
     }
 
     public static boolean isAbsolute(final String path) {

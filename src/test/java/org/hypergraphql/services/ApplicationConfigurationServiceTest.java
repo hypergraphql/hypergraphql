@@ -87,12 +87,12 @@ class ApplicationConfigurationServiceTest {
         return tempDirectory;
     }
 
-    private File copyTestResourceToFileSystem(final String path) {
-
-        final File tempDirectory = createTempDirectory();
-        copyClasspathResourceToTemp(tempDirectory, path);
-        return new File(tempDirectory, new File(path).getName());
-    }
+//    private File copyTestResourceToFileSystem(final String path) {
+//
+//        final File tempDirectory = createTempDirectory();
+//        copyClasspathResourceToTemp(tempDirectory, path);
+//        return new File(tempDirectory, new File(path).getName());
+//    }
 
     private void copyClasspathResourceToTemp(final File tempDirectory, final String path) {
 

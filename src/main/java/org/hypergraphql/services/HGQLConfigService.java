@@ -48,7 +48,7 @@ public class HGQLConfigService {
 
             final String fullSchemaPath = extractFullSchemaPath(hgqlConfigPath, config.getSchemaFile());
 
-            LOGGER.info("Schema config path: " + fullSchemaPath);
+            LOGGER.debug("Schema config path: " + fullSchemaPath);
 
             final Reader reader = selectAppropriateReader(fullSchemaPath, username, password, classpath);
             final TypeDefinitionRegistry registry =
@@ -69,16 +69,19 @@ public class HGQLConfigService {
 
         if(schemaPath.matches(S3_REGEX)) {
 
+            LOGGER.debug("S3 schema");
             // create S3 bucket request, etc.
             return getReaderForS3(schemaPath, username, password);
 
         } else if(schemaPath.matches(NORMAL_URL_REGEX)) {
+            LOGGER.info("HTTP/S schema");
             return getReaderForUrl(schemaPath, username, password);
         } else if (schemaPath.contains(".jar!") || classpath) {
+            LOGGER.debug("Class path schema");
             // classpath
-            System.out.println("Schema on classpath");
             return getReaderForClasspath(schemaPath);
         } else {
+            LOGGER.debug("Filesystem schema");
             // file
             return new InputStreamReader(new FileInputStream(schemaPath), StandardCharsets.UTF_8);
         }
@@ -110,10 +113,13 @@ public class HGQLConfigService {
 
     private String extractFullSchemaPath(final String hgqlConfigPath, final String schemaPath) {
 
-        final String configPath = '/' + FilenameUtils.getPath(hgqlConfigPath);
+        LOGGER.debug("HGQL config path: {}, schema path: {}", hgqlConfigPath, schemaPath);
+        final String configPath = FilenameUtils.getFullPath(hgqlConfigPath);
         if(StringUtils.isBlank(configPath)) {
             return schemaPath;
         } else {
+            final String abs = PathUtils.makeAbsolute(configPath, schemaPath);
+            LOGGER.debug("Absolute path: {}", abs);
             return PathUtils.makeAbsolute(configPath, schemaPath);
         }
     }
@@ -125,8 +131,8 @@ public class HGQLConfigService {
         final String fn = schemaPath.contains("!")
                 ? schemaPath.substring(schemaPath.lastIndexOf("!") + 1)
                 : schemaPath;
-        final String filename = schemaPath.startsWith("/") ? fn.substring(fn.indexOf("/") + 1) : fn;
+        final String filename = fn.startsWith("/") ? fn.substring(fn.indexOf("/") + 1) : fn;
         LOGGER.debug("For filename: {}", filename);
         return new InputStreamReader(getClass().getClassLoader().getResourceAsStream(filename));
-    }
+     }
 }
