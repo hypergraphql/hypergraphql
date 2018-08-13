@@ -20,7 +20,7 @@ To facilitate exploration, each HyperGraphQL instance is by default accompanied 
 
 The core response object of HyperGraphQL is [JSON-LD](https://json-ld.org) (embedded in the standard GraphQL response), which extends JSON with a [JSON-LD context](https://json-ld.org/spec/latest/json-ld-api-best-practices/#dfn-json-ld-context) enabling semantic disambiguation of the served data. Support for other RDF serialisation formats is also provided.
 
-<br>
+<br/>
 
 # Running
 
@@ -70,7 +70,7 @@ The [GraphiQL](https://github.com/graphql/graphiql) UI is initiated at:
 http://localhost:8080/graphiql
 ```
 
-<br>
+<br/>
 
 # Example
 
@@ -152,7 +152,7 @@ _:b0 <http://hypergraphql.org/query/Person_GET> <http://dbpedia.org/resource/San
 ```
 This graph (except for the first triple, added by HyperGraphQL) is a subset of the DBpedia dataset. 
 
-<br>
+<br/>
 
 # HyperGraphQL instance = configuration + annotated GraphQL schema
 
@@ -334,7 +334,7 @@ The `Query` type of the type is generated automatically by the service. Addition
 - `_type:String` field, attached to each type in the schema, returning the `rdf:type` of the parent type of this resource in the schema;
 - `lang:String` argument, attached to each field in the schema with the value type `String`, which allows to specify the language of the literal to be fetched for the respective field. The recommended argument values follow the convention used in `rdf:langString` (e.g. `en`, `fr`, `de`, etc.)  
 
-<br>
+<br/>
 
 # Request and response formats
 
@@ -447,7 +447,7 @@ For instance, the response above in `application/rdf+xml` is served as:
 </rdf:RDF>
 ```
 
-<br>
+<br/>
 
 # Data fetching and query execution
 
@@ -519,7 +519,7 @@ is rewritten:
 Currently, the rewriting to GraphQL is conducted under the assumption that the schemas of the local and the remote HyperGraphQL instances are aligned, meaning that types/fields with the same labels are mapped to the same IRIs, and the output types are associated with the same fields in both schemas. This assumption will be relaxed in the future versions of HyperGraphQL.
 
 
-<br>
+<br/>
 
 # Accessing the schema
 
@@ -533,11 +533,9 @@ Similarly to GraphQL, HyperGraphQL supports introspection queries, following the
 - `application/n3`
 - `text/n3`
 
-In the future versions, this representation will also be made available via suitable introspection queries.
+In future versions, this representation will also be made available via suitable introspection queries.
 
-<br>
-
-
+<br/>
 
 # Other references
 
