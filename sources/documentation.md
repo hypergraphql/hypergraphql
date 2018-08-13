@@ -252,6 +252,8 @@ configuration file on a local filesystem.
 * `filepath`: the local path to the file with the RDF data;
 * `filetype`: the serialisation format of the RDF data; the acronyms follow the convention used in [Jena](https://jena.apache.org/documentation/io/rdf-output.html#jena_model_write_formats) `RDF/XML` (for RDF/XML), `TTL` (for Turtle), `NTRIPLE` (for n-triple).
 
+The RDF file may reside in a remote location; it will be loaded into a local in-memory RDF model for use by the system.
+
 ### Remote HyperGraphQL instances
 
 ```json
@@ -323,7 +325,7 @@ name:      _@href(iri: "http://xmlns.com/foaf/0.1/name")
 
 Note that each type/field must be mapped to a unique such IRI. Intuitively, GraphQL types should be mapped to IRIs representing RDF/OWL classes, while fields to OWL data properties (whenever the values of the field are scalars, e.g., `String`, `Int`, `Boolean`, `ID`) and OWL object properties (whenever the values of the field are IRI resources).
 
-Furthermore, types and fields in the schema are annotated with the directives of the form:
+Types and fields in the schema are annotated with the directives of the form:
 ```
 @service(id:"dbpedia-sparql")
 ```
