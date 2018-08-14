@@ -249,7 +249,7 @@ configuration file on a local filesystem.
 
 * `id`: identifier of the service, used in the GraphQL schema annotations;
 * `type`: type of the service - here the constant value of `LocalModelSPARQLService`;
-* `filepath`: the local path to the file with the RDF data;
+* `filepath`: the local path to the file with the RDF data (absolute, or relative to the run directory of the application);
 * `filetype`: the serialisation format of the RDF data; the acronyms follow the convention used in [Jena](https://jena.apache.org/documentation/io/rdf-output.html#jena_model_write_formats) `RDF/XML` (for RDF/XML), `TTL` (for Turtle), `NTRIPLE` (for n-triple).
 
 The RDF file may reside in a remote location; it will be loaded into a local in-memory RDF model for use by the system.
