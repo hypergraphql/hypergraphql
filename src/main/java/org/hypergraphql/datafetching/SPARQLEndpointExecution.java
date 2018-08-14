@@ -17,7 +17,6 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.web.HttpOp;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
-import org.apache.jena.sparql.resultset.ResultsFormat;
 import org.apache.log4j.Logger;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
 import org.hypergraphql.datamodel.HGQLSchema;
@@ -59,7 +58,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
 
         SPARQLServiceConverter converter = new SPARQLServiceConverter(schema);
         String sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);
-        logger.info(sparqlQuery);
+        logger.debug(sparqlQuery);
 
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         Credentials credentials =

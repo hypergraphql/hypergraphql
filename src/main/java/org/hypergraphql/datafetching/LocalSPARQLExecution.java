@@ -37,7 +37,7 @@ public class LocalSPARQLExecution extends SPARQLEndpointExecution {
 
         SPARQLServiceConverter converter = new SPARQLServiceConverter(schema);
         String sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);
-        logger.info(sparqlQuery);
+        logger.debug(sparqlQuery);
         Query jenaQuery = QueryFactory.create(sparqlQuery);
 
         QueryExecution qexec = QueryExecutionFactory.create(jenaQuery, model);
