@@ -17,10 +17,11 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.web.HttpOp;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
-import org.apache.log4j.Logger;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.query.converters.SPARQLServiceConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,7 +37,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
     Set<String> markers;
     SPARQLEndpointService sparqlEndpointService;
     protected HGQLSchema schema ;
-    protected Logger logger = Logger.getLogger(SPARQLEndpointExecution.class);
+    protected Logger logger = LoggerFactory.getLogger(SPARQLEndpointExecution.class);
     String rootType;
 
     public SPARQLEndpointExecution(JsonNode query, Set<String> inputSubset, Set<String> markers, SPARQLEndpointService sparqlEndpointService, HGQLSchema schema, String rootType) {
@@ -86,7 +87,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
         });
 
         SPARQLExecutionResult sparqlExecutionResult = new SPARQLExecutionResult(resultSet, unionModel);
-        logger.debug(sparqlExecutionResult);
+        logger.debug("Result: {}", sparqlExecutionResult);
 
         return sparqlExecutionResult;
     }

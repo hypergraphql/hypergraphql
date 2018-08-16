@@ -124,7 +124,6 @@ public class Application {
         return new Options()
                 .addOption(
                         Option.builder("config")
-                                .longOpt("config")
                                 .hasArgs()
                                 .numberOfArgs(Option.UNLIMITED_VALUES)
                                 .desc("Location of config files (or absolute paths to config files)")
@@ -132,13 +131,11 @@ public class Application {
                 )
                 .addOption(
                         Option.builder("classpath")
-                                .longOpt("classpath")
                                 .hasArg(false)
                                 .desc("Look on classpath instead of file system")
                                 .build()
                 ).addOption(
-                        Option.builder("s")
-                                .longOpt("s3")
+                        Option.builder("s3")
                                 .hasArg(true)
                                 .desc("Look at the provided URL for configuration")
                                 .build()
@@ -164,7 +161,6 @@ public class Application {
                                 .build()
                 ).addOption(
                         Option.builder("nobanner")
-                                .longOpt("nobanner")
                                 .hasArg(false)
                                 .desc("Don't show the banner on startup")
                                 .build()

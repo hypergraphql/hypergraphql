@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import graphql.schema.GraphQLSchema;
-import org.apache.log4j.Logger;
 import org.hypergraphql.datamodel.HGQLSchema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -36,18 +37,8 @@ public class HGQLConfig {
         return hgqlSchema;
     }
 
-    public static Logger getLogger() {
-        return logger;
-    }
-
-    public static void setLogger(Logger logger) {
-        HGQLConfig.logger = logger;
-    }
-
     private GraphQLSchema schema;
     private HGQLSchema hgqlSchema;
-
-    private static Logger logger = Logger.getLogger(HGQLConfig.class);
 
     @JsonCreator
     private HGQLConfig(

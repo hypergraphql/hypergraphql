@@ -15,13 +15,14 @@ import graphql.schema.GraphQLTypeReference;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.log4j.Logger;
 import org.hypergraphql.config.schema.FieldConfig;
 import org.hypergraphql.config.schema.FieldOfTypeConfig;
 import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.config.schema.TypeConfig;
 import org.hypergraphql.datafetching.services.Service;
 import org.hypergraphql.exception.HGQLConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +61,7 @@ import static org.hypergraphql.config.schema.HGQLVocabulary.SCALAR_TYPES_TO_GRAP
 
 public class HGQLSchema {
 
-    private static Logger logger = Logger.getLogger(HGQLSchema.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(HGQLSchema.class);
 
     private String schemaUri;
     private String schemaNamespace;
@@ -113,7 +114,7 @@ public class HGQLSchema {
         if (context == null) {
             HGQLConfigurationException e =
                     new HGQLConfigurationException("The provided GraphQL schema IDL specification is missing the obligatory __Context type (see specs at http://hypergraphql.org).");
-            logger.error(e);
+            LOGGER.error("Context not set!", e);
             throw(e);
         }
 

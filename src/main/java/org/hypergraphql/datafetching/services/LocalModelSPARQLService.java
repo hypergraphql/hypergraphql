@@ -13,7 +13,8 @@ import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.exception.HGQLConfigurationException;
 import org.hypergraphql.util.LangUtils;
-import org.hypergraphql.util.PathUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -31,9 +32,9 @@ import java.util.concurrent.Future;
 
 public class LocalModelSPARQLService extends SPARQLEndpointService{
 
-    protected Model model;
+    private final static Logger LOGGER = LoggerFactory.getLogger(LocalModelSPARQLService.class);
 
-    private String absoluteBasePath;
+    protected Model model;
 
     @Override
     public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers , String rootType , HGQLSchema schema) {
@@ -76,14 +77,12 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
 
         this.id = serviceConfig.getId();
 
-//        String filepath = PathUtils.makeAbsolute(serviceConfig.getFilepath());
-        System.out.println("Current path: " + new File(".").getAbsolutePath());
+        LOGGER.debug("Current path: " + new File(".").getAbsolutePath());
 
         final File cwd = new File(".");
         try(final FileInputStream fis = new FileInputStream(new File(cwd, serviceConfig.getFilepath()));
             final BufferedInputStream in = new BufferedInputStream(fis)) {
             this.model = ModelFactory.createDefaultModel();
-//            this.model.read(in, serviceConfig.getFiletype());
             final Lang lang = LangUtils.forName(serviceConfig.getFiletype());
             RDFDataMgr.read(model, in, lang);
         } catch (FileNotFoundException e) {
@@ -91,9 +90,5 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
         } catch (IOException e) {
             throw new HGQLConfigurationException("Nonspecific IO exception", e);
         }
-    }
-
-    public void setAbsoluteBasePath(final String absoluteBasePath) {
-        this.absoluteBasePath = absoluteBasePath;
     }
 }

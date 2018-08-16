@@ -6,8 +6,9 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.log4j.Logger;
 import org.hypergraphql.config.schema.HGQLVocabulary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class ModelContainer {
 
     protected Model model;
 
-    private static final Logger LOGGER = Logger.getLogger(ModelContainer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ModelContainer.class);
 
     public String getDataOutput(String format) {
 

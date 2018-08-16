@@ -9,16 +9,16 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import graphql.schema.idl.TypeDefinitionRegistry;
-import org.apache.log4j.Logger;
 import org.hypergraphql.config.schema.FieldOfTypeConfig;
 import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.config.schema.TypeConfig;
 import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.services.Service;
 import org.hypergraphql.exception.HGQLConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +42,7 @@ import static org.hypergraphql.config.schema.HGQLVocabulary.SCALAR_TYPES;
 
 public class HGQLSchemaWiring {
 
-    private static final Logger LOGGER = Logger.getLogger(HGQLSchemaWiring.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HGQLSchemaWiring.class);
 
     private HGQLSchema hgqlSchema;
     private GraphQLSchema schema;
@@ -104,7 +104,7 @@ public class HGQLSchemaWiring {
                     | InstantiationException
                     | ClassNotFoundException
                     | InvocationTargetException e) {
-                LOGGER.error(e);
+                LOGGER.error("Problem adding service {}", serviceConfig.getId(), e);
                 throw new HGQLConfigurationException("Error wiring up services", e);
             }
         });

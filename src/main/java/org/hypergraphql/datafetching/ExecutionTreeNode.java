@@ -14,12 +14,13 @@ import graphql.language.SelectionSet;
 import graphql.language.StringValue;
 import graphql.language.Value;
 import org.apache.jena.rdf.model.Model;
-import org.apache.log4j.Logger;
 import org.hypergraphql.config.schema.FieldOfTypeConfig;
 import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.datafetching.services.Service;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.exception.HGQLConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,7 +44,7 @@ public class ExecutionTreeNode {
     private Map<String, String> ldContext;
     private HGQLSchema hgqlSchema;
 
-    private final static Logger LOGGER = Logger.getLogger(ExecutionTreeNode.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(ExecutionTreeNode.class);
 
     public void setService(Service service) {
         this.service = service;
@@ -230,7 +231,7 @@ public class ExecutionTreeNode {
                         try {
                             this.childrenNodes.get(parentId).getForest().add(childNode);
                         } catch (Exception e) {
-                            LOGGER.error(e);
+                            LOGGER.error("Problem adding parent", e);
                         }
                     } else {
                         ExecutionForest forest = new ExecutionForest();
@@ -238,7 +239,7 @@ public class ExecutionTreeNode {
                         try {
                             this.childrenNodes.put(parentId, forest);
                         } catch (Exception e) {
-                            LOGGER.error(e);
+                            LOGGER.error("Problem adding child", e);
                         }
                     }
                 }
@@ -388,7 +389,7 @@ public class ExecutionTreeNode {
                 computedModels.add(futureModel.get());
             } catch (InterruptedException
                     | ExecutionException e) {
-                LOGGER.error(e);
+                LOGGER.error("Problem adding execution result", e);
             }
         });
         computedModels.forEach(model::add);
