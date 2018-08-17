@@ -1,36 +1,55 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.0'
+    }
+}
+
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 group = 'org.hypergraphql'
-version = '1.1.4'
+version = '1.0.0'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
-        
-     maven { url "http://repo.maven.apache.org/maven2" }
+    mavenLocal()
+    mavenCentral()
+    jcenter()
 }
 
 ext {
-
-    jenaVersion = '3.6.0'
+    jenaVersion = '3.8.0'
 }
-
 dependencies {
+
     compile group: 'com.graphql-java', name: 'graphql-java', version: '6.0'
     compile group: 'org.apache.jena', name: 'jena-arq', version: jenaVersion
     compile group: 'org.apache.jena', name: 'jena', version: jenaVersion
     compile group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
     compile group: 'org.apache.jena', name: 'jena-fuseki-embedded', version: jenaVersion
+
     compile group: 'log4j', name: 'log4j', version: '1.2.17'
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
-    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+
     compile group: 'com.sparkjava', name: 'spark-core', version: '2.5'
     compile group: 'com.sparkjava', name: 'spark-template-velocity', version: '2.5.5'
+    compile group: 'com.sparkjava', name: 'spark-core', version: '2.5'
     compile group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.9'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.327'
 
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.11.0'
+
+    testCompile group: 'org.junit.platform', name: 'junit-platform-gradle-plugin', version: '1.2.0'
 
     testCompileOnly('org.apiguardian:apiguardian-api:1.0.0')
 
@@ -42,15 +61,38 @@ dependencies {
     )
 }
 
-//test {
-//    useJUnitPlatform()
-//}
+test {
+    systemProperty 'hgql_version', project.version
+    useJUnitPlatform()
+    testLogging {
+        events 'PASSED', 'FAILED', 'SKIPPED'
+    }
+}
 
 task execute(type:JavaExec) {
+    systemProperty('hgql_version', project.version)
     main = 'org.hypergraphql.Application'
     classpath = sourceSets.main.runtimeClasspath
 
     if(project.hasProperty('a')){
         args(a.split(','))
+    }
+}
+
+sourceSets {
+    main {
+        resources {
+            include '**/*.json', '**/*.xml', '**/*.vtl', '**/*.properties', '**/*.txt', '**/*.graphql'
+        }
+    }
+}
+
+shadowJar {
+    zip64 = true
+    exclude 'META-INF/*', 'META-INF/**', 'LICENSE', 'LICENSE/**', 'license', 'license/**'
+    classifier = 'exe'
+
+    manifest {
+        attributes("Main-Class": "org.hypergraphql.Application")
     }
 }

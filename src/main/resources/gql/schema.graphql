@@ -9,6 +9,7 @@ type __Context {
     birthPlace:     _@href(iri: "http://dbpedia.org/ontology/birthPlace")
     deathDate:      _@href(iri: "http://dbpedia.org/ontology/deathDate")
     birthDate:      _@href(iri: "http://dbpedia.org/ontology/birthDate")
+    netWorth:       _@href(iri: "http://dbpedia.org/property/netWorth")
     locationCity:   _@href(iri: "http://dbpedia.org/ontology/locationCity")
     owner:          _@href(iri: "http://dbpedia.org/ontology/owner")
     country:        _@href(iri: "http://dbpedia.org/ontology/country")
@@ -22,6 +23,7 @@ type Person @service(id:"dbpedia-sparql") {
     birthPlace: City @service(id:"dbpedia-sparql")
     deathDate: String @service(id:"dbpedia-sparql")
     birthDate: String @service(id:"dbpedia-sparql")
+    netWorth: String @service(id:"dbpedia-sparql")
 }
 
 type Company @service(id:"dbpedia-sparql") {

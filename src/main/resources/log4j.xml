@@ -10,9 +10,13 @@
         </layout>
     </appender>
 
+    <logger name="org.hypergraphql" additivity="false">
+        <level value="INFO"/>
+        <appender-ref ref="console" />
+    </logger>
+
     <root>
-        <!--<level value="DEBUG" />-->
-        <level value="INFO" />
+        <level value="WARN" />
         <appender-ref ref="console" />
     </root>
 

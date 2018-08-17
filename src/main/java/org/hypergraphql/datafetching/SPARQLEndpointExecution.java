@@ -8,15 +8,20 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.jena.query.*;
+import org.apache.jena.query.ARQ;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.web.HttpOp;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
-import org.apache.log4j.Logger;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.query.converters.SPARQLServiceConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,7 +37,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
     Set<String> markers;
     SPARQLEndpointService sparqlEndpointService;
     protected HGQLSchema schema ;
-    protected Logger logger = Logger.getLogger(SPARQLEndpointExecution.class);
+    protected Logger logger = LoggerFactory.getLogger(SPARQLEndpointExecution.class);
     String rootType;
 
     public SPARQLEndpointExecution(JsonNode query, Set<String> inputSubset, Set<String> markers, SPARQLEndpointService sparqlEndpointService, HGQLSchema schema, String rootType) {
@@ -54,7 +59,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
 
         SPARQLServiceConverter converter = new SPARQLServiceConverter(schema);
         String sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);
-        logger.info(sparqlQuery);
+        logger.debug(sparqlQuery);
 
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         Credentials credentials =
@@ -65,10 +70,12 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
                 .build();
         HttpOp.setDefaultHttpClient(httpclient);
 
+        ARQ.init();
         Query jenaQuery = QueryFactory.create(sparqlQuery);
 
         QueryEngineHTTP qEngine = QueryExecutionFactory.createServiceRequest(this.sparqlEndpointService.getUrl(), jenaQuery);
         qEngine.setClient(httpclient);
+        //qEngine.setSelectContentType(ResultsFormat.FMT_RS_XML.getSymbol());
 
         ResultSet results = qEngine.execSelect();
 
@@ -80,7 +87,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
         });
 
         SPARQLExecutionResult sparqlExecutionResult = new SPARQLExecutionResult(resultSet, unionModel);
-        logger.info(sparqlExecutionResult);
+        logger.debug("Result: {}", sparqlExecutionResult);
 
         return sparqlExecutionResult;
     }

@@ -1,6 +1,6 @@
 {
-    "name": "dbpedia-sparql-hgql-demo",
-    "schema": "schema.graphql",
+    "name": "hgql-example-with-sparql",
+    "schema": "gql/schema.graphql",
     "server": {
         "port": 8080,
         "graphql": "/graphql",

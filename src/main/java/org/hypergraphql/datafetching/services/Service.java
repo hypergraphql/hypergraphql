@@ -1,6 +1,7 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -57,7 +58,9 @@ public abstract class Service {
     public Model getModelFromResults(JsonNode query, QuerySolution results , HGQLSchema schema) {
 
         Model model = ModelFactory.createDefaultModel();
-        if (query.isNull()) return model;
+        if (query.isNull()) {
+            return model;
+        }
 
         if (query.isArray()) {
 
@@ -100,33 +103,33 @@ public abstract class Service {
         return model;
     }
 
-    protected Map<String, Set<String>> getResultset(Model model, JsonNode query, Set<String> input, Set<String> markers , HGQLSchema schema) {
+    Map<String, Set<String>> getResultset(Model model, JsonNode query, Set<String> input, Set<String> markers, HGQLSchema schema) {
 
         Map<String, Set<String>> resultset = new HashMap<>();
         JsonNode node;
 
-        if (!query.isArray()) {
+        if (query.isArray()) {
+            node = query; // TODO - in this situation, we should iterate over the array
+        } else {
             node = query.get("fields");
             if (markers.contains(query.get("nodeId").asText())){
                 resultset.put(query.get("nodeId").asText(),findRootIdentifiers(model,schema.getTypes().get(query.get("targetName").asText())));
             }
-        } else {
-            node = query;
         }
         Set<LinkedList<QueryNode>> paths = new HashSet<>();
         if (node != null && !node.isNull()) {
             paths = getQueryPaths(node, schema);
         }
 
-        for (LinkedList<QueryNode> path : paths) {
+        paths.forEach(path -> {
             if (hasMarkerLeaf(path, markers)) {
                 Set<String> identifiers = findIdentifiers(model, input, path);
                 String marker = getLeafMarker(path);
                 resultset.put(marker, identifiers);
             }
-        }
+        });
 
-        //todo query happens to be an array sometimes - then the following line fails.
+        // TODO query happens to be an array sometimes - then the following line fails.
 
         return resultset;
     }
@@ -146,12 +149,12 @@ public abstract class Service {
         return identifiers;
     }
 
-    protected String getLeafMarker(LinkedList<QueryNode> path) {
+    private String getLeafMarker(LinkedList<QueryNode> path) {
 
         return path.getLast().getMarker();
     }
 
-    protected Set<String> findIdentifiers(Model model, Set<String> input, LinkedList<QueryNode> path) {
+    private Set<String> findIdentifiers(Model model, Set<String> input, LinkedList<QueryNode> path) {
 
         Set<String> subjects;
         Set<String> objects;
@@ -185,7 +188,7 @@ public abstract class Service {
         return objects;
     }
 
-    protected boolean hasMarkerLeaf(LinkedList<QueryNode> path, Set<String> markers) {
+    private boolean hasMarkerLeaf(LinkedList<QueryNode> path, Set<String> markers) {
 
         for (String marker : markers) {
             if (path.getLast().getMarker().equals(marker)) {
@@ -195,13 +198,13 @@ public abstract class Service {
         return false;
     }
 
-    protected Set<LinkedList<QueryNode>> getQueryPaths(JsonNode query , HGQLSchema schema) {
+    private Set<LinkedList<QueryNode>> getQueryPaths(JsonNode query, HGQLSchema schema) {
         Set<LinkedList<QueryNode>> paths = new HashSet<>();
         getQueryPathsRecursive(query, paths, null ,  schema);
         return paths;
     }
 
-    protected void getQueryPathsRecursive(JsonNode query, Set<LinkedList<QueryNode>> paths, LinkedList<QueryNode> path, HGQLSchema schema) {
+    private void getQueryPathsRecursive(JsonNode query, Set<LinkedList<QueryNode>> paths, LinkedList<QueryNode> path, HGQLSchema schema) {
 
         Model model = ModelFactory.createDefaultModel();
 
@@ -243,7 +246,7 @@ public abstract class Service {
         }
     }
 
-    protected void populateModel(
+    private void populateModel(
             final QuerySolution results,
             final JsonNode currentNode,
             final Model model,

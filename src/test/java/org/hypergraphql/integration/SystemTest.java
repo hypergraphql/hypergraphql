@@ -18,6 +18,7 @@ import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.rdf.model.impl.SelectorImpl;
 import org.hypergraphql.Controller;
 import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.services.HGQLConfigService;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
@@ -28,6 +29,8 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SystemTest {
+
+    private HGQLConfigService configService;
 
     @Test
     void integration_test() {
@@ -54,12 +57,14 @@ class SystemTest {
                 .build()
                 .start();
 
-        HGQLConfig externalConfig = HGQLConfig.fromClasspathConfig("test_services/externalconfig.json");
+
+
+        HGQLConfig externalConfig = fromClasspathConfig("test_services/externalconfig.json");
 
         Controller externalController = new Controller();
         externalController.start(externalConfig);
 
-        HGQLConfig config = HGQLConfig.fromClasspathConfig("test_services/mainconfig.json");
+        HGQLConfig config = fromClasspathConfig("test_services/mainconfig.json");
 
         Controller controller = new Controller();
         controller.start(config);
@@ -119,5 +124,15 @@ class SystemTest {
         externalController.stop();
         controller.stop();
         server.stop();
+    }
+
+    private HGQLConfig fromClasspathConfig(final String configPath) {
+
+        if(configService == null) {
+            configService = new HGQLConfigService();
+        }
+
+        final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(configPath);
+        return configService.loadHGQLConfig(configPath, inputStream, true);
     }
 }

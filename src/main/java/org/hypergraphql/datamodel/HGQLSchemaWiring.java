@@ -9,21 +9,22 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import graphql.schema.idl.TypeDefinitionRegistry;
-import org.apache.log4j.Logger;
 import org.hypergraphql.config.schema.FieldOfTypeConfig;
 import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.config.schema.TypeConfig;
 import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.services.Service;
 import org.hypergraphql.exception.HGQLConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static graphql.Scalars.GraphQLID;
 import static graphql.Scalars.GraphQLInt;
@@ -41,7 +42,7 @@ import static org.hypergraphql.config.schema.HGQLVocabulary.SCALAR_TYPES;
 
 public class HGQLSchemaWiring {
 
-    private static final Logger LOGGER = Logger.getLogger(HGQLSchemaWiring.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HGQLSchemaWiring.class);
 
     private HGQLSchema hgqlSchema;
     private GraphQLSchema schema;
@@ -79,7 +80,6 @@ public class HGQLSchemaWiring {
             this.schema = generateSchema();
 
         } catch (Exception e) {
-            e.printStackTrace(); // TODO!!!
             throw new HGQLConfigurationException("Unable to perform schema wiring", e);
         }
     }
@@ -90,7 +90,7 @@ public class HGQLSchemaWiring {
 
         String packageName = "org.hypergraphql.datafetching.services";
 
-        for (ServiceConfig serviceConfig : serviceConfigs) {
+        serviceConfigs.forEach(serviceConfig -> {
             try {
                 String type = serviceConfig.getType();
 
@@ -99,16 +99,15 @@ public class HGQLSchemaWiring {
 
                 service.setParameters(serviceConfig);
 
-
                 services.put(serviceConfig.getId(), service);
             } catch (IllegalAccessException
                     | InstantiationException
                     | ClassNotFoundException
                     | InvocationTargetException e) {
-                LOGGER.error(e);
+                LOGGER.error("Problem adding service {}", serviceConfig.getId(), e);
                 throw new HGQLConfigurationException("Error wiring up services", e);
             }
-        }
+        });
 
         return services;
     }
@@ -117,13 +116,10 @@ public class HGQLSchemaWiring {
 
         Set<String> typeNames = this.hgqlSchema.getTypes().keySet();
         GraphQLObjectType builtQueryType = registerGraphQLQueryType(this.hgqlSchema.getTypes().get("Query"));
-        Set<GraphQLType> builtTypes = new HashSet<>();
-
-        for (String typeName : typeNames) {
-            if (!typeName.equals("Query")) {
-                builtTypes.add(registerGraphQLType(this.hgqlSchema.getTypes().get(typeName)));
-            }
-        }
+        Set<GraphQLType> builtTypes = typeNames.stream()
+                .filter(typeName -> !typeName.equals("Query"))
+                .map(typeName -> registerGraphQLType(this.hgqlSchema.getTypes().get(typeName)))
+                .collect(Collectors.toSet());
 
         return GraphQLSchema.newSchema()
                 .query(builtQueryType)
@@ -160,15 +156,15 @@ public class HGQLSchemaWiring {
                 "_GET queries return all objects of a given type, possibly restricted by limit and offset values. " +
                 "_GET_BY_ID queries require a set of URIs to be specified.";
 
-        List<GraphQLFieldDefinition> builtFields = new ArrayList<>();
+        List<GraphQLFieldDefinition> builtFields;
 
         Map<String, FieldOfTypeConfig> fields = type.getFields();
 
         Set<String> fieldNames = fields.keySet();
 
-        for (String fieldName : fieldNames) {
-            builtFields.add(registerGraphQLQueryField(type.getField(fieldName)));
-        }
+        builtFields = fieldNames.stream()
+                .map(fieldName -> registerGraphQLQueryField(type.getField(fieldName)))
+                .collect(Collectors.toList());
 
         return newObject()
                 .name(typeName)
@@ -183,15 +179,15 @@ public class HGQLSchemaWiring {
         String uri = this.hgqlSchema.getTypes().get(typeName).getId();
         String description = "Instances of \"" + uri + "\".";
 
-        List<GraphQLFieldDefinition> builtFields = new ArrayList<>();
+        List<GraphQLFieldDefinition> builtFields;
 
         Map<String, FieldOfTypeConfig> fields = type.getFields();
 
         Set<String> fieldNames = fields.keySet();
 
-        for (String fieldName : fieldNames) {
-            builtFields.add(registerGraphQLField(type.getField(fieldName)));
-        }
+        builtFields = fieldNames.stream()
+                .map(fieldName -> registerGraphQLField(type.getField(fieldName)))
+                .collect(Collectors.toList());
 
         builtFields.add(getidField());
         builtFields.add(gettypeField());
@@ -267,11 +263,13 @@ public class HGQLSchemaWiring {
 
         Service service = queryFieldConfig.service();
         if(service == null) {
-            throw new HGQLConfigurationException("Service for field '" + queryFieldConfig.type() + "' not specified (null)");
+            throw new HGQLConfigurationException("Service for field '" + field.getName() + "':['"
+                    + queryFieldConfig.type() + "'] not specified (null)");
         }
         String serviceId = service.getId();
         String description = (queryFieldConfig.type().equals(HGQL_QUERY_GET_FIELD)) ?
-                "Get instances of " + field.getTargetName() + " (service: " + serviceId + ")" : "Get instances of " + field.getTargetName() + " by URIs (service: " + serviceId + ")";
+                "Get instances of " + field.getTargetName() + " (service: " + serviceId + ")" :
+                "Get instances of " + field.getTargetName() + " by URIs (service: " + serviceId + ")";
 
         return newFieldDefinition()
                 .name(field.getName())

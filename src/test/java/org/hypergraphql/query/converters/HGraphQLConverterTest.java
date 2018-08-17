@@ -8,12 +8,14 @@ import org.hypergraphql.datafetching.ExecutionForestFactory;
 import org.hypergraphql.datafetching.ExecutionTreeNode;
 import org.hypergraphql.query.QueryValidator;
 import org.hypergraphql.query.ValidatedQuery;
+import org.hypergraphql.services.HGQLConfigService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,7 +31,10 @@ class HGraphQLConverterTest {
     @BeforeEach
     void startUp() {
 
-        config = HGQLConfig.fromClasspathConfig("test_config.json");
+        final String configPath = "test_config.json";
+        final HGQLConfigService configService = new HGQLConfigService();
+        final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(configPath);
+        config = configService.loadHGQLConfig(configPath, inputStream, true); // ???
         if(controller == null) {
             controller = new Controller();
             controller.start(config);

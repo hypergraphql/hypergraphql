@@ -2,7 +2,8 @@ package org.hypergraphql.datafetching;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +16,7 @@ import java.util.concurrent.Future;
 
 public class ExecutionForest  {
 
-    private final static Logger LOGGER = Logger.getLogger(ExecutionForest.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(ExecutionForest.class);
 
     private HashSet<ExecutionTreeNode> forest;
 
@@ -40,7 +41,7 @@ public class ExecutionForest  {
             try {
                 model.add(futureModel.get());
             } catch (InterruptedException | ExecutionException e) {
-                LOGGER.error(e);
+                LOGGER.error("Problem generating model", e);
             }
         });
         return model;

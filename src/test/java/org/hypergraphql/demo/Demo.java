@@ -11,7 +11,8 @@ public class Demo {
             "--config",
             "demo_services/config1.json",
             "demo_services/config2.json",
-            "demo_services/config3.json"
+            "demo_services/config3.json",
+            "demo_services/config4.json"
         };
 
         Application.main(demoArguments);

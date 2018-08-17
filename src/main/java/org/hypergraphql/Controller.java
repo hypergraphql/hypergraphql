@@ -3,6 +3,7 @@ package org.hypergraphql;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +14,12 @@ import org.hypergraphql.services.HGQLQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.ModelAndView;
+import spark.Request;
+import spark.Response;
 import spark.Service;
 import spark.template.velocity.VelocityTemplateEngine;
+
+import static spark.Spark.before;
 
 /**
  * Created by szymon on 05/09/2017.
@@ -67,6 +72,16 @@ public class Controller {
 
         hgqlService = Service.ignite().port(config.getGraphqlConfig().port());
 
+        // CORS
+        before((request, response) -> {
+            response.header("Access-Control-Allow-Methods", "OPTIONS,GET,POST");
+        });
+
+        hgqlService.options("/*", (req, res) -> {
+            setResponseHeaders(res);
+            return "";
+        });
+
         // get method for accessing the GraphiQL UI
 
         hgqlService.get(config.getGraphqlConfig().graphiQLPath(), (req, res) -> {
@@ -75,6 +90,8 @@ public class Controller {
 
             model.put("template", String.valueOf(config.getGraphqlConfig().graphQLPath()));
 
+            setResponseHeaders(res);
+
             return new VelocityTemplateEngine().render(
                     new ModelAndView(model, "graphiql.vtl")
             );
@@ -82,13 +99,10 @@ public class Controller {
 
         // post method for accessing the GraphQL getService
         hgqlService.post(config.getGraphqlConfig().graphQLPath(), (req, res) -> {
-            ObjectMapper mapper = new ObjectMapper();
+
             HGQLQueryService service = new HGQLQueryService(config);
 
-            JsonNode requestObject = mapper.readTree(req.body());
-
-            String query = requestObject.get("query").asText();
-
+            final String query = consumeRequest(req);
             String acceptType = req.headers("accept");
 
             String mime = MIME_MAP.getOrDefault(acceptType, null);
@@ -104,6 +118,9 @@ public class Controller {
                 res.status(400);
             }
 
+            setResponseHeaders(res);
+
+            ObjectMapper mapper = new ObjectMapper();
             if (graphQLCompatible) {
                 return mapper.readTree(new ObjectMapper().writeValueAsString(result));
             } else {
@@ -131,8 +148,36 @@ public class Controller {
 
             res.type(contentType);
 
+            setResponseHeaders(res);
+
             return config.getHgqlSchema().getRdfSchemaOutput(mime);
         });
+    }
+
+    private String consumeRequest(final Request request) throws IOException {
+
+        if(request.contentType().equalsIgnoreCase("application-x/graphql")) {
+            return consumeGraphQLBody(request.body());
+        } else {
+            return consumeJSONBody(request.body());
+        }
+    }
+
+    private String consumeJSONBody(final String body) throws IOException {
+
+        final ObjectMapper mapper = new ObjectMapper();
+        final JsonNode requestObject = mapper.readTree(body);
+        if(requestObject.get("query") == null) {
+            throw new IllegalArgumentException(
+                    "Body appears to be JSON but does not contain required 'query' attribute: " + body
+            );
+        }
+        return requestObject.get("query").asText();
+    }
+
+    private String consumeGraphQLBody(final String body) {
+
+        return body;
     }
 
     public void stop() {
@@ -142,5 +187,11 @@ public class Controller {
             hgqlService.stop();
             LOGGER.info("Shut down server");
         }
+    }
+
+    private void setResponseHeaders(final Response response) {
+
+        response.header("Access-Control-Allow-Origin", "*");
+        response.header("Access-Control-Allow-Headers", "*");
     }
 }

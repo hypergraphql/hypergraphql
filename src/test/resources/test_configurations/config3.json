@@ -1,6 +1,6 @@
 {
     "name": "fao-go-hgql",
-    "schema": "src/test/resources/demo_services/schema3.graphql",
+    "schema": "schema3.graphql",
     "server": {
         "port": 8083,
         "graphql": "/graphql",

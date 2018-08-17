@@ -9,9 +9,9 @@ import org.apache.jena.atlas.web.MediaType;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.services.HGQLConfigService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -36,8 +36,11 @@ class ControllerTest {
     @BeforeEach
     void startServer() {
 
+        final HGQLConfigService configService = new HGQLConfigService();
+
+        final String configPath = "test_config.json";
         controller = new Controller();
-        config = HGQLConfig.from(getClass().getClassLoader().getResourceAsStream("test_config.json"));
+        config = configService.loadHGQLConfig(configPath, getClass().getClassLoader().getResourceAsStream(configPath), true);
         controller.start(config);
     }
 
@@ -51,6 +54,7 @@ class ControllerTest {
     @Test
     void should_get_for_graphql() throws Exception {
 
+        Thread.sleep(1000);
         final String path = basePath + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphQLPath();
 
         final Envelope envelope = getPath(path, "text/turtle");

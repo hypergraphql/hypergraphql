@@ -54,8 +54,8 @@ public class HGraphQLService extends Service {
 
         Model model = ModelFactory.createDefaultModel();
 
-        LOGGER.info("\n" + url);
-        LOGGER.info("\n" + graphQlQuery);
+        LOGGER.debug("\n" + url);
+        LOGGER.debug("\n" + graphQlQuery);
 
         try {
 
