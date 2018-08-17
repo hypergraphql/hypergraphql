@@ -50,7 +50,7 @@ Below we list a few example queries via embedded GraphiQL interfaces. Feel free 
        graphiqlInit('demo1');
   </script>
 </graphiql>
-<br>
+<br/>
 
 
 ### Data about the BMW company
@@ -81,7 +81,7 @@ Below we list a few example queries via embedded GraphiQL interfaces. Feel free 
        graphiqlInit('demo2');
 </script>
 </graphiql>
-<br>
+<br/>
 
 
 ### Countries and the leaders of their capital cities
@@ -115,7 +115,7 @@ Below we list a few example queries via embedded GraphiQL interfaces. Feel free 
        graphiqlInit('demo3');
 </script>
 </graphiql>
-<br>
+<br/>
 
 ### Introspection query
 
@@ -147,5 +147,5 @@ Introspection queries allow for accessing the schema of a GraphQL instance using
        graphiqlInit('demo4');
 </script>
 </graphiql>
-<br>
+<br/>
 [The internal representation of the schema as an RDF graph in TURTLE format can be also accessed here](http://demo.hypergraphql.org:8084/graphql).

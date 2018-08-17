@@ -1,6 +1,6 @@
 var config = {
   "port": 8080,
-  "demoServerBase":"http://demo.hypergraphql.org",
+  "demoServerBase":"http://localhost",
   "gitpage":"https://hypergraphql.github.io/hypergraphql",
   "gitdomain":"https://hypergraphql.github.io",
   "services": [
