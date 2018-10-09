@@ -1,0 +1,24 @@
+sudo: false
+
+language: java
+
+jdk:
+- openjdk8
+
+script: gradle build
+
+jobs:
+  include:
+  - stage: GitHub release
+    jdk: openjdk8
+    deploy:
+      provider: releases
+      api_key:
+        secure: "yV8cL0aW4Hv4MmQR+AZ5OqWZ8Cy2Pe5gwcZGgi2z3Wc3HGd+1AG1imZxuNBhLx8y6Q8n0g3vw0sS90nNyomMvNPnpaHK+uxz60Y5zlZmZzNpF0jMOpWqTCpPzavxZwwKCjaHf8sDqysNtg/noH+S1dQ4zxTgJery9lUwqA3paZxdmoi2kIdvOTS6UkWDsrfQ4wlAk+BqE4zCIgmujcFNbMQVWBgZwOHwlZM5DSRPSyNDgpi+Fv+keJtP0NM4F+Ub91UbUGtc12UVfLbcmPqVGZz61xnAgPI2Jm2aiXukthvDTGz/A1qU1B24wWlPNBBbedtpWUVFxo76IjbyvwsILbmhFvtZ6ZqvBSiLdnbxawQpd1svE6u8ON9QoFty80my290FQ7aXTZtM/7tcv0dNvNfOyQPGHI/wzkfJziZNCNDfGjIoek2YNKL/FyWSrmfOOsHTFcHw2mxXl5BI3F1yr9NX2Vwz8AwWzYj3lA8jFK0TXXALFxoAjKA8P579cYZJGDHxOihcaoso0GOjvyxVe3c/hkBSdkdH8BNVfsuGy9+tj1L4KuTE2RepzNFh61UHuR9w4SyXmaaSybz9MFRJozCSmgw2OCbVKZZm/GnZrvVXOL0iEkQDBIjG6rIOhIR+Z6RO0noYahkxC1MtGHagscNc8rirPXG6xqTQkrQCUI0="
+      file_glob: true
+      file: build/libs/*.jar
+      skip_cleanup: true
+      overwrite: true
+      on:
+        repo: hypergraphql/hypergraphql
+        tags: true
