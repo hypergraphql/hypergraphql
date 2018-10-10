@@ -63,7 +63,7 @@ dependencies {
 
 test {
     systemProperty 'hgql_version', project.version
-    useJUnitPlatform()
+//    useJUnitPlatform()
     testLogging {
         events 'PASSED', 'FAILED', 'SKIPPED'
     }
