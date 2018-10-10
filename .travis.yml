@@ -5,7 +5,7 @@ language: java
 jdk:
 - openjdk8
 
-script: gradle clean build shadowJar
+script: gradle -version
 
 jobs:
   include:
