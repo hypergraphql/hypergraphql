@@ -24,7 +24,7 @@ In this tutorial we outline all the steps required to define and connect several
 3. an instance serving the [FAO Geopolitical Ontology](http://www.fao.org/countryprofiles/geoinfo/geopolitical/resource/) uploaded from a local file, containing `owl:sameAs` links to RDF resources exposed by the other two HyperGraphQL instances. 
 
 
-<img src="https://semantic-integration.github.io/hypergraphql/sources/service-linking.png" alt="diagram">
+<img src="http://hypergraphql.org/sources/service-linking.png" alt="diagram">
 
 All the resources, including configuration files, GraphQL schemas and RDF datasets, are included in the [src/test/resources/demo_services](https://github.com/semantic-integration/hypergraphql/tree/master/src/test/resources/demo_services) directory of the project's GitHub repository. 
 
