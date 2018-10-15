@@ -75,6 +75,7 @@ public class Controller {
         // CORS
         before((request, response) -> {
             response.header("Access-Control-Allow-Methods", "OPTIONS,GET,POST");
+            response.header("Content-Type", "");
         });
 
         hgqlService.options("/*", (req, res) -> {
@@ -192,6 +193,6 @@ public class Controller {
     private void setResponseHeaders(final Response response) {
 
         response.header("Access-Control-Allow-Origin", "*");
-        response.header("Access-Control-Allow-Headers", "*");
+        response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, authorization, x-auth-token");
     }
 }
