@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import graphql.GraphQLError;
+import org.apache.commons.lang3.StringUtils;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.services.HGQLQueryService;
 import org.slf4j.Logger;
@@ -192,7 +194,16 @@ public class Controller {
 
     private void setResponseHeaders(final Response response) {
 
+        final List<String> headersList = Arrays.asList(
+                "Origin",
+                "X-Requested-With",
+                "Content-Type",
+                "Accept",
+                "authorization",
+                "x-auth-token"
+        );
+
         response.header("Access-Control-Allow-Origin", "*");
-        response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, authorization, x-auth-token");
+        response.header("Access-Control-Allow-Headers", StringUtils.join(headersList, ","));
     }
 }
