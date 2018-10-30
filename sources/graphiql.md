@@ -1,3 +1,8 @@
+---
+layout: default
+permalink: /graphiql/
+---
+
 <!--
  *  Copyright (c) Facebook, Inc.
  *  All rights reserved.
