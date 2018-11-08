@@ -9,3 +9,5 @@ docs:
   url: tutorial
 - title: Containers & Configuration
   url: container
+  title: GraphiQL
+  url: graphiql
