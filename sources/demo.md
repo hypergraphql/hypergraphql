@@ -21,8 +21,8 @@ permalink: /demo/
 
 A live demo of the HyperGraphQL instance pointing at DBpedia SPARQL endpoint and configured as in the main GitHub repository (also used as a running example in the [Documentation](/documentation) section) is available at:
 
-- [GraphQL server](http://demo.hypergraphql.org:8084/graphql)
-- [GraphiQL UI](http://demo.hypergraphql.org:8084/graphiql)
+- [GraphQL server](https://demo.hypergraphql.org:8484/graphql)
+- [GraphiQL UI](https://demo.hypergraphql.org:8484/graphiql)
 
 Below we list a few example queries via embedded GraphiQL interfaces. Feel free to edit them!
 

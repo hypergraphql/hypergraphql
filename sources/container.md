@@ -51,10 +51,36 @@ can be a directory, a file or a list of files, e.g.:<br/>
 1. Set up an application to run with Java 8 using the command:<br/>
 `java [-Xmx<val>] -jar hypergraphql-<version>-exe.jar [<args>]`<br/>
 where the `-X` options can be used to apply various memory options to the JVM see [JVM Memory](http://jvmmemory.com/) 
-and [Baeldung](http://www.baeldung.com/jvm-parameters)for a non-comprehensive list<br/>
+and [Baeldung](http://www.baeldung.com/jvm-parameters) for a non-comprehensive list<br/>
 and the `args` list optionally points to configuration resources
 2. If you are not using command-line parameters, for example to reference a URL for configuration, then set environment 
 variables as appropriate<br/>
 3. Don't forget to upload the executable JAR file
 4. Start your container and test it at `http://<container>:<port>/graphiql`
+
+## Example: Running in AWS Elastic Beanstalk
+
+The demos on this site run in an Elastic Beanstalk instance.
+
+They were deployed in a ZIP file with the structure:
+
+```
+/___hypergraph-1.0.2-exe.jar
+ |__Procfile
+ |__demo_services
+    |__agrovoc.json
+    |__config1.json
+    |__config2.json
+    |__config3.json
+    |__config4.json
+    |__fao.ttl
+    |__schema1.json
+    |__schema2.json
+    |__schema3.json
+    |__schema4.json
+```
+
+The `config` and `schema` files are those described in the [Demo] (/demo/) and [Tutorial] (/tutorial/) sections.
+`Procfile` looks like:
+`web: java -jar -Xmx1024 hypergraphql-1.0.2-exe.jar -config demo_services`
 

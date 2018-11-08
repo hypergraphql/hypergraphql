@@ -1,3 +1,8 @@
+---
+layout: default
+title: GraphiQL
+permalink: /graphiql
+---
 <style>body { height: 100%; margin: 0; width: 100%; overflow: hidden; } #graphiql { height: 100vh; }</style>
 
 <div id="graphiql">Loading...</div>
