@@ -79,7 +79,7 @@ permalink: /graphiql
     // use fetch, and could instead implement graphQLFetcher however you like,
     // as long as it returns a Promise or Observable.
     function graphQLFetcher(graphQLParams) {
-        return fetch('/graphql', {
+        return fetch('https://demo.hypergraphql.org:8484/graphql', {
             method: 'post',
             headers: {
                 'Accept': 'application/json',
