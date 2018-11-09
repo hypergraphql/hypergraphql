@@ -20,7 +20,7 @@
         {
             "id": "fao-local",
             "type": "LocalModelSPARQLService",
-            "filepath": "build/libs/demo_sources/fao.ttl",
+            "filepath": "demo_services/fao.ttl",
             "filetype": "TTL"
         }
     ]

@@ -15,7 +15,7 @@ apply plugin: 'maven'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 group = 'org.hypergraphql'
-version = '1.0.1'
+version = '1.0.2'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8

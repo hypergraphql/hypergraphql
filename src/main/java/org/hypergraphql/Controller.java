@@ -81,7 +81,7 @@ public class Controller {
         });
 
         hgqlService.options("/*", (req, res) -> {
-            setResponseHeaders(res);
+            setResponseHeaders(req, res);
             return "";
         });
 
@@ -93,7 +93,7 @@ public class Controller {
 
             model.put("template", String.valueOf(config.getGraphqlConfig().graphQLPath()));
 
-            setResponseHeaders(res);
+            setResponseHeaders(req, res);
 
             return new VelocityTemplateEngine().render(
                     new ModelAndView(model, "graphiql.vtl")
@@ -121,7 +121,7 @@ public class Controller {
                 res.status(400);
             }
 
-            setResponseHeaders(res);
+            setResponseHeaders(req, res);
 
             ObjectMapper mapper = new ObjectMapper();
             if (graphQLCompatible) {
@@ -151,7 +151,7 @@ public class Controller {
 
             res.type(contentType);
 
-            setResponseHeaders(res);
+            setResponseHeaders(req, res);
 
             return config.getHgqlSchema().getRdfSchemaOutput(mime);
         });
@@ -192,7 +192,7 @@ public class Controller {
         }
     }
 
-    private void setResponseHeaders(final Response response) {
+    private void setResponseHeaders(final Request request, final Response response) {
 
         final List<String> headersList = Arrays.asList(
                 "Origin",
@@ -203,7 +203,8 @@ public class Controller {
                 "x-auth-token"
         );
 
-        response.header("Access-Control-Allow-Origin", "*");
+        final String origin = request.headers("Origin") == null ? "*" : request.headers("Origin");
+        response.header("Access-Control-Allow-Origin", origin);
         response.header("Access-Control-Allow-Headers", StringUtils.join(headersList, ","));
     }
 }

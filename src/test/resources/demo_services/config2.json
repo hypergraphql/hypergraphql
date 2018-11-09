@@ -10,7 +10,7 @@
         {
             "id": "agrovoc-local",
             "type": "LocalModelSPARQLService",
-            "filepath": "build/libs/demo_sources/agrovoc.ttl",
+            "filepath": "demo_services/agrovoc.ttl",
             "filetype": "TTL"
         }
     ]
