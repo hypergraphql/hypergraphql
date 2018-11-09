@@ -3,6 +3,12 @@ layout: none
 title: GraphiQL
 permalink: /graphiql
 ---
+<script src="//cdn.jsdelivr.net/es6-promise/4.0.5/es6-promise.auto.min.js"></script> 
+<script src="//cdn.jsdelivr.net/fetch/0.9.0/fetch.min.js"></script> 
+<script src="//cdn.jsdelivr.net/react/15.4.2/react.min.js"></script> 
+<script src="//cdn.jsdelivr.net/react/15.4.2/react-dom.min.js"></script> 
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.css"/>  
+<script src="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.js"></script>
 <style>body { height: 100%; margin: 0; width: 100%; overflow: hidden; } #graphiql { height: 100vh; }</style>
 
 <div id="graphiql">Loading...</div>
@@ -110,9 +116,3 @@ permalink: /graphiql
     );
     
 </script> 
-<script src="//cdn.jsdelivr.net/es6-promise/4.0.5/es6-promise.auto.min.js"></script> 
-<script src="//cdn.jsdelivr.net/fetch/0.9.0/fetch.min.js"></script> 
-<script src="//cdn.jsdelivr.net/react/15.4.2/react.min.js"></script> 
-<script src="//cdn.jsdelivr.net/react/15.4.2/react-dom.min.js"></script> 
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.css"/>  
-<script src="//cdn.jsdelivr.net/npm/graphiql@0.11.2/graphiql.js"></script>
