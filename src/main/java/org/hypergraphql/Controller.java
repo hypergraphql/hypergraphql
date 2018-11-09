@@ -205,6 +205,9 @@ public class Controller {
 
         final String origin = request.headers("Origin") == null ? "*" : request.headers("Origin");
         response.header("Access-Control-Allow-Origin", origin);
+        if(!origin.equals("*")) {
+            response.header("Vary", "Origin");
+        }
         response.header("Access-Control-Allow-Headers", StringUtils.join(headersList, ","));
     }
 }
