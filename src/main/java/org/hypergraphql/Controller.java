@@ -209,8 +209,7 @@ public class Controller {
             response.header("Vary", "Origin");
         }
         response.header("Access-Control-Allow-Headers", StringUtils.join(headersList, ","));
-        if(request.headers("credentials") != null && request.headers("credentials").equalsIgnoreCase("include")) {
-            response.header("Access-Control-Allow-Credentials", "true");
-        }
+
+        response.header("Access-Control-Allow-Credentials", "true");
     }
 }
