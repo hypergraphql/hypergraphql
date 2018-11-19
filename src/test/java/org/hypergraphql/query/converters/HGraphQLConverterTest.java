@@ -11,6 +11,7 @@ import org.hypergraphql.query.ValidatedQuery;
 import org.hypergraphql.services.HGQLConfigService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+//@Disabled
 class HGraphQLConverterTest {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(HGraphQLConverterTest.class);
@@ -113,6 +115,61 @@ class HGraphQLConverterTest {
 
         boolean test = generateRewritingForNonRootReturnValidity(query, inputSet);
         assertTrue(test);
+    }
+
+    @Test
+    void simple_fragment() {
+
+        final String query = "fragment PersonAttrs on Person {\n" +
+                "  prefLabel(lang: \"en\")\n" +
+                "  altLabel\n" +
+                "}\n" +
+                "\n" +
+                "{\n" +
+                "  Person_GET(limit: 10) { \n" +
+                "    _id\n" +
+                "    ...PersonAttrs\n" +
+                "  }\n" +
+                "}";
+
+        assertTrue(generateRewritingForRootReturnValidity(query));
+    }
+
+    @Test
+    void nested_fragment() {
+
+        final String query = "fragment PersonAttrs on Person {\n" +
+                "  prefLabel(lang: \"en\")\n" +
+                "  altLabel\n" +
+                "}\n" +
+                "\n" +
+                "fragment PersonRecursive on Person {\n" +
+                "\t...PersonAttrs\n" +
+                "  broader {\n" +
+                "    ...PersonAttrs\n" +
+                "     broader{\n" +
+                "       ...PersonAttrs\n" +
+                "       broader {\n" +
+                "         ...PersonAttrs\n" +
+                "         broader {\n" +
+                "           ...PersonAttrs\n" +
+                "         }\n" +
+                "       }\n" +
+                "     }\n" +
+                "  }\n" +
+                "  narrower {\n" +
+                "    ...PersonAttrs\n" +
+                "  }\n" +
+                "}\n" +
+                "\n" +
+                "{\n" +
+                "  Person_GET(limit: 100) { \n" +
+                "    _id\n" +
+                "  \t...PersonRecursive\n" +
+                "  }\n" +
+                "}";
+
+        assertTrue(generateRewritingForRootReturnValidity(query));
     }
 
     // TODO - These methods seem a little complicated
