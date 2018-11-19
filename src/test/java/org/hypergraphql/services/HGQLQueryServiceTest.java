@@ -1,6 +1,7 @@
 package org.hypergraphql.services;
 
 import org.hypergraphql.config.system.HGQLConfig;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;

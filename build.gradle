@@ -15,7 +15,7 @@ apply plugin: 'maven'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 group = 'org.hypergraphql'
-version = '1.0.2'
+version = '1.0.3'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -30,8 +30,9 @@ ext {
     jenaVersion = '3.8.0'
 }
 dependencies {
+    
+    compile group: 'com.graphql-java', name: 'graphql-java', version: '2018-11-15T21-34-14-7110576-ignored-chars'
 
-    compile group: 'com.graphql-java', name: 'graphql-java', version: '6.0'
     compile group: 'org.apache.jena', name: 'jena-arq', version: jenaVersion
     compile group: 'org.apache.jena', name: 'jena', version: jenaVersion
     compile group: 'org.apache.jena', name: 'jena-core', version: jenaVersion

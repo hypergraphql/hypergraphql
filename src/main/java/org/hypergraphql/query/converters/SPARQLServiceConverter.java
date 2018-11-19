@@ -188,17 +188,8 @@ public class SPARQLServiceConverter {
         String parentId = firstField.get(PARENT_ID).asText();
         String valueSTR = valuesClause(parentId, input);
 
-        Iterator<JsonNode> queryFieldsIterator = jsonQuery.elements();
-
         StringBuilder whereClause = new StringBuilder();
-
-        while (queryFieldsIterator.hasNext()) {
-
-            JsonNode field = queryFieldsIterator.next();
-            String subquery = getFieldSubquery(field);
-            whereClause.append(subquery);
-        }
-
+        jsonQuery.elements().forEachRemaining(field -> whereClause.append(getFieldSubquery(field)));
         return selectQueryClause(valueSTR + (whereClause.toString()), graphID);
     }
 
@@ -235,16 +226,8 @@ public class SPARQLServiceConverter {
         if (subfields.isNull()) {
             return "";
         }
-
-        Iterator<JsonNode> queryFieldsIterator = subfields.elements();
-
         StringBuilder whereClause = new StringBuilder();
-
-        while (queryFieldsIterator.hasNext()) {
-
-            JsonNode field = queryFieldsIterator.next();
-            whereClause.append(getFieldSubquery(field));
-        }
+        subfields.elements().forEachRemaining(field -> whereClause.append(getFieldSubquery(field)));
         return whereClause.toString();
     }
 }
