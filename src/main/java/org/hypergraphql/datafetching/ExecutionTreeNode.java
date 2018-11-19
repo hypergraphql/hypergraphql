@@ -74,7 +74,7 @@ public class ExecutionTreeNode {
         return executionId;
     }
 
-    public Map<String, String> getFullLdContext() {
+    Map<String, String> getFullLdContext() {
 
         Map<String, String> result = new HashMap<>(ldContext);
 
@@ -90,10 +90,12 @@ public class ExecutionTreeNode {
 
     }
 
-    public ExecutionTreeNode(Field field, String nodeId , HGQLSchema schema ) {
+    ExecutionTreeNode(Field field, String nodeId , HGQLSchema schema ) {
 
         if(schema.getQueryFields().containsKey(field.getName())) {
             this.service = schema.getQueryFields().get(field.getName()).service();
+        } else if(schema.getFields().containsKey(field.getName())) {
+            LOGGER.info("here");
         } else {
             throw new HGQLConfigurationException("Field '" + field.getName() + "' not found in schema");
         }
@@ -106,7 +108,7 @@ public class ExecutionTreeNode {
         this.query = getFieldJson(field, null, nodeId, "Query");
     }
 
-    public ExecutionTreeNode(Service service, Set<Field> fields, String parentId, String parentType, HGQLSchema schema) {
+    private ExecutionTreeNode(Service service, Set<Field> fields, String parentId, String parentType, HGQLSchema schema) {
 
         this.service = service;
         this.executionId = createId();
@@ -346,16 +348,15 @@ public class ExecutionTreeNode {
     }
 
 
-    public String createId() {
+    private String createId() {
         return "execution-"+ UUID.randomUUID();
     }
 
-    public Model generateTreeModel(Set<String> input) {
+    Model generateTreeModel(Set<String> input) {
 
         TreeExecutionResult executionResult = service.executeQuery(query, input,  childrenNodes.keySet() , rootType, hgqlSchema);
 
-        Map<String,Set<String>> resultset = executionResult.getResultSet();
-
+        Map<String,Set<String>> resultSet = executionResult.getResultSet();
 
         Model model = executionResult.getModel();
 
@@ -363,10 +364,10 @@ public class ExecutionTreeNode {
 
         //    StoredModel.getInstance().add(model);
 
-        Set<String> vars = resultset.keySet();
+        Set<String> vars = resultSet.keySet();
 
         ExecutorService executor = Executors.newFixedThreadPool(50);
-        Set<Future<Model>> futuremodels = new HashSet<>();
+        Set<Future<Model>> futureModels = new HashSet<>();
 
         vars.forEach(var ->{
 
@@ -374,17 +375,17 @@ public class ExecutionTreeNode {
 
             if (executionChildren.getForest().size() > 0) {
 
-                Set<String> values = resultset.get(var);
+                Set<String> values = resultSet.get(var);
 
                 executionChildren.getForest().forEach(node -> {
 
                     FetchingExecution childExecution = new FetchingExecution(values, node);
-                    futuremodels.add(executor.submit(childExecution));
+                    futureModels.add(executor.submit(childExecution));
                 });
             }
         });
 
-        futuremodels.forEach(futureModel -> {
+        futureModels.forEach(futureModel -> {
             try {
                 computedModels.add(futureModel.get());
             } catch (InterruptedException

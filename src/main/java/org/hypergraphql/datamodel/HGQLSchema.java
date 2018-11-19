@@ -1,5 +1,6 @@
 package org.hypergraphql.datamodel;
 
+import graphql.language.Directive;
 import graphql.language.FieldDefinition;
 import graphql.language.ListType;
 import graphql.language.Node;
@@ -149,8 +150,9 @@ public class HGQLSchema {
 
 
             TypeDefinition type = types.get(typeName);
+            final List<Directive> directives = type.getDirectives();
 
-            type.getDirectives().forEach(dir -> {
+            directives.forEach(dir -> {
                 if (dir.getName().equals("service")) {
                     String getQueryUri = typeUri + "_GET";
                     String getByIdQueryUri = typeUri + "_GET_BY_ID";
