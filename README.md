@@ -6,8 +6,7 @@ HyperGraphQL is a [GraphQL](http://graphql.org) interface for querying and servi
 <img src="https://hypergraphql.org/sources/front-diagram.svg" alt="diagram">
 
 ### Release
-This is v1.0.1, a minor release that contains a few code tidy-ups and enhancements, improves test coverage.
- and adds a couple of generic demo launchers that provide examples of how this can be achieved in practice.
+This is v1.0.3, a minor release that enables language support for query fragments and tidies some code.
 ### License note:
  This software has been developed and is maintained by [Semantic Integration Ltd.](http://semanticintegration.co.uk). It 
           is released under Apache License 2.0. See [LICENSE.TXT](https://github.com/semantic-integration/hypergraphql/blob/master/LICENSE.TXT) for more infromation. 
