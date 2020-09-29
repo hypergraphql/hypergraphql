@@ -29,18 +29,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-
+// Performs HTTP query to remote store
 public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> {
 
-    protected JsonNode query;
-    Set<String> inputSubset;
-    Set<String> markers;
-    SPARQLEndpointService sparqlEndpointService;
-    protected HGQLSchema schema ;
-    protected Logger logger = LoggerFactory.getLogger(SPARQLEndpointExecution.class);
-    String rootType;
+    protected final JsonNode query;
+    protected final Set<String> inputSubset;
+    protected final Set<String> markers;
+    protected final SPARQLEndpointService sparqlEndpointService;
+    protected final HGQLSchema schema ;
+    protected final Logger logger = LoggerFactory.getLogger(SPARQLEndpointExecution.class);
+    protected final String rootType;
 
-    public SPARQLEndpointExecution(JsonNode query, Set<String> inputSubset, Set<String> markers, SPARQLEndpointService sparqlEndpointService, HGQLSchema schema, String rootType) {
+    public SPARQLEndpointExecution(final JsonNode query,
+                                   final Set<String> inputSubset,
+                                   final Set<String> markers,
+                                   final SPARQLEndpointService sparqlEndpointService,
+                                   final HGQLSchema schema,
+                                   final String rootType) {
         this.query = query;
         this.inputSubset = inputSubset;
         this.markers = markers;
@@ -51,33 +56,30 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
 
     @Override
     public SPARQLExecutionResult call() {
-        Map<String, Set<String>> resultSet = new HashMap<>();
-
+        final Map<String, Set<String>> resultSet = new HashMap<>();
         markers.forEach(marker -> resultSet.put(marker, new HashSet<>()));
-
-        Model unionModel = ModelFactory.createDefaultModel();
-
-        SPARQLServiceConverter converter = new SPARQLServiceConverter(schema);
-        String sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);
+        final var unionModel = ModelFactory.createDefaultModel();
+        final var converter = new SPARQLServiceConverter(schema);
+        final var sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);
         logger.debug(sparqlQuery);
 
-        CredentialsProvider credsProvider = new BasicCredentialsProvider();
-        Credentials credentials =
+        final var credsProvider = new BasicCredentialsProvider();
+        final var credentials =
                 new UsernamePasswordCredentials(this.sparqlEndpointService.getUser(), this.sparqlEndpointService.getPassword());
         credsProvider.setCredentials(AuthScope.ANY, credentials);
-        HttpClient httpclient = HttpClients.custom()
+        final var httpclient = HttpClients.custom()
                 .setDefaultCredentialsProvider(credsProvider)
                 .build();
         HttpOp.setDefaultHttpClient(httpclient);
 
         ARQ.init();
-        Query jenaQuery = QueryFactory.create(sparqlQuery);
+        final var jenaQuery = QueryFactory.create(sparqlQuery);
 
-        QueryEngineHTTP qEngine = QueryExecutionFactory.createServiceRequest(this.sparqlEndpointService.getUrl(), jenaQuery);
+        final var qEngine = QueryExecutionFactory.createServiceRequest(this.sparqlEndpointService.getUrl(), jenaQuery);
         qEngine.setClient(httpclient);
         //qEngine.setSelectContentType(ResultsFormat.FMT_RS_XML.getSymbol());
 
-        ResultSet results = qEngine.execSelect();
+        final var results = qEngine.execSelect();
 
         results.forEachRemaining(solution -> {
             markers.stream().filter(solution::contains).forEach(marker ->
@@ -86,7 +88,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
             unionModel.add(this.sparqlEndpointService.getModelFromResults(query, solution, schema));
         });
 
-        SPARQLExecutionResult sparqlExecutionResult = new SPARQLExecutionResult(resultSet, unionModel);
+        final var sparqlExecutionResult = new SPARQLExecutionResult(resultSet, unionModel);
         logger.debug("Result: {}", sparqlExecutionResult);
 
         return sparqlExecutionResult;

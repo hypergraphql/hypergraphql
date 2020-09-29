@@ -1,8 +1,10 @@
 package org.hypergraphql.datafetching.services;
 
+import java.io.InputStream;
+import java.util.Map;
+import java.util.Set;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
@@ -15,10 +17,6 @@ import org.hypergraphql.query.converters.HGraphQLConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
-import java.util.Map;
-import java.util.Set;
-
 public class HGraphQLService extends Service {
 
     private String url;
@@ -28,38 +26,43 @@ public class HGraphQLService extends Service {
     private final static Logger LOGGER = LoggerFactory.getLogger(HGraphQLService.class);
 
     @Override
-    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers , String rootType, HGQLSchema schema) {
+    public TreeExecutionResult executeQuery(
+            final JsonNode query,
+            final Set<String> input,
+            final Set<String> markers,
+            final String rootType,
+            final HGQLSchema schema) {
 
-        Model model;
-        Map<String, Set<String>> resultSet;
-        String graphQlQuery = new HGraphQLConverter(schema).convertToHGraphQL(query, input, rootType);
+        final Model model;
+        final Map<String, Set<String>> resultSet;
+        final var graphQlQuery = HGraphQLConverter.convertToHGraphQL(schema, query, input, rootType);
         model = getModelFromRemote(graphQlQuery);
 
         resultSet = getResultset(model, query, input, markers, schema);
 
-        TreeExecutionResult treeExecutionResult = new TreeExecutionResult();
+        final var treeExecutionResult = new TreeExecutionResult();
         treeExecutionResult.setResultSet(resultSet);
         treeExecutionResult.setModel(model);
 
         return treeExecutionResult;
     }
 
-    Model getModelFromRemote(String graphQlQuery) {
+    Model getModelFromRemote(final String graphQlQuery) {
 
-        ObjectMapper mapper = new ObjectMapper();
+        final var mapper = new ObjectMapper();
 
-        ObjectNode bodyParam = mapper.createObjectNode();
+        final var bodyParam = mapper.createObjectNode();
 
         bodyParam.put("query", graphQlQuery);
 
-        Model model = ModelFactory.createDefaultModel();
+        final var model = ModelFactory.createDefaultModel();
 
         LOGGER.debug("\n" + url);
         LOGGER.debug("\n" + graphQlQuery);
 
         try {
 
-            HttpResponse<InputStream> response = Unirest.post(url)
+            final HttpResponse<InputStream> response = Unirest.post(url)
                     .header("Accept", "application/rdf+xml")
                     .body(bodyParam.toString())
                     .asBinary();

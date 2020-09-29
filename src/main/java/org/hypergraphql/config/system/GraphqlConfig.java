@@ -8,14 +8,14 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class GraphqlConfig {
 
-    private Integer port;
-    private String graphqlPath;
-    private String graphiqlPath;
+    private final Integer port;
+    private final String graphqlPath;
+    private final String graphiqlPath;
 
     @JsonCreator
-    public GraphqlConfig(@JsonProperty("port") Integer port,
-                         @JsonProperty("graphql") String graphqlPath,
-                         @JsonProperty("graphiql") String graphiqlPath
+    public GraphqlConfig(@JsonProperty("port") final Integer port,
+                         @JsonProperty("graphql") final String graphqlPath,
+                         @JsonProperty("graphiql") final String graphiqlPath
     ) {
         if(port == null) {
             this.port = generateRandomPort();
@@ -48,6 +48,6 @@ public class GraphqlConfig {
     private int generateRandomPort() {
         int min = 1024;
         int max = 65536;
-        return ThreadLocalRandom.current().nextInt(min, max);
+        return ThreadLocalRandom.current().nextInt(min, max); // TODO - review this
     }
 }

@@ -1,5 +1,9 @@
 package org.hypergraphql;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -13,12 +17,6 @@ import org.hypergraphql.services.HGQLConfigService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,7 +26,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class ControllerTest {
 
-    private final String basePath = "http://localhost:";
+    private static final String BASE_PATH = "http://localhost:";
+    private static final int ONE_S_IN_MS = 1000;
+    private static final int TRIPLE_COUNT = 167;
     private HGQLConfig config;
 
     private Controller controller;
@@ -46,7 +46,7 @@ class ControllerTest {
 
     @AfterEach
     void stopServer() {
-        if(controller != null) {
+        if (controller != null) {
             controller.stop();
         }
     }
@@ -54,33 +54,33 @@ class ControllerTest {
     @Test
     void should_get_for_graphql() throws Exception {
 
-        Thread.sleep(1000);
-        final String path = basePath + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphQLPath();
+        Thread.sleep(ONE_S_IN_MS);
+        final String path = BASE_PATH + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphQLPath();
 
         final Envelope envelope = getPath(path, "text/turtle");
 
         final Model model = ModelFactory.createDefaultModel();
         model.read(envelope.streamBody(), "", "text/turtle");
         assertTrue(model.size() > 0);
-        assertEquals(167, model.size());
+        assertEquals(TRIPLE_COUNT, model.size());
     }
 
     @Test
     void should_get_for_graphiql() throws Exception {
 
-        Thread.sleep(1000);
-        final String path = basePath + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphiQLPath();
-        final Envelope envelope = getPath(path, "application/json");
+        Thread.sleep(ONE_S_IN_MS);
+        final String path = BASE_PATH + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphiQLPath();
+        final Envelope envelope = getPath(path, "application/json"); // TODO
         final String contentType = envelope.getContentType();
         assertNotNull(contentType);
         final MediaType mediaType = MediaType.createFromContentType(contentType);
-        assertEquals("text/html", mediaType.getContentType());
+        assertEquals("text/html", mediaType.getContentType()); // TODO
     }
 
     private Envelope getPath(final String path, final String acceptHeader) throws IOException {
 
         final Envelope envelope;
-        try(final CloseableHttpClient httpClient = HttpClients.createDefault()) {
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
             final HttpGet get = new HttpGet(path);
             get.addHeader("Accept", acceptHeader);
@@ -91,7 +91,7 @@ class ControllerTest {
         return envelope;
     }
 
-    private class Envelope {
+    private static class Envelope {
 
         private final String contentType;
         private final String body;

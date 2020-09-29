@@ -18,18 +18,18 @@ public class ExecutionForestFactory {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ExecutionForestFactory.class);
 
-    public ExecutionForest getExecutionForest(Document queryDocument , HGQLSchema schema) {
+    public ExecutionForest getExecutionForest(final Document queryDocument, final HGQLSchema schema) {
 
-        ExecutionForest forest = new ExecutionForest();
+        final var forest = new ExecutionForest();
 
-        SelectionSet queryFields = selectionSet(queryDocument);
+        final var queryFields = selectionSet(queryDocument);
 
-        final AtomicInteger counter = new AtomicInteger(0);
+        final var counter = new AtomicInteger(0);
         queryFields.getSelections().forEach(child -> { // query fields - why no args?
 
             if (child.getClass().getSimpleName().equals("Field")) {
 
-                String nodeId = "x_" + counter.incrementAndGet();
+                final var nodeId = "x_" + counter.incrementAndGet();
                 forest.getForest().add(new ExecutionTreeNode((Field) child, nodeId , schema));
 
             }
@@ -39,14 +39,14 @@ public class ExecutionForestFactory {
 
     private SelectionSet selectionSet(final Document queryDocument) {
 
-        final Definition definition = queryDocument.getDefinitions().get(0);
+        final var definition = queryDocument.getDefinitions().get(0);
 
-        if(definition.getClass().isAssignableFrom(FragmentDefinition.class)) {
+        if (definition.getClass().isAssignableFrom(FragmentDefinition.class)) {
 
             return getFragmentSelectionSet(queryDocument);
 
-        } else if(definition.getClass().isAssignableFrom(OperationDefinition.class)) {
-            final OperationDefinition operationDefinition = (OperationDefinition)definition;
+        } else if (definition.getClass().isAssignableFrom(OperationDefinition.class)) {
+            final var operationDefinition = (OperationDefinition)definition;
             return operationDefinition.getSelectionSet();
         }
         throw new IllegalArgumentException(queryDocument.getClass().getName() + " is not supported");
@@ -55,8 +55,8 @@ public class ExecutionForestFactory {
     private SelectionSet getFragmentSelectionSet(final Document queryDocument) {
 
         // NPE
-        final FragmentDefinition fragmentDefinition = (FragmentDefinition)queryDocument.getDefinitions().get(0);
-        final SelectionSet originalSelectionSet = fragmentDefinition.getSelectionSet();
+        final var fragmentDefinition = (FragmentDefinition)queryDocument.getDefinitions().get(0);
+        final var originalSelectionSet = fragmentDefinition.getSelectionSet();
 
         final Optional<Definition> optionalDefinition = queryDocument.getDefinitions()
                 .stream()
@@ -72,11 +72,11 @@ public class ExecutionForestFactory {
         }
 
         // NPE?
-        final Field operationSelection = (Field)operationDefinition.getSelectionSet().getSelections().get(0);
+        final var operationSelection = (Field)operationDefinition.getSelectionSet().getSelections().get(0);
 
-        final String typeFieldName = operationSelection.getName();
+        final var typeFieldName = operationSelection.getName();
 
-        final Field newSelection = Field.newField()
+        final var newSelection = Field.newField()
                 .name(typeFieldName)
                 .arguments(operationSelection.getArguments())
                 .selectionSet(originalSelectionSet)

@@ -25,11 +25,13 @@ import java.util.List;
 public class ApplicationConfigurationService {
 
     private S3Service s3Service;
-    private HGQLConfigService hgqlConfigService = new HGQLConfigService();
+    private final HGQLConfigService hgqlConfigService = new HGQLConfigService();
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ApplicationConfigurationService.class);
 
-    public List<HGQLConfig> readConfigurationFromS3(final String configUri, final String username, final String password) {
+    public List<HGQLConfig> readConfigurationFromS3(final String configUri,
+                                                    final String username,
+                                                    final String password) {
 
         final URI uri;
         try {
@@ -48,7 +50,9 @@ public class ApplicationConfigurationService {
         return Collections.singletonList(config);
     }
 
-    public List<HGQLConfig> readConfigurationFromUrl(final String configUri, final String username, final String password) {
+    public List<HGQLConfig> readConfigurationFromUrl(final String configUri,
+                                                     final String username,
+                                                     final String password) {
 
         final GetRequest getRequest;
         if(username == null && password == null) {
@@ -113,9 +117,9 @@ public class ApplicationConfigurationService {
 
         final String filename = getConfigFilename(configPathString);
 
-        try(final InputStream in = getClass().getClassLoader().getResourceAsStream(filename)) {
+        try (final InputStream in = getClass().getClassLoader().getResourceAsStream(filename)) {
 
-            if(in == null) {
+            if (in == null) {
                 // try to get from file - probably being run from an IDE with CP as filesystem
                 return getConfigurationsFromFile(configPathString);
             }

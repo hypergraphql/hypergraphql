@@ -1,7 +1,13 @@
 package org.hypergraphql;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -14,28 +20,19 @@ import org.hypergraphql.services.ApplicationConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.stream.Collectors;
-
 import static org.hypergraphql.util.PathUtils.isNormalURL;
 import static org.hypergraphql.util.PathUtils.isS3;
 
-public class Application {
+public abstract class Application {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(Application.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
     public static void main(final String[] args) throws Exception {
 
         final String[] trimmedArgs = trimValues(args);
 
-        final Options options = buildOptions();
-        final CommandLineParser parser = new DefaultParser();
+        final var options = buildOptions();
+        final var parser = new DefaultParser();
         final CommandLine commandLine;
         try {
             commandLine = parser.parse(options, trimmedArgs);
@@ -43,36 +40,34 @@ public class Application {
             throw new HGQLConfigurationException("Unable to parse command line", e);
         }
 
-        final ApplicationConfigurationService service = new ApplicationConfigurationService();
+        final var service = new ApplicationConfigurationService();
 
         final List<HGQLConfig> configurations;
 
-        final boolean showBanner = !commandLine.hasOption("nobanner");
+        final var showBanner = !commandLine.hasOption("nobanner");
 
-        if(commandLine.hasOption("config") || commandLine.hasOption("s3")) {
+        if (commandLine.hasOption("config") || commandLine.hasOption("s3")) {
 
             configurations = getConfigurationFromArgs(service, commandLine);
         } else {
 
             final Map<String, String> properties;
-            if(commandLine.hasOption("D")) {
+            if (commandLine.hasOption("D")) {
                 final Properties props = commandLine.getOptionProperties("D");
 
                 properties = new HashMap<>();
-                props.forEach((k, v) -> properties.put((String)k, (String)v));
+                props.forEach((k, v) -> properties.put((String) k, (String) v));
 
             } else {
                 properties = System.getenv();
             }
-
             configurations = getConfigurationsFromProperties(properties, service);
         }
 
-        if(configurations.size() == 0) {
+        if (configurations.size() == 0) {
             System.err.println("No configurations loaded, exiting");
             return;
         }
-
         start(configurations, showBanner);
     }
 
@@ -82,7 +77,7 @@ public class Application {
 
     protected static void start(final List<HGQLConfig> configurations, final boolean showBanner) throws IOException {
 
-        if(showBanner) {
+        if (showBanner) {
             showBanner();
         }
 
@@ -98,20 +93,20 @@ public class Application {
     ) {
 
         // look for environment variables
-        final String configPath = properties.get("hgql_config");
-        if(StringUtils.isBlank(configPath)) {
+        final var configPath = properties.get("hgql_config");
+        if (StringUtils.isBlank(configPath)) {
             throw new HGQLConfigurationException("No configuration parameters seem to have been provided");
         }
-        final String username = properties.get("hgql_username");
-        final String password = properties.get("hgql_password");
+        final var username = properties.get("hgql_username");
+        final var password = properties.get("hgql_password");
 
         LOGGER.debug("Config path: {}", configPath);
         LOGGER.debug("Username: {}", username);
         LOGGER.debug("Password: {}", password == null ? "Not provided" : "**********");
 
-        if(isS3(configPath)) {
+        if (isS3(configPath)) {
             return service.readConfigurationFromS3(configPath, username, password);
-        } else if(isNormalURL(configPath)) {
+        } else if (isNormalURL(configPath)) {
             return service.readConfigurationFromUrl(configPath, username, password);
         } else {
             // assume it's a normal file
@@ -156,11 +151,11 @@ public class Application {
                                 .build()
                 ).addOption(
                         Option.builder("D")
-                                .longOpt( "property=value" )
+                                .longOpt("property=value")
                                 .hasArgs()
                                 .numberOfArgs(2)
                                 .valueSeparator()
-                                .desc( "use value for given property" )
+                                .desc("use value for given property")
                                 .build()
                 ).addOption(
                         Option.builder("nobanner")
@@ -175,15 +170,15 @@ public class Application {
             final ApplicationConfigurationService service,
             final CommandLine commandLine
     ) {
-        if(commandLine.hasOption("s3")) {
+        if (commandLine.hasOption("s3")) {
 
-            final String s3url = commandLine.getOptionValue("s3");
-            final String accessKey = commandLine.getOptionValue('u');
-            final String secretKey = commandLine.getOptionValue('p');
+            final var s3url = commandLine.getOptionValue("s3");
+            final var accessKey = commandLine.getOptionValue('u');
+            final var secretKey = commandLine.getOptionValue('p');
 
             // URL lookup
             return service.readConfigurationFromS3(s3url, accessKey, secretKey);
-        } else if(commandLine.hasOption("config")) {
+        } else if (commandLine.hasOption("config")) {
 
             if (commandLine.hasOption("classpath")) {
                 return service.getConfigResources(commandLine.getOptionValues("config"));
@@ -207,9 +202,9 @@ public class Application {
 
     private static void showBanner() throws IOException {
 
-        final String bannerFile = "banner.txt";
-        final InputStream bannerInputStream = Application.class.getClassLoader().getResourceAsStream(bannerFile);
-        if(bannerInputStream == null) {
+        final var bannerFile = "banner.txt";
+        final var bannerInputStream = Application.class.getClassLoader().getResourceAsStream(bannerFile);
+        if (bannerInputStream == null) {
             System.out.println(Application.class.getClassLoader().getResource(bannerFile));
             System.err.println("Banner is null");
         }
@@ -217,7 +212,7 @@ public class Application {
             LOGGER.info("Banner file doesn't seem to exist");
         } else {
             IOUtils.copy(bannerInputStream, System.out);
-            final String version = System.getProperty("hgql_version");
+            final var version = System.getProperty("hgql_version");
             if (version == null) {
                 System.out.println("----------------------------------------------------------------------\n");
             } else {

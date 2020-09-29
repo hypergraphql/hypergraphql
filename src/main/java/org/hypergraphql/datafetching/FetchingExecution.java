@@ -7,10 +7,10 @@ import java.util.concurrent.Callable;
 
 public class FetchingExecution implements Callable<Model> {
 
-    private Set<String> inputValues;
-    private ExecutionTreeNode node;
+    private final Set<String> inputValues;
+    private final ExecutionTreeNode node;
 
-    public FetchingExecution(Set<String> inputValues, ExecutionTreeNode node) {
+    public FetchingExecution(final Set<String> inputValues, final ExecutionTreeNode node) {
 
         this.inputValues = inputValues;
         this.node = node;

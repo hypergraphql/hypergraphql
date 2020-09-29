@@ -33,11 +33,17 @@ public class HGQLConfigService {
 
     private S3Service s3Service = new S3Service();
 
-    public HGQLConfig loadHGQLConfig(final String hgqlConfigPath, final InputStream inputStream, final boolean classpath) {
+    public HGQLConfig loadHGQLConfig(final String hgqlConfigPath,
+                                     final InputStream inputStream,
+                                     final boolean classpath) {
         return loadHGQLConfig(hgqlConfigPath, inputStream, null, null, classpath);
     }
 
-    HGQLConfig loadHGQLConfig(final String hgqlConfigPath, final InputStream inputStream, final String username, final String password, boolean classpath) {
+    HGQLConfig loadHGQLConfig(final String hgqlConfigPath,
+                              final InputStream inputStream,
+                              final String username,
+                              final String password,
+                              boolean classpath) {
 
         final ObjectMapper mapper = new ObjectMapper();
 
@@ -64,7 +70,10 @@ public class HGQLConfigService {
         }
     }
 
-    private Reader selectAppropriateReader(final String schemaPath, final String username, final String password, final boolean classpath)
+    private Reader selectAppropriateReader(final String schemaPath,
+                                           final String username,
+                                           final String password,
+                                           final boolean classpath)
             throws IOException, URISyntaxException {
 
         if(schemaPath.matches(S3_REGEX)) {
@@ -87,7 +96,9 @@ public class HGQLConfigService {
         }
     }
 
-    private Reader getReaderForUrl(final String schemaPath, final String username, final String password) {
+    private Reader getReaderForUrl(final String schemaPath,
+                                   final String username,
+                                   final String password) {
 
         final GetRequest getRequest;
         if(username == null && password == null) {
@@ -104,7 +115,9 @@ public class HGQLConfigService {
         }
     }
 
-    private Reader getReaderForS3(final String schemaPath, final String username, final String password)
+    private Reader getReaderForS3(final String schemaPath,
+                                  final String username,
+                                  final String password)
             throws URISyntaxException {
 
         final URI uri = new URI(schemaPath);
@@ -133,6 +146,6 @@ public class HGQLConfigService {
                 : schemaPath;
         final String filename = fn.startsWith("/") ? fn.substring(fn.indexOf("/") + 1) : fn;
         LOGGER.debug("For filename: {}", filename);
-        return new InputStreamReader(getClass().getClassLoader().getResourceAsStream(filename));
+        return new InputStreamReader(getClass().getClassLoader().getResourceAsStream(filename)); // TODO - address this
      }
 }

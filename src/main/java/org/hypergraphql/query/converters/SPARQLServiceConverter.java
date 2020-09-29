@@ -32,23 +32,25 @@ public class SPARQLServiceConverter {
 
     private final HGQLSchema schema;
 
-    public SPARQLServiceConverter(HGQLSchema schema) {
+    public SPARQLServiceConverter(final HGQLSchema schema) {
         this.schema = schema;
     }
 
-    private String optionalClause(String sparqlPattern) {
+    private String optionalClause(final String sparqlPattern) {
         return " OPTIONAL { " + sparqlPattern + " } ";
     }
 
-    private String selectSubqueryClause(String id, String sparqlPattern, String limitOffset) {
+    private String selectSubqueryClause(final String id,
+                                        final String sparqlPattern,
+                                        final String limitOffset) {
         return "{ SELECT " + toVar(id) + " WHERE { " + sparqlPattern + " } " + limitOffset + " } ";
     }
 
-    private String selectQueryClause(String where, String graphID) {
+    private String selectQueryClause(final String where, final String graphID) {
         return  "SELECT * WHERE { " + graphClause(graphID, where) + " } ";
     }
 
-    private String graphClause(String graphID, String where) {
+    private String graphClause(final String graphID, final String where) {
         if (StringUtils.isEmpty(graphID)) {
             return where;
         } else {
@@ -56,29 +58,29 @@ public class SPARQLServiceConverter {
         }
     }
 
-    private String valuesClause(String id, Set<String> input) {
-        String var = toVar(id);
-        Set<String> uris = new HashSet<>();
+    private String valuesClause(final String id, final Set<String> input) {
+        final String var = toVar(id);
+        final Set<String> uris = new HashSet<>();
         input.forEach(uri -> uris.add(uriToResource(uri)));
 
-        String urisConcat = String.join(" ", uris);
+        final String urisConcat = String.join(" ", uris);
 
         return  "VALUES " + var + " { " + urisConcat + " } ";
     }
 
     private String filterClause(final String id, final Set<String> input) {
 
-        String var = toVar(id);
-        Set<String> uris = new HashSet<>();
+        final String var = toVar(id);
+        final Set<String> uris = new HashSet<>();
         input.forEach(uri -> uris.add(uriToResource(uri)));
 
-        String urisConcat = String.join(" , ", uris);
+        final String urisConcat = String.join(" , ", uris);
 
         return "FILTER ( " + var + " IN ( " + urisConcat + " ) )";
     }
 
-    private String limitOffsetClause(JsonNode jsonQuery) {
-        JsonNode args = jsonQuery.get(ARGS);
+    private String limitOffsetClause(final JsonNode jsonQuery) {
+        final JsonNode args = jsonQuery.get(ARGS);
         String limit = "";
         String offset = "";
         if (args != null) {
@@ -92,44 +94,51 @@ public class SPARQLServiceConverter {
         return limit + offset;
     }
 
-    private String limitClause(int limit) {
+    private String limitClause(final int limit) {
         return "LIMIT " + limit + " ";
     }
 
-    private String offsetClause(int limit) {
+    private String offsetClause(final int limit) {
         return "OFFSET " + limit + " ";
     }
 
-    private String uriToResource(String uri) {
+    private String uriToResource(final String uri) {
         return "<" + uri + ">";
     }
 
-    private String toVar(String id) {
+    private String toVar(final String id) {
         return "?" + id;
     }
 
-    private String toTriple(String subject, String predicate, String object) {
+    private String toTriple(final String subject,
+                            final String predicate,
+                            final String object) {
         return subject + " " + predicate + " " + object + " .";
     }
 
-    private String langFilterClause(JsonNode field) {
+    private String langFilterClause(final JsonNode field) {
         final String PATTERN = "FILTER (lang(%s) = \"%s\") . ";
-        String nodeVar = toVar(field.get(NODE_ID).asText());
-        JsonNode args = field.get(ARGS);
+        final String nodeVar = toVar(field.get(NODE_ID).asText());
+        final JsonNode args = field.get(ARGS);
         return (args.has(LANG)) ? String.format(PATTERN, nodeVar, args.get(LANG).asText()) : "";
     }
 
-    private String fieldPattern(String parentId, String nodeId, String predicateURI, String typeURI) {
-        String predicateTriple = (parentId.equals("")) ? "" : toTriple(toVar(parentId), uriToResource(predicateURI), toVar(nodeId));
-        String typeTriple = (typeURI.equals("")) ? "" : toTriple(toVar(nodeId), RDF_TYPE_URI, uriToResource(typeURI));
+    private String fieldPattern(final String parentId,
+                                final String nodeId,
+                                final String predicateURI,
+                                final String typeURI) {
+        final String predicateTriple = (parentId.equals("")) ? "" : toTriple(toVar(parentId), uriToResource(predicateURI), toVar(nodeId));
+        final String typeTriple = (typeURI.equals("")) ? "" : toTriple(toVar(nodeId), RDF_TYPE_URI, uriToResource(typeURI));
         return predicateTriple + typeTriple;
     }
 
-    public String getSelectQuery(JsonNode jsonQuery, Set<String> input, String rootType) {
+    public String getSelectQuery(final JsonNode jsonQuery,
+                                 final Set<String> input,
+                                 final String rootType) {
 
-        Map<String, QueryFieldConfig> queryFields = schema.getQueryFields();
+        final Map<String, QueryFieldConfig> queryFields = schema.getQueryFields();
 
-        Boolean root = (!jsonQuery.isArray() && queryFields.containsKey(jsonQuery.get(NAME).asText()));
+        final Boolean root = (!jsonQuery.isArray() && queryFields.containsKey(jsonQuery.get(NAME).asText()));
 
         if (root) {
             if (queryFields.get(jsonQuery.get(NAME).asText()).type().equals(HGQLVocabulary.HGQL_QUERY_GET_FIELD)) {
@@ -142,91 +151,93 @@ public class SPARQLServiceConverter {
         }
     }
 
-    private String getSelectRoot_GET_BY_ID(JsonNode queryField) {
+    private String getSelectRoot_GET_BY_ID(final JsonNode queryField) {
 
-        Iterator<JsonNode> urisIter = queryField.get(ARGS).get(URIS).elements();
+        final Iterator<JsonNode> urisIter = queryField.get(ARGS).get(URIS).elements();
 
-        Set<String> uris = new HashSet<>();
+        final Set<String> uris = new HashSet<>();
 
         urisIter.forEachRemaining(uri -> uris.add(uri.asText()));
 
-        String targetName = queryField.get(TARGET_NAME).asText();
-        String targetURI = schema.getTypes().get(targetName).getId();
-        String graphID = ((SPARQLEndpointService) schema.getQueryFields().get(queryField.get(NAME).asText()).service()).getGraph();
-        String nodeId = queryField.get(NODE_ID).asText();
-        String selectTriple = toTriple(toVar(nodeId), RDF_TYPE_URI, uriToResource(targetURI));
+        final String targetName = queryField.get(TARGET_NAME).asText();
+        final String targetURI = schema.getTypes().get(targetName).getId();
+        final String graphID = ((SPARQLEndpointService) schema.getQueryFields().get(queryField.get(NAME).asText()).service()).getGraph();
+        final String nodeId = queryField.get(NODE_ID).asText();
+        final String selectTriple = toTriple(toVar(nodeId), RDF_TYPE_URI, uriToResource(targetURI));
         String valueSTR = valuesClause(nodeId, uris);
         String filterSTR = filterClause(nodeId, uris);
 
-        JsonNode subfields = queryField.get(FIELDS);
-        String subQuery = getSubQueries(subfields);
+        final JsonNode subfields = queryField.get(FIELDS);
+        final String subQuery = getSubQueries(subfields);
 
         return selectQueryClause(valueSTR + selectTriple + subQuery, graphID);
     }
 
-    private String getSelectRoot_GET(JsonNode queryField) {
+    private String getSelectRoot_GET(final JsonNode queryField) {
 
-        String targetName = queryField.get(TARGET_NAME).asText();
-        String targetURI = schema.getTypes().get(targetName).getId();
-        String graphID = ((SPARQLEndpointService) schema.getQueryFields().get(queryField.get(NAME).asText()).service()).getGraph();
-        String nodeId = queryField.get(NODE_ID).asText();
-        String limitOffsetSTR = limitOffsetClause(queryField);
-        String selectTriple = toTriple(toVar(nodeId), RDF_TYPE_URI, uriToResource(targetURI));
-        String rootSubquery = selectSubqueryClause(nodeId, selectTriple, limitOffsetSTR);
+        final String targetName = queryField.get(TARGET_NAME).asText();
+        final String targetURI = schema.getTypes().get(targetName).getId();
+        final String graphID = ((SPARQLEndpointService) schema.getQueryFields().get(queryField.get(NAME).asText()).service()).getGraph();
+        final String nodeId = queryField.get(NODE_ID).asText();
+        final String limitOffsetSTR = limitOffsetClause(queryField);
+        final String selectTriple = toTriple(toVar(nodeId), RDF_TYPE_URI, uriToResource(targetURI));
+        final String rootSubquery = selectSubqueryClause(nodeId, selectTriple, limitOffsetSTR);
 
-        JsonNode subfields = queryField.get(FIELDS);
-        String whereClause = getSubQueries(subfields);
+        final JsonNode subfields = queryField.get(FIELDS);
+        final String whereClause = getSubQueries(subfields);
 
         return selectQueryClause(rootSubquery + whereClause, graphID);
     }
 
-    private String getSelectNonRoot(ArrayNode jsonQuery, Set<String> input, String rootType) {
+    private String getSelectNonRoot(final ArrayNode jsonQuery,
+                                    final Set<String> input,
+                                    final String rootType) {
 
 
-        JsonNode firstField = jsonQuery.elements().next();
-        String graphID = ((SPARQLEndpointService) schema.getTypes().get(rootType).getFields().get(firstField.get(NAME).asText()).getService()).getGraph();
-        String parentId = firstField.get(PARENT_ID).asText();
-        String valueSTR = valuesClause(parentId, input);
+        final JsonNode firstField = jsonQuery.elements().next();
+        final String graphID = ((SPARQLEndpointService) schema.getTypes().get(rootType).getFields().get(firstField.get(NAME).asText()).getService()).getGraph();
+        final String parentId = firstField.get(PARENT_ID).asText();
+        final String valueSTR = valuesClause(parentId, input);
 
-        StringBuilder whereClause = new StringBuilder();
+        final StringBuilder whereClause = new StringBuilder();
         jsonQuery.elements().forEachRemaining(field -> whereClause.append(getFieldSubquery(field)));
         return selectQueryClause(valueSTR + (whereClause.toString()), graphID);
     }
 
 
-    private String getFieldSubquery(JsonNode fieldJson) {
+    private String getFieldSubquery(final JsonNode fieldJson) {
 
-        String fieldName = fieldJson.get(NAME).asText();
+        final String fieldName = fieldJson.get(NAME).asText();
 
         if (HGQLVocabulary.JSONLD.containsKey(fieldName)) {
             return "";
         }
 
-        String fieldURI = schema.getFields().get(fieldName).getId();
-        String targetName = fieldJson.get(TARGET_NAME).asText();
-        String parentId = fieldJson.get(PARENT_ID).asText();
-        String nodeId = fieldJson.get(NODE_ID).asText();
+        final String fieldURI = schema.getFields().get(fieldName).getId();
+        final String targetName = fieldJson.get(TARGET_NAME).asText();
+        final String parentId = fieldJson.get(PARENT_ID).asText();
+        final String nodeId = fieldJson.get(NODE_ID).asText();
 
-        String langFilter = langFilterClause(fieldJson);
+        final String langFilter = langFilterClause(fieldJson);
 
-        String typeURI = (schema.getTypes().containsKey(targetName)) ? schema.getTypes().get(targetName).getId() : "";
+        final String typeURI = (schema.getTypes().containsKey(targetName)) ? schema.getTypes().get(targetName).getId() : "";
 
-        String fieldPattern = fieldPattern(parentId, nodeId, fieldURI, typeURI);
+        final String fieldPattern = fieldPattern(parentId, nodeId, fieldURI, typeURI);
 
-        JsonNode subfields = fieldJson.get(FIELDS);
+        final JsonNode subfields = fieldJson.get(FIELDS);
 
-        String rest = getSubQueries(subfields);
+        final String rest = getSubQueries(subfields);
 
         return optionalClause(fieldPattern + langFilter + rest);
     }
 
 
-    private String getSubQueries(JsonNode subfields) {
+    private String getSubQueries(final JsonNode subfields) {
 
         if (subfields.isNull()) {
             return "";
         }
-        StringBuilder whereClause = new StringBuilder();
+        final StringBuilder whereClause = new StringBuilder();
         subfields.elements().forEachRemaining(field -> whereClause.append(getFieldSubquery(field)));
         return whereClause.toString();
     }

@@ -42,33 +42,37 @@ public class SPARQLEndpointService extends SPARQLService {
     }
 
     @Override
-    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers , String rootType , HGQLSchema schema) {
+    public TreeExecutionResult executeQuery(final JsonNode query,
+                                            final Set<String> input,
+                                            final Set<String> markers,
+                                            final String rootType,
+                                            final HGQLSchema schema) {
 
 
-        Map<String, Set<String>> resultSet = new HashMap<>();
-        Model unionModel = ModelFactory.createDefaultModel();
-        Set<Future<SPARQLExecutionResult>> futureSPARQLresults = new HashSet<>();
+        final Map<String, Set<String>> resultSet = new HashMap<>(); // TODO - dupe
+        final var unionModel = ModelFactory.createDefaultModel();
+        final Set<Future<SPARQLExecutionResult>> futureSPARQLresults = new HashSet<>();
 
-        List<String> inputList = getStrings(query, input, markers, rootType, schema, resultSet);
+        final List<String> inputList = getStrings(query, input, markers, rootType, schema, resultSet);
 
         do {
 
-            Set<String> inputSubset = new HashSet<>();
+            final Set<String> inputSubset = new HashSet<>(); // TODO - dupe
             int i = 0;
             while (i < VALUES_SIZE_LIMIT && !inputList.isEmpty()) {
                 inputSubset.add(inputList.get(0));
                 inputList.remove(0);
                 i++;
             }
-            ExecutorService executor = Executors.newFixedThreadPool(50);
-            SPARQLEndpointExecution execution = new SPARQLEndpointExecution(query,inputSubset,markers,this, schema, rootType);
+            final var executor = Executors.newFixedThreadPool(50);
+            final var execution = new SPARQLEndpointExecution(query,inputSubset,markers,this, schema, rootType);
             futureSPARQLresults.add(executor.submit(execution));
 
-        } while (inputList.size()>VALUES_SIZE_LIMIT);
+        } while (inputList.size() > VALUES_SIZE_LIMIT);
 
         iterateFutureResults(futureSPARQLresults, unionModel, resultSet);
 
-        TreeExecutionResult treeExecutionResult = new TreeExecutionResult();
+        final var treeExecutionResult = new TreeExecutionResult();
         treeExecutionResult.setResultSet(resultSet);
         treeExecutionResult.setModel(unionModel);
 
@@ -78,12 +82,12 @@ public class SPARQLEndpointService extends SPARQLService {
     void iterateFutureResults (
             final Set<Future<SPARQLExecutionResult>> futureSPARQLResults,
             final Model unionModel,
-            Map<String, Set<String>> resultSet
+            final Map<String, Set<String>> resultSet
     ) {
 
         for (Future<SPARQLExecutionResult> futureExecutionResult : futureSPARQLResults) {
             try {
-                SPARQLExecutionResult result = futureExecutionResult.get();
+                final var result = futureExecutionResult.get();
                 unionModel.add(result.getModel());
                 resultSet.putAll(result.getResultSet());
             } catch (InterruptedException
@@ -93,13 +97,18 @@ public class SPARQLEndpointService extends SPARQLService {
         }
     }
 
-    List<String> getStrings(JsonNode query, Set<String> input, Set<String> markers, String rootType, HGQLSchema schema, Map<String, Set<String>> resultSet) {
-        for (String marker : markers) {
+    List<String> getStrings(final JsonNode query,
+                            final Set<String> input,
+                            final Set<String> markers,
+                            final String rootType,
+                            final HGQLSchema schema,
+                            final Map<String, Set<String>> resultSet) {
+        for (final String marker : markers) {
             resultSet.put(marker, new HashSet<>());
         }
 
         if (rootType.equals("Query")&&schema.getQueryFields().get(query.get("name").asText()).type().equals(HGQLVocabulary.HGQL_QUERY_GET_BY_ID_FIELD)) {
-            Iterator<JsonNode> uris = query.get("args").get("uris").elements();
+            final Iterator<JsonNode> uris = query.get("args").get("uris").elements();
             while (uris.hasNext()) {
                 String uri = uris.next().asText();
                 input.add(uri);
@@ -109,7 +118,7 @@ public class SPARQLEndpointService extends SPARQLService {
     }
 
     @Override
-    public void setParameters(ServiceConfig serviceConfig) {
+    public void setParameters(final ServiceConfig serviceConfig) {
 
         super.setParameters(serviceConfig);
 

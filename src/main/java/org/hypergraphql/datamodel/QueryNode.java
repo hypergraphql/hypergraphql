@@ -4,29 +4,20 @@ import org.apache.jena.rdf.model.Property;
 
 public class QueryNode {
 
-    private Property node;
-    private String marker;
+    private final Property node;
+    private final String marker;
+
+    public QueryNode(final Property node, final String marker) {
+        this.node = node;
+        this.marker = marker;
+    }
 
     public Property getNode() {
         return node;
     }
 
-    public void setNode(Property node) {
-        this.node = node;
-    }
-
     public String getMarker() {
         return marker;
-    }
-
-    public void setMarker(String marker) {
-        this.marker = marker;
-    }
-
-    public QueryNode(Property node, String marker) {
-        this.node = node;
-
-        this.marker = marker;
     }
 
     @Override

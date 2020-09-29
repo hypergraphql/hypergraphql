@@ -16,14 +16,29 @@ import java.util.List;
 
 public class HGQLConfig {
 
-    private String name;
-    private String schemaFile;
-    private GraphqlConfig graphqlConfig;
-    private List<ServiceConfig> serviceConfigs;
+    private final String name;
+    private final String schemaFile;
+    private final GraphqlConfig graphqlConfig;
+    private final List<ServiceConfig> serviceConfigs;
 
-    public void setName(String name) {
+    private GraphQLSchema schema;
+    private HGQLSchema hgqlSchema;
+
+    @JsonCreator
+    private HGQLConfig(
+            @JsonProperty("name") final String name,
+            @JsonProperty("schema") final String schemaFile,
+            @JsonProperty("server") final GraphqlConfig graphqlConfig,
+            @JsonProperty("services") final List<ServiceConfig> services
+    ) {
         this.name = name;
+        this.schemaFile = schemaFile;
+        this.graphqlConfig = graphqlConfig;
+        this.serviceConfigs = services;
     }
+//    public void setName(String name) {
+//        this.name = name;
+//    }
 
     public GraphQLSchema getSchema() {
         return schema;
@@ -35,22 +50,6 @@ public class HGQLConfig {
 
     public HGQLSchema getHgqlSchema() {
         return hgqlSchema;
-    }
-
-    private GraphQLSchema schema;
-    private HGQLSchema hgqlSchema;
-
-    @JsonCreator
-    private HGQLConfig(
-            @JsonProperty("name") String name,
-            @JsonProperty("schema") String schemaFile,
-            @JsonProperty("server") GraphqlConfig graphqlConfig,
-            @JsonProperty("services") List<ServiceConfig> services
-    ) {
-        this.name = name;
-        this.schemaFile = schemaFile;
-        this.graphqlConfig = graphqlConfig;
-        this.serviceConfigs = services;
     }
 
     public GraphqlConfig getGraphqlConfig() {

@@ -2,7 +2,7 @@ package org.hypergraphql.util;
 
 import org.apache.commons.io.FilenameUtils;
 
-public class PathUtils {
+public abstract class PathUtils {
 
     private static final String S3_REGEX = "(?i)^https?://s3.*\\.amazonaws\\.com/.*";
     private static final String NORMAL_URL_REGEX = "(?i)^https?://.*";
@@ -10,13 +10,11 @@ public class PathUtils {
 
     public static String makeAbsolute(final String generalPath, final String path) {
 
-        if(isAbsolute(path)) { // FQ URL or absolute path
+        if (isAbsolute(path)) { // FQ URL or absolute path
             return path;
         } else {
             final String parentPath = FilenameUtils.getFullPath(generalPath);
-            return parentPath +
-                    (parentPath.endsWith("/") ? "" : "/") +
-                    path;
+            return parentPath + (parentPath.endsWith("/") ? "" : "/") + path;
         }
     }
 

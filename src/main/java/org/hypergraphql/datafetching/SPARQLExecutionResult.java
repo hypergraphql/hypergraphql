@@ -7,8 +7,14 @@ import java.util.Set;
 
 public class SPARQLExecutionResult {
 
-   private  Map<String, Set<String>> resultSet;
-   private Model model;
+    private final Map<String, Set<String>> resultSet;
+    private Model model;
+
+    public SPARQLExecutionResult(final Map<String, Set<String>> resultSet, final Model model) {
+
+        this.resultSet = resultSet;
+        this.model = model;
+    }
 
     public Map<String, Set<String>> getResultSet() {
         return resultSet;
@@ -18,13 +24,7 @@ public class SPARQLExecutionResult {
         return model;
     }
 
-    public void setModel(Model model) {
-        this.model = model;
-    }
-
-    public SPARQLExecutionResult(Map<String, Set<String>> resultSet, Model model) {
-
-        this.resultSet = resultSet;
+    public void setModel(final Model model) {
         this.model = model;
     }
 

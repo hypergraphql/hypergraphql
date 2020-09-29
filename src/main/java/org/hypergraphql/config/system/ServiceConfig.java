@@ -5,24 +5,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ServiceConfig {
 
-    private String id;
-    private String type;
-    private String url;
-    private String graph;
-    private String user;
-    private String password;
-    private String filepath;
-    private String filetype;
+    private final String id;
+    private final String type;
+    private final String url;
+    private final String graph;
+    private final String user;
+    private final String password;
+    private final String filepath;
+    private final String filetype;
 
     @JsonCreator
-    public ServiceConfig(@JsonProperty("id") String id,
-                         @JsonProperty("type") String type,
-                         @JsonProperty("url") String url,
-                         @JsonProperty("graph") String graph,
-                         @JsonProperty("user") String user,
-                         @JsonProperty("password") String password,
-                         @JsonProperty("filepath") String filepath,
-                         @JsonProperty("filetype") String filetype
+    public ServiceConfig(@JsonProperty("id") final String id,
+                         @JsonProperty("type") final String type,
+                         @JsonProperty("url") final String url,
+                         @JsonProperty("graph") final String graph,
+                         @JsonProperty("user") final String user,
+                         @JsonProperty("password") final String password,
+                         @JsonProperty("filepath") final String filepath,
+                         @JsonProperty("filetype") final String filetype
     ) {
         this.id = id;
         this.type = type;
@@ -59,7 +59,7 @@ public class ServiceConfig {
         return password;
     }
 
-    protected void setUrl(final String url) {
-        this.url = url;
-    }
+//    protected void setUrl(final String url) {
+//        this.url = url;
+//    }
 }

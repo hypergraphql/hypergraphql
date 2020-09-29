@@ -23,32 +23,31 @@ import java.util.Map;
  */
 public class HGQLQueryService {
 
-    private GraphQL graphql;
-    private GraphQLSchema schema;
-    private HGQLSchema hgqlSchema;
+    private final GraphQL graphql;
+    private final GraphQLSchema schema;
+    private final HGQLSchema hgqlSchema;
 
-
-    public HGQLQueryService(HGQLConfig config) {
+    public HGQLQueryService(final HGQLConfig config) {
         this.hgqlSchema = config.getHgqlSchema();
         this.schema = config.getSchema();
 
         this.graphql = GraphQL.newGraphQL(config.getSchema()).build();
     }
 
-    public Map<String, Object> results(String query, String acceptType) {
+    public Map<String, Object> results(final String query, final String acceptType) {
 
-        Map<String, Object> result = new HashMap<>();
-        Map<String, Object> data = new HashMap<>();
-        Map<Object, Object> extensions = new HashMap<>();
-        List<GraphQLError> errors = new ArrayList<>();
+        final Map<String, Object> result = new HashMap<>();
+        final Map<String, Object> data = new HashMap<>();
+        final Map<Object, Object> extensions = new HashMap<>();
+        final List<GraphQLError> errors = new ArrayList<>();
 
         result.put("errors", errors);
-        result.put("extensions", extensions);
+        result.put("extensions", extensions); // TODO - is this ever populated
 
-        ExecutionInput executionInput;
+        final ExecutionInput executionInput;
         ExecutionResult qlResult = null;
 
-        ValidatedQuery validatedQuery = new QueryValidator(schema).validateQuery(query);
+        final ValidatedQuery validatedQuery = new QueryValidator(schema).validateQuery(query);
 
         if (!validatedQuery.getValid()) {
             errors.addAll(validatedQuery.getErrors());
@@ -62,10 +61,10 @@ public class HGQLQueryService {
 
         } else {
 
-            ExecutionForest queryExecutionForest =
+            final ExecutionForest queryExecutionForest =
                     new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery(), hgqlSchema);
 
-            ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
+            final ModelContainer client = new ModelContainer(queryExecutionForest.generateModel());
 
             if (acceptType == null) {
                 executionInput = ExecutionInput.newExecutionInput()

@@ -29,21 +29,26 @@ public class FieldOfTypeConfig {
         return name;
     }
 
-    private String id;
-    private String name;
-    private Service service;
-    private GraphQLOutputType graphqlOutputType;
-    private Boolean isList;
-    private String targetName;
+    private final String id;
+    private final String name;
+    private final Service service;
+    private final GraphQLOutputType graphqlOutputType;
+    private final Boolean isList;
+    private final String targetName;
 
-    public FieldOfTypeConfig(String name, String id, Service service, GraphQLOutputType graphqlOutputType, Boolean isList, String targetName) {
+    public FieldOfTypeConfig(final String name,
+                             final String id,
+                             final Service service,
+                             final GraphQLOutputType graphqlOutputType,
+                             final Boolean isList,
+                             final String targetName) {
 
         this.name = name;
-        this.id=id;
-        this.service=service;
+        this.id = id;
+        this.service = service;
         this.graphqlOutputType = graphqlOutputType;
-        this.targetName=targetName;
-        this.isList=isList;
+        this.targetName = targetName;
+        this.isList = isList;
 
     }
 

@@ -10,11 +10,12 @@ import org.hypergraphql.config.system.FetchParams;
 import java.util.List;
 import java.util.Map;
 
+// TODO - can these methods be simplified?
 public class FetcherFactory {
 
     private final HGQLSchema schema;
 
-    public FetcherFactory(HGQLSchema hgqlSchema ) {
+    public FetcherFactory(final HGQLSchema hgqlSchema ) {
 
         this.schema = hgqlSchema;
     }
@@ -22,7 +23,7 @@ public class FetcherFactory {
     public DataFetcher<String> idFetcher() {
         
         return environment -> {
-            RDFNode thisNode = environment.getSource();
+            final RDFNode thisNode = environment.getSource();
 
             if (thisNode.asResource().isURIResource()) {
                 return thisNode.asResource().getURI();
@@ -33,17 +34,17 @@ public class FetcherFactory {
     }
 
     public DataFetcher<String> typeFetcher(Map<String, TypeConfig> types) {
-        return  environment -> {
-            String typeName = environment.getParentType().getName();
+        return environment -> {
+            final var typeName = environment.getParentType().getName();
             return (types.containsKey(typeName)) ? types.get(typeName).getId() : null;
         };
     }
 
     public DataFetcher<List<RDFNode>> instancesOfTypeFetcher() {
         return environment -> {
-            Field field = (Field) environment.getFields().toArray()[0];
-            String predicate = (field.getAlias() == null) ? field.getName() : field.getAlias();
-            ModelContainer client = environment.getContext();
+            final var field = (Field) environment.getFields().toArray()[0];
+            final var predicate = (field.getAlias() == null) ? field.getName() : field.getAlias();
+            final ModelContainer client = environment.getContext();
             return client.getValuesOfObjectProperty(
                     HGQLVocabulary.HGQL_QUERY_URI,
                     HGQLVocabulary.HGQL_QUERY_NAMESPACE + predicate
@@ -53,7 +54,7 @@ public class FetcherFactory {
 
     public DataFetcher<RDFNode> objectFetcher() {
         return environment -> {
-            FetchParams params = new FetchParams(environment, schema);
+            final var params = new FetchParams(environment, schema);
             return params.getClient().getValueOfObjectProperty(
                     params.getSubjectResource(),
                     params.getPredicateURI(),
@@ -64,7 +65,7 @@ public class FetcherFactory {
 
     public DataFetcher<List<RDFNode>> objectsFetcher() {
         return environment -> {
-            FetchParams params = new FetchParams(environment, schema);
+            final var params = new FetchParams(environment, schema);
             return params.getClient().getValuesOfObjectProperty(
                     params.getSubjectResource(),
                     params.getPredicateURI(),
@@ -75,7 +76,7 @@ public class FetcherFactory {
 
     public DataFetcher<String> literalValueFetcher() {
         return environment -> {
-            FetchParams params = new FetchParams(environment, schema);
+            final var params = new FetchParams(environment, schema);
             return params.getClient().getValueOfDataProperty(
                     params.getSubjectResource(),
                     params.getPredicateURI(),
@@ -86,7 +87,7 @@ public class FetcherFactory {
 
     public DataFetcher<List<String>> literalValuesFetcher() {
         return environment -> {
-            FetchParams params = new FetchParams(environment, schema);
+            final var params = new FetchParams(environment, schema);
             return params.getClient().getValuesOfDataProperty(
                     params.getSubjectResource(),
                     params.getPredicateURI(),

@@ -37,32 +37,37 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
     protected Model model;
 
     @Override
-    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers , String rootType , HGQLSchema schema) {
+    public TreeExecutionResult executeQuery(
+            final JsonNode query,
+            final Set<String> input,
+            final Set<String> markers,
+            final String rootType,
+            final HGQLSchema schema) {
 
-        Map<String, Set<String>> resultSet = new HashMap<>();
-        Model unionModel = ModelFactory.createDefaultModel();
-        Set<Future<SPARQLExecutionResult>> futureSPARQLresults = new HashSet<>();
+        final Map<String, Set<String>> resultSet = new HashMap<>(); // TODO - dupe
+        final var unionModel = ModelFactory.createDefaultModel();
+        final Set<Future<SPARQLExecutionResult>> futureSPARQLResults = new HashSet<>();
 
-        List<String> inputList = getStrings(query, input, markers, rootType, schema, resultSet);
+        final List<String> inputList = getStrings(query, input, markers, rootType, schema, resultSet);
 
         do {
 
-            Set<String> inputSubset = new HashSet<>();
+            final Set<String> inputSubset = new HashSet<>(); // TODO - dupe
             int i = 0;
-            while (i < VALUES_SIZE_LIMIT && !inputList.isEmpty()) {
+            while (i < VALUES_SIZE_LIMIT && !inputList.isEmpty()) { // TODO - inner loop
                 inputSubset.add(inputList.get(0));
                 inputList.remove(0);
                 i++;
             }
-            ExecutorService executor = Executors.newFixedThreadPool(50);
-            LocalSPARQLExecution execution = new LocalSPARQLExecution(query,inputSubset,markers,this, schema , this.model, rootType);
-            futureSPARQLresults.add(executor.submit(execution));
+            final var executor = Executors.newFixedThreadPool(50);
+            final var execution = new LocalSPARQLExecution(query,inputSubset,markers,this, schema , this.model, rootType);
+            futureSPARQLResults.add(executor.submit(execution));
 
-        } while (inputList.size()>VALUES_SIZE_LIMIT);
+        } while (inputList.size() > VALUES_SIZE_LIMIT);
 
-        iterateFutureResults(futureSPARQLresults, unionModel, resultSet);
+        iterateFutureResults(futureSPARQLResults, unionModel, resultSet);
 
-        TreeExecutionResult treeExecutionResult = new TreeExecutionResult();
+        final var treeExecutionResult = new TreeExecutionResult();
         treeExecutionResult.setResultSet(resultSet);
         treeExecutionResult.setModel(unionModel);
 
@@ -70,7 +75,7 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
     }
 
     @Override
-    public void setParameters(ServiceConfig serviceConfig) {
+    public void setParameters(final ServiceConfig serviceConfig) {
         super.setParameters(serviceConfig);
 
         ARQ.init();
@@ -79,11 +84,11 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
 
         LOGGER.debug("Current path: " + new File(".").getAbsolutePath());
 
-        final File cwd = new File(".");
-        try(final FileInputStream fis = new FileInputStream(new File(cwd, serviceConfig.getFilepath()));
-            final BufferedInputStream in = new BufferedInputStream(fis)) {
+        final var cwd = new File(".");
+        try(final var fis = new FileInputStream(new File(cwd, serviceConfig.getFilepath()));
+            final var in = new BufferedInputStream(fis)) {
             this.model = ModelFactory.createDefaultModel();
-            final Lang lang = LangUtils.forName(serviceConfig.getFiletype());
+            final var lang = LangUtils.forName(serviceConfig.getFiletype());
             RDFDataMgr.read(model, in, lang);
         } catch (FileNotFoundException e) {
             throw new HGQLConfigurationException("Unable to locate local RDF file", e);

@@ -2,12 +2,15 @@ package org.hypergraphql.util;
 
 import org.apache.jena.riot.Lang;
 
-public class LangUtils {
+public abstract class LangUtils {
+
+    public static final String EMPTY_STRING = "";
+    public static final String SPACE = " ";
 
     public static Lang forName(final String rdfFormat) {
 
         final String ucRdfFormat = rdfFormat.toUpperCase();
-        switch(ucRdfFormat) {
+        switch (ucRdfFormat) {
 
             case "N3":
             case "TTL":

@@ -7,7 +7,6 @@ import java.util.Set;
 
 public class TreeExecutionResult {
 
-
     private Model model;
 
     private Map<String, Set<String>> resultSet;
@@ -16,7 +15,7 @@ public class TreeExecutionResult {
         return model;
     }
 
-    public void setModel(Model model) {
+    public void setModel(final Model model) {
         this.model = model;
     }
 
@@ -24,7 +23,7 @@ public class TreeExecutionResult {
         return resultSet;
     }
 
-    public void setResultSet(Map<String, Set<String>> resultSet) {
+    public void setResultSet(final Map<String, Set<String>> resultSet) {
         this.resultSet = resultSet;
     }
 }

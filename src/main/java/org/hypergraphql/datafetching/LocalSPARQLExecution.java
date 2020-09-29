@@ -22,26 +22,30 @@ public class LocalSPARQLExecution extends SPARQLEndpointExecution {
     private Model model;
 
 
-    public LocalSPARQLExecution(JsonNode query, Set<String> inputSubset, Set<String> markers, SPARQLEndpointService sparqlEndpointService, HGQLSchema schema , Model localmodel, String rootType) {
+    public LocalSPARQLExecution(final JsonNode query,
+                                final Set<String> inputSubset,
+                                final Set<String> markers,
+                                final SPARQLEndpointService sparqlEndpointService,
+                                final HGQLSchema schema,
+                                final Model localModel,
+                                final String rootType) {
         super(query, inputSubset, markers, sparqlEndpointService, schema, rootType);
-        this.model = localmodel;
+        this.model = localModel;
     }
 
     @Override
     public SPARQLExecutionResult call() {
 
-        Map<String, Set<String>> resultSet = new HashMap<>();
+        final Map<String, Set<String>> resultSet = new HashMap<>();
         markers.forEach(marker -> resultSet.put(marker, new HashSet<>()));
 
-        Model unionModel = ModelFactory.createDefaultModel();
-
-        SPARQLServiceConverter converter = new SPARQLServiceConverter(schema);
-        String sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);
+        final var unionModel = ModelFactory.createDefaultModel();
+        final var converter = new SPARQLServiceConverter(schema);
+        final var sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);
         logger.debug(sparqlQuery);
-        Query jenaQuery = QueryFactory.create(sparqlQuery);
-
-        QueryExecution qexec = QueryExecutionFactory.create(jenaQuery, model);
-        ResultSet results = qexec.execSelect();
+        final var jenaQuery = QueryFactory.create(sparqlQuery);
+        final var qexec = QueryExecutionFactory.create(jenaQuery, model);
+        final var results = qexec.execSelect();
 
         results.forEachRemaining(solution -> {
 
@@ -51,7 +55,7 @@ public class LocalSPARQLExecution extends SPARQLEndpointExecution {
                 }
             });
 
-            Model model = this.sparqlEndpointService.getModelFromResults(query, solution, schema);
+            final var model = this.sparqlEndpointService.getModelFromResults(query, solution, schema);
             unionModel.add(model);
         });
 

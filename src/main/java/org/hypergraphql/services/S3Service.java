@@ -17,7 +17,9 @@ public class S3Service {
         return new BasicAWSCredentials(key, secret);
     }
 
-    public AmazonS3 buildS3(final URI uri, final String key, final String secret) {
+    public AmazonS3 buildS3(final URI uri,
+                            final String key,
+                            final String secret) {
 
         final Regions region = extractRegion(uri);
 
@@ -27,13 +29,17 @@ public class S3Service {
                 .build();
     }
 
-    public InputStream openS3Stream(final URI uri, final String key, final String secret) {
+    public InputStream openS3Stream(final URI uri,
+                                    final String key,
+                                    final String secret) {
 
         S3Object s3Object = getObject(uri, key, secret);
         return s3Object.getObjectContent();
     }
 
-    private S3Object getObject(final URI uri, final String key, final String secret) {
+    private S3Object getObject(final URI uri,
+                               final String key,
+                               final String secret) {
 
         final AmazonS3 s3 = buildS3(uri, key, secret);
         final String bucketName = extractBucket(uri);
