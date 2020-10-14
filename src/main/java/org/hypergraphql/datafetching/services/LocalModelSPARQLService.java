@@ -1,10 +1,21 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.LocalSPARQLExecution;
@@ -16,25 +27,19 @@ import org.hypergraphql.util.LangUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+public class LocalModelSPARQLService extends SPARQLEndpointService {
 
-public class LocalModelSPARQLService extends SPARQLEndpointService{
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalModelSPARQLService.class);
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(LocalModelSPARQLService.class);
+    private Model model;
 
-    protected Model model;
+    public Model getModel() {
+        return model;
+    }
+
+    public void setModel(Model model) {
+        this.model = model;
+    }
 
     @Override
     public TreeExecutionResult executeQuery(
@@ -60,7 +65,7 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
                 i++;
             }
             final var executor = Executors.newFixedThreadPool(50);
-            final var execution = new LocalSPARQLExecution(query,inputSubset,markers,this, schema , this.model, rootType);
+            final var execution = new LocalSPARQLExecution(query, inputSubset, markers, this, schema, this.model, rootType);
             futureSPARQLResults.add(executor.submit(execution));
 
         } while (inputList.size() > VALUES_SIZE_LIMIT);
@@ -85,8 +90,8 @@ public class LocalModelSPARQLService extends SPARQLEndpointService{
         LOGGER.debug("Current path: " + new File(".").getAbsolutePath());
 
         final var cwd = new File(".");
-        try(final var fis = new FileInputStream(new File(cwd, serviceConfig.getFilepath()));
-            final var in = new BufferedInputStream(fis)) {
+        try (var fis = new FileInputStream(new File(cwd, serviceConfig.getFilepath()));
+            var in = new BufferedInputStream(fis)) {
             this.model = ModelFactory.createDefaultModel();
             final var lang = LangUtils.forName(serviceConfig.getFiletype());
             RDFDataMgr.read(model, in, lang);

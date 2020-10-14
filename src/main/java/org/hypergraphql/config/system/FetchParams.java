@@ -2,14 +2,13 @@ package org.hypergraphql.config.system;
 
 import graphql.language.Field;
 import graphql.schema.DataFetchingEnvironment;
+import java.util.List;
+import java.util.Map;
 import org.apache.jena.rdf.model.Resource;
 import org.hypergraphql.config.schema.FieldConfig;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.datamodel.ModelContainer;
 import org.hypergraphql.exception.HGQLConfigurationException;
-
-import java.util.List;
-import java.util.Map;
 
 public class FetchParams {
 
@@ -31,12 +30,15 @@ public class FetchParams {
     public Resource getSubjectResource() {
         return subjectResource;
     }
+
     public String getPredicateURI() {
         return predicateURI;
     }
+
     public ModelContainer getClient() {
         return client;
     }
+
     public String getTargetURI() {return targetURI; }
 
     private String extractPredicate(DataFetchingEnvironment environment) {
@@ -52,7 +54,7 @@ public class FetchParams {
 
         final Map<String, FieldConfig> fields = schema.getFields();
 
-        if(fields == null || fields.isEmpty()) { // TODO :: Does this cause an issue?
+        if (fields == null || fields.isEmpty()) { // TODO :: Does this cause an issue?
             throw new HGQLConfigurationException("Schema has no fields");
         }
 

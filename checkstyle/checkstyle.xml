@@ -90,8 +90,8 @@
         <module name="IllegalImport" />
         <module name="ImportOrder">
             <property name="option" value="bottom" />
-<!--            <property name="sortStaticImportsAlphabetically" value="true" />-->
-<!--            <property name="separatedStaticGroups" value="true" />-->
+            <property name="sortStaticImportsAlphabetically" value="true" />
+            <property name="separatedStaticGroups" value="true" />
         </module>
         <module name="RedundantImport" />
         <module name="UnusedImports" />
@@ -134,7 +134,9 @@
         <!-- Regexp -->
         <!-- Size violations -->
         <module name="MethodLength" />
-        <module name="ParameterNumber" />
+        <module name="ParameterNumber">
+            <property name="max" value="10" />
+        </module>
         <!-- Whitespace -->
         <module name="EmptyForIteratorPad" />
         <module name="EmptyLineSeparator">

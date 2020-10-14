@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_Boolean;
+import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_BOOLEAN;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_FIELD;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_HAS_FIELD;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_HAS_ID;
@@ -39,7 +39,7 @@ import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_HAS_NAME;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_HAS_SERVICE;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_HREF;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_ID;
-import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_Int;
+import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_INT;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_LIST_TYPE;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_NON_NULL_TYPE;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_OBJECT_TYPE;
@@ -86,10 +86,10 @@ public class HGQLSchema {
         rdfSchema.insertStringLiteralTriple(schemaNamespace + "query", HGQL_HAS_NAME, "Query");
         rdfSchema.insertObjectTriple(HGQL_STRING, RDF_TYPE, HGQL_SCALAR_TYPE);
         rdfSchema.insertStringLiteralTriple(HGQL_STRING, HGQL_HAS_NAME, "String");
-        rdfSchema.insertObjectTriple(HGQL_Int, RDF_TYPE, HGQL_SCALAR_TYPE);
-        rdfSchema.insertStringLiteralTriple(HGQL_Int, HGQL_HAS_NAME, "Int");
-        rdfSchema.insertObjectTriple(HGQL_Boolean, RDF_TYPE, HGQL_SCALAR_TYPE);
-        rdfSchema.insertStringLiteralTriple(HGQL_Boolean, HGQL_HAS_NAME, "Boolean");
+        rdfSchema.insertObjectTriple(HGQL_INT, RDF_TYPE, HGQL_SCALAR_TYPE);
+        rdfSchema.insertStringLiteralTriple(HGQL_INT, HGQL_HAS_NAME, "Int");
+        rdfSchema.insertObjectTriple(HGQL_BOOLEAN, RDF_TYPE, HGQL_SCALAR_TYPE);
+        rdfSchema.insertStringLiteralTriple(HGQL_BOOLEAN, HGQL_HAS_NAME, "Boolean");
         rdfSchema.insertObjectTriple(HGQL_ID, RDF_TYPE, HGQL_SCALAR_TYPE);
         rdfSchema.insertStringLiteralTriple(HGQL_ID, HGQL_HAS_NAME, "ID");
 

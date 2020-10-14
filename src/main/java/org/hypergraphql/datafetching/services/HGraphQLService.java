@@ -1,13 +1,13 @@
 package org.hypergraphql.datafetching.services;
 
-import java.io.InputStream;
-import java.util.Map;
-import java.util.Set;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.Set;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.config.system.ServiceConfig;
@@ -17,13 +17,13 @@ import org.hypergraphql.query.converters.HGraphQLConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HGraphQLService extends Service {
+public abstract class HGraphQLService extends Service {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HGraphQLService.class);
 
     private String url;
     private String user;
     private String password;
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(HGraphQLService.class);
 
     @Override
     public TreeExecutionResult executeQuery(

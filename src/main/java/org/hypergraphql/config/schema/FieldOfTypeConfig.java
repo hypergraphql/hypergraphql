@@ -5,6 +5,28 @@ import org.hypergraphql.datafetching.services.Service;
 
 public class FieldOfTypeConfig {
 
+    private final String id;
+    private final String name;
+    private final Service service;
+    private final GraphQLOutputType graphqlOutputType;
+    private final Boolean isList;
+    private final String targetName;
+
+    public FieldOfTypeConfig(final String name,
+                             final String id,
+                             final Service service,
+                             final GraphQLOutputType graphqlOutputType,
+                             final Boolean isList,
+                             final String targetName) {
+
+        this.name = name;
+        this.id = id;
+        this.service = service;
+        this.graphqlOutputType = graphqlOutputType;
+        this.targetName = targetName;
+        this.isList = isList;
+    }
+
     public String getId() {
         return id;
     }
@@ -28,29 +50,4 @@ public class FieldOfTypeConfig {
     public String getName() {
         return name;
     }
-
-    private final String id;
-    private final String name;
-    private final Service service;
-    private final GraphQLOutputType graphqlOutputType;
-    private final Boolean isList;
-    private final String targetName;
-
-    public FieldOfTypeConfig(final String name,
-                             final String id,
-                             final Service service,
-                             final GraphQLOutputType graphqlOutputType,
-                             final Boolean isList,
-                             final String targetName) {
-
-        this.name = name;
-        this.id = id;
-        this.service = service;
-        this.graphqlOutputType = graphqlOutputType;
-        this.targetName = targetName;
-        this.isList = isList;
-
-    }
-
-
 }

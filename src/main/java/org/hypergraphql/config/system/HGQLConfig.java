@@ -4,17 +4,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import graphql.schema.GraphQLSchema;
-import org.hypergraphql.datamodel.HGQLSchema;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
+import org.hypergraphql.datamodel.HGQLSchema;
 
 /**
  * Created by szymon on 05/09/2017.
  */
 
-public class HGQLConfig {
+public abstract class HGQLConfig {
 
     private final String name;
     private final String schemaFile;
@@ -71,13 +68,13 @@ public class HGQLConfig {
     }
 
     @JsonIgnore
-    public void setGraphQLSchema(final GraphQLSchema schema) {
-        this.schema = schema;
+    public void setGraphQLSchema(final GraphQLSchema graphQLSchema) {
+        this.schema = graphQLSchema;
     }
 
     @JsonIgnore
-    public void setHgqlSchema(final HGQLSchema schema) {
-        this.hgqlSchema = schema;
+    public void setHgqlSchema(final HGQLSchema hgqlSchema) {
+        this.hgqlSchema = hgqlSchema;
     }
 }
 

@@ -12,7 +12,12 @@ buildscript {
 
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'checkstyle'
 apply plugin: 'com.github.johnrengelman.shadow'
+
+//plugins {
+//    id 'checkstyle'
+//}
 
 group = 'org.hypergraphql'
 version = '1.1.0'
@@ -32,7 +37,9 @@ ext {
     jenaVersion = '3.8.0'
 }
 dependencies {
-    
+
+    compile group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+
     compile group: 'com.graphql-java', name: 'graphql-java', version: graphqlVersion
 
     compile group: 'org.apache.jena', name: 'jena-arq', version: jenaVersion
@@ -50,14 +57,9 @@ dependencies {
     compile group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.9'
     compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.869'
 
-//    testCompile group: 'org.junit.platform', name: 'junit-platform-gradle-plugin', version: '1.2.0'
-
-//    testCompile: 'org.junit.platform:junit-platform-launcher:1.6.2'
-//    testCompile: 'org.junit.platform:junit-platform-engine:1.6.2'
-
     testCompile group: 'org.mockito', name: 'mockito-core', version: '3.5.11'
 
-    testCompileOnly('org.apiguardian:apiguardian-api:1.2.0') // ???
+    testCompileOnly('org.apiguardian:apiguardian-api:1.1.0')
 
     testImplementation(
             'org.junit.jupiter:junit-jupiter-api:5.7.0'
@@ -65,6 +67,17 @@ dependencies {
     testRuntimeOnly(
             'org.junit.jupiter:junit-jupiter-engine:5.7.0'
     )
+}
+
+checkstyle {
+    toolVersion '8.29'
+    configFile file("checkstyle/checkstyle.xml")
+}
+checkstyleMain {
+    source ='src/main/java'
+}
+checkstyleTest {
+    source ='src/test/java'
 }
 
 test {

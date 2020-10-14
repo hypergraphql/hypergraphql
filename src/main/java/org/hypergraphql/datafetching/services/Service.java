@@ -1,30 +1,22 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.NodeIterator;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.ResIterator;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.vocabulary.RDF;
-import org.hypergraphql.config.schema.FieldConfig;
-import org.hypergraphql.config.schema.QueryFieldConfig;
-import org.hypergraphql.config.schema.TypeConfig;
-import org.hypergraphql.config.system.ServiceConfig;
-import org.hypergraphql.datafetching.TreeExecutionResult;
-import org.hypergraphql.datamodel.HGQLSchema;
-import org.hypergraphql.datamodel.QueryNode;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.vocabulary.RDF;
+import org.hypergraphql.config.schema.FieldConfig;
+import org.hypergraphql.config.schema.TypeConfig;
+import org.hypergraphql.config.system.ServiceConfig;
+import org.hypergraphql.datafetching.TreeExecutionResult;
+import org.hypergraphql.datamodel.HGQLSchema;
+import org.hypergraphql.datamodel.QueryNode;
 
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_NAMESPACE;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_URI;
@@ -32,8 +24,8 @@ import static org.hypergraphql.config.schema.HGQLVocabulary.RDF_TYPE;
 
 public abstract class Service {
 
-    protected String type;
-    protected String id;
+    private String type;
+    private String id;
 
     public String getType() {
         return type;
@@ -70,12 +62,12 @@ public abstract class Service {
 
             while (nodesIterator.hasNext()) {
                 final var currentNode = nodesIterator.next();
-                final var currentModel = buildModel(results, currentNode , schema);
+                final var currentModel = buildModel(results, currentNode, schema);
                 model.add(currentModel);
-                model.add(getModelFromResults(currentNode.get("fields"), results ,schema));
+                model.add(getModelFromResults(currentNode.get("fields"), results, schema));
             }
         } else {
-            final var currentModel = buildModel(results, query , schema);
+            final var currentModel = buildModel(results, query, schema);
             model.add(currentModel);
             model.add(getModelFromResults(query.get("fields"), results, schema));
         }
@@ -120,8 +112,8 @@ public abstract class Service {
             node = query; // TODO - in this situation, we should iterate over the array
         } else {
             node = query.get("fields");
-            if (markers.contains(query.get("nodeId").asText())){
-                resultset.put(query.get("nodeId").asText(),findRootIdentifiers(model,schema.getTypes().get(query.get("targetName").asText())));
+            if (markers.contains(query.get("nodeId").asText())) {
+                resultset.put(query.get("nodeId").asText(), findRootIdentifiers(model, schema.getTypes().get(query.get("targetName").asText())));
             }
         }
         Set<LinkedList<QueryNode>> paths = new HashSet<>(); // TODO - variable reuse

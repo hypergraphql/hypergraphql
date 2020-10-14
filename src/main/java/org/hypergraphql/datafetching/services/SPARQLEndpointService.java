@@ -1,6 +1,16 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.config.schema.HGQLVocabulary;
@@ -10,24 +20,12 @@ import org.hypergraphql.datafetching.SPARQLExecutionResult;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.HGQLSchema;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+public abstract class SPARQLEndpointService extends SPARQLService {
 
-public class SPARQLEndpointService extends SPARQLService {
-
+    private static final int VALUES_SIZE_LIMIT = 100;
     private String url;
     private String user;
     private String password;
-    final static int VALUES_SIZE_LIMIT = 100;
 
     public String getUrl() {
         return url;
@@ -79,7 +77,7 @@ public class SPARQLEndpointService extends SPARQLService {
         return treeExecutionResult;
     }
 
-    void iterateFutureResults (
+    void iterateFutureResults(
             final Set<Future<SPARQLExecutionResult>> futureSPARQLResults,
             final Model unionModel,
             final Map<String, Set<String>> resultSet
@@ -107,7 +105,7 @@ public class SPARQLEndpointService extends SPARQLService {
             resultSet.put(marker, new HashSet<>());
         }
 
-        if (rootType.equals("Query")&&schema.getQueryFields().get(query.get("name").asText()).type().equals(HGQLVocabulary.HGQL_QUERY_GET_BY_ID_FIELD)) {
+        if ("Query".equals(rootType) && schema.getQueryFields().get(query.get("name").asText()).type().equals(HGQLVocabulary.HGQL_QUERY_GET_BY_ID_FIELD)) {
             final Iterator<JsonNode> uris = query.get("args").get("uris").elements();
             while (uris.hasNext()) {
                 String uri = uris.next().asText();
@@ -122,7 +120,7 @@ public class SPARQLEndpointService extends SPARQLService {
 
         super.setParameters(serviceConfig);
 
-        this.id = serviceConfig.getId();
+        setId(serviceConfig.getId());
         this.url = serviceConfig.getUrl();
         this.user = serviceConfig.getUser();
         this.graph = serviceConfig.getGraph();

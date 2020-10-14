@@ -26,8 +26,8 @@ public class TypeConfig {
         return this.id;
     }
 
-    public FieldOfTypeConfig getField(final String name) {
-        return this.fields.get(name);
+    public FieldOfTypeConfig getField(final String fieldName) {
+        return this.fields.get(fieldName);
     }
 
     public Map<String, FieldOfTypeConfig> getFields() {

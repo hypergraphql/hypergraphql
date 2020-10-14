@@ -37,29 +37,32 @@ public class ServiceConfig {
     public String getId() {
         return id;
     }
+
     public String getFilepath() {
         return filepath;
     }
+
     public String getFiletype() {
         return filetype;
     }
+
     public String getType() {
         return type;
     }
+
     public String getUrl() {
         return url;
     }
+
     public String getGraph() {
         return graph;
     }
+
     public String getUser() {
         return user;
     }
+
     public String getPassword() {
         return password;
     }
-
-//    protected void setUrl(final String url) {
-//        this.url = url;
-//    }
 }

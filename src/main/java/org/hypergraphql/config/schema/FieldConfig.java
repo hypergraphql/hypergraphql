@@ -9,5 +9,7 @@ public class FieldConfig {
         this.id = id;
     }
 
-    public String getId() { return this.id; }
+    public String getId() {
+        return this.id;
+    }
 }

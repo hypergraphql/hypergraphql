@@ -4,7 +4,11 @@ import org.hypergraphql.config.system.ServiceConfig;
 
 public abstract class SPARQLService extends Service {
 
-    protected String graph;
+    private String graph;
+
+    public void setGraph(String graph) {
+        this.graph = graph;
+    }
 
     public String getGraph() {
         return graph;
@@ -12,7 +16,7 @@ public abstract class SPARQLService extends Service {
 
     public void setParameters(final ServiceConfig serviceConfig) {
 
-        this.id = serviceConfig.getId();
+        setId(serviceConfig.getId());
         if (serviceConfig.getGraph() == null) {
             this.graph = "";
         } else {
