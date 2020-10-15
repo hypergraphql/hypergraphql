@@ -1,15 +1,12 @@
 package org.hypergraphql.datafetching;
 
+import java.util.Map;
+import java.util.Set;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SPARQLExecutionResultTest {
 
@@ -28,19 +25,17 @@ class SPARQLExecutionResultTest {
         final SPARQLExecutionResult result = new SPARQLExecutionResult(generateSimpleResultSet(), model);
         final String toString = result.toString();
 
-        final String expectedToS = "RESULTS\nModel : \n" +
-                "<ModelCom   {http://data.hypergraphql.org/resources/123456 " +
-                "@http://data.hypergraphql.org/ontology/name \"Test\"@en} |  " +
-                "[http://data.hypergraphql.org/resources/123456, http://data.hypergraphql.org/ontology/name, \"Test\"@en]>\n" +
-                "ResultSet : \n{one=[1]}";
+        final String expectedToS = "RESULTS\nModel : \n"
+                + "<ModelCom   {http://data.hypergraphql.org/resources/123456 "
+                + "@http://data.hypergraphql.org/ontology/name \"Test\"@en} |  "
+                + "[http://data.hypergraphql.org/resources/123456, http://data.hypergraphql.org/ontology/name, \"Test\"@en]>\n"
+                + "ResultSet : \n{one=[1]}";
 
         assertEquals(expectedToS, toString);
     }
 
     private Map<String, Set<String>> generateSimpleResultSet() {
 
-        return new HashMap<String, Set<String>>() {{
-            put("one", new HashSet<String>() {{ add("1"); }});
-        }};
+        return Map.of("one", Set.of("1"));
     }
 }

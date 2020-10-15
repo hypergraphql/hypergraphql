@@ -1,12 +1,11 @@
 package org.hypergraphql.datamodel;
 
 import graphql.schema.idl.TypeDefinitionRegistry;
+import java.util.ArrayList;
 import org.hypergraphql.exception.HGQLConfigurationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-
-import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

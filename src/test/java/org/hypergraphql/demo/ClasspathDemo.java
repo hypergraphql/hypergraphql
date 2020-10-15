@@ -1,12 +1,11 @@
 package org.hypergraphql.demo;
 
+import java.io.InputStream;
 import org.hypergraphql.Controller;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.services.HGQLConfigService;
 
-import java.io.InputStream;
-
-public class ClasspathDemo {
+public abstract class ClasspathDemo {
 
     public static void main(String[] args) {
 
