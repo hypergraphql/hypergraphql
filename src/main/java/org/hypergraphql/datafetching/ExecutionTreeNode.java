@@ -2,8 +2,6 @@ package org.hypergraphql.datafetching;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.language.Argument;
 import graphql.language.BooleanValue;
 import graphql.language.Field;
@@ -12,16 +10,6 @@ import graphql.language.Node;
 import graphql.language.Selection;
 import graphql.language.SelectionSet;
 import graphql.language.StringValue;
-import graphql.language.Value;
-import org.apache.jena.rdf.model.Model;
-import org.hypergraphql.config.schema.FieldOfTypeConfig;
-import org.hypergraphql.config.schema.HGQLVocabulary;
-import org.hypergraphql.datafetching.services.Service;
-import org.hypergraphql.datamodel.HGQLSchema;
-import org.hypergraphql.exception.HGQLConfigurationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,71 +18,33 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import org.apache.jena.rdf.model.Model;
+import org.hypergraphql.config.schema.HGQLVocabulary;
+import org.hypergraphql.datafetching.services.Service;
+import org.hypergraphql.datamodel.HGQLSchema;
+import org.hypergraphql.exception.HGQLConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExecutionTreeNode {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExecutionTreeNode.class);
+
     private Service service; // getService configuration
     private JsonNode query; // GraphQL in a basic Json format
-    private String executionId; // unique identifier of this execution node
-    private Map<String, ExecutionForest> childrenNodes; // succeeding executions
-    private String rootType;
-    private Map<String, String> ldContext;
-    private HGQLSchema hgqlSchema;
+    private final String executionId; // unique identifier of this execution node
+    private final Map<String, ExecutionForest> childrenNodes; // succeeding executions
+    private final String rootType;
+    private final Map<String, String> ldContext;
+    private final HGQLSchema hgqlSchema;
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ExecutionTreeNode.class);
+    ExecutionTreeNode(final Field field, final String nodeId, final HGQLSchema schema) {
 
-    public void setService(final Service service) {
-        this.service = service;
-    }
-
-    public void setQuery(final JsonNode query) {
-        this.query = query;
-    }
-
-    public Map<String, ExecutionForest> getChildrenNodes() {
-        return childrenNodes;
-    }
-
-    public String getRootType() {
-        return rootType;
-    }
-
-    public Map<String, String> getLdContext() { return this.ldContext; }
-
-    public Service getService() {
-        return service;
-    }
-
-    public JsonNode getQuery() { return query; }
-
-    public String getExecutionId() {
-        return executionId;
-    }
-
-    Map<String, String> getFullLdContext() {
-
-        Map<String, String> result = new HashMap<>(ldContext);
-
-        Collection<ExecutionForest> children = getChildrenNodes().values();
-
-        if (!children.isEmpty()) {
-            for (ExecutionForest child : children) {
-                    result.putAll(child.getFullLdContext());
-            }
-        }
-
-        return result;
-
-    }
-
-    ExecutionTreeNode(final Field field, final String nodeId, final HGQLSchema schema ) {
-
-        if(schema.getQueryFields().containsKey(field.getName())) {
+        if (schema.getQueryFields().containsKey(field.getName())) {
             this.service = schema.getQueryFields().get(field.getName()).service();
-        } else if(schema.getFields().containsKey(field.getName())) {
+        } else if (schema.getFields().containsKey(field.getName())) {
             LOGGER.info("here");
         } else {
             throw new HGQLConfigurationException("Field '" + field.getName() + "' not found in schema");
@@ -124,6 +74,53 @@ public class ExecutionTreeNode {
         this.ldContext.putAll(HGQLVocabulary.JSONLD);
     }
 
+    public void setService(final Service service) {
+        this.service = service;
+    }
+
+    public void setQuery(final JsonNode query) {
+        this.query = query;
+    }
+
+    public Map<String, ExecutionForest> getChildrenNodes() {
+        return childrenNodes;
+    }
+
+    public String getRootType() {
+        return rootType;
+    }
+
+    public Map<String, String> getLdContext() {
+        return this.ldContext;
+    }
+
+    public Service getService() {
+        return service;
+    }
+
+    public JsonNode getQuery() {
+        return query;
+    }
+
+    public String getExecutionId() {
+        return executionId;
+    }
+
+    Map<String, String> getFullLdContext() {
+
+        Map<String, String> result = new HashMap<>(ldContext);
+
+        Collection<ExecutionForest> children = getChildrenNodes().values();
+
+        if (!children.isEmpty()) {
+            for (ExecutionForest child : children) {
+                result.putAll(child.getFullLdContext());
+            }
+        }
+
+        return result;
+
+    }
 
     public String toString(final int i) {
 
@@ -143,30 +140,28 @@ public class ExecutionTreeNode {
                 result.append(space).append("\tParent marker: ")
                         .append(child.getKey()).append("\n")
                         .append(space).append("\tChildren execution nodes: \n")
-                        .append(child.getValue().toString(i+1)).append("\n");
+                        .append(child.getValue().toString(i + 1)).append("\n");
             }
         }
 
         return result.append("\n").toString();
     }
 
-
     private JsonNode getFieldsJson(final Set<Field> fields,
                                    final String parentId,
                                    final String parentType) {
 
         final var mapper = new ObjectMapper();
-        final var query = mapper.createArrayNode();
+        final var queryNode = mapper.createArrayNode();
 
         int i = 0;
         for (final Field field : fields) {
             i++;
             final String nodeId = parentId + "_" + i;
-            query.add(getFieldJson(field, parentId, nodeId, parentType));
+            queryNode.add(getFieldJson(field, parentId, nodeId, parentType));
         }
-        return query;
+        return queryNode;
     }
-
 
     private JsonNode getFieldJson(final Field field,
                                   final String parentId,
@@ -174,32 +169,32 @@ public class ExecutionTreeNode {
                                   final String parentType) {
 
         final var mapper = new ObjectMapper();
-        final var query = mapper.createObjectNode();
+        final var queryNode = mapper.createObjectNode();
 
-        query.put("name", field.getName());
-        query.put("alias", field.getAlias());
-        query.put("parentId", parentId);
-        query.put("nodeId", nodeId);
+        queryNode.put("name", field.getName());
+        queryNode.put("alias", field.getAlias());
+        queryNode.put("parentId", parentId);
+        queryNode.put("nodeId", nodeId);
         final List<Argument> args = field.getArguments();
 
-        final var contextLdKey = (field.getAlias()==null) ? field.getName() : field.getAlias();
+        final var contextLdKey = (field.getAlias() == null) ? field.getName() : field.getAlias();
         final var contextLdValue = getContextLdValue(contextLdKey);
 
         this.ldContext.put(contextLdKey, contextLdValue);
 
         if (args.isEmpty()) {
-            query.set("args", null);
+            queryNode.set("args", null);
         } else {
-            query.set("args", getArgsJson(args));
+            queryNode.set("args", getArgsJson(args));
         }
 
         final var fieldConfig = hgqlSchema.getTypes().get(parentType).getField(field.getName());
         final var targetName = fieldConfig.getTargetName();
 
-        query.put("targetName", targetName);
-        query.set("fields", this.traverse(field, nodeId, parentType));
+        queryNode.put("targetName", targetName);
+        queryNode.set("fields", this.traverse(field, nodeId, parentType));
 
-        return query;
+        return queryNode;
     }
 
     private String getContextLdValue(final String contextLdKey) {
@@ -211,6 +206,7 @@ public class ExecutionTreeNode {
         }
     }
 
+    @SuppressWarnings({"checkstyle:NestedIfDepth", "checkstyle:IllegalCatch"})
     private JsonNode traverse(final Field field, final String parentId, final String parentType) {
 
         final var subFields = field.getSelectionSet();
@@ -271,32 +267,30 @@ public class ExecutionTreeNode {
             final var type = value.getClass().getSimpleName();
 
             switch (type) {
-                case "IntValue": {
+                case "IntValue": // TODO - ???
                     long longValue = ((IntValue) value).getValue().longValueExact();
                     argNode.put(arg.getName(), longValue);
                     break;
-                }
-                case "StringValue": {
+                case "StringValue":
                     final var stringValue = ((StringValue) value).getValue();
                     argNode.put(arg.getName(), stringValue);
                     break;
-                }
-                case "BooleanValue": {
+                case "BooleanValue":
                     final var booleanValue = ((BooleanValue) value).isValue();
                     argNode.put(arg.getName(), booleanValue);
                     break;
-                }
-                case "ArrayValue": {
+                case "ArrayValue":
                     final List<Node> nodes = value.getChildren();
                     final var arrayNode = mapper.createArrayNode();
 
                     for (final Node node : nodes)  {
-                        final var stringValue = ((StringValue) node).getValue();
-                        arrayNode.add(stringValue);
+                        final var v = ((StringValue) node).getValue();
+                        arrayNode.add(v);
                     }
                     argNode.set(arg.getName(), arrayNode);
                     break;
-                }
+                default:
+                    break; // this might cause problems
             }
 
         }
@@ -304,7 +298,7 @@ public class ExecutionTreeNode {
         return argNode;
     }
 
-
+    @SuppressWarnings("checkstyle:NestedIfDepth")
     private Map<Service, Set<Field>> getPartitionedFields(final String parentType, final SelectionSet selectionSet) {
 
         final Map<Service, Set<Field>> result = new HashMap<>();
@@ -316,8 +310,8 @@ public class ExecutionTreeNode {
                 final var field = (Field) child;
                 if (hgqlSchema.getFields().containsKey(field.getName())) {
                     final Service serviceConfig;
-                    if(hgqlSchema.getTypes().containsKey(parentType)) {
-                        if(hgqlSchema.getTypes().get(parentType).getFields().containsKey(field.getName())) {
+                    if (hgqlSchema.getTypes().containsKey(parentType)) {
+                        if (hgqlSchema.getTypes().get(parentType).getFields().containsKey(field.getName())) {
                             serviceConfig = hgqlSchema.getTypes().get(parentType).getFields().get(field.getName()).getService();
                         } else {
                             throw new HGQLConfigurationException("Schema is missing field '"
@@ -341,7 +335,6 @@ public class ExecutionTreeNode {
         return result;
     }
 
-
     private String createId() {
         return "execution-" + UUID.randomUUID();
     }
@@ -349,14 +342,14 @@ public class ExecutionTreeNode {
     Model generateTreeModel(final Set<String> input) {
 
         final var executionResult = service.executeQuery(query, input, childrenNodes.keySet(), rootType, hgqlSchema);
-        final Map<String,Set<String>> resultSet = executionResult.getResultSet();
+        final Map<String, Set<String>> resultSet = executionResult.getResultSet();
         final var model = executionResult.getModel();
         final Set<Model> computedModels = new HashSet<>();
         //    StoredModel.getInstance().add(model);
         final Set<String> vars = resultSet.keySet();
         final var executor = Executors.newFixedThreadPool(50);
         final Set<Future<Model>> futureModels = new HashSet<>();
-        vars.forEach(var ->{
+        vars.forEach(var -> {
             final var executionChildren = this.childrenNodes.get(var);
             if (executionChildren.getForest().size() > 0) {
                 final Set<String> values = resultSet.get(var);

@@ -1,9 +1,8 @@
 package org.hypergraphql.datafetching;
 
-import org.apache.jena.rdf.model.Model;
-
 import java.util.Map;
 import java.util.Set;
+import org.apache.jena.rdf.model.Model;
 
 public class SPARQLExecutionResult {
 
@@ -31,8 +30,8 @@ public class SPARQLExecutionResult {
     @Override
     public String toString() {
 
-        return "RESULTS\n" +
-                "Model : \n" + this.model.toString() + "\n" +
-                "ResultSet : \n" + this.resultSet.toString();
+        return "RESULTS\n"
+                + "Model : \n" + this.model.toString() + "\n"
+                + "ResultSet : \n" + this.resultSet.toString();
     }
 }

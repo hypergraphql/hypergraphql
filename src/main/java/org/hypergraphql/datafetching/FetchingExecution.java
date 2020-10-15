@@ -1,9 +1,8 @@
 package org.hypergraphql.datafetching;
 
-import org.apache.jena.rdf.model.Model;
-
 import java.util.Set;
 import java.util.concurrent.Callable;
+import org.apache.jena.rdf.model.Model;
 
 public class FetchingExecution implements Callable<Model> {
 
@@ -15,7 +14,7 @@ public class FetchingExecution implements Callable<Model> {
         this.inputValues = inputValues;
         this.node = node;
     }
-    
+
     @Override
     public Model call() {
         return node.generateTreeModel(inputValues);

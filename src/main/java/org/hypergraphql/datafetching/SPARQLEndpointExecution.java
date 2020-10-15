@@ -1,44 +1,36 @@
 package org.hypergraphql.datafetching;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
 import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.jena.query.ARQ;
-import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.web.HttpOp;
-import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.query.converters.SPARQLServiceConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
 // Performs HTTP query to remote store
 public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> {
 
-    protected final JsonNode query;
-    protected final Set<String> inputSubset;
-    protected final Set<String> markers;
-    protected final SPARQLEndpointService sparqlEndpointService;
-    protected final HGQLSchema schema ;
-    protected final Logger logger = LoggerFactory.getLogger(SPARQLEndpointExecution.class);
-    protected final String rootType;
+    private final JsonNode query;
+    private final Set<String> inputSubset;
+    private final Set<String> markers;
+    private final SPARQLEndpointService sparqlEndpointService;
+    private final HGQLSchema schema;
+    private final Logger logger = LoggerFactory.getLogger(SPARQLEndpointExecution.class);
+    private final String rootType;
 
     public SPARQLEndpointExecution(final JsonNode query,
                                    final Set<String> inputSubset,
@@ -51,7 +43,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
         this.markers = markers;
         this.sparqlEndpointService = sparqlEndpointService;
         this.schema = schema;
-        this.rootType=rootType;
+        this.rootType = rootType;
     }
 
     @Override
@@ -94,5 +86,28 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
         return sparqlExecutionResult;
     }
 
+    public JsonNode getQuery() {
+        return query;
+    }
+
+    public Set<String> getInputSubset() {
+        return inputSubset;
+    }
+
+    public Set<String> getMarkers() {
+        return markers;
+    }
+
+    public SPARQLEndpointService getSparqlEndpointService() {
+        return sparqlEndpointService;
+    }
+
+    public HGQLSchema getSchema() {
+        return schema;
+    }
+
+    public String getRootType() {
+        return rootType;
+    }
 }
 

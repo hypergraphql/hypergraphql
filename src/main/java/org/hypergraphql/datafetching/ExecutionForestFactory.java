@@ -6,17 +6,16 @@ import graphql.language.Field;
 import graphql.language.FragmentDefinition;
 import graphql.language.OperationDefinition;
 import graphql.language.SelectionSet;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class ExecutionForestFactory {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ExecutionForestFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExecutionForestFactory.class);
 
     public ExecutionForest getExecutionForest(final Document queryDocument, final HGQLSchema schema) {
 
@@ -30,7 +29,7 @@ public class ExecutionForestFactory {
             if (child.getClass().getSimpleName().equals("Field")) {
 
                 final var nodeId = "x_" + counter.incrementAndGet();
-                forest.getForest().add(new ExecutionTreeNode((Field) child, nodeId , schema));
+                forest.getForest().add(new ExecutionTreeNode((Field) child, nodeId, schema));
 
             }
         });
@@ -46,7 +45,7 @@ public class ExecutionForestFactory {
             return getFragmentSelectionSet(queryDocument);
 
         } else if (definition.getClass().isAssignableFrom(OperationDefinition.class)) {
-            final var operationDefinition = (OperationDefinition)definition;
+            final var operationDefinition = (OperationDefinition) definition;
             return operationDefinition.getSelectionSet();
         }
         throw new IllegalArgumentException(queryDocument.getClass().getName() + " is not supported");
@@ -55,7 +54,7 @@ public class ExecutionForestFactory {
     private SelectionSet getFragmentSelectionSet(final Document queryDocument) {
 
         // NPE
-        final var fragmentDefinition = (FragmentDefinition)queryDocument.getDefinitions().get(0);
+        final var fragmentDefinition = (FragmentDefinition) queryDocument.getDefinitions().get(0);
         final var originalSelectionSet = fragmentDefinition.getSelectionSet();
 
         final Optional<Definition> optionalDefinition = queryDocument.getDefinitions()
@@ -64,15 +63,15 @@ public class ExecutionForestFactory {
                 .findFirst();
 
         final OperationDefinition operationDefinition;
-        if(optionalDefinition.isPresent()) {
-            operationDefinition = (OperationDefinition)optionalDefinition.get();
+        if (optionalDefinition.isPresent()) {
+            operationDefinition = (OperationDefinition) optionalDefinition.get();
         } else {
             // bail
             throw new IllegalArgumentException("No OperationDefinition is available within the query");
         }
 
         // NPE?
-        final var operationSelection = (Field)operationDefinition.getSelectionSet().getSelections().get(0);
+        final var operationSelection = (Field) operationDefinition.getSelectionSet().getSelections().get(0);
 
         final var typeFieldName = operationSelection.getName();
 

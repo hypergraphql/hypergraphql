@@ -1,9 +1,8 @@
 package org.hypergraphql.datafetching;
 
-import org.apache.jena.rdf.model.Model;
-
 import java.util.Map;
 import java.util.Set;
+import org.apache.jena.rdf.model.Model;
 
 public class TreeExecutionResult {
 
