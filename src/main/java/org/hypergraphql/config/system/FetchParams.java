@@ -39,7 +39,9 @@ public class FetchParams {
         return client;
     }
 
-    public String getTargetURI() {return targetURI; }
+    public String getTargetURI() {
+        return targetURI;
+    }
 
     private String extractPredicate(DataFetchingEnvironment environment) {
 

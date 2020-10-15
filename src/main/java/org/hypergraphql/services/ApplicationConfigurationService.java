@@ -145,14 +145,14 @@ public class ApplicationConfigurationService {
 
         if (resourcePaths != null) {
             Arrays.stream(resourcePaths).forEach(
-                    resourcePath -> {
-                        final URL sourceUrl = getClass().getClassLoader().getResource(resourcePath);
+                resourcePath -> {
+                    final URL sourceUrl = getClass().getClassLoader().getResource(resourcePath);
 
-                        LOGGER.info("Resource path: {}", resourcePath);
-                        if (sourceUrl != null) {
-                            configurations.addAll(getConfigurationsFromClasspath(sourceUrl.getFile()));
-                        }
+                    LOGGER.info("Resource path: {}", resourcePath);
+                    if (sourceUrl != null) {
+                        configurations.addAll(getConfigurationsFromClasspath(sourceUrl.getFile()));
                     }
+                }
             );
         }
 

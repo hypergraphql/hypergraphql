@@ -7,10 +7,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.config.schema.HGQLVocabulary;
-import org.hypergraphql.datamodel.HGQLSchema;
+import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
+import org.hypergraphql.datamodel.HGQLSchema;
 
 public class SPARQLServiceConverter {
 
@@ -134,7 +134,7 @@ public class SPARQLServiceConverter {
 
         final Map<String, QueryFieldConfig> queryFields = schema.getQueryFields();
 
-        final Boolean root = (!jsonQuery.isArray() && queryFields.containsKey(jsonQuery.get(NAME).asText()));
+        final Boolean root = !jsonQuery.isArray() && queryFields.containsKey(jsonQuery.get(NAME).asText());
 
         if (root) {
             if (queryFields.get(jsonQuery.get(NAME).asText()).type().equals(HGQLVocabulary.HGQL_QUERY_GET_FIELD)) {
@@ -200,7 +200,6 @@ public class SPARQLServiceConverter {
         return selectQueryClause(valueSTR + (whereClause.toString()), graphID);
     }
 
-
     private String getFieldSubquery(final JsonNode fieldJson) {
 
         final String fieldName = fieldJson.get(NAME).asText();
@@ -226,7 +225,6 @@ public class SPARQLServiceConverter {
 
         return optionalClause(fieldPattern + langFilter + rest);
     }
-
 
     private String getSubQueries(final JsonNode subfields) {
 
