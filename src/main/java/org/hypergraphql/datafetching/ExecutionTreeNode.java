@@ -108,15 +108,10 @@ public class ExecutionTreeNode {
 
     Map<String, String> getFullLdContext() {
 
-        Map<String, String> result = new HashMap<>(ldContext);
+        final Map<String, String> result = new HashMap<>(ldContext);
 
         Collection<ExecutionForest> children = getChildrenNodes().values();
-
-        if (!children.isEmpty()) {
-            for (ExecutionForest child : children) {
-                result.putAll(child.getFullLdContext());
-            }
-        }
+        children.forEach(child -> result.putAll(child.getFullLdContext()));
 
         return result;
 
