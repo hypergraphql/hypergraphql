@@ -17,7 +17,7 @@ import org.hypergraphql.query.converters.HGraphQLConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class HGraphQLService extends Service {
+public final class HGraphQLService extends Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HGraphQLService.class);
 

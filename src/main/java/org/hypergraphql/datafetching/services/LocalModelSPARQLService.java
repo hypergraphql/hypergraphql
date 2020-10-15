@@ -27,7 +27,7 @@ import org.hypergraphql.util.LangUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LocalModelSPARQLService extends SPARQLEndpointService {
+public final class LocalModelSPARQLService extends SPARQLEndpointService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalModelSPARQLService.class);
 

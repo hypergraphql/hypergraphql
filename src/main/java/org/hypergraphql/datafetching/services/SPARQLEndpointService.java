@@ -20,7 +20,7 @@ import org.hypergraphql.datafetching.SPARQLExecutionResult;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.HGQLSchema;
 
-public abstract class SPARQLEndpointService extends SPARQLService {
+public class SPARQLEndpointService extends SPARQLService {
 
     public static final int VALUES_SIZE_LIMIT = 100;
     private String url;
