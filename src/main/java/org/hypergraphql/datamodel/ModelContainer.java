@@ -1,20 +1,17 @@
 package org.hypergraphql.datamodel;
 
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.NodeIterator;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.ResIterator;
-import org.apache.jena.rdf.model.Resource;
-import org.hypergraphql.config.schema.HGQLVocabulary;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.hypergraphql.config.schema.HGQLVocabulary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by szymon on 22/08/2017.
@@ -22,9 +19,12 @@ import java.util.Map;
 
 public class ModelContainer {
 
-    protected final Model model;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ModelContainer.class);
+    private final Model model;
+
+    public ModelContainer(final Model model) {
+        this.model = model;
+    }
 
     public String getDataOutput(final String format) {
 
@@ -32,11 +32,6 @@ public class ModelContainer {
         model.write(out, format);
         return out.toString();
     }
-
-    public ModelContainer(final Model model) {
-        this.model = model;
-    }
-
 
     private Property getPropertyFromUri(final String propertyURI) {
 
@@ -87,7 +82,7 @@ public class ModelContainer {
             RDFNode data = iterator.next();
             if (data.isLiteral()) {
                 if (!args.containsKey("lang") || args.get("lang").toString().equalsIgnoreCase(data.asLiteral().getLanguage())) {
-                        valList.add(data.asLiteral().getString());
+                    valList.add(data.asLiteral().getString());
                 }
             }
         }
@@ -109,9 +104,9 @@ public class ModelContainer {
         final List<RDFNode> rdfNodes = new ArrayList<>();
         iterator.forEachRemaining(node -> {
             if (!node.isLiteral()) {
-                if(targetURI == null) {
+                if (targetURI == null) {
                     rdfNodes.add(node);
-                } else if(this.model.contains(node.asResource(), getPropertyFromUri(HGQLVocabulary.RDF_TYPE), getResourceFromUri(targetURI))) {
+                } else if (this.model.contains(node.asResource(), getPropertyFromUri(HGQLVocabulary.RDF_TYPE), getResourceFromUri(targetURI))) {
                     rdfNodes.add(node);
                 }
             }
@@ -122,7 +117,7 @@ public class ModelContainer {
     RDFNode getValueOfObjectProperty(final RDFNode subject, final String predicateURI) {
 
         final List<RDFNode> values = getValuesOfObjectProperty(subject, predicateURI);
-        if(values == null || values.isEmpty()) {
+        if (values == null || values.isEmpty()) {
             return null;
         }
         return values.get(0);

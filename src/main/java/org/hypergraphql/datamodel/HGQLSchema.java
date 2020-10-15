@@ -14,6 +14,11 @@ import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLTypeReference;
 import graphql.schema.idl.TypeDefinitionRegistry;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.hypergraphql.config.schema.FieldConfig;
@@ -24,12 +29,6 @@ import org.hypergraphql.datafetching.services.Service;
 import org.hypergraphql.exception.HGQLConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_BOOLEAN;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_FIELD;
@@ -59,10 +58,9 @@ import static org.hypergraphql.config.schema.HGQLVocabulary.RDF_TYPE;
 import static org.hypergraphql.config.schema.HGQLVocabulary.SCALAR_TYPES;
 import static org.hypergraphql.config.schema.HGQLVocabulary.SCALAR_TYPES_TO_GRAPHQL_OUTPUT;
 
-
 public class HGQLSchema {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(HGQLSchema.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HGQLSchema.class);
 
     private final String schemaUri;
     private final String schemaNamespace;
@@ -93,25 +91,26 @@ public class HGQLSchema {
         rdfSchema.insertObjectTriple(HGQL_ID, RDF_TYPE, HGQL_SCALAR_TYPE);
         rdfSchema.insertStringLiteralTriple(HGQL_ID, HGQL_HAS_NAME, "ID");
 
-        final Map<String, TypeDefinition> types = registry.types();
-        final var context = types.get("__Context");
+        final Map<String, TypeDefinition> registryTypes = registry.types();
+        final var context = registryTypes.get("__Context");
 
         if (context == null) {
             final var e =
-                    new HGQLConfigurationException("The provided GraphQL schema IDL specification is missing the obligatory __Context type (see specs at http://hypergraphql.org).");
+                    new HGQLConfigurationException("The provided GraphQL schema IDL specification is missing the"
+                            + "obligatory __Context type (see specs at http://hypergraphql.org).");
             LOGGER.error("Context not set!", e);
-            throw(e);
+            throw e;
         }
         final List<Node> children = context.getChildren();
         final Map<String, String> contextMap = new HashMap<>();
 
         children.forEach(node -> {
-            final var field = ((FieldDefinition) node);
+            final var field = (FieldDefinition) node;
             final var iri = ((StringValue) field.getDirective("href").getArgument("iri").getValue()).getValue();
             contextMap.put(field.getName(), iri);
         });
 
-        final Set<String> typeNames = types.keySet();
+        final Set<String> typeNames = registryTypes.keySet();
         typeNames.remove("__Context");
 
         final Set<String> serviceIds = services.keySet();
@@ -129,7 +128,7 @@ public class HGQLSchema {
             rdfSchema.insertObjectTriple(typeUri, RDF_TYPE, HGQL_OBJECT_TYPE);
 
 
-            final var type = types.get(typeName);
+            final var type = registryTypes.get(typeName);
             final List<Directive> directives = type.getDirectives();
 
             directives.forEach(dir -> {
@@ -244,16 +243,16 @@ public class HGQLSchema {
         typeNodes.forEach(rdfNode -> {
             final var typeName = rdfSchema.getValueOfDataProperty(rdfNode, HGQL_HAS_NAME);
             final var typeHref = rdfSchema.getValueOfObjectProperty(rdfNode, HGQL_HREF);
-            final var typeURI = (typeHref!=null) ? typeHref.asResource().getURI() : null;
+            final var typeURI = (typeHref != null) ? typeHref.asResource().getURI() : null;
 
             final List<RDFNode> fieldsOfType = rdfSchema.getValuesOfObjectProperty(rdfNode, HGQL_HAS_FIELD);
-            final Map<String, FieldOfTypeConfig> fields = new HashMap<>();
+            final Map<String, FieldOfTypeConfig> fieldConfig = new HashMap<>();
 
             fieldsOfType.forEach(field -> {
 
                 final var fieldOfTypeName = rdfSchema.getValueOfDataProperty(field, HGQL_HAS_NAME);
                 final var href = rdfSchema.getValueOfObjectProperty(field, HGQL_HREF);
-                final var hrefURI = (href!=null) ? href.asResource().getURI() : null;
+                final var hrefURI = (href != null) ? href.asResource().getURI() : null;
                 final var serviceNode = rdfSchema.getValueOfObjectProperty(field, HGQL_HAS_SERVICE);
                 final var serviceId = rdfSchema.getValueOfDataProperty(serviceNode, HGQL_HAS_ID);
                 final var outputTypeNode = rdfSchema.getValueOfObjectProperty(field, HGQL_OUTPUT_TYPE);
@@ -261,17 +260,17 @@ public class HGQLSchema {
                 final var isList = getIsList(outputTypeNode);
                 final var targetTypeName = getTargetTypeName(outputTypeNode);
                 final var fieldOfTypeConfig = new FieldOfTypeConfig(fieldOfTypeName, hrefURI, services.get(serviceId), graphqlOutputType, isList, targetTypeName);
-                fields.put(fieldOfTypeName, fieldOfTypeConfig);
+                fieldConfig.put(fieldOfTypeName, fieldOfTypeConfig);
             });
 
-            final var typeConfig = new TypeConfig(typeName, typeURI, fields);
+            final var typeConfig = new TypeConfig(typeName, typeURI, fieldConfig);
             this.types.put(typeName, typeConfig);
         });
     }
 
     private String getTargetTypeName(RDFNode outputTypeNode) {
         String typeName = rdfSchema.getValueOfDataProperty(outputTypeNode, HGQL_HAS_NAME);
-        if (typeName!=null) {
+        if (typeName != null) {
             return typeName;
         } else {
             RDFNode childOutputNode = rdfSchema.getValueOfObjectProperty(outputTypeNode, HGQL_OF_TYPE);

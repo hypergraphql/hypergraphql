@@ -22,9 +22,9 @@ public class QueryNode {
 
     @Override
     public String toString() {
-        return "QueryNode{" +
-                "node=" + node +
-                ", marker='" + marker + '\'' +
-                '}';
+        return "QueryNode{"
+                + "node=" + node
+                + ", marker='" + marker + '\''
+                + '}';
     }
 }
