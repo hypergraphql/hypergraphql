@@ -7,11 +7,10 @@ import graphql.schema.GraphQLSchema;
 import graphql.validation.ValidationError;
 import graphql.validation.ValidationErrorType;
 import graphql.validation.Validator;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class QueryValidator {
+public class QueryValidator { // TODO - CS suppress
 
     private final GraphQLSchema schema;
     private final List<ValidationError> validationErrors;
@@ -26,6 +25,7 @@ public class QueryValidator {
         this.parser = new Parser();
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public ValidatedQuery validateQuery(final String query) {
 
         final ValidatedQuery result = new ValidatedQuery();

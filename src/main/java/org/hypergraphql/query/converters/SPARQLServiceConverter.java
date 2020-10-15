@@ -1,34 +1,30 @@
 package org.hypergraphql.query.converters;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import org.apache.commons.lang3.StringUtils;
-import org.hypergraphql.config.schema.QueryFieldConfig;
-
-import org.hypergraphql.datamodel.HGQLSchema;
-
-import org.hypergraphql.config.schema.HGQLVocabulary;
-import org.hypergraphql.datafetching.services.SPARQLEndpointService;
-
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
+import org.hypergraphql.config.schema.QueryFieldConfig;
+import org.hypergraphql.config.schema.HGQLVocabulary;
+import org.hypergraphql.datamodel.HGQLSchema;
+import org.hypergraphql.datafetching.services.SPARQLEndpointService;
 
 public class SPARQLServiceConverter {
 
-    private final static String RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
-    private final static String NAME = "name";
-    private final static String URIS = "uris";
-    private final static String NODE_ID = "nodeId";
-    private final static String LANG = "lang";
-    private final static String FIELDS = "fields";
-    private final static String ARGS = "args";
-    private final static String TARGET_NAME = "targetName";
-    private final static String PARENT_ID = "parentId";
-    private final static String LIMIT = "limit";
-    private final static String OFFSET = "offset";
+    private static final String RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+    private static final String NAME = "name";
+    private static final String URIS = "uris";
+    private static final String NODE_ID = "nodeId";
+    private static final String LANG = "lang";
+    private static final String FIELDS = "fields";
+    private static final String ARGS = "args";
+    private static final String TARGET_NAME = "targetName";
+    private static final String PARENT_ID = "parentId";
+    private static final String LIMIT = "limit";
+    private static final String OFFSET = "offset";
 
     private final HGQLSchema schema;
 
@@ -117,18 +113,18 @@ public class SPARQLServiceConverter {
     }
 
     private String langFilterClause(final JsonNode field) {
-        final String PATTERN = "FILTER (lang(%s) = \"%s\") . ";
+        final String pattern = "FILTER (lang(%s) = \"%s\") . ";
         final String nodeVar = toVar(field.get(NODE_ID).asText());
         final JsonNode args = field.get(ARGS);
-        return (args.has(LANG)) ? String.format(PATTERN, nodeVar, args.get(LANG).asText()) : "";
+        return (args.has(LANG)) ? String.format(pattern, nodeVar, args.get(LANG).asText()) : "";
     }
 
     private String fieldPattern(final String parentId,
                                 final String nodeId,
                                 final String predicateURI,
                                 final String typeURI) {
-        final String predicateTriple = (parentId.equals("")) ? "" : toTriple(toVar(parentId), uriToResource(predicateURI), toVar(nodeId));
-        final String typeTriple = (typeURI.equals("")) ? "" : toTriple(toVar(nodeId), RDF_TYPE_URI, uriToResource(typeURI));
+        final String predicateTriple = ("".equals(parentId)) ? "" : toTriple(toVar(parentId), uriToResource(predicateURI), toVar(nodeId));
+        final String typeTriple = ("".equals(typeURI)) ? "" : toTriple(toVar(nodeId), RDF_TYPE_URI, uriToResource(typeURI));
         return predicateTriple + typeTriple;
     }
 

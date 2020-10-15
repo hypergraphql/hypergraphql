@@ -1,14 +1,15 @@
 package org.hypergraphql.query.converters;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.datamodel.HGQLSchema;
+
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_GET_FIELD;
 import static org.hypergraphql.util.LangUtils.EMPTY_STRING;
 import static org.hypergraphql.util.LangUtils.SPACE;

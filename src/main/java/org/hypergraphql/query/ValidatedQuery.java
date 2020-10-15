@@ -2,7 +2,6 @@ package org.hypergraphql.query;
 
 import graphql.language.Document;
 import graphql.validation.ValidationError;
-
 import java.util.List;
 
 public class ValidatedQuery {
