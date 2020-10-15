@@ -85,7 +85,7 @@ public class LocalModelSPARQLService extends SPARQLEndpointService {
 
         ARQ.init();
 
-        this.id = serviceConfig.getId();
+        setId(serviceConfig.getId());
 
         LOGGER.debug("Current path: " + new File(".").getAbsolutePath());
 

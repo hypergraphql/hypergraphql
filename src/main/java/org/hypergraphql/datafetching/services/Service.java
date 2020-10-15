@@ -22,7 +22,7 @@ import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_NAMESPACE
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_URI;
 import static org.hypergraphql.config.schema.HGQLVocabulary.RDF_TYPE;
 
-public abstract class Service {
+public abstract class Service { // TODO - Review cs suppression
 
     private String type;
     private String id;
@@ -202,10 +202,11 @@ public abstract class Service {
 
     private Set<LinkedList<QueryNode>> getQueryPaths(final JsonNode query, final HGQLSchema schema) {
         final Set<LinkedList<QueryNode>> paths = new HashSet<>();
-        getQueryPathsRecursive(query, paths, null ,  schema);
+        getQueryPathsRecursive(query, paths, null, schema);
         return paths;
     }
 
+    @SuppressWarnings("checkstyle:ParameterAssignment")
     private void getQueryPathsRecursive(final JsonNode query,
                                         final Set<LinkedList<QueryNode>> paths,
                                         LinkedList<QueryNode> path,

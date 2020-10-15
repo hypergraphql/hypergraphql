@@ -22,7 +22,7 @@ import org.hypergraphql.datamodel.HGQLSchema;
 
 public abstract class SPARQLEndpointService extends SPARQLService {
 
-    private static final int VALUES_SIZE_LIMIT = 100;
+    public static final int VALUES_SIZE_LIMIT = 100;
     private String url;
     private String user;
     private String password;
@@ -123,7 +123,7 @@ public abstract class SPARQLEndpointService extends SPARQLService {
         setId(serviceConfig.getId());
         this.url = serviceConfig.getUrl();
         this.user = serviceConfig.getUser();
-        this.graph = serviceConfig.getGraph();
+        setGraph(serviceConfig.getGraph());
         this.password = serviceConfig.getPassword();
 
     }

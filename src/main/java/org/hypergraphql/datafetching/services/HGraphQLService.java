@@ -79,7 +79,7 @@ public abstract class HGraphQLService extends Service {
     @Override
     public void setParameters(ServiceConfig serviceConfig) {
 
-        this.id = serviceConfig.getId();
+        setId(serviceConfig.getId());
         this.url = serviceConfig.getUrl();
         this.user = serviceConfig.getUser();
         this.password = serviceConfig.getPassword();

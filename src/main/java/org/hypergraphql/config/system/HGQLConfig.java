@@ -11,7 +11,7 @@ import org.hypergraphql.datamodel.HGQLSchema;
  * Created by szymon on 05/09/2017.
  */
 
-public abstract class HGQLConfig {
+public final class HGQLConfig {
 
     private final String name;
     private final String schemaFile;

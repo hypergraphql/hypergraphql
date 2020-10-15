@@ -15,10 +15,6 @@ apply plugin: 'maven'
 apply plugin: 'checkstyle'
 apply plugin: 'com.github.johnrengelman.shadow'
 
-//plugins {
-//    id 'checkstyle'
-//}
-
 group = 'org.hypergraphql'
 version = '1.1.0'
 
