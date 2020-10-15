@@ -5,18 +5,17 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
 import graphql.schema.GraphQLSchema;
-import org.hypergraphql.config.system.HGQLConfig;
-import org.hypergraphql.datamodel.HGQLSchema;
-import org.hypergraphql.datafetching.ExecutionForest;
-import org.hypergraphql.datafetching.ExecutionForestFactory;
-import org.hypergraphql.datamodel.ModelContainer;
-import org.hypergraphql.query.QueryValidator;
-import org.hypergraphql.query.ValidatedQuery;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.datafetching.ExecutionForest;
+import org.hypergraphql.datafetching.ExecutionForestFactory;
+import org.hypergraphql.datamodel.HGQLSchema;
+import org.hypergraphql.datamodel.ModelContainer;
+import org.hypergraphql.query.QueryValidator;
+import org.hypergraphql.query.ValidatedQuery;
 
 /**
  * Created by szymon on 01/11/2017.

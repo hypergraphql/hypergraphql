@@ -7,7 +7,6 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.S3Object;
-
 import java.io.InputStream;
 import java.net.URI;
 
@@ -55,9 +54,9 @@ public class S3Service {
     Regions extractRegion(final URI uri) {
 
         final String regionString = uri.getHost().split("\\.")[0];
-        switch(regionString.toUpperCase()) {
+        switch (regionString.toUpperCase()) {
 
-            case ("S3"):
+            case "S3":
                 return Regions.US_EAST_1;
             default:
                 final String regionPart = regionString.substring(regionString.indexOf("-") + 1);

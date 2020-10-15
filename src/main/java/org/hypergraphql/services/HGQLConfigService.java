@@ -6,15 +6,6 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.GetRequest;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.hypergraphql.config.system.HGQLConfig;
-import org.hypergraphql.datamodel.HGQLSchemaWiring;
-import org.hypergraphql.exception.HGQLConfigurationException;
-import org.hypergraphql.util.PathUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +15,14 @@ import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.datamodel.HGQLSchemaWiring;
+import org.hypergraphql.exception.HGQLConfigurationException;
+import org.hypergraphql.util.PathUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HGQLConfigService {
 
@@ -76,13 +75,13 @@ public class HGQLConfigService {
                                            final boolean classpath)
             throws IOException, URISyntaxException {
 
-        if(schemaPath.matches(S3_REGEX)) {
+        if (schemaPath.matches(S3_REGEX)) {
 
             LOGGER.debug("S3 schema");
             // create S3 bucket request, etc.
             return getReaderForS3(schemaPath, username, password);
 
-        } else if(schemaPath.matches(NORMAL_URL_REGEX)) {
+        } else if (schemaPath.matches(NORMAL_URL_REGEX)) {
             LOGGER.info("HTTP/S schema");
             return getReaderForUrl(schemaPath, username, password);
         } else if (schemaPath.contains(".jar!") || classpath) {
@@ -101,7 +100,7 @@ public class HGQLConfigService {
                                    final String password) {
 
         final GetRequest getRequest;
-        if(username == null && password == null) {
+        if (username == null && password == null) {
             getRequest = Unirest.get(schemaPath);
         } else {
             getRequest = Unirest.get(schemaPath).basicAuth(username, password);
@@ -128,7 +127,7 @@ public class HGQLConfigService {
 
         LOGGER.debug("HGQL config path: {}, schema path: {}", hgqlConfigPath, schemaPath);
         final String configPath = FilenameUtils.getFullPath(hgqlConfigPath);
-        if(StringUtils.isBlank(configPath)) {
+        if (StringUtils.isBlank(configPath)) {
             return schemaPath;
         } else {
             final String abs = PathUtils.makeAbsolute(configPath, schemaPath);
@@ -147,5 +146,5 @@ public class HGQLConfigService {
         final String filename = fn.startsWith("/") ? fn.substring(fn.indexOf("/") + 1) : fn;
         LOGGER.debug("For filename: {}", filename);
         return new InputStreamReader(getClass().getClassLoader().getResourceAsStream(filename)); // TODO - address this
-     }
+    }
 }
