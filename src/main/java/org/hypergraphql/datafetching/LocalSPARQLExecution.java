@@ -1,10 +1,10 @@
 package org.hypergraphql.datafetching;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
@@ -21,8 +21,8 @@ public class LocalSPARQLExecution extends SPARQLEndpointExecution {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public LocalSPARQLExecution(final JsonNode query,
-                                final Set<String> inputSubset,
-                                final Set<String> markers,
+                                final Collection<String> inputSubset,
+                                final Collection<String> markers,
                                 final SPARQLEndpointService sparqlEndpointService,
                                 final HGQLSchema schema,
                                 final Model localModel,
@@ -34,7 +34,7 @@ public class LocalSPARQLExecution extends SPARQLEndpointExecution {
     @Override
     public SPARQLExecutionResult call() {
 
-        final Map<String, Set<String>> resultSet = new HashMap<>();
+        final Map<String, Collection<String>> resultSet = new HashMap<>();
         getMarkers().forEach(marker -> resultSet.put(marker, new HashSet<>()));
 
         final var unionModel = ModelFactory.createDefaultModel();

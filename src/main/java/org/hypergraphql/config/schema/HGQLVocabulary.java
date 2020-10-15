@@ -53,8 +53,8 @@ public abstract class HGQLVocabulary {
     public static final Map<String, GraphQLOutputType> SCALAR_TYPES_TO_GRAPHQL_OUTPUT =
             Map.of(
                 HGQL_STRING, GraphQLString,
-                    HGQL_INT, GraphQLInt,
-                    HGQL_BOOLEAN, GraphQLBoolean,
+                HGQL_INT, GraphQLInt,
+                HGQL_BOOLEAN, GraphQLBoolean,
                 HGQL_ID, GraphQLID
             );
 

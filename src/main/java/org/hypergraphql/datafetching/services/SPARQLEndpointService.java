@@ -2,12 +2,12 @@ package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -41,21 +41,21 @@ public class SPARQLEndpointService extends SPARQLService {
 
     @Override
     public TreeExecutionResult executeQuery(final JsonNode query,
-                                            final Set<String> input,
-                                            final Set<String> markers,
+                                            final Collection<String> input,
+                                            final Collection<String> markers,
                                             final String rootType,
                                             final HGQLSchema schema) {
 
 
-        final Map<String, Set<String>> resultSet = new HashMap<>(); // TODO - dupe
+        final Map<String, Collection<String>> resultSet = new HashMap<>(); // TODO - dupe
         final var unionModel = ModelFactory.createDefaultModel();
-        final Set<Future<SPARQLExecutionResult>> futureSPARQLresults = new HashSet<>();
+        final Collection<Future<SPARQLExecutionResult>> futureSPARQLresults = new HashSet<>();
 
         final List<String> inputList = getStrings(query, input, markers, rootType, schema, resultSet);
 
         do {
 
-            final Set<String> inputSubset = new HashSet<>(); // TODO - dupe
+            final Collection<String> inputSubset = new HashSet<>(); // TODO - dupe
             int i = 0;
             while (i < VALUES_SIZE_LIMIT && !inputList.isEmpty()) {
                 inputSubset.add(inputList.get(0));
@@ -78,9 +78,9 @@ public class SPARQLEndpointService extends SPARQLService {
     }
 
     void iterateFutureResults(
-            final Set<Future<SPARQLExecutionResult>> futureSPARQLResults,
+            final Collection<Future<SPARQLExecutionResult>> futureSPARQLResults,
             final Model unionModel,
-            final Map<String, Set<String>> resultSet
+            final Map<String, Collection<String>> resultSet
     ) {
 
         for (Future<SPARQLExecutionResult> futureExecutionResult : futureSPARQLResults) {
@@ -96,11 +96,11 @@ public class SPARQLEndpointService extends SPARQLService {
     }
 
     List<String> getStrings(final JsonNode query,
-                            final Set<String> input,
-                            final Set<String> markers,
+                            final Collection<String> input,
+                            final Collection<String> markers,
                             final String rootType,
                             final HGQLSchema schema,
-                            final Map<String, Set<String>> resultSet) {
+                            final Map<String, Collection<String>> resultSet) {
         for (final String marker : markers) {
             resultSet.put(marker, new HashSet<>());
         }

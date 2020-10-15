@@ -6,11 +6,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.jena.query.ARQ;
@@ -44,20 +44,20 @@ public final class LocalModelSPARQLService extends SPARQLEndpointService {
     @Override
     public TreeExecutionResult executeQuery(
             final JsonNode query,
-            final Set<String> input,
-            final Set<String> markers,
+            final Collection<String> input,
+            final Collection<String> markers,
             final String rootType,
             final HGQLSchema schema) {
 
-        final Map<String, Set<String>> resultSet = new HashMap<>(); // TODO - dupe
+        final Map<String, Collection<String>> resultSet = new HashMap<>(); // TODO - dupe
         final var unionModel = ModelFactory.createDefaultModel();
-        final Set<Future<SPARQLExecutionResult>> futureSPARQLResults = new HashSet<>();
+        final Collection<Future<SPARQLExecutionResult>> futureSPARQLResults = new HashSet<>();
 
         final List<String> inputList = getStrings(query, input, markers, rootType, schema, resultSet);
 
         do {
 
-            final Set<String> inputSubset = new HashSet<>(); // TODO - dupe
+            final Collection<String> inputSubset = new HashSet<>(); // TODO - dupe
             int i = 0;
             while (i < VALUES_SIZE_LIMIT && !inputList.isEmpty()) { // TODO - inner loop
                 inputSubset.add(inputList.get(0));

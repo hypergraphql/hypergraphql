@@ -7,8 +7,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class GraphqlConfig {
 
-    private static final int MIN_PORT = 1024;
-    private static final int MAX_PORT = 65536;
+    private static final int PORT_RANGE_START = 1024;
+    private static final int PORT_RANGE_END = 65536;
 
     private final Integer port;
     private final String graphqlPath;
@@ -52,6 +52,6 @@ public class GraphqlConfig {
 
     @JsonIgnore
     private int generateRandomPort() {
-        return ThreadLocalRandom.current().nextInt(MIN_PORT, MAX_PORT); // TODO - review this
+        return ThreadLocalRandom.current().nextInt(PORT_RANGE_START, PORT_RANGE_END); // TODO - review this
     }
 }

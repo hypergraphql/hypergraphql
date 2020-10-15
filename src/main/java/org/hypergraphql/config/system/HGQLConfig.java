@@ -33,9 +33,6 @@ public final class HGQLConfig {
         this.graphqlConfig = graphqlConfig;
         this.serviceConfigs = services;
     }
-//    public void setName(String name) {
-//        this.name = name;
-//    }
 
     public GraphQLSchema getSchema() {
         return schema;

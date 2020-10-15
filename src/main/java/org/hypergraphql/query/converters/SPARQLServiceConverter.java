@@ -2,10 +2,10 @@ package org.hypergraphql.query.converters;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.config.schema.QueryFieldConfig;
@@ -54,9 +54,9 @@ public class SPARQLServiceConverter {
         }
     }
 
-    private String valuesClause(final String id, final Set<String> input) {
+    private String valuesClause(final String id, final Collection<String> input) {
         final String var = toVar(id);
-        final Set<String> uris = new HashSet<>();
+        final Collection<String> uris = new HashSet<>();
         input.forEach(uri -> uris.add(uriToResource(uri)));
 
         final String urisConcat = String.join(" ", uris);
@@ -64,10 +64,10 @@ public class SPARQLServiceConverter {
         return  "VALUES " + var + " { " + urisConcat + " } ";
     }
 
-    private String filterClause(final String id, final Set<String> input) {
+    private String filterClause(final String id, final Collection<String> input) {
 
         final String var = toVar(id);
-        final Set<String> uris = new HashSet<>();
+        final Collection<String> uris = new HashSet<>();
         input.forEach(uri -> uris.add(uriToResource(uri)));
 
         final String urisConcat = String.join(" , ", uris);
@@ -129,12 +129,12 @@ public class SPARQLServiceConverter {
     }
 
     public String getSelectQuery(final JsonNode jsonQuery,
-                                 final Set<String> input,
+                                 final Collection<String> input,
                                  final String rootType) {
 
         final Map<String, QueryFieldConfig> queryFields = schema.getQueryFields();
 
-        final Boolean root = !jsonQuery.isArray() && queryFields.containsKey(jsonQuery.get(NAME).asText());
+        final boolean root = !jsonQuery.isArray() && queryFields.containsKey(jsonQuery.get(NAME).asText());
 
         if (root) {
             if (queryFields.get(jsonQuery.get(NAME).asText()).type().equals(HGQLVocabulary.HGQL_QUERY_GET_FIELD)) {
@@ -151,7 +151,7 @@ public class SPARQLServiceConverter {
 
         final Iterator<JsonNode> urisIter = queryField.get(ARGS).get(URIS).elements();
 
-        final Set<String> uris = new HashSet<>();
+        final Collection<String> uris = new HashSet<>();
 
         urisIter.forEachRemaining(uri -> uris.add(uri.asText()));
 
@@ -186,7 +186,7 @@ public class SPARQLServiceConverter {
     }
 
     private String getSelectNonRoot(final ArrayNode jsonQuery,
-                                    final Set<String> input,
+                                    final Collection<String> input,
                                     final String rootType) {
 
 

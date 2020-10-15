@@ -1,10 +1,10 @@
 package org.hypergraphql.datafetching;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -25,16 +25,16 @@ import org.slf4j.LoggerFactory;
 public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> {
 
     private final JsonNode query;
-    private final Set<String> inputSubset;
-    private final Set<String> markers;
+    private final Collection<String> inputSubset;
+    private final Collection<String> markers;
     private final SPARQLEndpointService sparqlEndpointService;
     private final HGQLSchema schema;
     private final Logger logger = LoggerFactory.getLogger(SPARQLEndpointExecution.class);
     private final String rootType;
 
     public SPARQLEndpointExecution(final JsonNode query,
-                                   final Set<String> inputSubset,
-                                   final Set<String> markers,
+                                   final Collection<String> inputSubset,
+                                   final Collection<String> markers,
                                    final SPARQLEndpointService sparqlEndpointService,
                                    final HGQLSchema schema,
                                    final String rootType) {
@@ -48,7 +48,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
 
     @Override
     public SPARQLExecutionResult call() {
-        final Map<String, Set<String>> resultSet = new HashMap<>();
+        final Map<String, Collection<String>> resultSet = new HashMap<>();
         markers.forEach(marker -> resultSet.put(marker, new HashSet<>()));
         final var unionModel = ModelFactory.createDefaultModel();
         final var converter = new SPARQLServiceConverter(schema);
@@ -90,11 +90,11 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
         return query;
     }
 
-    public Set<String> getInputSubset() {
+    public Collection<String> getInputSubset() {
         return inputSubset;
     }
 
-    public Set<String> getMarkers() {
+    public Collection<String> getMarkers() {
         return markers;
     }
 

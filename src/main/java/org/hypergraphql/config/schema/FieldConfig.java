@@ -2,7 +2,7 @@ package org.hypergraphql.config.schema;
 
 public class FieldConfig {
 
-    private String id;
+    private final String id;
 
     public FieldConfig(String id) {
 

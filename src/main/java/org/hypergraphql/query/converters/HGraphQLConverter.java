@@ -3,10 +3,10 @@ package org.hypergraphql.query.converters;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.datamodel.HGQLSchema;
 
@@ -38,7 +38,7 @@ public abstract class HGraphQLConverter {
     public static String convertToHGraphQL(
             final HGQLSchema schema,
             final JsonNode jsonQuery,
-            final Set<String> input,
+            final Collection<String> input,
             final String rootType) {
 
         final Map<String, QueryFieldConfig> queryFields = schema.getQueryFields();
@@ -56,9 +56,9 @@ public abstract class HGraphQLConverter {
         }
     }
 
-    private static String urisString(final Set<String> uris) {
+    private static String urisString(final Collection<String> uris) {
 
-        final Set<String> quotedUris = new HashSet<>();
+        final Collection<String> quotedUris = new HashSet<>();
         for (final String  uri : uris) {
             quotedUris.add(String.format(QUOTE, uri));
         }
@@ -98,7 +98,7 @@ public abstract class HGraphQLConverter {
 
     private static String getSelectRoot_GET_BY_ID(final HGQLSchema schema, final JsonNode jsonQuery) {
 
-        final Set<String> uris = new HashSet<>();
+        final Collection<String> uris = new HashSet<>();
         final var urisArray = (ArrayNode) jsonQuery.get(ARGS).get(URIS);
         urisArray.elements().forEachRemaining(el -> uris.add(el.asText()));
         final var key = jsonNodeName(jsonQuery) + urisString(uris);
@@ -116,7 +116,7 @@ public abstract class HGraphQLConverter {
     private static String getSelectNonRoot(
             final HGQLSchema schema,
             final ArrayNode jsonQuery,
-            final Set<String> input,
+            final Collection<String> input,
             final String rootType) {
 
         final var topQueryFieldName = rootType + BY_ID;
@@ -130,7 +130,7 @@ public abstract class HGraphQLConverter {
             final JsonNode fieldsJson,
             final String parentType) {
 
-        final Set<String> subQueryStrings = new HashSet<>();
+        final Collection<String> subQueryStrings = new HashSet<>();
 
         if (schema.getTypes().containsKey(parentType)) {
             subQueryStrings.add("_id");

@@ -1,14 +1,14 @@
 package org.hypergraphql.datafetching;
 
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import org.apache.jena.rdf.model.Model;
 
 public class TreeExecutionResult {
 
     private Model model;
 
-    private Map<String, Set<String>> resultSet;
+    private Map<String, Collection<String>> resultSet;
 
     public Model getModel() {
         return model;
@@ -18,11 +18,11 @@ public class TreeExecutionResult {
         this.model = model;
     }
 
-    public Map<String, Set<String>> getResultSet() {
+    public Map<String, Collection<String>> getResultSet() {
         return resultSet;
     }
 
-    public void setResultSet(final Map<String, Set<String>> resultSet) {
+    public void setResultSet(final Map<String, Collection<String>> resultSet) {
         this.resultSet = resultSet;
     }
 }

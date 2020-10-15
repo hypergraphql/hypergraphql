@@ -1,5 +1,6 @@
 package org.hypergraphql.datafetching;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import org.apache.jena.rdf.model.Model;
@@ -34,7 +35,7 @@ class SPARQLExecutionResultTest {
         assertEquals(expectedToS, toString);
     }
 
-    private Map<String, Set<String>> generateSimpleResultSet() {
+    private Map<String, Collection<String>> generateSimpleResultSet() {
 
         return Map.of("one", Set.of("1"));
     }

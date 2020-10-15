@@ -74,7 +74,8 @@ public class FetchParams {
             final var targetName =
                     schema.getTypes().get(parentTypeName).getField(predicate).getTargetName();
 
-            if (schema.getTypes().containsKey(targetName) && schema.getTypes().get(targetName).getId() != null) {
+            if (schema.getTypes().containsKey(targetName)
+                    && schema.getTypes().get(targetName).getId() != null) {
                 return schema.getTypes().get(targetName).getId();
             }
         }

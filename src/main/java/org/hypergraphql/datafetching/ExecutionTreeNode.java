@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -60,7 +59,7 @@ public class ExecutionTreeNode {
     }
 
     private ExecutionTreeNode(final Service service,
-                              final Set<Field> fields,
+                              final Collection<Field> fields,
                               final String parentId,
                               final String parentType,
                               final HGQLSchema schema) {
@@ -134,7 +133,7 @@ public class ExecutionTreeNode {
             .append(space).append("Query: ").append(this.query.toString()).append("\n")
             .append(space).append("Root type: ").append(this.rootType).append("\n")
             .append(space).append("LD context: ").append(this.ldContext.toString()).append("\n");
-        final Set<Map.Entry<String, ExecutionForest>> children = this.childrenNodes.entrySet();
+        final Collection<Map.Entry<String, ExecutionForest>> children = this.childrenNodes.entrySet();
         if (!children.isEmpty()) {
             result.append(space).append("Children nodes: \n");
             for (final Map.Entry<String, ExecutionForest> child : children) {
@@ -148,7 +147,7 @@ public class ExecutionTreeNode {
         return result.append("\n").toString();
     }
 
-    private JsonNode getFieldsJson(final Set<Field> fields,
+    private JsonNode getFieldsJson(final Collection<Field> fields,
                                    final String parentId,
                                    final String parentType) {
 
@@ -216,11 +215,11 @@ public class ExecutionTreeNode {
             final var fieldConfig = hgqlSchema.getTypes().get(parentType).getField(field.getName());
             final var targetName = fieldConfig.getTargetName();
 
-            final Map<Service, Set<Field>> splitFields = getPartitionedFields(targetName, subFields);
+            final Map<Service, Collection<Field>> splitFields = getPartitionedFields(targetName, subFields);
 
-            final Set<Service> serviceCalls = splitFields.keySet();
+            final Collection<Service> serviceCalls = splitFields.keySet();
 
-            for (final Map.Entry<Service, Set<Field>> entry : splitFields.entrySet()) {
+            for (final Map.Entry<Service, Collection<Field>> entry : splitFields.entrySet()) {
                 if (!entry.getKey().equals(this.service)) {
                     final var childNode = new ExecutionTreeNode(
                             entry.getKey(),
@@ -250,7 +249,7 @@ public class ExecutionTreeNode {
 
             if (serviceCalls.contains(this.service)) {
 
-                final Set<Field> subfields = splitFields.get(this.service);
+                final Collection<Field> subfields = splitFields.get(this.service);
                 return getFieldsJson(subfields, parentId, targetName);
             }
         }
@@ -300,11 +299,11 @@ public class ExecutionTreeNode {
     }
 
     @SuppressWarnings("checkstyle:NestedIfDepth")
-    private Map<Service, Set<Field>> getPartitionedFields(final String parentType, final SelectionSet selectionSet) {
+    private Map<Service, Collection<Field>> getPartitionedFields(final String parentType, final SelectionSet selectionSet) {
 
-        final Map<Service, Set<Field>> result = new HashMap<>();
+        final Map<Service, Collection<Field>> result = new HashMap<>();
 
-        final List<Selection> selections = selectionSet.getSelections();
+        final Collection<Selection> selections = selectionSet.getSelections();
 
         for (final Selection child : selections) {
             if (child.getClass().getSimpleName().equals("Field")) {
@@ -325,7 +324,7 @@ public class ExecutionTreeNode {
                     if (result.containsKey(serviceConfig)) {
                         result.get(serviceConfig).add(field);
                     } else {
-                        final Set<Field> newFieldSet = new HashSet<>();
+                        final Collection<Field> newFieldSet = new HashSet<>();
                         newFieldSet.add(field);
                         result.put(serviceConfig, newFieldSet);
                     }
@@ -340,20 +339,20 @@ public class ExecutionTreeNode {
         return "execution-" + UUID.randomUUID();
     }
 
-    Model generateTreeModel(final Set<String> input) {
+    Model generateTreeModel(final Collection<String> input) {
 
         final var executionResult = service.executeQuery(query, input, childrenNodes.keySet(), rootType, hgqlSchema);
-        final Map<String, Set<String>> resultSet = executionResult.getResultSet();
+        final Map<String, Collection<String>> resultSet = executionResult.getResultSet();
         final var model = executionResult.getModel();
-        final Set<Model> computedModels = new HashSet<>();
+        final Collection<Model> computedModels = new HashSet<>();
         //    StoredModel.getInstance().add(model);
-        final Set<String> vars = resultSet.keySet();
+        final Collection<String> vars = resultSet.keySet();
         final var executor = Executors.newFixedThreadPool(50);
-        final Set<Future<Model>> futureModels = new HashSet<>();
+        final Collection<Future<Model>> futureModels = new HashSet<>();
         vars.forEach(var -> {
             final var executionChildren = this.childrenNodes.get(var);
             if (executionChildren.getForest().size() > 0) {
-                final Set<String> values = resultSet.get(var);
+                final Collection<String> values = resultSet.get(var);
                 executionChildren.getForest().forEach(node -> {
                     final var childExecution = new FetchingExecution(values, node);
                     futureModels.add(executor.submit(childExecution));

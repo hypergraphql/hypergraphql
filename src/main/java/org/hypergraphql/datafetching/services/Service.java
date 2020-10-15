@@ -1,12 +1,12 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -43,7 +43,7 @@ public abstract class Service { // TODO - Review cs suppression
         this.id = id;
     }
 
-    public abstract TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> strings, String rootType, HGQLSchema schema);
+    public abstract TreeExecutionResult executeQuery(JsonNode query, Collection<String> input, Collection<String> strings, String rootType, HGQLSchema schema);
 
     public abstract void setParameters(ServiceConfig serviceConfig);
 
@@ -99,13 +99,13 @@ public abstract class Service { // TODO - Review cs suppression
         return model;
     }
 
-    Map<String, Set<String>> getResultset(final Model model,
+    Map<String, Collection<String>> getResultSet(final Model model,
                                           final JsonNode query,
-                                          final Set<String> input,
-                                          final Set<String> markers,
+                                          final Collection<String> input,
+                                          final Collection<String> markers,
                                           final HGQLSchema schema) {
 
-        final Map<String, Set<String>> resultset = new HashMap<>();
+        final Map<String, Collection<String>> resultSet = new HashMap<>();
         final JsonNode node;
 
         if (query.isArray()) {
@@ -113,30 +113,30 @@ public abstract class Service { // TODO - Review cs suppression
         } else {
             node = query.get("fields");
             if (markers.contains(query.get("nodeId").asText())) {
-                resultset.put(query.get("nodeId").asText(), findRootIdentifiers(model, schema.getTypes().get(query.get("targetName").asText())));
+                resultSet.put(query.get("nodeId").asText(), findRootIdentifiers(model, schema.getTypes().get(query.get("targetName").asText())));
             }
         }
-        Set<LinkedList<QueryNode>> paths = new HashSet<>(); // TODO - variable reuse
+        Collection<LinkedList<QueryNode>> paths = new HashSet<>(); // TODO - variable reuse
         if (node != null && !node.isNull()) {
             paths = getQueryPaths(node, schema);
         }
 
         paths.forEach(path -> {
             if (hasMarkerLeaf(path, markers)) {
-                Set<String> identifiers = findIdentifiers(model, input, path);
+                Collection<String> identifiers = findIdentifiers(model, input, path);
                 String marker = getLeafMarker(path);
-                resultset.put(marker, identifiers);
+                resultSet.put(marker, identifiers);
             }
         });
 
         // TODO query happens to be an array sometimes - then the following line fails.
 
-        return resultset;
+        return resultSet;
     }
 
-    private Set<String> findRootIdentifiers(final Model model, final TypeConfig targetName) {
+    private Collection<String> findRootIdentifiers(final Model model, final TypeConfig targetName) {
 
-        final Set<String> identifiers = new HashSet<>();
+        final Collection<String> identifiers = new HashSet<>();
         final var currentModel = ModelFactory.createDefaultModel();
         final var res = currentModel.createResource(targetName.getId());
         final var property = currentModel.createProperty(RDF_TYPE);
@@ -154,12 +154,12 @@ public abstract class Service { // TODO - Review cs suppression
         return path.getLast().getMarker();
     }
 
-    private Set<String> findIdentifiers(final Model model,
-                                        final Set<String> input,
+    private Collection<String> findIdentifiers(final Model model,
+                                        final Collection<String> input,
                                         final LinkedList<QueryNode> path) {
 
-        Set<String> subjects; // TODO - variable reuse
-        Set<String> objects; // TODO - variable reuse
+        Collection<String> subjects; // TODO - variable reuse
+        Collection<String> objects; // TODO - variable reuse
         if (input == null) {
             objects = new HashSet<>();
         } else {
@@ -190,7 +190,7 @@ public abstract class Service { // TODO - Review cs suppression
         return objects;
     }
 
-    private boolean hasMarkerLeaf(final LinkedList<QueryNode> path, final Set<String> markers) {
+    private boolean hasMarkerLeaf(final LinkedList<QueryNode> path, final Collection<String> markers) {
 
         for (final String marker : markers) {
             if (path.getLast().getMarker().equals(marker)) {
@@ -200,15 +200,15 @@ public abstract class Service { // TODO - Review cs suppression
         return false;
     }
 
-    private Set<LinkedList<QueryNode>> getQueryPaths(final JsonNode query, final HGQLSchema schema) {
-        final Set<LinkedList<QueryNode>> paths = new HashSet<>();
+    private Collection<LinkedList<QueryNode>> getQueryPaths(final JsonNode query, final HGQLSchema schema) {
+        final Collection<LinkedList<QueryNode>> paths = new HashSet<>();
         getQueryPathsRecursive(query, paths, null, schema);
         return paths;
     }
 
     @SuppressWarnings("checkstyle:ParameterAssignment")
     private void getQueryPathsRecursive(final JsonNode query,
-                                        final Set<LinkedList<QueryNode>> paths,
+                                        final Collection<LinkedList<QueryNode>> paths,
                                         LinkedList<QueryNode> path,
                                         final HGQLSchema schema) {
 
@@ -232,7 +232,7 @@ public abstract class Service { // TODO - Review cs suppression
         }
     }
 
-    private void getFieldPath(final Set<LinkedList<QueryNode>> paths,
+    private void getFieldPath(final Collection<LinkedList<QueryNode>> paths,
                               final LinkedList<QueryNode> path,
                               final HGQLSchema schema,
                               final Model model,

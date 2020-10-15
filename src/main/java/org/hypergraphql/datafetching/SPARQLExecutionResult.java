@@ -1,21 +1,21 @@
 package org.hypergraphql.datafetching;
 
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import org.apache.jena.rdf.model.Model;
 
 public class SPARQLExecutionResult {
 
-    private final Map<String, Set<String>> resultSet;
+    private final Map<String, Collection<String>> resultSet;
     private Model model;
 
-    public SPARQLExecutionResult(final Map<String, Set<String>> resultSet, final Model model) {
+    public SPARQLExecutionResult(final Map<String, Collection<String>> resultSet, final Model model) {
 
         this.resultSet = resultSet;
         this.model = model;
     }
 
-    public Map<String, Set<String>> getResultSet() {
+    public Map<String, Collection<String>> getResultSet() {
         return resultSet;
     }
 
