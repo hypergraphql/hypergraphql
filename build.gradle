@@ -65,6 +65,10 @@ dependencies {
     )
 }
 
+dependencies {
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+}
+
 checkstyle {
     toolVersion '8.29'
     configFile file("checkstyle/checkstyle.xml")
