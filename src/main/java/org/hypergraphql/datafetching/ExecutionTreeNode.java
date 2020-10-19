@@ -19,6 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import lombok.Getter;
 import org.apache.jena.rdf.model.Model;
 import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.datafetching.services.Service;
@@ -27,6 +28,7 @@ import org.hypergraphql.exception.HGQLConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Getter
 // TODO - fix cs suppressions
 public class ExecutionTreeNode {
 
@@ -80,30 +82,6 @@ public class ExecutionTreeNode {
 
     public void setQuery(final JsonNode query) {
         this.query = query;
-    }
-
-    public Map<String, ExecutionForest> getChildrenNodes() {
-        return childrenNodes;
-    }
-
-    public String getRootType() {
-        return rootType;
-    }
-
-    public Map<String, String> getLdContext() {
-        return this.ldContext;
-    }
-
-    public Service getService() {
-        return service;
-    }
-
-    public JsonNode getQuery() {
-        return query;
-    }
-
-    public String getExecutionId() {
-        return executionId;
     }
 
     Map<String, String> getFullLdContext() {

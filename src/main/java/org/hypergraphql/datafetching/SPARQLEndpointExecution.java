@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -18,10 +21,11 @@ import org.apache.jena.riot.web.HttpOp;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.query.converters.SPARQLServiceConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 // Performs HTTP query to remote store
+@Slf4j
+@Getter
+@RequiredArgsConstructor
 public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> {
 
     private final JsonNode query;
@@ -29,22 +33,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
     private final Collection<String> markers;
     private final SPARQLEndpointService sparqlEndpointService;
     private final HGQLSchema schema;
-    private final Logger logger = LoggerFactory.getLogger(SPARQLEndpointExecution.class);
     private final String rootType;
-
-    public SPARQLEndpointExecution(final JsonNode query,
-                                   final Collection<String> inputSubset,
-                                   final Collection<String> markers,
-                                   final SPARQLEndpointService sparqlEndpointService,
-                                   final HGQLSchema schema,
-                                   final String rootType) {
-        this.query = query;
-        this.inputSubset = inputSubset;
-        this.markers = markers;
-        this.sparqlEndpointService = sparqlEndpointService;
-        this.schema = schema;
-        this.rootType = rootType;
-    }
 
     @Override
     public SPARQLExecutionResult call() {
@@ -53,7 +42,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
         final var unionModel = ModelFactory.createDefaultModel();
         final var converter = new SPARQLServiceConverter(schema);
         final var sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);
-        logger.debug(sparqlQuery);
+        log.debug(sparqlQuery);
 
         final var credsProvider = new BasicCredentialsProvider();
         final var credentials =
@@ -81,33 +70,9 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
         });
 
         final var sparqlExecutionResult = new SPARQLExecutionResult(resultSet, unionModel);
-        logger.debug("Result: {}", sparqlExecutionResult);
+        log.debug("Result: {}", sparqlExecutionResult);
 
         return sparqlExecutionResult;
-    }
-
-    public JsonNode getQuery() {
-        return query;
-    }
-
-    public Collection<String> getInputSubset() {
-        return inputSubset;
-    }
-
-    public Collection<String> getMarkers() {
-        return markers;
-    }
-
-    public SPARQLEndpointService getSparqlEndpointService() {
-        return sparqlEndpointService;
-    }
-
-    public HGQLSchema getSchema() {
-        return schema;
-    }
-
-    public String getRootType() {
-        return rootType;
     }
 }
 

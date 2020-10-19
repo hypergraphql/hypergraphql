@@ -10,12 +10,8 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.hypergraphql.datamodel.HGQLSchema;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ExecutionForestFactory {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExecutionForestFactory.class);
 
     public ExecutionForest getExecutionForest(final Document queryDocument, final HGQLSchema schema) {
 

@@ -2,30 +2,16 @@ package org.hypergraphql.datafetching;
 
 import java.util.Collection;
 import java.util.Map;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.jena.rdf.model.Model;
 
+@Getter
+@RequiredArgsConstructor
 public class SPARQLExecutionResult {
 
     private final Map<String, Collection<String>> resultSet;
-    private Model model;
-
-    public SPARQLExecutionResult(final Map<String, Collection<String>> resultSet, final Model model) {
-
-        this.resultSet = resultSet;
-        this.model = model;
-    }
-
-    public Map<String, Collection<String>> getResultSet() {
-        return resultSet;
-    }
-
-    public Model getModel() {
-        return model;
-    }
-
-    public void setModel(final Model model) {
-        this.model = model;
-    }
+    private final Model model;
 
     @Override
     public String toString() {

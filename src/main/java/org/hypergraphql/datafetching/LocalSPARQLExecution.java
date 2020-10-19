@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
@@ -12,13 +13,11 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.query.converters.SPARQLServiceConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class LocalSPARQLExecution extends SPARQLEndpointExecution {
 
     private final Model model;
-    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public LocalSPARQLExecution(final JsonNode query,
                                 final Collection<String> inputSubset,
@@ -40,7 +39,7 @@ public class LocalSPARQLExecution extends SPARQLEndpointExecution {
         final var unionModel = ModelFactory.createDefaultModel();
         final var converter = new SPARQLServiceConverter(getSchema());
         final var sparqlQuery = converter.getSelectQuery(getQuery(), getInputSubset(), getRootType());
-        logger.debug(sparqlQuery);
+        log.debug(sparqlQuery);
         final var jenaQuery = QueryFactory.create(sparqlQuery);
         final var qexec = QueryExecutionFactory.create(jenaQuery, model);
         final var results = qexec.execSelect();

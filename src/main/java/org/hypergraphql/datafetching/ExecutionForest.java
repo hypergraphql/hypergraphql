@@ -7,23 +7,19 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
+@Getter
 public class ExecutionForest  {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExecutionForest.class);
 
     private final Set<ExecutionTreeNode> forest;
 
     public ExecutionForest() {
         this.forest = new HashSet<>();
-    }
-
-    public Set<ExecutionTreeNode> getForest() {
-        return forest;
     }
 
     public Model generateModel() {
@@ -39,7 +35,7 @@ public class ExecutionForest  {
             try {
                 model.add(futureModel.get());
             } catch (InterruptedException | ExecutionException e) {
-                LOGGER.error("Problem generating model", e);
+                log.error("Problem generating model", e);
             }
         });
         return model;
