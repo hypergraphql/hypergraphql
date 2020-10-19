@@ -5,26 +5,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.hypergraphql.config.schema.HGQLVocabulary;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by szymon on 22/08/2017.
  */
-
+@RequiredArgsConstructor
 public class ModelContainer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ModelContainer.class);
     private final Model model;
-
-    public ModelContainer(final Model model) {
-        this.model = model;
-    }
 
     public String getDataOutput(final String format) {
 
@@ -121,22 +115,6 @@ public class ModelContainer {
             return null;
         }
         return values.get(0);
-    }
-
-    RDFNode getValueOfObjectProperty(final RDFNode subject,
-                                     final String predicateURI,
-                                     final String targetURI) {
-        final var iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
-
-        while (iterator.hasNext()) {
-            final var next = iterator.next();
-            if (!next.isLiteral()) {
-                if (targetURI != null && this.model.contains(next.asResource(), getPropertyFromUri(HGQLVocabulary.RDF_TYPE), getResourceFromUri(targetURI))) {
-                    return next;
-                }
-            }
-        }
-        return null;
     }
 
     void insertObjectTriple(final String subjectURI,

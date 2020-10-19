@@ -16,13 +16,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.hypergraphql.config.schema.FieldOfTypeConfig;
 import org.hypergraphql.config.schema.TypeConfig;
 import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.services.Service;
 import org.hypergraphql.exception.HGQLConfigurationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static graphql.Scalars.GraphQLID;
 import static graphql.Scalars.GraphQLInt;
@@ -37,25 +37,30 @@ import static org.hypergraphql.config.schema.HGQLVocabulary.SCALAR_TYPES;
  * <p>
  * This class defines the GraphQL wiring (data fetchers)
  */
-
+@Slf4j
+@Getter
 public class HGQLSchemaWiring { // TODO - Remove cs suppressions
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HGQLSchemaWiring.class);
+    // TODO - read these from common source
+    private static final String LIMIT = "limit";
+    private static final String OFFSET = "offset";
+    private static final String URIS = "uris";
+    private static final String LANG = "lang";
 
     private final HGQLSchema hgqlSchema;
     private final GraphQLSchema schema;
 
     // TODO - should this be hardcoded?
     private final Map<String, GraphQLArgument> defaultArguments = Map.of(
-            "limit", new GraphQLArgument("limit", GraphQLInt),
-            "offset", new GraphQLArgument("offset", GraphQLInt),
-            "lang", new GraphQLArgument("lang", GraphQLString),
-            "uris", new GraphQLArgument("uris", new GraphQLNonNull(new GraphQLList(GraphQLID)))
+            LIMIT, new GraphQLArgument(LIMIT, GraphQLInt),
+            OFFSET, new GraphQLArgument(OFFSET, GraphQLInt),
+            LANG, new GraphQLArgument(LANG, GraphQLString),
+            URIS, new GraphQLArgument(URIS, new GraphQLNonNull(new GraphQLList(GraphQLID)))
     );
 
     private final List<GraphQLArgument> getQueryArgs = List.of(
-            defaultArguments.get("limit"),
-            defaultArguments.get("offset")
+            defaultArguments.get(LIMIT),
+            defaultArguments.get(OFFSET)
     );
 
     private final List<GraphQLArgument> getByIdQueryArgs = List.of(defaultArguments.get("uris"));
@@ -72,14 +77,6 @@ public class HGQLSchemaWiring { // TODO - Remove cs suppressions
         } catch (Exception e) {
             throw new HGQLConfigurationException("Unable to perform schema wiring", e);
         }
-    }
-
-    public GraphQLSchema getSchema() {
-        return schema;
-    }
-
-    public HGQLSchema getHgqlSchema() {
-        return hgqlSchema;
     }
 
     // TODO - investigate alternatives
@@ -102,7 +99,7 @@ public class HGQLSchemaWiring { // TODO - Remove cs suppressions
                     | InstantiationException
                     | ClassNotFoundException
                     | InvocationTargetException e) {
-                LOGGER.error("Problem adding service {}", serviceConfig.getId(), e);
+                log.error("Problem adding service {}", serviceConfig.getId(), e);
                 throw new HGQLConfigurationException("Error wiring up services", e);
             }
         });
@@ -207,7 +204,7 @@ public class HGQLSchemaWiring { // TODO - Remove cs suppressions
         final List<GraphQLArgument> args = new ArrayList<>();
 
         if (field.getTargetName().equals("String")) {
-            args.add(defaultArguments.get("lang"));
+            args.add(defaultArguments.get(LANG));
         }
 
         if (field.getService() == null) {

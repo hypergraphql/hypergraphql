@@ -1,24 +1,15 @@
 package org.hypergraphql.datamodel;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.jena.rdf.model.Property;
 
+@RequiredArgsConstructor
+@Getter
 public class QueryNode {
 
     private final Property node;
     private final String marker;
-
-    public QueryNode(final Property node, final String marker) {
-        this.node = node;
-        this.marker = marker;
-    }
-
-    public Property getNode() {
-        return node;
-    }
-
-    public String getMarker() {
-        return marker;
-    }
 
     @Override
     public String toString() {

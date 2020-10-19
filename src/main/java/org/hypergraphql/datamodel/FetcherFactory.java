@@ -4,20 +4,16 @@ import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.jena.rdf.model.RDFNode;
 import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.config.schema.TypeConfig;
 import org.hypergraphql.config.system.FetchParams;
 
-// TODO - can these methods be simplified?
+@RequiredArgsConstructor
 public class FetcherFactory {
 
     private final HGQLSchema schema;
-
-    public FetcherFactory(final HGQLSchema hgqlSchema) {
-
-        this.schema = hgqlSchema;
-    }
 
     public DataFetcher<String> idFetcher() {
 
@@ -58,17 +54,6 @@ public class FetcherFactory {
                     params.getSubjectResource(),
                     params.getPredicateURI(),
                     params.getTargetURI()
-            );
-        };
-    }
-
-    public DataFetcher<String> literalValueFetcher() {
-        return environment -> {
-            final var params = new FetchParams(environment, schema);
-            return params.getClient().getValueOfDataProperty(
-                    params.getSubjectResource(),
-                    params.getPredicateURI(),
-                    environment.getArguments()
             );
         };
     }

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.hypergraphql.config.schema.FieldConfig;
@@ -27,8 +28,6 @@ import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.config.schema.TypeConfig;
 import org.hypergraphql.datafetching.services.Service;
 import org.hypergraphql.exception.HGQLConfigurationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_BOOLEAN;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_FIELD;
@@ -58,9 +57,9 @@ import static org.hypergraphql.config.schema.HGQLVocabulary.RDF_TYPE;
 import static org.hypergraphql.config.schema.HGQLVocabulary.SCALAR_TYPES;
 import static org.hypergraphql.config.schema.HGQLVocabulary.SCALAR_TYPES_TO_GRAPHQL_OUTPUT;
 
+@Slf4j
+// TODO - This has a very complex constructor, can it be simplified?
 public class HGQLSchema {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(HGQLSchema.class);
 
     private final String schemaUri;
     private final String schemaNamespace;
@@ -98,7 +97,7 @@ public class HGQLSchema {
             final var e =
                     new HGQLConfigurationException("The provided GraphQL schema IDL specification is missing the"
                             + "obligatory __Context type (see specs at http://hypergraphql.org).");
-            LOGGER.error("Context not set!", e);
+            log.error("Context not set!", e);
             throw e;
         }
         final List<Node> children = context.getChildren();
