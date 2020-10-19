@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import lombok.Getter;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.config.schema.HGQLVocabulary;
@@ -20,24 +21,13 @@ import org.hypergraphql.datafetching.SPARQLExecutionResult;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.HGQLSchema;
 
+@Getter
 public class SPARQLEndpointService extends SPARQLService {
 
     public static final int VALUES_SIZE_LIMIT = 100;
     private String url;
     private String user;
     private String password;
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public String getPassword() {
-        return password;
-    }
 
     @Override
     public TreeExecutionResult executeQuery(final JsonNode query,

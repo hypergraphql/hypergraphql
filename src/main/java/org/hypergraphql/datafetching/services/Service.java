@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -22,26 +24,12 @@ import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_NAMESPACE
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_URI;
 import static org.hypergraphql.config.schema.HGQLVocabulary.RDF_TYPE;
 
+@Getter
+@Setter
 public abstract class Service { // TODO - Review cs suppression
 
     private String type;
     private String id;
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(final String type) {
-        this.type = type;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public abstract TreeExecutionResult executeQuery(JsonNode query, Collection<String> input, Collection<String> strings, String rootType, HGQLSchema schema);
 

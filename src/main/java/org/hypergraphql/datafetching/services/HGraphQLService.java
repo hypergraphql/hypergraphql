@@ -8,18 +8,16 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.query.converters.HGraphQLConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public final class HGraphQLService extends Service {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(HGraphQLService.class);
 
     private String url;
     private String user;
@@ -57,8 +55,8 @@ public final class HGraphQLService extends Service {
 
         final var model = ModelFactory.createDefaultModel();
 
-        LOGGER.debug("\n" + url);
-        LOGGER.debug("\n" + graphQlQuery);
+        log.debug("\n" + url);
+        log.debug("\n" + graphQlQuery);
 
         try {
 

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -24,12 +25,9 @@ import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.exception.HGQLConfigurationException;
 import org.hypergraphql.util.LangUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public final class LocalModelSPARQLService extends SPARQLEndpointService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(LocalModelSPARQLService.class);
 
     private Model model;
 
@@ -87,7 +85,7 @@ public final class LocalModelSPARQLService extends SPARQLEndpointService {
 
         setId(serviceConfig.getId());
 
-        LOGGER.debug("Current path: " + new File(".").getAbsolutePath());
+        log.debug("Current path: " + new File(".").getAbsolutePath());
 
         final var cwd = new File(".");
         try (var fis = new FileInputStream(new File(cwd, serviceConfig.getFilepath()));
