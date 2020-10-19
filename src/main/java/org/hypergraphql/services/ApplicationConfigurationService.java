@@ -15,15 +15,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.exception.HGQLConfigurationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class ApplicationConfigurationService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfigurationService.class);
 
     private S3Service s3Service;
     private final HGQLConfigService hgqlConfigService = new HGQLConfigService();
@@ -85,7 +83,7 @@ public class ApplicationConfigurationService {
         final List<HGQLConfig> configurations = new ArrayList<>();
         try {
             if (configPath.isDirectory()) {
-                LOGGER.debug("Directory");
+                log.debug("Directory");
                 final File[] jsonFiles = configPath.listFiles(pathname ->
                         FilenameUtils.isExtension(pathname.getName(), "json"));
                 if (jsonFiles != null) {
@@ -101,7 +99,7 @@ public class ApplicationConfigurationService {
                     });
                 }
             } else { // assume regular file
-                LOGGER.debug("Regular File");
+                log.debug("Regular File");
                 try (InputStream in = new FileInputStream(configPath)) {
                     configurations.add(hgqlConfigService.loadHGQLConfig(configPathString, in, false));
                 }
@@ -148,7 +146,7 @@ public class ApplicationConfigurationService {
                 resourcePath -> {
                     final URL sourceUrl = getClass().getClassLoader().getResource(resourcePath);
 
-                    LOGGER.info("Resource path: {}", resourcePath);
+                    log.info("Resource path: {}", resourcePath);
                     if (sourceUrl != null) {
                         configurations.addAll(getConfigurationsFromClasspath(sourceUrl.getFile()));
                     }
