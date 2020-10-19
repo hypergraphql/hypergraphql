@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
@@ -17,15 +18,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.exception.HGQLConfigurationException;
 import org.hypergraphql.services.ApplicationConfigurationService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.hypergraphql.util.PathUtils.isNormalURL;
 import static org.hypergraphql.util.PathUtils.isS3;
 
+@Slf4j
 public abstract class Application {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
     public static void main(final String[] args) throws Exception {
 
@@ -82,7 +80,7 @@ public abstract class Application {
         }
 
         configurations.forEach(config -> {
-            LOGGER.info("Starting controller...");
+            log.info("Starting controller...");
             new Controller().start(config);
         });
     }
@@ -100,9 +98,9 @@ public abstract class Application {
         final var username = properties.get("hgql_username");
         final var password = properties.get("hgql_password");
 
-        LOGGER.debug("Config path: {}", configPath);
-        LOGGER.debug("Username: {}", username);
-        LOGGER.debug("Password: {}", password == null ? "Not provided" : "**********");
+        log.debug("Config path: {}", configPath);
+        log.debug("Username: {}", username);
+        log.debug("Password: {}", password == null ? "Not provided" : "**********");
 
         if (isS3(configPath)) {
             return service.readConfigurationFromS3(configPath, username, password);
@@ -209,7 +207,7 @@ public abstract class Application {
             System.err.println("Banner is null");
         }
         if (bannerInputStream == null) {
-            LOGGER.info("Banner file doesn't seem to exist");
+            log.info("Banner file doesn't seem to exist");
         } else {
             IOUtils.copy(bannerInputStream, System.out);
             final var version = System.getProperty("hgql_version");
