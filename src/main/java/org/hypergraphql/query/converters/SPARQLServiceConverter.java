@@ -6,12 +6,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
 import org.hypergraphql.datamodel.HGQLSchema;
 
+@RequiredArgsConstructor
 public class SPARQLServiceConverter {
 
     private static final String RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
@@ -27,10 +29,6 @@ public class SPARQLServiceConverter {
     private static final String OFFSET = "offset";
 
     private final HGQLSchema schema;
-
-    public SPARQLServiceConverter(final HGQLSchema schema) {
-        this.schema = schema;
-    }
 
     private String optionalClause(final String sparqlPattern) {
         return " OPTIONAL { " + sparqlPattern + " } ";

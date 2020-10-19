@@ -30,6 +30,7 @@ public abstract class HGraphQLConverter {
     private static final String NAME = "name";
     private static final String TARGET_NAME = "targetName";
     private static final String ARGS = "args";
+    // TODO - Extract these constants
 //    private static final String LIMIT = "limit";
 //    private static final String OFFSET = "offset";
     private static final String LANG = "lang";
