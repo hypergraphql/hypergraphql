@@ -20,8 +20,6 @@ import org.hypergraphql.query.converters.HGraphQLConverter;
 public final class HGraphQLService extends Service {
 
     private String url;
-    private String user;
-    private String password;
 
     @Override
     public TreeExecutionResult executeQuery(
@@ -79,9 +77,6 @@ public final class HGraphQLService extends Service {
 
         setId(serviceConfig.getId());
         this.url = serviceConfig.getUrl();
-        this.user = serviceConfig.getUser();
-        this.password = serviceConfig.getPassword();
-
     }
 }
 

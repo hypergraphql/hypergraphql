@@ -13,20 +13,21 @@ import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
 import org.hypergraphql.datamodel.HGQLSchema;
 
+import static org.hypergraphql.util.HGQLConstants.ARGS;
+import static org.hypergraphql.util.HGQLConstants.FIELDS;
+import static org.hypergraphql.util.HGQLConstants.LANG;
+import static org.hypergraphql.util.HGQLConstants.LIMIT;
+import static org.hypergraphql.util.HGQLConstants.NAME;
+import static org.hypergraphql.util.HGQLConstants.NODE_ID;
+import static org.hypergraphql.util.HGQLConstants.OFFSET;
+import static org.hypergraphql.util.HGQLConstants.PARENT_ID;
+import static org.hypergraphql.util.HGQLConstants.TARGET_NAME;
+import static org.hypergraphql.util.HGQLConstants.URIS;
+
 @RequiredArgsConstructor
 public class SPARQLServiceConverter {
 
     private static final String RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
-    private static final String NAME = "name";
-    private static final String URIS = "uris";
-    private static final String NODE_ID = "nodeId";
-    private static final String LANG = "lang";
-    private static final String FIELDS = "fields";
-    private static final String ARGS = "args";
-    private static final String TARGET_NAME = "targetName";
-    private static final String PARENT_ID = "parentId";
-    private static final String LIMIT = "limit";
-    private static final String OFFSET = "offset";
 
     private final HGQLSchema schema;
 

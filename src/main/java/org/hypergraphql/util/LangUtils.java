@@ -4,9 +4,6 @@ import org.apache.jena.riot.Lang;
 
 public abstract class LangUtils {
 
-    public static final String EMPTY_STRING = "";
-    public static final String SPACE = " ";
-
     public static Lang forName(final String rdfFormat) {
 
         final String ucRdfFormat = rdfFormat.toUpperCase();

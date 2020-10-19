@@ -21,6 +21,10 @@ import org.hypergraphql.datafetching.SPARQLExecutionResult;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.HGQLSchema;
 
+import static org.hypergraphql.util.HGQLConstants.ARGS;
+import static org.hypergraphql.util.HGQLConstants.NAME;
+import static org.hypergraphql.util.HGQLConstants.URIS;
+
 @Getter
 public class SPARQLEndpointService extends SPARQLService {
 
@@ -95,8 +99,8 @@ public class SPARQLEndpointService extends SPARQLService {
             resultSet.put(marker, new HashSet<>());
         }
 
-        if ("Query".equals(rootType) && schema.getQueryFields().get(query.get("name").asText()).type().equals(HGQLVocabulary.HGQL_QUERY_GET_BY_ID_FIELD)) {
-            final Iterator<JsonNode> uris = query.get("args").get("uris").elements();
+        if ("Query".equals(rootType) && schema.getQueryFields().get(query.get(NAME).asText()).type().equals(HGQLVocabulary.HGQL_QUERY_GET_BY_ID_FIELD)) {
+            final Iterator<JsonNode> uris = query.get(ARGS).get(URIS).elements();
             while (uris.hasNext()) {
                 String uri = uris.next().asText();
                 input.add(uri);

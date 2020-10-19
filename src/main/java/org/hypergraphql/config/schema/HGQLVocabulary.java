@@ -7,6 +7,8 @@ import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLID;
 import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
+import static org.hypergraphql.util.HGQLConstants.ID;
+import static org.hypergraphql.util.HGQLConstants.TYPE;
 
 public abstract class HGQLVocabulary {
 
@@ -59,7 +61,7 @@ public abstract class HGQLVocabulary {
             );
 
     public static final Map<String, String> JSONLD = Map.of(
-        "_id", "@id",
-        "_type", "@type"
+        ID, "@id",
+        TYPE, "@type"
     );
 }

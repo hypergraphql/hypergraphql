@@ -28,6 +28,14 @@ import org.hypergraphql.exception.HGQLConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.hypergraphql.util.HGQLConstants.ALIAS;
+import static org.hypergraphql.util.HGQLConstants.ARGS;
+import static org.hypergraphql.util.HGQLConstants.FIELDS;
+import static org.hypergraphql.util.HGQLConstants.NAME;
+import static org.hypergraphql.util.HGQLConstants.NODE_ID;
+import static org.hypergraphql.util.HGQLConstants.PARENT_ID;
+import static org.hypergraphql.util.HGQLConstants.TARGET_NAME;
+
 @Getter
 // TODO - fix cs suppressions
 public class ExecutionTreeNode {
@@ -97,8 +105,7 @@ public class ExecutionTreeNode {
 
     public String toString(final int i) {
 
-        final var space = new StringBuilder();
-        space.append("\t".repeat(Math.max(0, i)));
+        final var space = "\t".repeat(Math.max(0, i));
 
         final var result = new StringBuilder("\n")
             .append(space).append("ExecutionNode ID: ").append(this.executionId).append("\n")
@@ -144,10 +151,10 @@ public class ExecutionTreeNode {
         final var mapper = new ObjectMapper();
         final var queryNode = mapper.createObjectNode();
 
-        queryNode.put("name", field.getName());
-        queryNode.put("alias", field.getAlias());
-        queryNode.put("parentId", parentId);
-        queryNode.put("nodeId", nodeId);
+        queryNode.put(NAME, field.getName());
+        queryNode.put(ALIAS, field.getAlias());
+        queryNode.put(PARENT_ID, parentId);
+        queryNode.put(NODE_ID, nodeId);
         final List<Argument> args = field.getArguments();
 
         final var contextLdKey = (field.getAlias() == null) ? field.getName() : field.getAlias();
@@ -156,16 +163,16 @@ public class ExecutionTreeNode {
         this.ldContext.put(contextLdKey, contextLdValue);
 
         if (args.isEmpty()) {
-            queryNode.set("args", null);
+            queryNode.set(ARGS, null);
         } else {
-            queryNode.set("args", getArgsJson(args));
+            queryNode.set(ARGS, getArgsJson(args));
         }
 
         final var fieldConfig = hgqlSchema.getTypes().get(parentType).getField(field.getName());
         final var targetName = fieldConfig.getTargetName();
 
-        queryNode.put("targetName", targetName);
-        queryNode.set("fields", this.traverse(field, nodeId, parentType));
+        queryNode.put(TARGET_NAME, targetName);
+        queryNode.set(FIELDS, this.traverse(field, nodeId, parentType));
 
         return queryNode;
     }

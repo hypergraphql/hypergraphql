@@ -31,6 +31,10 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_GET_FIELD;
 import static org.hypergraphql.config.schema.HGQLVocabulary.SCALAR_TYPES;
+import static org.hypergraphql.util.HGQLConstants.LANG;
+import static org.hypergraphql.util.HGQLConstants.LIMIT;
+import static org.hypergraphql.util.HGQLConstants.OFFSET;
+import static org.hypergraphql.util.HGQLConstants.URIS;
 
 /**
  * Created by szymon on 24/08/2017.
@@ -40,12 +44,6 @@ import static org.hypergraphql.config.schema.HGQLVocabulary.SCALAR_TYPES;
 @Slf4j
 @Getter
 public class HGQLSchemaWiring { // TODO - Remove cs suppressions
-
-    // TODO - read these from common source
-    private static final String LIMIT = "limit";
-    private static final String OFFSET = "offset";
-    private static final String URIS = "uris";
-    private static final String LANG = "lang";
 
     private final HGQLSchema hgqlSchema;
     private final GraphQLSchema schema;
@@ -63,7 +61,7 @@ public class HGQLSchemaWiring { // TODO - Remove cs suppressions
             defaultArguments.get(OFFSET)
     );
 
-    private final List<GraphQLArgument> getByIdQueryArgs = List.of(defaultArguments.get("uris"));
+    private final List<GraphQLArgument> getByIdQueryArgs = List.of(defaultArguments.get(URIS));
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     public HGQLSchemaWiring(final TypeDefinitionRegistry registry,

@@ -23,6 +23,12 @@ import org.hypergraphql.datamodel.QueryNode;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_NAMESPACE;
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_URI;
 import static org.hypergraphql.config.schema.HGQLVocabulary.RDF_TYPE;
+import static org.hypergraphql.util.HGQLConstants.ALIAS;
+import static org.hypergraphql.util.HGQLConstants.FIELDS;
+import static org.hypergraphql.util.HGQLConstants.NAME;
+import static org.hypergraphql.util.HGQLConstants.NODE_ID;
+import static org.hypergraphql.util.HGQLConstants.PARENT_ID;
+import static org.hypergraphql.util.HGQLConstants.TARGET_NAME;
 
 @Getter
 @Setter
@@ -52,12 +58,12 @@ public abstract class Service { // TODO - Review cs suppression
                 final var currentNode = nodesIterator.next();
                 final var currentModel = buildModel(results, currentNode, schema);
                 model.add(currentModel);
-                model.add(getModelFromResults(currentNode.get("fields"), results, schema));
+                model.add(getModelFromResults(currentNode.get(FIELDS), results, schema));
             }
         } else {
             final var currentModel = buildModel(results, query, schema);
             model.add(currentModel);
-            model.add(getModelFromResults(query.get("fields"), results, schema));
+            model.add(getModelFromResults(query.get(FIELDS), results, schema));
         }
         return model;
 
@@ -69,17 +75,18 @@ public abstract class Service { // TODO - Review cs suppression
 
         final var model = ModelFactory.createDefaultModel();
 
-        final var propertyString = schema.getFields().get(currentNode.get("name").asText());
-        final var targetTypeString = schema.getTypes().get(currentNode.get("targetName").asText());
+        final var propertyString = schema.getFields().get(currentNode.get(NAME).asText());
+        final var targetTypeString = schema.getTypes().get(currentNode.get(TARGET_NAME).asText());
 
         populateModel(results, currentNode, model, propertyString, targetTypeString);
 
-        final var queryField = schema.getQueryFields().get(currentNode.get("name").asText());
+        final var queryField = schema.getQueryFields().get(currentNode.get(NAME).asText());
 
         if (queryField != null) {
 
-            final var typeName = (currentNode.get("alias").isNull()) ? currentNode.get("name").asText() : currentNode.get("alias").asText();
-            final var object = results.getResource(currentNode.get("nodeId").asText());
+            // TODO - Replace this
+            final var typeName = (currentNode.get(ALIAS).isNull()) ? currentNode.get(NAME).asText() : currentNode.get(ALIAS).asText();
+            final var object = results.getResource(currentNode.get(NODE_ID).asText());
             final var subject = model.createResource(HGQL_QUERY_URI);
             final var predicate = model.createProperty("", HGQL_QUERY_NAMESPACE + typeName);
             model.add(subject, predicate, object);
@@ -99,9 +106,9 @@ public abstract class Service { // TODO - Review cs suppression
         if (query.isArray()) {
             node = query; // TODO - in this situation, we should iterate over the array
         } else {
-            node = query.get("fields");
-            if (markers.contains(query.get("nodeId").asText())) {
-                resultSet.put(query.get("nodeId").asText(), findRootIdentifiers(model, schema.getTypes().get(query.get("targetName").asText())));
+            node = query.get(FIELDS);
+            if (markers.contains(query.get(NODE_ID).asText())) {
+                resultSet.put(query.get(NODE_ID).asText(), findRootIdentifiers(model, schema.getTypes().get(query.get("targetName").asText())));
             }
         }
         Collection<LinkedList<QueryNode>> paths = new HashSet<>(); // TODO - variable reuse
@@ -227,8 +234,8 @@ public abstract class Service { // TODO - Review cs suppression
                               final JsonNode currentNode) {
 
         final LinkedList<QueryNode> newPath = new LinkedList<>(path);
-        final var nodeMarker = currentNode.get("nodeId").asText();
-        final var nodeName = currentNode.get("name").asText();
+        final var nodeMarker = currentNode.get(NODE_ID).asText();
+        final var nodeName = currentNode.get(NAME).asText();
         final var field = schema.getFields().get(nodeName);
         if (field == null) {
             throw new RuntimeException("field not found");
@@ -238,7 +245,7 @@ public abstract class Service { // TODO - Review cs suppression
         final var queryNode = new QueryNode(predicate, nodeMarker);
         newPath.add(queryNode);
         paths.add(newPath);
-        final var fields = currentNode.get("fields");
+        final var fields = currentNode.get(FIELDS);
         if (fields != null && !fields.isNull()) {
             getQueryPathsRecursive(fields, paths, newPath, schema);
         }
@@ -252,17 +259,17 @@ public abstract class Service { // TODO - Review cs suppression
             final TypeConfig targetTypeString
     ) {
 
-        if (propertyString != null && !(currentNode.get("parentId").asText().equals("null"))) {
+        if (propertyString != null && !(currentNode.get(PARENT_ID).asText().equals("null"))) {
             final var predicate = model.createProperty("", propertyString.getId());
-            final var subject = results.getResource(currentNode.get("parentId").asText());
-            final var object = results.get(currentNode.get("nodeId").asText());
+            final var subject = results.getResource(currentNode.get(PARENT_ID).asText());
+            final var object = results.get(currentNode.get(NODE_ID).asText());
             if (predicate != null && subject != null && object != null) {
                 model.add(subject, predicate, object);
             }
         }
 
         if (targetTypeString != null) {
-            final var subject = results.getResource(currentNode.get("nodeId").asText());
+            final var subject = results.getResource(currentNode.get(NODE_ID).asText());
             final var object = model.createResource(targetTypeString.getId());
             if (subject != null && object != null) {
                 model.add(subject, RDF.type, object);

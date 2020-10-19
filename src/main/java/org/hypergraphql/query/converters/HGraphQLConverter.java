@@ -11,30 +11,28 @@ import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.datamodel.HGQLSchema;
 
 import static org.hypergraphql.config.schema.HGQLVocabulary.HGQL_QUERY_GET_FIELD;
-import static org.hypergraphql.util.LangUtils.EMPTY_STRING;
-import static org.hypergraphql.util.LangUtils.SPACE;
+import static org.hypergraphql.util.HGQLConstants.ARGS;
+import static org.hypergraphql.util.HGQLConstants.EMPTY_STRING;
+import static org.hypergraphql.util.HGQLConstants.FIELDS;
+import static org.hypergraphql.util.HGQLConstants.ID;
+import static org.hypergraphql.util.HGQLConstants.LANG;
+import static org.hypergraphql.util.HGQLConstants.NAME;
+import static org.hypergraphql.util.HGQLConstants.SPACE;
+import static org.hypergraphql.util.HGQLConstants.TARGET_NAME;
+import static org.hypergraphql.util.HGQLConstants.TYPE;
+import static org.hypergraphql.util.HGQLConstants.URIS;
 
 public abstract class HGraphQLConverter {
 
     private static final String DELIMITER = ",";
     private static final String QUOTE = "\"%s\"";
-    private static final String URIS_S = "(uris:[%s])";
+    private static final String URIS_S = "(" + URIS + ":[%s])";
     private static final String ARG = "(%s)";
-//    private static final String LIMIT_S = "limit:%s ";
-//    private static final String OFFSET_S = "offset:%s ";
-    private static final String LANG_S = "(lang:\"%s\")";
+//    private static final String LIMIT_S = LIMIT + ":%s ";
+//    private static final String OFFSET_S = OFFSET + ":%s ";
+    private static final String LANG_S = "(" + LANG + ":\"%s\")";
     private static final String QUERY = "{ %s }";
     private static final String BY_ID = "_GET_BY_ID";
-
-    private static final String FIELDS = "fields";
-    private static final String NAME = "name";
-    private static final String TARGET_NAME = "targetName";
-    private static final String ARGS = "args";
-    // TODO - Extract these constants
-//    private static final String LIMIT = "limit";
-//    private static final String OFFSET = "offset";
-    private static final String LANG = "lang";
-    private static final String URIS = "uris";
 
     public static String convertToHGraphQL(
             final HGQLSchema schema,
@@ -134,8 +132,8 @@ public abstract class HGraphQLConverter {
         final Collection<String> subQueryStrings = new HashSet<>();
 
         if (schema.getTypes().containsKey(parentType)) {
-            subQueryStrings.add("_id");
-            subQueryStrings.add("_type");
+            subQueryStrings.add(ID);
+            subQueryStrings.add(TYPE);
         }
 
         if (fieldsJson == null || fieldsJson.isNull()) {
