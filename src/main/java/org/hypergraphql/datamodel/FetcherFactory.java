@@ -51,17 +51,6 @@ public class FetcherFactory {
         };
     }
 
-    public DataFetcher<RDFNode> objectFetcher() {
-        return environment -> {
-            final var params = new FetchParams(environment, schema);
-            return params.getClient().getValueOfObjectProperty(
-                    params.getSubjectResource(),
-                    params.getPredicateURI(),
-                    params.getTargetURI()
-            );
-        };
-    }
-
     public DataFetcher<List<RDFNode>> objectsFetcher() {
         return environment -> {
             final var params = new FetchParams(environment, schema);

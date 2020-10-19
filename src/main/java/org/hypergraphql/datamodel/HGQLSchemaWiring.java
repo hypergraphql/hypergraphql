@@ -190,21 +190,10 @@ public class HGQLSchemaWiring { // TODO - Remove cs suppressions
 
     private GraphQLFieldDefinition registerGraphQLField(final FieldOfTypeConfig field) {
         final var fetcherFactory = new FetcherFactory(hgqlSchema);
-        final var isList = field.isList();
-
         if (SCALAR_TYPES.containsKey(field.getTargetName())) {
-            if (isList) {
-                return getBuiltField(field, fetcherFactory.literalValuesFetcher());
-            } else {
-                return getBuiltField(field, fetcherFactory.literalValueFetcher());
-            }
-
+            return getBuiltField(field, fetcherFactory.literalValuesFetcher());
         } else {
-            if (isList) {
-                return getBuiltField(field, fetcherFactory.objectsFetcher());
-            } else {
-                return getBuiltField(field, fetcherFactory.objectFetcher());
-            }
+            return getBuiltField(field, fetcherFactory.objectsFetcher());
         }
     }
 
