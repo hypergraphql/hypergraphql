@@ -34,7 +34,8 @@ ext {
 }
 dependencies {
 
-    compile group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+    compileOnly group: 'org.projectlombok', name:'lombok', version: '1.18.16'
+    annotationProcessor group: 'org.projectlombok', name:'lombok', version: '1.18.16'
 
     compile group: 'com.graphql-java', name: 'graphql-java', version: graphqlVersion
 
@@ -63,10 +64,9 @@ dependencies {
     testRuntimeOnly(
             'org.junit.jupiter:junit-jupiter-engine:5.7.0'
     )
-}
 
-dependencies {
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+    testCompileOnly group: 'org.projectlombok', name:'lombok', version: '1.18.16'
+    testAnnotationProcessor group: 'org.projectlombok', name:'lombok', version: '1.18.16'
 }
 
 checkstyle {

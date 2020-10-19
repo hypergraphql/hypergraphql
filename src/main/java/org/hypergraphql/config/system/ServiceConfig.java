@@ -2,7 +2,9 @@ package org.hypergraphql.config.system;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 
+@Getter
 public class ServiceConfig {
 
     private final String id;
@@ -32,37 +34,5 @@ public class ServiceConfig {
         this.password = password;
         this.filepath = filepath;
         this.filetype = filetype;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getFilepath() {
-        return filepath;
-    }
-
-    public String getFiletype() {
-        return filetype;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getGraph() {
-        return graph;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public String getPassword() {
-        return password;
     }
 }

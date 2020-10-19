@@ -4,12 +4,14 @@ import graphql.language.Field;
 import graphql.schema.DataFetchingEnvironment;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
 import org.apache.jena.rdf.model.Resource;
 import org.hypergraphql.config.schema.FieldConfig;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.datamodel.ModelContainer;
 import org.hypergraphql.exception.HGQLConfigurationException;
 
+@Getter
 public class FetchParams {
 
     private final Resource subjectResource;
@@ -25,22 +27,6 @@ public class FetchParams {
         targetURI = extractTargetURI(environment, hgqlSchema, predicate);
         subjectResource = environment.getSource();
         client = environment.getContext();
-    }
-
-    public Resource getSubjectResource() {
-        return subjectResource;
-    }
-
-    public String getPredicateURI() {
-        return predicateURI;
-    }
-
-    public ModelContainer getClient() {
-        return client;
-    }
-
-    public String getTargetURI() {
-        return targetURI;
     }
 
     private String extractPredicate(DataFetchingEnvironment environment) {

@@ -5,12 +5,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import graphql.schema.GraphQLSchema;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 import org.hypergraphql.datamodel.HGQLSchema;
 
 /**
  * Created by szymon on 05/09/2017.
  */
-
+@Getter
+@Setter
 public final class HGQLConfig {
 
     private final String name;
@@ -32,26 +35,6 @@ public final class HGQLConfig {
         this.schemaFile = schemaFile;
         this.graphqlConfig = graphqlConfig;
         this.serviceConfigs = services;
-    }
-
-    public GraphQLSchema getSchema() {
-        return schema;
-    }
-
-    public void setSchema(GraphQLSchema schema) {
-        this.schema = schema;
-    }
-
-    public HGQLSchema getHgqlSchema() {
-        return hgqlSchema;
-    }
-
-    public GraphqlConfig getGraphqlConfig() {
-        return graphqlConfig;
-    }
-
-    public String getName() {
-        return name;
     }
 
     @JsonIgnore

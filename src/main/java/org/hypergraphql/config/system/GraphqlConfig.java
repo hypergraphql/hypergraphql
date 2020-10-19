@@ -3,6 +3,7 @@ package org.hypergraphql.config.system;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class GraphqlConfig {
@@ -19,11 +20,7 @@ public class GraphqlConfig {
                          @JsonProperty("graphql") final String graphqlPath,
                          @JsonProperty("graphiql") final String graphiqlPath
     ) {
-        if (port == null) {
-            this.port = generateRandomPort();
-        } else {
-            this.port = port;
-        }
+        this.port = Objects.requireNonNullElseGet(port, this::generateRandomPort);
         this.graphqlPath = graphqlPath;
         this.graphiqlPath = graphiqlPath;
     }
