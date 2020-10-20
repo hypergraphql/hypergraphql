@@ -139,11 +139,18 @@ public class HGQLConfigService {
 
         log.debug("Obtaining reader for: {}", schemaPath);
 
-        final String fn = schemaPath.contains("!")
-                ? schemaPath.substring(schemaPath.lastIndexOf("!") + 1)
-                : schemaPath;
+        final String fn;
+        if (schemaPath.contains("!")) {
+            fn = schemaPath.substring(schemaPath.lastIndexOf("!") + 1);
+        } else {
+            fn = schemaPath;
+        }
         final String filename = fn.startsWith("/") ? fn.substring(fn.indexOf("/") + 1) : fn;
         log.debug("For filename: {}", filename);
-        return new InputStreamReader(getClass().getClassLoader().getResourceAsStream(filename)); // TODO - address this
+        final var resourceStream = getClass().getClassLoader().getResourceAsStream(filename);
+        if (resourceStream == null) {
+            throw new HGQLConfigurationException(String.format("Schema at path '%1$s' does not exist", schemaPath));
+        }
+        return new InputStreamReader(resourceStream);
     }
 }

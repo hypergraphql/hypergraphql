@@ -9,8 +9,9 @@ import graphql.validation.ValidationErrorType;
 import graphql.validation.Validator;
 import java.util.ArrayList;
 import java.util.List;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 
-public class QueryValidator { // TODO - CS suppress
+public class QueryValidator {
 
     private final GraphQLSchema schema;
     private final List<ValidationError> validationErrors;
@@ -25,7 +26,6 @@ public class QueryValidator { // TODO - CS suppress
         this.parser = new Parser();
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
     public ValidatedQuery validateQuery(final String query) {
 
         final ValidatedQuery result = new ValidatedQuery();
@@ -36,7 +36,7 @@ public class QueryValidator { // TODO - CS suppress
         try {
             document = parser.parseDocument(query);
             result.setParsedQuery(document);
-        } catch (Exception e) {
+        } catch (ParseCancellationException e) {
             final ValidationError err =
                     new ValidationError(ValidationErrorType.InvalidSyntax, new SourceLocation(0, 0), "Invalid query syntax.");
             validationErrors.add(err);

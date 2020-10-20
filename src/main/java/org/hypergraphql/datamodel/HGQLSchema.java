@@ -14,10 +14,10 @@ import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLTypeReference;
 import graphql.schema.idl.TypeDefinitionRegistry;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -58,7 +58,6 @@ import static org.hypergraphql.config.schema.HGQLVocabulary.SCALAR_TYPES;
 import static org.hypergraphql.config.schema.HGQLVocabulary.SCALAR_TYPES_TO_GRAPHQL_OUTPUT;
 
 @Slf4j
-// TODO - This has a very complex constructor, can it be simplified?
 public class HGQLSchema {
 
     private final String schemaUri;
@@ -78,17 +77,7 @@ public class HGQLSchema {
         schemaUri = HGQL_SCHEMA_NAMESPACE + schemaName;
         schemaNamespace = schemaUri + "/";
 
-        rdfSchema.insertObjectTriple(schemaUri, RDF_TYPE, HGQL_SCHEMA);
-        rdfSchema.insertObjectTriple(schemaNamespace + "query", RDF_TYPE, HGQL_QUERY_TYPE);
-        rdfSchema.insertStringLiteralTriple(schemaNamespace + "query", HGQL_HAS_NAME, "Query");
-        rdfSchema.insertObjectTriple(HGQL_STRING, RDF_TYPE, HGQL_SCALAR_TYPE);
-        rdfSchema.insertStringLiteralTriple(HGQL_STRING, HGQL_HAS_NAME, "String");
-        rdfSchema.insertObjectTriple(HGQL_INT, RDF_TYPE, HGQL_SCALAR_TYPE);
-        rdfSchema.insertStringLiteralTriple(HGQL_INT, HGQL_HAS_NAME, "Int");
-        rdfSchema.insertObjectTriple(HGQL_BOOLEAN, RDF_TYPE, HGQL_SCALAR_TYPE);
-        rdfSchema.insertStringLiteralTriple(HGQL_BOOLEAN, HGQL_HAS_NAME, "Boolean");
-        rdfSchema.insertObjectTriple(HGQL_ID, RDF_TYPE, HGQL_SCALAR_TYPE);
-        rdfSchema.insertStringLiteralTriple(HGQL_ID, HGQL_HAS_NAME, "ID");
+        populateHGQLRDFSchemaBaseTypes();
 
         final Map<String, TypeDefinition> registryTypes = registry.types();
         final var context = registryTypes.get("__Context");
@@ -100,90 +89,10 @@ public class HGQLSchema {
             log.error("Context not set!", e);
             throw e;
         }
-        final List<Node> children = context.getChildren();
-        final Map<String, String> contextMap = new HashMap<>();
+        final Map<String, String> contextMap = generateContextMap(context);
 
-        children.forEach(node -> {
-            final var field = (FieldDefinition) node;
-            final var iri = ((StringValue) field.getDirective("href").getArgument("iri").getValue()).getValue();
-            contextMap.put(field.getName(), iri);
-        });
-
-        final Set<String> typeNames = registryTypes.keySet();
-        typeNames.remove("__Context");
-
-        final Set<String> serviceIds = services.keySet();
-        serviceIds.forEach(serviceId -> {
-            String serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
-            rdfSchema.insertObjectTriple(serviceURI, RDF_TYPE, HGQL_SERVICE);
-            rdfSchema.insertStringLiteralTriple(serviceURI, HGQL_HAS_ID, serviceId);
-        });
-
-        typeNames.forEach(typeName -> {
-
-            final var typeUri = schemaNamespace + typeName;
-            rdfSchema.insertStringLiteralTriple(typeUri, HGQL_HAS_NAME, typeName);
-            rdfSchema.insertObjectTriple(typeUri, HGQL_HREF, contextMap.get(typeName));
-            rdfSchema.insertObjectTriple(typeUri, RDF_TYPE, HGQL_OBJECT_TYPE);
-
-
-            final var type = registryTypes.get(typeName);
-            final List<Directive> directives = type.getDirectives();
-
-            directives.forEach(dir -> {
-                if (dir.getName().equals("service")) {
-                    final var getQueryUri = typeUri + "_GET";
-                    final var getByIdQueryUri = typeUri + "_GET_BY_ID";
-
-                    rdfSchema.insertObjectTriple(getQueryUri, RDF_TYPE, HGQL_QUERY_FIELD);
-                    rdfSchema.insertObjectTriple(getQueryUri, RDF_TYPE, HGQL_QUERY_GET_FIELD);
-                    rdfSchema.insertObjectTriple(schemaNamespace + "query", HGQL_HAS_FIELD, getQueryUri);
-                    rdfSchema.insertStringLiteralTriple(getQueryUri, HGQL_HAS_NAME, typeName + "_GET");
-                    rdfSchema.insertObjectTriple(getByIdQueryUri, RDF_TYPE, HGQL_QUERY_FIELD);
-                    rdfSchema.insertObjectTriple(getByIdQueryUri, RDF_TYPE, HGQL_QUERY_GET_BY_ID_FIELD);
-                    rdfSchema.insertObjectTriple(schemaNamespace + "query", HGQL_HAS_FIELD, getByIdQueryUri);
-                    rdfSchema.insertStringLiteralTriple(getByIdQueryUri, HGQL_HAS_NAME, typeName + "_GET_BY_ID");
-
-                    final var outputListTypeURI = schemaNamespace + UUID.randomUUID();
-
-                    rdfSchema.insertObjectTriple(outputListTypeURI, RDF_TYPE, HGQL_LIST_TYPE);
-                    rdfSchema.insertObjectTriple(outputListTypeURI, HGQL_OF_TYPE, typeUri);
-
-                    rdfSchema.insertObjectTriple(getQueryUri, HGQL_OUTPUT_TYPE, outputListTypeURI);
-                    rdfSchema.insertObjectTriple(getByIdQueryUri, HGQL_OUTPUT_TYPE, outputListTypeURI);
-                    final var serviceId = ((StringValue) dir.getArgument("id").getValue()).getValue();
-
-                    final var serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
-                    rdfSchema.insertObjectTriple(getQueryUri, HGQL_HAS_SERVICE, serviceURI);
-                    rdfSchema.insertObjectTriple(getByIdQueryUri, HGQL_HAS_SERVICE, serviceURI);
-                }
-            });
-
-            final List<Node> typeChildren = type.getChildren();
-
-            typeChildren.forEach(node -> {
-                if (node.getClass().getSimpleName().equals("FieldDefinition")) {
-                    final var field = (FieldDefinition) node;
-                    final var fieldURI = schemaNamespace + typeName + "/" + field.getName();
-
-                    rdfSchema.insertStringLiteralTriple(fieldURI, HGQL_HAS_NAME, field.getName());
-                    rdfSchema.insertObjectTriple(fieldURI, HGQL_HREF, contextMap.get(field.getName()));
-
-                    rdfSchema.insertObjectTriple(fieldURI, RDF_TYPE, HGQL_FIELD);
-                    rdfSchema.insertObjectTriple(typeUri, HGQL_HAS_FIELD, fieldURI);
-
-                    final var serviceId = ((StringValue) field.getDirective("service").getArgument("id").getValue()).getValue();
-                    final var serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
-                    rdfSchema.insertObjectTriple(fieldURI, HGQL_HAS_SERVICE, serviceURI);
-                    rdfSchema.insertObjectTriple(serviceURI, RDF_TYPE, HGQL_SERVICE);
-
-                    final var outputTypeUri = getOutputType(field.getType());
-                    rdfSchema.insertObjectTriple(fieldURI, HGQL_OUTPUT_TYPE, outputTypeUri);
-
-                }
-            });
-        });
-
+        populateServices(services);
+        populateTypes(registryTypes, contextMap);
         generateConfigs(services);
 
     }
@@ -204,7 +113,7 @@ public class HGQLSchema {
         return rdfSchema.getDataOutput(format);
     }
 
-    private void generateConfigs(final Map<String, Service> services) {
+    private void generateConfigs(final Map<String, Service> services) { // TODO - Extract class
         this.types = new HashMap<>();
         this.fields = new HashMap<>();
         this.queryFields = new HashMap<>();
@@ -216,7 +125,6 @@ public class HGQLSchema {
             final var name = rdfSchema.getValueOfDataProperty(rdfNode, HGQL_HAS_NAME);
             final var href = rdfSchema.getValueOfObjectProperty(rdfNode, HGQL_HREF);
             final var serviceNode = rdfSchema.getValueOfObjectProperty(rdfNode, HGQL_HAS_SERVICE);
-            final var serviceId = rdfSchema.getValueOfDataProperty(serviceNode, HGQL_HAS_ID);
 
             final var fieldConfig = new FieldConfig(href.asResource().getURI());
             fields.put(name, fieldConfig);
@@ -345,11 +253,130 @@ public class HGQLSchema {
         return dummyNode;
     }
 
-    public String getSchemaUri() {
-        return schemaUri;
-    }
-
     public String getSchemaNamespace() {
         return schemaNamespace;
+    }
+
+    private void populateHGQLRDFSchemaBaseTypes() {
+
+        rdfSchema.insertObjectTriple(schemaUri, RDF_TYPE, HGQL_SCHEMA);
+        rdfSchema.insertObjectTriple(schemaNamespace + "query", RDF_TYPE, HGQL_QUERY_TYPE);
+        rdfSchema.insertStringLiteralTriple(schemaNamespace + "query", HGQL_HAS_NAME, "Query");
+        rdfSchema.insertObjectTriple(HGQL_STRING, RDF_TYPE, HGQL_SCALAR_TYPE);
+        rdfSchema.insertStringLiteralTriple(HGQL_STRING, HGQL_HAS_NAME, "String");
+        rdfSchema.insertObjectTriple(HGQL_INT, RDF_TYPE, HGQL_SCALAR_TYPE);
+        rdfSchema.insertStringLiteralTriple(HGQL_INT, HGQL_HAS_NAME, "Int");
+        rdfSchema.insertObjectTriple(HGQL_BOOLEAN, RDF_TYPE, HGQL_SCALAR_TYPE);
+        rdfSchema.insertStringLiteralTriple(HGQL_BOOLEAN, HGQL_HAS_NAME, "Boolean");
+        rdfSchema.insertObjectTriple(HGQL_ID, RDF_TYPE, HGQL_SCALAR_TYPE);
+        rdfSchema.insertStringLiteralTriple(HGQL_ID, HGQL_HAS_NAME, "ID");
+    }
+
+    private Map<String, String> generateContextMap(final TypeDefinition context) {
+        final List<Node> children = context.getChildren();
+        final Map<String, String> contextMap = new HashMap<>();
+
+        children.forEach(node -> {
+            final var field = (FieldDefinition) node;
+            final var iri = ((StringValue) field.getDirective("href").getArgument("iri").getValue()).getValue();
+            contextMap.put(field.getName(), iri);
+        });
+        return contextMap;
+    }
+
+    private void populateServices(final Map<String, Service> services) {
+        final Collection<String> serviceIds = services.keySet();
+        serviceIds.forEach(serviceId -> {
+            final var serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
+            rdfSchema.insertObjectTriple(serviceURI, RDF_TYPE, HGQL_SERVICE);
+            rdfSchema.insertStringLiteralTriple(serviceURI, HGQL_HAS_ID, serviceId);
+        });
+    }
+
+    private void populateTypes(
+            final Map<String, TypeDefinition> registryTypes,
+            final Map<String, String> contextMap
+    ) {
+        final Collection<String> typeNames = registryTypes.keySet();
+        typeNames.remove("__Context");
+
+        typeNames.forEach(typeName -> {
+
+            final var typeUri = schemaNamespace + typeName;
+            rdfSchema.insertStringLiteralTriple(typeUri, HGQL_HAS_NAME, typeName);
+            rdfSchema.insertObjectTriple(typeUri, HGQL_HREF, contextMap.get(typeName));
+            rdfSchema.insertObjectTriple(typeUri, RDF_TYPE, HGQL_OBJECT_TYPE);
+
+
+            final var type = registryTypes.get(typeName);
+            populateDirectives(type, typeName, typeUri);
+            populateChildTypes(type, typeName, typeUri, contextMap);
+        });
+    }
+
+    private void populateDirectives(
+            final TypeDefinition type,
+            final String typeName,
+            final String typeUri
+    ) {
+        final List<Directive> directives = type.getDirectives();
+        directives.forEach(dir -> {
+            if (dir.getName().equals("service")) {
+                final var getQueryUri = typeUri + "_GET";
+                final var getByIdQueryUri = typeUri + "_GET_BY_ID";
+
+                rdfSchema.insertObjectTriple(getQueryUri, RDF_TYPE, HGQL_QUERY_FIELD);
+                rdfSchema.insertObjectTriple(getQueryUri, RDF_TYPE, HGQL_QUERY_GET_FIELD);
+                rdfSchema.insertObjectTriple(schemaNamespace + "query", HGQL_HAS_FIELD, getQueryUri);
+                rdfSchema.insertStringLiteralTriple(getQueryUri, HGQL_HAS_NAME, typeName + "_GET");
+                rdfSchema.insertObjectTriple(getByIdQueryUri, RDF_TYPE, HGQL_QUERY_FIELD);
+                rdfSchema.insertObjectTriple(getByIdQueryUri, RDF_TYPE, HGQL_QUERY_GET_BY_ID_FIELD);
+                rdfSchema.insertObjectTriple(schemaNamespace + "query", HGQL_HAS_FIELD, getByIdQueryUri);
+                rdfSchema.insertStringLiteralTriple(getByIdQueryUri, HGQL_HAS_NAME, typeName + "_GET_BY_ID");
+
+                final var outputListTypeURI = schemaNamespace + UUID.randomUUID();
+
+                rdfSchema.insertObjectTriple(outputListTypeURI, RDF_TYPE, HGQL_LIST_TYPE);
+                rdfSchema.insertObjectTriple(outputListTypeURI, HGQL_OF_TYPE, typeUri);
+
+                rdfSchema.insertObjectTriple(getQueryUri, HGQL_OUTPUT_TYPE, outputListTypeURI);
+                rdfSchema.insertObjectTriple(getByIdQueryUri, HGQL_OUTPUT_TYPE, outputListTypeURI);
+                final var serviceId = ((StringValue) dir.getArgument("id").getValue()).getValue();
+
+                final var serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
+                rdfSchema.insertObjectTriple(getQueryUri, HGQL_HAS_SERVICE, serviceURI);
+                rdfSchema.insertObjectTriple(getByIdQueryUri, HGQL_HAS_SERVICE, serviceURI);
+            }
+        });
+    }
+
+    private void populateChildTypes(
+            final TypeDefinition type,
+            final String typeName,
+            final String typeUri,
+            final Map<String, String> contextMap
+    ) {
+
+        type.getChildren().forEach(node -> {
+            if (node.getClass().getSimpleName().equals("FieldDefinition")) {
+                final var field = (FieldDefinition) node;
+                final var fieldURI = schemaNamespace + typeName + "/" + field.getName();
+
+                rdfSchema.insertStringLiteralTriple(fieldURI, HGQL_HAS_NAME, field.getName());
+                rdfSchema.insertObjectTriple(fieldURI, HGQL_HREF, contextMap.get(field.getName()));
+
+                rdfSchema.insertObjectTriple(fieldURI, RDF_TYPE, HGQL_FIELD);
+                rdfSchema.insertObjectTriple(typeUri, HGQL_HAS_FIELD, fieldURI);
+
+                final var serviceId = ((StringValue) field.getDirective("service").getArgument("id").getValue()).getValue();
+                final var serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
+                rdfSchema.insertObjectTriple(fieldURI, HGQL_HAS_SERVICE, serviceURI);
+                rdfSchema.insertObjectTriple(serviceURI, RDF_TYPE, HGQL_SERVICE);
+
+                final var outputTypeUri = getOutputType(field.getType());
+                rdfSchema.insertObjectTriple(fieldURI, HGQL_OUTPUT_TYPE, outputTypeUri);
+
+            }
+        });
     }
 }
