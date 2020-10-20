@@ -6,7 +6,6 @@ import graphql.language.Argument;
 import graphql.language.BooleanValue;
 import graphql.language.Field;
 import graphql.language.IntValue;
-import graphql.language.Node;
 import graphql.language.Selection;
 import graphql.language.SelectionSet;
 import graphql.language.StringValue;
@@ -37,7 +36,6 @@ import static org.hypergraphql.util.HGQLConstants.PARENT_ID;
 import static org.hypergraphql.util.HGQLConstants.TARGET_NAME;
 
 @Getter
-// TODO - fix cs suppressions
 public class ExecutionTreeNode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExecutionTreeNode.class);
@@ -186,7 +184,7 @@ public class ExecutionTreeNode {
         }
     }
 
-    @SuppressWarnings({"checkstyle:NestedIfDepth"})
+    @SuppressWarnings({"checkstyle:NestedIfDepth"}) // TODO - address this
     private JsonNode traverse(final Field field, final String parentId, final String parentType) {
 
         final var subFields = field.getSelectionSet();
@@ -239,26 +237,18 @@ public class ExecutionTreeNode {
             final var type = value.getClass().getSimpleName();
 
             switch (type) {
-                case "IntValue": // TODO - ???
-                    long longValue = ((IntValue) value).getValue().longValueExact();
-                    argNode.put(arg.getName(), longValue);
+                case "IntValue":
+                    argNode.put(arg.getName(), ((IntValue) value).getValue());
                     break;
                 case "StringValue":
-                    final var stringValue = ((StringValue) value).getValue();
-                    argNode.put(arg.getName(), stringValue);
+                    argNode.put(arg.getName(), ((StringValue) value).getValue());
                     break;
                 case "BooleanValue":
-                    final var booleanValue = ((BooleanValue) value).isValue();
-                    argNode.put(arg.getName(), booleanValue);
+                    argNode.put(arg.getName(), ((BooleanValue) value).isValue());
                     break;
                 case "ArrayValue":
-                    final List<Node> nodes = value.getChildren();
                     final var arrayNode = mapper.createArrayNode();
-
-                    for (final Node node : nodes)  {
-                        final var v = ((StringValue) node).getValue();
-                        arrayNode.add(v);
-                    }
+                    value.getChildren().forEach(child -> arrayNode.add(((StringValue) child).getValue()));
                     argNode.set(arg.getName(), arrayNode);
                     break;
                 default:

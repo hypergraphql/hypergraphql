@@ -49,6 +49,6 @@ public class GraphqlConfig {
 
     @JsonIgnore
     private int generateRandomPort() {
-        return ThreadLocalRandom.current().nextInt(PORT_RANGE_START, PORT_RANGE_END); // TODO - review this
+        return ThreadLocalRandom.current().nextInt(PORT_RANGE_START, PORT_RANGE_END);
     }
 }

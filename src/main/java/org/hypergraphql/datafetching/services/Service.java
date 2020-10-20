@@ -91,7 +91,12 @@ public abstract class Service { // TODO - Review cs suppression
         if (queryField != null) {
 
             // TODO - Replace this
-            final var typeName = (currentNode.get(ALIAS).isNull()) ? currentNode.get(NAME).asText() : currentNode.get(ALIAS).asText();
+            final String typeName;
+            if (currentNode.get(ALIAS).isNull()) {
+                typeName = currentNode.get(NAME).asText();
+            } else {
+                typeName = currentNode.get(ALIAS).asText();
+            }
             final var object = results.getResource(currentNode.get(NODE_ID).asText());
             final var subject = model.createResource(HGQL_QUERY_URI);
             final var predicate = model.createProperty("", HGQL_QUERY_NAMESPACE + typeName);
@@ -209,7 +214,7 @@ public abstract class Service { // TODO - Review cs suppression
                                         LinkedList<QueryNode> path,
                                         final HGQLSchema schema) {
 
-        Model model = ModelFactory.createDefaultModel();
+        final var model = ModelFactory.createDefaultModel();
 
         if (path == null) {
             path = new LinkedList<>();

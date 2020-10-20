@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hypergraphql.config.system.HGQLConfig;
@@ -18,6 +19,8 @@ import spark.Response;
 import spark.Service;
 import spark.template.velocity.VelocityTemplateEngine;
 
+import static org.hypergraphql.util.ControllerConstants.ORIGIN_HEADER;
+import static org.hypergraphql.util.ControllerConstants.WILDCARD;
 import static spark.Spark.before;
 
 /**
@@ -32,33 +35,53 @@ public class Controller {
     private static final String DEFAULT_MIME_TYPE = "RDF/XML";
     private static final String DEFAULT_ACCEPT_TYPE = "application/rdf+xml";
 
-    private static final Map<String, String> MIME_MAP = Map.of(
+    private static final Map<String, String> APPLICATION_MIME_MAP = Map.of(
         "application/json+rdf+xml", "RDF/XML",
         "application/json+turtle", "TTL",
         "application/json+ntriples", "N-TRIPLES",
-//        "application/json+n3", "N3", // TODO - reinstate
+        "application/json+n3", "N3",
         "application/rdf+xml", "RDF/XML",
         "application/turtle", "TTL",
         "application/ntriples", "N-TRIPLES",
-        "application/n3", "N3",
+        "application/n3", "N3"
+    );
+
+    private static final Map<String, String> TEXT_MIME_MAP = Map.of(
         "text/turtle", "TTL",
         "text/ntriples", "N-TRIPLES",
         "text/n3", "N3"
     );
 
-    private static final Map<String, Boolean> GRAPHQL_COMPATIBLE_TYPE = Map.of(
+    private static final Map<String, String> MIME_MAP = new HashMap<>();
+
+    {
+        MIME_MAP.putAll(APPLICATION_MIME_MAP);
+        MIME_MAP.putAll(TEXT_MIME_MAP);
+    }
+
+    private static final Map<String, Boolean> APPLICATION_GQL_TYPES = Map.of(
         "application/json+rdf+xml", true,
         "application/json+turtle", true,
         "application/json+ntriples", true,
-//        "application/json+n3", true, // TODO - reinstate
+        "application/json+n3", true,
         "application/rdf+xml", false,
         "application/turtle", false,
         "application/ntriples", false,
-        "application/n3", false,
-        "text/turtle", false,
-        "text/ntriples", false,
-        "text/n3", false
+        "application/n3", false
     );
+
+    private static final Map<String, Boolean> TEXT_GQL_TYPES = Map.of(
+            "text/turtle", false,
+            "text/ntriples", false,
+            "text/n3", false
+    );
+
+    private static final Map<String, Boolean> GRAPHQL_COMPATIBLE_TYPE = new HashMap<>();
+
+    {
+        GRAPHQL_COMPATIBLE_TYPE.putAll(APPLICATION_GQL_TYPES);
+        GRAPHQL_COMPATIBLE_TYPE.putAll(TEXT_GQL_TYPES);
+    }
 
     private static final int BAD_REQUEST_CODE = 400;
 
@@ -171,7 +194,7 @@ public class Controller {
 
         final var mapper = new ObjectMapper();
         final var requestObject = mapper.readTree(body);
-        if (requestObject.get("query") == null) { // TODO
+        if (requestObject.get("query") == null) {
             throw new IllegalArgumentException(
                     "Body appears to be JSON but does not contain required 'query' attribute: " + body
             );
@@ -196,7 +219,7 @@ public class Controller {
     private void setResponseHeaders(final Request request, final Response response) {
 
         final List<String> headersList = Arrays.asList(
-                "Origin",
+                ORIGIN_HEADER,
                 "X-Requested-With",
                 "Content-Type",
                 "Accept",
@@ -204,10 +227,10 @@ public class Controller {
                 "x-auth-token"
         );
 
-        final String origin = request.headers("Origin") == null ? "*" : request.headers("Origin"); // TODO
+        final var origin = Objects.requireNonNullElse(request.headers(ORIGIN_HEADER), WILDCARD);
         response.header("Access-Control-Allow-Origin", origin); // TODO
-        if (!"*".equals(origin)) { // TODO
-            response.header("Vary", "Origin"); // TODO
+        if (!WILDCARD.equals(origin)) {
+            response.header("Vary", ORIGIN_HEADER);
         }
         response.header("Access-Control-Allow-Headers", StringUtils.join(headersList, ",")); // TODO
 
