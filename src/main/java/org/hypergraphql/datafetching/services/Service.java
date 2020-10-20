@@ -37,7 +37,12 @@ public abstract class Service { // TODO - Review cs suppression
     private String type;
     private String id;
 
-    public abstract TreeExecutionResult executeQuery(JsonNode query, Collection<String> input, Collection<String> strings, String rootType, HGQLSchema schema);
+    public abstract TreeExecutionResult executeQuery(
+            JsonNode query,
+            Collection<String> input,
+            Collection<String> strings,
+            String rootType,
+            HGQLSchema schema);
 
     public abstract void setParameters(ServiceConfig serviceConfig);
 

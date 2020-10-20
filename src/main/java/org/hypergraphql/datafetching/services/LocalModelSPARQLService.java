@@ -7,12 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.rdf.model.Model;
@@ -20,8 +14,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.LocalSPARQLExecution;
-import org.hypergraphql.datafetching.SPARQLExecutionResult;
-import org.hypergraphql.datafetching.TreeExecutionResult;
+import org.hypergraphql.datafetching.SPARQLEndpointExecution;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.exception.HGQLConfigurationException;
 import org.hypergraphql.util.LangUtils;
@@ -33,48 +26,6 @@ public final class LocalModelSPARQLService extends SPARQLEndpointService {
 
     public Model getModel() {
         return model;
-    }
-
-    public void setModel(Model model) {
-        this.model = model;
-    }
-
-    @Override
-    public TreeExecutionResult executeQuery(
-            final JsonNode query,
-            final Collection<String> input,
-            final Collection<String> markers,
-            final String rootType,
-            final HGQLSchema schema) {
-
-        final Map<String, Collection<String>> resultSet = new HashMap<>(); // TODO - dupe
-        final var unionModel = ModelFactory.createDefaultModel();
-        final Collection<Future<SPARQLExecutionResult>> futureSPARQLResults = new HashSet<>();
-
-        final List<String> inputList = getStrings(query, input, markers, rootType, schema, resultSet);
-
-        do {
-
-            final Collection<String> inputSubset = new HashSet<>(); // TODO - dupe
-            int i = 0;
-            while (i < VALUES_SIZE_LIMIT && !inputList.isEmpty()) { // TODO - inner loop
-                inputSubset.add(inputList.get(0));
-                inputList.remove(0);
-                i++;
-            }
-            final var executor = Executors.newFixedThreadPool(50);
-            final var execution = new LocalSPARQLExecution(query, inputSubset, markers, this, schema, this.model, rootType);
-            futureSPARQLResults.add(executor.submit(execution));
-
-        } while (inputList.size() > VALUES_SIZE_LIMIT);
-
-        iterateFutureResults(futureSPARQLResults, unionModel, resultSet);
-
-        final var treeExecutionResult = new TreeExecutionResult();
-        treeExecutionResult.setResultSet(resultSet);
-        treeExecutionResult.setModel(unionModel);
-
-        return treeExecutionResult;
     }
 
     @Override
@@ -98,5 +49,16 @@ public final class LocalModelSPARQLService extends SPARQLEndpointService {
         } catch (IOException e) {
             throw new HGQLConfigurationException("Nonspecific IO exception", e);
         }
+    }
+
+    @Override
+    protected SPARQLEndpointExecution buildExecutor(
+            final JsonNode query,
+            final Collection<String> inputSubset,
+            final Collection<String> markers,
+            final HGQLSchema schema,
+            final String rootType
+    ) {
+        return new LocalSPARQLExecution(query, inputSubset, markers, this, schema, getModel(), rootType);
     }
 }

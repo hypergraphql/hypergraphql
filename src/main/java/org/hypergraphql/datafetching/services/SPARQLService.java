@@ -1,6 +1,10 @@
 package org.hypergraphql.datafetching.services;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Collection;
 import org.hypergraphql.config.system.ServiceConfig;
+import org.hypergraphql.datafetching.SPARQLEndpointExecution;
+import org.hypergraphql.datamodel.HGQLSchema;
 
 public abstract class SPARQLService extends Service {
 
@@ -23,4 +27,12 @@ public abstract class SPARQLService extends Service {
             this.graph = serviceConfig.getGraph();
         }
     }
+
+    protected abstract SPARQLEndpointExecution buildExecutor(
+            JsonNode query,
+            Collection<String> inputSubset,
+            Collection<String> markers,
+            HGQLSchema schema,
+            String rootType
+    );
 }

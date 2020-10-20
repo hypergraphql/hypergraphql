@@ -34,14 +34,15 @@ public class SPARQLEndpointService extends SPARQLService {
     private String password;
 
     @Override
-    public TreeExecutionResult executeQuery(final JsonNode query,
-                                            final Collection<String> input,
-                                            final Collection<String> markers,
-                                            final String rootType,
-                                            final HGQLSchema schema) {
+    public TreeExecutionResult executeQuery(
+            final JsonNode query,
+            final Collection<String> input,
+            final Collection<String> markers,
+            final String rootType,
+            final HGQLSchema schema
+    ) {
 
-
-        final Map<String, Collection<String>> resultSet = new HashMap<>(); // TODO - dupe
+        final Map<String, Collection<String>> resultSet = new HashMap<>();
         final var unionModel = ModelFactory.createDefaultModel();
         final Collection<Future<SPARQLExecutionResult>> futureSPARQLresults = new HashSet<>();
 
@@ -49,7 +50,7 @@ public class SPARQLEndpointService extends SPARQLService {
 
         do {
 
-            final Collection<String> inputSubset = new HashSet<>(); // TODO - dupe
+            final Collection<String> inputSubset = new HashSet<>();
             int i = 0;
             while (i < VALUES_SIZE_LIMIT && !inputList.isEmpty()) {
                 inputSubset.add(inputList.get(0));
@@ -57,7 +58,7 @@ public class SPARQLEndpointService extends SPARQLService {
                 i++;
             }
             final var executor = Executors.newFixedThreadPool(50);
-            final var execution = new SPARQLEndpointExecution(query, inputSubset, markers, this, schema, rootType);
+            final var execution = buildExecutor(query, inputSubset, markers, schema, rootType);
             futureSPARQLresults.add(executor.submit(execution));
 
         } while (inputList.size() > VALUES_SIZE_LIMIT);
@@ -120,5 +121,15 @@ public class SPARQLEndpointService extends SPARQLService {
         setGraph(serviceConfig.getGraph());
         this.password = serviceConfig.getPassword();
 
+    }
+
+    @Override
+    protected SPARQLEndpointExecution buildExecutor(
+            final JsonNode query,
+            final Collection<String> inputSubset,
+            final Collection<String> markers,
+            final HGQLSchema schema,
+            final String rootType) {
+        return new SPARQLEndpointExecution(query, inputSubset, markers, this, schema, rootType);
     }
 }
