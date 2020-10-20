@@ -1,37 +1,22 @@
 package org.hypergraphql.config.schema;
 
 import java.util.Map;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-public class TypeConfig  {
+@RequiredArgsConstructor
+@Getter
+public class TypeConfig {
+
+    private final String typeName;
+    private final String id;
+    private final Map<String, FieldOfTypeConfig> fields;
 
     public String getName() {
-        return name;
+        return typeName;
     }
 
-    public String getId() {
-        return this.id;
-    }
-
-    public FieldOfTypeConfig getField(String name) {
+    public FieldOfTypeConfig getField(final String name) {
         return this.fields.get(name);
     }
-
-    private String id;
-
-    private String name;
-
-    public Map<String, FieldOfTypeConfig> getFields() {
-        return fields;
-    }
-
-    private Map<String, FieldOfTypeConfig> fields;
-
-    public TypeConfig(String name, String id, Map<String, FieldOfTypeConfig> fields) {
-
-        this.name=name;
-        this.id = id;
-        this.fields=fields;
-
-    }
-
 }

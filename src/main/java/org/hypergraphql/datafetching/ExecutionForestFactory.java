@@ -6,32 +6,25 @@ import graphql.language.Field;
 import graphql.language.FragmentDefinition;
 import graphql.language.OperationDefinition;
 import graphql.language.SelectionSet;
-import org.hypergraphql.datamodel.HGQLSchema;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.hypergraphql.datamodel.HGQLSchema;
 
 public class ExecutionForestFactory {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ExecutionForestFactory.class);
+    public ExecutionForest getExecutionForest(final Document queryDocument, final HGQLSchema schema) {
 
-    public ExecutionForest getExecutionForest(Document queryDocument , HGQLSchema schema) {
+        final var forest = new ExecutionForest();
 
-        ExecutionForest forest = new ExecutionForest();
+        final var queryFields = selectionSet(queryDocument);
 
-        SelectionSet queryFields = selectionSet(queryDocument);
-
-        final AtomicInteger counter = new AtomicInteger(0);
+        final var counter = new AtomicInteger(0);
         queryFields.getSelections().forEach(child -> { // query fields - why no args?
 
-            if (child.getClass().getSimpleName().equals("Field")) {
-
-                String nodeId = "x_" + counter.incrementAndGet();
-                forest.getForest().add(new ExecutionTreeNode((Field) child, nodeId , schema));
-
+            if (child.getClass().isAssignableFrom(Field.class)) {
+                final var nodeId = "x_" + counter.incrementAndGet();
+                forest.getForest().add(new ExecutionTreeNode((Field) child, nodeId, schema));
             }
         });
         return forest;
@@ -39,14 +32,14 @@ public class ExecutionForestFactory {
 
     private SelectionSet selectionSet(final Document queryDocument) {
 
-        final Definition definition = queryDocument.getDefinitions().get(0);
+        final var definition = queryDocument.getDefinitions().get(0);
 
-        if(definition.getClass().isAssignableFrom(FragmentDefinition.class)) {
+        if (definition.getClass().isAssignableFrom(FragmentDefinition.class)) {
 
             return getFragmentSelectionSet(queryDocument);
 
-        } else if(definition.getClass().isAssignableFrom(OperationDefinition.class)) {
-            final OperationDefinition operationDefinition = (OperationDefinition)definition;
+        } else if (definition.getClass().isAssignableFrom(OperationDefinition.class)) {
+            final var operationDefinition = (OperationDefinition) definition;
             return operationDefinition.getSelectionSet();
         }
         throw new IllegalArgumentException(queryDocument.getClass().getName() + " is not supported");
@@ -55,8 +48,8 @@ public class ExecutionForestFactory {
     private SelectionSet getFragmentSelectionSet(final Document queryDocument) {
 
         // NPE
-        final FragmentDefinition fragmentDefinition = (FragmentDefinition)queryDocument.getDefinitions().get(0);
-        final SelectionSet originalSelectionSet = fragmentDefinition.getSelectionSet();
+        final var fragmentDefinition = (FragmentDefinition) queryDocument.getDefinitions().get(0);
+        final var originalSelectionSet = fragmentDefinition.getSelectionSet();
 
         final Optional<Definition> optionalDefinition = queryDocument.getDefinitions()
                 .stream()
@@ -64,19 +57,19 @@ public class ExecutionForestFactory {
                 .findFirst();
 
         final OperationDefinition operationDefinition;
-        if(optionalDefinition.isPresent()) {
-            operationDefinition = (OperationDefinition)optionalDefinition.get();
+        if (optionalDefinition.isPresent()) {
+            operationDefinition = (OperationDefinition) optionalDefinition.get();
         } else {
             // bail
             throw new IllegalArgumentException("No OperationDefinition is available within the query");
         }
 
         // NPE?
-        final Field operationSelection = (Field)operationDefinition.getSelectionSet().getSelections().get(0);
+        final var operationSelection = (Field) operationDefinition.getSelectionSet().getSelections().get(0);
 
-        final String typeFieldName = operationSelection.getName();
+        final var typeFieldName = operationSelection.getName();
 
-        final Field newSelection = Field.newField()
+        final var newSelection = Field.newField()
                 .name(typeFieldName)
                 .arguments(operationSelection.getArguments())
                 .selectionSet(originalSelectionSet)

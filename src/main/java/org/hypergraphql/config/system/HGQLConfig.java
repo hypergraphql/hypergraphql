@@ -4,61 +4,37 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import graphql.schema.GraphQLSchema;
-import org.hypergraphql.datamodel.HGQLSchema;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import org.hypergraphql.datamodel.HGQLSchema;
 
 /**
  * Created by szymon on 05/09/2017.
  */
+@Getter
+@Setter
+public final class HGQLConfig {
 
-public class HGQLConfig {
-
-    private String name;
-    private String schemaFile;
-    private GraphqlConfig graphqlConfig;
-    private List<ServiceConfig> serviceConfigs;
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public GraphQLSchema getSchema() {
-        return schema;
-    }
-
-    public void setSchema(GraphQLSchema schema) {
-        this.schema = schema;
-    }
-
-    public HGQLSchema getHgqlSchema() {
-        return hgqlSchema;
-    }
+    private final String name;
+    private final String schemaFile;
+    private final GraphqlConfig graphqlConfig;
+    private final List<ServiceConfig> serviceConfigs;
 
     private GraphQLSchema schema;
     private HGQLSchema hgqlSchema;
 
     @JsonCreator
     private HGQLConfig(
-            @JsonProperty("name") String name,
-            @JsonProperty("schema") String schemaFile,
-            @JsonProperty("server") GraphqlConfig graphqlConfig,
-            @JsonProperty("services") List<ServiceConfig> services
+            @JsonProperty("name") final String name,
+            @JsonProperty("schema") final String schemaFile,
+            @JsonProperty("server") final GraphqlConfig graphqlConfig,
+            @JsonProperty("services") final List<ServiceConfig> services
     ) {
         this.name = name;
         this.schemaFile = schemaFile;
         this.graphqlConfig = graphqlConfig;
         this.serviceConfigs = services;
-    }
-
-    public GraphqlConfig getGraphqlConfig() {
-        return graphqlConfig;
-    }
-
-    public String getName() {
-        return name;
     }
 
     @JsonIgnore
@@ -72,13 +48,13 @@ public class HGQLConfig {
     }
 
     @JsonIgnore
-    public void setGraphQLSchema(final GraphQLSchema schema) {
-        this.schema = schema;
+    public void setGraphQLSchema(final GraphQLSchema graphQLSchema) {
+        this.schema = graphQLSchema;
     }
 
     @JsonIgnore
-    public void setHgqlSchema(final HGQLSchema schema) {
-        this.hgqlSchema = schema;
+    public void setHgqlSchema(final HGQLSchema hgqlSchema) {
+        this.hgqlSchema = hgqlSchema;
     }
 }
 

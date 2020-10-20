@@ -1,58 +1,59 @@
 package org.hypergraphql.datafetching;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.datafetching.services.SPARQLEndpointService;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.query.converters.SPARQLServiceConverter;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+@Slf4j
 public class LocalSPARQLExecution extends SPARQLEndpointExecution {
 
-    private Model model;
+    private final Model model;
 
-
-    public LocalSPARQLExecution(JsonNode query, Set<String> inputSubset, Set<String> markers, SPARQLEndpointService sparqlEndpointService, HGQLSchema schema , Model localmodel, String rootType) {
+    public LocalSPARQLExecution(final JsonNode query,
+                                final Collection<String> inputSubset,
+                                final Collection<String> markers,
+                                final SPARQLEndpointService sparqlEndpointService,
+                                final HGQLSchema schema,
+                                final Model localModel,
+                                final String rootType) {
         super(query, inputSubset, markers, sparqlEndpointService, schema, rootType);
-        this.model = localmodel;
+        this.model = localModel;
     }
 
     @Override
     public SPARQLExecutionResult call() {
 
-        Map<String, Set<String>> resultSet = new HashMap<>();
-        markers.forEach(marker -> resultSet.put(marker, new HashSet<>()));
+        final Map<String, Collection<String>> resultSet = new HashMap<>();
+        getMarkers().forEach(marker -> resultSet.put(marker, new HashSet<>()));
 
-        Model unionModel = ModelFactory.createDefaultModel();
-
-        SPARQLServiceConverter converter = new SPARQLServiceConverter(schema);
-        String sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);
-        logger.debug(sparqlQuery);
-        Query jenaQuery = QueryFactory.create(sparqlQuery);
-
-        QueryExecution qexec = QueryExecutionFactory.create(jenaQuery, model);
-        ResultSet results = qexec.execSelect();
+        final var unionModel = ModelFactory.createDefaultModel();
+        final var converter = new SPARQLServiceConverter(getSchema());
+        final var sparqlQuery = converter.getSelectQuery(getQuery(), getInputSubset(), getRootType());
+        log.debug(sparqlQuery);
+        final var jenaQuery = QueryFactory.create(sparqlQuery);
+        final var qexec = QueryExecutionFactory.create(jenaQuery, model);
+        final var results = qexec.execSelect();
 
         results.forEachRemaining(solution -> {
 
-            markers.forEach(marker ->{
-                if(solution.contains(marker)) {
+            getMarkers().forEach(marker -> {
+                if (solution.contains(marker)) {
                     resultSet.get(marker).add(solution.get(marker).asResource().getURI());
                 }
             });
 
-            Model model = this.sparqlEndpointService.getModelFromResults(query, solution, schema);
-            unionModel.add(model);
+            final var modelFromResults = getSparqlEndpointService().getModelFromResults(getQuery(), solution, getSchema());
+            unionModel.add(modelFromResults);
         });
 
         return new SPARQLExecutionResult(resultSet, unionModel);

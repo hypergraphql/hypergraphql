@@ -5,6 +5,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.jena.fuseki.embedded.FusekiServer;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -21,11 +25,6 @@ import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.services.HGQLConfigService;
 import org.junit.jupiter.api.Test;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SystemTest {
@@ -37,13 +36,13 @@ class SystemTest {
 
         Model mainModel = ModelFactory.createDefaultModel();
         final URL dbpediaContentUrl = getClass().getClassLoader().getResource("test_services/dbpedia.ttl");
-        if(dbpediaContentUrl != null) {
+        if (dbpediaContentUrl != null) {
             mainModel.read(dbpediaContentUrl.toString(), "TTL");
         }
 
         Model citiesModel = ModelFactory.createDefaultModel();
         final URL citiesContentUrl = getClass().getClassLoader().getResource("test_services/cities.ttl");
-        if(citiesContentUrl != null) {
+        if (citiesContentUrl != null) {
             citiesModel.read(citiesContentUrl.toString(), "TTL");
         }
 
@@ -72,21 +71,21 @@ class SystemTest {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode bodyParam = mapper.createObjectNode();
 
-        bodyParam.put("query", "{\n" +
-                "  Person_GET {\n" +
-                "    _id\n" +
-                "    label\n" +
-                "    name\n" +
-                "    birthPlace {\n" +
-                "      _id\n" +
-                "      label\n" +
-                "    }\n" +
-                "    \n" +
-                "  }\n" +
-                "  City_GET {\n" +
-                "    _id\n" +
-                "    label}\n" +
-                "}");
+        bodyParam.put("query", "{\n"
+                + "  Person_GET {\n"
+                + "    _id\n"
+                + "    label\n"
+                + "    name\n"
+                + "    birthPlace {\n"
+                + "      _id\n"
+                + "      label\n"
+                + "    }\n"
+                + "    \n"
+                + "  }\n"
+                + "  City_GET {\n"
+                + "    _id\n"
+                + "    label}\n"
+                + "}");
 
         Model returnedModel = ModelFactory.createDefaultModel();
 
@@ -128,7 +127,7 @@ class SystemTest {
 
     private HGQLConfig fromClasspathConfig(final String configPath) {
 
-        if(configService == null) {
+        if (configService == null) {
             configService = new HGQLConfigService();
         }
 

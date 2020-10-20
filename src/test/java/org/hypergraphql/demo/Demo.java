@@ -2,7 +2,7 @@ package org.hypergraphql.demo;
 
 import org.hypergraphql.Application;
 
-public class Demo {
+public abstract class Demo {
 
     public static void main(final String[] args) throws Exception {
 

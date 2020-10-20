@@ -1,20 +1,19 @@
 package org.hypergraphql.config.schema;
 
+import lombok.RequiredArgsConstructor;
 import org.hypergraphql.datafetching.services.Service;
 
+@RequiredArgsConstructor
 public class QueryFieldConfig {
 
-    private Service service;
-    private String type;
+    private final Service service;
+    private final String type;
 
-    public QueryFieldConfig(Service service, String type ) {
-
-        if (service!=null) this.service = service;
-        this.type = type;
-
+    public Service service() {
+        return this.service;
     }
-    public Service service() { return this.service; }
-    public String type() { return this.type; }
 
-
+    public String type() {
+        return this.type;
+    }
 }

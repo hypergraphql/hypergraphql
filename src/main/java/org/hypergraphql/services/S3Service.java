@@ -7,7 +7,6 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.S3Object;
-
 import java.io.InputStream;
 import java.net.URI;
 
@@ -17,7 +16,9 @@ public class S3Service {
         return new BasicAWSCredentials(key, secret);
     }
 
-    public AmazonS3 buildS3(final URI uri, final String key, final String secret) {
+    public AmazonS3 buildS3(final URI uri,
+                            final String key,
+                            final String secret) {
 
         final Regions region = extractRegion(uri);
 
@@ -27,13 +28,17 @@ public class S3Service {
                 .build();
     }
 
-    public InputStream openS3Stream(final URI uri, final String key, final String secret) {
+    public InputStream openS3Stream(final URI uri,
+                                    final String key,
+                                    final String secret) {
 
         S3Object s3Object = getObject(uri, key, secret);
         return s3Object.getObjectContent();
     }
 
-    private S3Object getObject(final URI uri, final String key, final String secret) {
+    private S3Object getObject(final URI uri,
+                               final String key,
+                               final String secret) {
 
         final AmazonS3 s3 = buildS3(uri, key, secret);
         final String bucketName = extractBucket(uri);
@@ -49,14 +54,11 @@ public class S3Service {
     Regions extractRegion(final URI uri) {
 
         final String regionString = uri.getHost().split("\\.")[0];
-        switch(regionString.toUpperCase()) {
-
-            case ("S3"):
-                return Regions.US_EAST_1;
-            default:
-                final String regionPart = regionString.substring(regionString.indexOf("-") + 1);
-                return Regions.fromName(regionPart);
+        if ("S3".equals(regionString.toUpperCase())) {
+            return Regions.US_EAST_1;
         }
+        final String regionPart = regionString.substring(regionString.indexOf("-") + 1);
+        return Regions.fromName(regionPart);
     }
 
     String extractObjectName(final URI uri) {

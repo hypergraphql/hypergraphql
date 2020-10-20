@@ -2,25 +2,25 @@ package org.hypergraphql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import graphql.GraphQLError;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import graphql.GraphQLError;
+import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.services.HGQLQueryService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
 import spark.Service;
 import spark.template.velocity.VelocityTemplateEngine;
 
+import static org.hypergraphql.util.ControllerConstants.ORIGIN_HEADER;
+import static org.hypergraphql.util.ControllerConstants.WILDCARD;
 import static spark.Spark.before;
 
 /**
@@ -29,42 +29,63 @@ import static spark.Spark.before;
  * This is the primary &quot;Controller&quot; used by the application.
  * The handler methods are in the get() and post() lambdas
  */
+@Slf4j
 public class Controller {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(Controller.class);
-
-    private Service hgqlService;
 
     private static final String DEFAULT_MIME_TYPE = "RDF/XML";
     private static final String DEFAULT_ACCEPT_TYPE = "application/rdf+xml";
 
-    private static final Map<String, String> MIME_MAP = new HashMap<String, String>() {{
-        put("application/json+rdf+xml", "RDF/XML");
-        put("application/json+turtle", "TTL");
-        put("application/json+ntriples", "N-TRIPLES");
-        put("application/json+n3", "N3");
-        put("application/rdf+xml", "RDF/XML");
-        put("application/turtle", "TTL");
-        put("application/ntriples", "N-TRIPLES");
-        put("application/n3", "N3");
-        put("text/turtle", "TTL");
-        put("text/ntriples", "N-TRIPLES");
-        put("text/n3", "N3");
-    }};
+    private static final Map<String, String> APPLICATION_MIME_MAP = Map.of(
+        "application/json+rdf+xml", "RDF/XML",
+        "application/json+turtle", "TTL",
+        "application/json+ntriples", "N-TRIPLES",
+        "application/json+n3", "N3",
+        "application/rdf+xml", "RDF/XML",
+        "application/turtle", "TTL",
+        "application/ntriples", "N-TRIPLES",
+        "application/n3", "N3"
+    );
 
-    private static final Map<String, Boolean> GRAPHQL_COMPATIBLE_TYPE = new HashMap<String, Boolean>() {{
-        put("application/json+rdf+xml", true);
-        put("application/json+turtle", true);
-        put("application/json+ntriples", true);
-        put("application/json+n3", true);
-        put("application/rdf+xml", false);
-        put("application/turtle", false);
-        put("application/ntriples", false);
-        put("application/n3", false);
-        put("text/turtle", false);
-        put("text/ntriples", false);
-        put("text/n3", false);
-    }};
+    private static final Map<String, String> TEXT_MIME_MAP = Map.of(
+        "text/turtle", "TTL",
+        "text/ntriples", "N-TRIPLES",
+        "text/n3", "N3"
+    );
+
+    private static final Map<String, String> MIME_MAP = new HashMap<>();
+
+    {
+        MIME_MAP.putAll(APPLICATION_MIME_MAP);
+        MIME_MAP.putAll(TEXT_MIME_MAP);
+    }
+
+    private static final Map<String, Boolean> APPLICATION_GQL_TYPES = Map.of(
+        "application/json+rdf+xml", true,
+        "application/json+turtle", true,
+        "application/json+ntriples", true,
+        "application/json+n3", true,
+        "application/rdf+xml", false,
+        "application/turtle", false,
+        "application/ntriples", false,
+        "application/n3", false
+    );
+
+    private static final Map<String, Boolean> TEXT_GQL_TYPES = Map.of(
+            "text/turtle", false,
+            "text/ntriples", false,
+            "text/n3", false
+    );
+
+    private static final Map<String, Boolean> GRAPHQL_COMPATIBLE_TYPE = new HashMap<>();
+
+    {
+        GRAPHQL_COMPATIBLE_TYPE.putAll(APPLICATION_GQL_TYPES);
+        GRAPHQL_COMPATIBLE_TYPE.putAll(TEXT_GQL_TYPES);
+    }
+
+    private static final int BAD_REQUEST_CODE = 400;
+
+    private Service hgqlService;
 
     public void start(HGQLConfig config) {
 
@@ -103,27 +124,30 @@ public class Controller {
         // post method for accessing the GraphQL getService
         hgqlService.post(config.getGraphqlConfig().graphQLPath(), (req, res) -> {
 
-            HGQLQueryService service = new HGQLQueryService(config);
+            final var service = new HGQLQueryService(config);
 
-            final String query = consumeRequest(req);
-            String acceptType = req.headers("accept");
+            final var query = consumeRequest(req);
+            final var acceptType = req.headers("accept");
 
-            String mime = MIME_MAP.getOrDefault(acceptType, null);
-            String contentType = MIME_MAP.containsKey(acceptType) ? acceptType : "application/json";
-            Boolean graphQLCompatible = GRAPHQL_COMPATIBLE_TYPE.getOrDefault(acceptType, true);
+            final var mime = MIME_MAP.getOrDefault(acceptType, null);
+            final var contentType = MIME_MAP.getOrDefault(acceptType, "application/json");
+            final var graphQLCompatible = GRAPHQL_COMPATIBLE_TYPE.getOrDefault(acceptType, true);
+//            final var mime = MIME_MAP.getOrDefault(acceptType, null);
+//            final var contentType = MIME_MAP.containsKey(acceptType) ? acceptType : "application/json";
+//            final var graphQLCompatible = GRAPHQL_COMPATIBLE_TYPE.getOrDefault(acceptType, true);
 
             res.type(contentType);
 
-            Map<String, Object> result = service.results(query, mime);
+            final Map<String, Object> result = service.results(query, mime);
 
-            List<GraphQLError> errors = (List<GraphQLError>) result.get("errors");
+            final List<GraphQLError> errors = (List<GraphQLError>) result.get("errors");
             if (!errors.isEmpty()) {
-                res.status(400);
+                res.status(BAD_REQUEST_CODE);
             }
 
             setResponseHeaders(req, res);
 
-            ObjectMapper mapper = new ObjectMapper();
+            final var mapper = new ObjectMapper();
             if (graphQLCompatible) {
                 return mapper.readTree(new ObjectMapper().writeValueAsString(result));
             } else {
@@ -136,18 +160,18 @@ public class Controller {
             }
         });
 
-        //Return the internal HGQL schema representation as rdf.
+        // Return the internal HGQL schema representation as rdf.
 
-        hgqlService.get(config.getGraphqlConfig().graphQLPath() , (req, res) -> {
+        hgqlService.get(config.getGraphqlConfig().graphQLPath(), (req, res) -> {
 
-            String acceptType = req.headers("accept");
+            final var acceptType = req.headers("accept"); // TODO
 
-            Boolean isRdfContentType =
-                    (MIME_MAP.containsKey(acceptType)
+            final var isRdfContentType =
+                    MIME_MAP.containsKey(acceptType)
                             && GRAPHQL_COMPATIBLE_TYPE.containsKey(acceptType)
-                            && !GRAPHQL_COMPATIBLE_TYPE.get(acceptType));
-            String mime = isRdfContentType ? MIME_MAP.get(acceptType) : DEFAULT_MIME_TYPE;
-            String contentType = isRdfContentType ? acceptType : DEFAULT_ACCEPT_TYPE;
+                            && !GRAPHQL_COMPATIBLE_TYPE.get(acceptType);
+            final String mime = isRdfContentType ? MIME_MAP.get(acceptType) : DEFAULT_MIME_TYPE;
+            final String contentType = isRdfContentType ? acceptType : DEFAULT_ACCEPT_TYPE;
 
             res.type(contentType);
 
@@ -159,7 +183,7 @@ public class Controller {
 
     private String consumeRequest(final Request request) throws IOException {
 
-        if(request.contentType().equalsIgnoreCase("application-x/graphql")) {
+        if (request.contentType().equalsIgnoreCase("application-x/graphql")) { // TODO
             return consumeGraphQLBody(request.body());
         } else {
             return consumeJSONBody(request.body());
@@ -168,9 +192,9 @@ public class Controller {
 
     private String consumeJSONBody(final String body) throws IOException {
 
-        final ObjectMapper mapper = new ObjectMapper();
-        final JsonNode requestObject = mapper.readTree(body);
-        if(requestObject.get("query") == null) {
+        final var mapper = new ObjectMapper();
+        final var requestObject = mapper.readTree(body);
+        if (requestObject.get("query") == null) {
             throw new IllegalArgumentException(
                     "Body appears to be JSON but does not contain required 'query' attribute: " + body
             );
@@ -185,17 +209,17 @@ public class Controller {
 
     public void stop() {
 
-        if(hgqlService != null) {
-            LOGGER.info("Attempting to shut down service at http://localhost:" + hgqlService.port() + "...");
+        if (hgqlService != null) {
+            log.info("Attempting to shut down service at http://localhost:" + hgqlService.port() + "...");
             hgqlService.stop();
-            LOGGER.info("Shut down server");
+            log.info("Shut down server");
         }
     }
 
     private void setResponseHeaders(final Request request, final Response response) {
 
         final List<String> headersList = Arrays.asList(
-                "Origin",
+                ORIGIN_HEADER,
                 "X-Requested-With",
                 "Content-Type",
                 "Accept",
@@ -203,13 +227,13 @@ public class Controller {
                 "x-auth-token"
         );
 
-        final String origin = request.headers("Origin") == null ? "*" : request.headers("Origin");
-        response.header("Access-Control-Allow-Origin", origin);
-        if(!origin.equals("*")) {
-            response.header("Vary", "Origin");
+        final var origin = Objects.requireNonNullElse(request.headers(ORIGIN_HEADER), WILDCARD);
+        response.header("Access-Control-Allow-Origin", origin); // TODO
+        if (!WILDCARD.equals(origin)) {
+            response.header("Vary", ORIGIN_HEADER);
         }
-        response.header("Access-Control-Allow-Headers", StringUtils.join(headersList, ","));
+        response.header("Access-Control-Allow-Headers", StringUtils.join(headersList, ",")); // TODO
 
-        response.header("Access-Control-Allow-Credentials", "true");
+        response.header("Access-Control-Allow-Credentials", "true"); // TODO
     }
 }

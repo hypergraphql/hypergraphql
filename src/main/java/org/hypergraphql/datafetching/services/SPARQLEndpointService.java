@@ -1,6 +1,17 @@
 package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import lombok.Getter;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.config.schema.HGQLVocabulary;
@@ -10,80 +21,66 @@ import org.hypergraphql.datafetching.SPARQLExecutionResult;
 import org.hypergraphql.datafetching.TreeExecutionResult;
 import org.hypergraphql.datamodel.HGQLSchema;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import static org.hypergraphql.util.HGQLConstants.ARGS;
+import static org.hypergraphql.util.HGQLConstants.NAME;
+import static org.hypergraphql.util.HGQLConstants.URIS;
 
+@Getter
 public class SPARQLEndpointService extends SPARQLService {
 
+    public static final int VALUES_SIZE_LIMIT = 100;
     private String url;
     private String user;
     private String password;
-    final static int VALUES_SIZE_LIMIT = 100;
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public String getPassword() {
-        return password;
-    }
 
     @Override
-    public TreeExecutionResult executeQuery(JsonNode query, Set<String> input, Set<String> markers , String rootType , HGQLSchema schema) {
+    public TreeExecutionResult executeQuery(
+            final JsonNode query,
+            final Collection<String> input,
+            final Collection<String> markers,
+            final String rootType,
+            final HGQLSchema schema
+    ) {
 
+        final Map<String, Collection<String>> resultSet = new HashMap<>();
+        final var unionModel = ModelFactory.createDefaultModel();
+        final Collection<Future<SPARQLExecutionResult>> futureSPARQLresults = new HashSet<>();
 
-        Map<String, Set<String>> resultSet = new HashMap<>();
-        Model unionModel = ModelFactory.createDefaultModel();
-        Set<Future<SPARQLExecutionResult>> futureSPARQLresults = new HashSet<>();
-
-        List<String> inputList = getStrings(query, input, markers, rootType, schema, resultSet);
+        final List<String> inputList = getStrings(query, input, markers, rootType, schema, resultSet);
 
         do {
 
-            Set<String> inputSubset = new HashSet<>();
+            final Collection<String> inputSubset = new HashSet<>();
             int i = 0;
             while (i < VALUES_SIZE_LIMIT && !inputList.isEmpty()) {
                 inputSubset.add(inputList.get(0));
                 inputList.remove(0);
                 i++;
             }
-            ExecutorService executor = Executors.newFixedThreadPool(50);
-            SPARQLEndpointExecution execution = new SPARQLEndpointExecution(query,inputSubset,markers,this, schema, rootType);
+            final var executor = Executors.newFixedThreadPool(50);
+            final var execution = buildExecutor(query, inputSubset, markers, schema, rootType);
             futureSPARQLresults.add(executor.submit(execution));
 
-        } while (inputList.size()>VALUES_SIZE_LIMIT);
+        } while (inputList.size() > VALUES_SIZE_LIMIT);
 
         iterateFutureResults(futureSPARQLresults, unionModel, resultSet);
 
-        TreeExecutionResult treeExecutionResult = new TreeExecutionResult();
+        final var treeExecutionResult = new TreeExecutionResult();
         treeExecutionResult.setResultSet(resultSet);
         treeExecutionResult.setModel(unionModel);
 
         return treeExecutionResult;
     }
 
-    void iterateFutureResults (
-            final Set<Future<SPARQLExecutionResult>> futureSPARQLResults,
+    void iterateFutureResults(
+            final Collection<Future<SPARQLExecutionResult>> futureSPARQLResults,
             final Model unionModel,
-            Map<String, Set<String>> resultSet
+            final Map<String, Collection<String>> resultSet
     ) {
 
         for (Future<SPARQLExecutionResult> futureExecutionResult : futureSPARQLResults) {
             try {
-                SPARQLExecutionResult result = futureExecutionResult.get();
+                final var result = futureExecutionResult.get();
                 unionModel.add(result.getModel());
                 resultSet.putAll(result.getResultSet());
             } catch (InterruptedException
@@ -93,13 +90,18 @@ public class SPARQLEndpointService extends SPARQLService {
         }
     }
 
-    List<String> getStrings(JsonNode query, Set<String> input, Set<String> markers, String rootType, HGQLSchema schema, Map<String, Set<String>> resultSet) {
-        for (String marker : markers) {
+    List<String> getStrings(final JsonNode query,
+                            final Collection<String> input,
+                            final Collection<String> markers,
+                            final String rootType,
+                            final HGQLSchema schema,
+                            final Map<String, Collection<String>> resultSet) {
+        for (final String marker : markers) {
             resultSet.put(marker, new HashSet<>());
         }
 
-        if (rootType.equals("Query")&&schema.getQueryFields().get(query.get("name").asText()).type().equals(HGQLVocabulary.HGQL_QUERY_GET_BY_ID_FIELD)) {
-            Iterator<JsonNode> uris = query.get("args").get("uris").elements();
+        if ("Query".equals(rootType) && schema.getQueryFields().get(query.get(NAME).asText()).type().equals(HGQLVocabulary.HGQL_QUERY_GET_BY_ID_FIELD)) {
+            final Iterator<JsonNode> uris = query.get(ARGS).get(URIS).elements();
             while (uris.hasNext()) {
                 String uri = uris.next().asText();
                 input.add(uri);
@@ -109,15 +111,25 @@ public class SPARQLEndpointService extends SPARQLService {
     }
 
     @Override
-    public void setParameters(ServiceConfig serviceConfig) {
+    public void setParameters(final ServiceConfig serviceConfig) {
 
         super.setParameters(serviceConfig);
 
-        this.id = serviceConfig.getId();
+        setId(serviceConfig.getId());
         this.url = serviceConfig.getUrl();
         this.user = serviceConfig.getUser();
-        this.graph = serviceConfig.getGraph();
+        setGraph(serviceConfig.getGraph());
         this.password = serviceConfig.getPassword();
 
+    }
+
+    @Override
+    protected SPARQLEndpointExecution buildExecutor(
+            final JsonNode query,
+            final Collection<String> inputSubset,
+            final Collection<String> markers,
+            final HGQLSchema schema,
+            final String rootType) {
+        return new SPARQLEndpointExecution(query, inputSubset, markers, this, schema, rootType);
     }
 }

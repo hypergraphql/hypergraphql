@@ -2,11 +2,11 @@ package org.hypergraphql.exception;
 
 public class HGQLConfigurationException extends IllegalArgumentException {
 
-    public HGQLConfigurationException(String message) {
+    public HGQLConfigurationException(final String message) {
         super(message);
     }
 
-    public HGQLConfigurationException(String message, Throwable cause) {
+    public HGQLConfigurationException(final String message, final Throwable cause) {
         super(message, cause);
     }
 }

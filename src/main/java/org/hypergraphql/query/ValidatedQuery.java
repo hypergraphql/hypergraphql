@@ -2,25 +2,13 @@ package org.hypergraphql.query;
 
 import graphql.language.Document;
 import graphql.validation.ValidationError;
-
 import java.util.List;
+import lombok.Data;
 
+@Data
 public class ValidatedQuery {
 
-    public Document getParsedQuery() {
-        return parsedQuery;
-    }
-
-    public List<ValidationError> getErrors() {
-        return errors;
-    }
-
-    public Boolean getValid() {
-        return valid;
-    }
-
-    Document parsedQuery;
-    List<ValidationError> errors;
-    Boolean valid;
-
+    private Document parsedQuery;
+    private List<ValidationError> errors;
+    private Boolean valid;
 }

@@ -3,12 +3,6 @@ package org.hypergraphql.services;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.GetRequest;
-import org.apache.commons.io.FilenameUtils;
-import org.hypergraphql.config.system.HGQLConfig;
-import org.hypergraphql.exception.HGQLConfigurationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,15 +15,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
+import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.exception.HGQLConfigurationException;
 
+@Slf4j
 public class ApplicationConfigurationService {
 
     private S3Service s3Service;
-    private HGQLConfigService hgqlConfigService = new HGQLConfigService();
+    private final HGQLConfigService hgqlConfigService = new HGQLConfigService();
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ApplicationConfigurationService.class);
-
-    public List<HGQLConfig> readConfigurationFromS3(final String configUri, final String username, final String password) {
+    public List<HGQLConfig> readConfigurationFromS3(final String configUri,
+                                                    final String username,
+                                                    final String password) {
 
         final URI uri;
         try {
@@ -38,7 +37,7 @@ public class ApplicationConfigurationService {
             throw new HGQLConfigurationException("Invalid S3 URL", e);
         }
 
-        if(s3Service == null) {
+        if (s3Service == null) {
             s3Service = new S3Service();
         }
 
@@ -48,10 +47,12 @@ public class ApplicationConfigurationService {
         return Collections.singletonList(config);
     }
 
-    public List<HGQLConfig> readConfigurationFromUrl(final String configUri, final String username, final String password) {
+    public List<HGQLConfig> readConfigurationFromUrl(final String configUri,
+                                                     final String username,
+                                                     final String password) {
 
         final GetRequest getRequest;
-        if(username == null && password == null) {
+        if (username == null && password == null) {
             getRequest = Unirest.get(configUri);
         } else {
             getRequest = Unirest.get(configUri).basicAuth(username, password);
@@ -66,10 +67,10 @@ public class ApplicationConfigurationService {
         }
     }
 
-    public List<HGQLConfig> getConfigFiles(final String ... configPathStrings) {
+    public List<HGQLConfig> getConfigFiles(final String... configPathStrings) {
 
         final List<HGQLConfig> configFiles = new ArrayList<>();
-        if(configPathStrings != null) {
+        if (configPathStrings != null) {
             Arrays.stream(configPathStrings).forEach(configPathString ->
                     configFiles.addAll(getConfigurationsFromFile(configPathString)));
         }
@@ -82,7 +83,7 @@ public class ApplicationConfigurationService {
         final List<HGQLConfig> configurations = new ArrayList<>();
         try {
             if (configPath.isDirectory()) {
-                LOGGER.debug("Directory");
+                log.debug("Directory");
                 final File[] jsonFiles = configPath.listFiles(pathname ->
                         FilenameUtils.isExtension(pathname.getName(), "json"));
                 if (jsonFiles != null) {
@@ -98,8 +99,8 @@ public class ApplicationConfigurationService {
                     });
                 }
             } else { // assume regular file
-                LOGGER.debug("Regular File");
-                try(InputStream in = new FileInputStream(configPath)) {
+                log.debug("Regular File");
+                try (InputStream in = new FileInputStream(configPath)) {
                     configurations.add(hgqlConfigService.loadHGQLConfig(configPathString, in, false));
                 }
             }
@@ -113,9 +114,9 @@ public class ApplicationConfigurationService {
 
         final String filename = getConfigFilename(configPathString);
 
-        try(final InputStream in = getClass().getClassLoader().getResourceAsStream(filename)) {
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(filename)) {
 
-            if(in == null) {
+            if (in == null) {
                 // try to get from file - probably being run from an IDE with CP as filesystem
                 return getConfigurationsFromFile(configPathString);
             }
@@ -136,20 +137,20 @@ public class ApplicationConfigurationService {
         return configPathString.startsWith("/") ? fn : fn.substring(fn.indexOf("/") + 1);
     }
 
-    public List<HGQLConfig> getConfigResources(final String ... resourcePaths) {
+    public List<HGQLConfig> getConfigResources(final String... resourcePaths) {
 
         final List<HGQLConfig> configurations = new ArrayList<>();
 
-        if(resourcePaths != null) {
+        if (resourcePaths != null) {
             Arrays.stream(resourcePaths).forEach(
-                    resourcePath -> {
-                        final URL sourceUrl = getClass().getClassLoader().getResource(resourcePath);
+                resourcePath -> {
+                    final URL sourceUrl = getClass().getClassLoader().getResource(resourcePath);
 
-                        LOGGER.info("Resource path: {}", resourcePath);
-                        if(sourceUrl != null) {
-                            configurations.addAll(getConfigurationsFromClasspath(sourceUrl.getFile()));
-                        }
+                    log.info("Resource path: {}", resourcePath);
+                    if (sourceUrl != null) {
+                        configurations.addAll(getConfigurationsFromClasspath(sourceUrl.getFile()));
                     }
+                }
             );
         }
 

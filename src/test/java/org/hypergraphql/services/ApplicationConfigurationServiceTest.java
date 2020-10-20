@@ -1,11 +1,5 @@
 package org.hypergraphql.services;
 
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.hypergraphql.config.system.HGQLConfig;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,6 +7,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.hypergraphql.config.system.HGQLConfig;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,9 +33,10 @@ class ApplicationConfigurationServiceTest {
         final List<HGQLConfig> expectedConfigs = new ArrayList<>();
         final String[] filenames = tempDirectory.list((directory, filename) -> filename.endsWith(".json"));
         Arrays.asList(filenames).forEach(filename -> {
-            final File file = new File(tempDirectory, filename);
+                final File file = new File(tempDirectory, filename);
                 expectedConfigs.add(service.getConfigurationsFromFile(file.getAbsolutePath()).get(0));
-            });
+            }
+        );
 
         final List<String> expected = readConfigs(expectedConfigs);
         final List<String> actual = readConfigs(configurations);

@@ -7,59 +7,50 @@ import graphql.schema.GraphQLSchema;
 import graphql.validation.ValidationError;
 import graphql.validation.ValidationErrorType;
 import graphql.validation.Validator;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 public class QueryValidator {
 
-    private GraphQLSchema schema;
-    private List<ValidationError> validationErrors;
-    private Validator validator;
-    private Parser parser;
+    private final GraphQLSchema schema;
+    private final List<ValidationError> validationErrors;
+    private final Validator validator;
+    private final Parser parser;
 
-    public QueryValidator(GraphQLSchema schema) {
+    public QueryValidator(final GraphQLSchema schema) {
 
         this.schema = schema;
         this.validationErrors = new ArrayList<>();
         this.validator = new Validator();
         this.parser = new Parser();
-
     }
 
+    public ValidatedQuery validateQuery(final String query) {
 
-    public ValidatedQuery validateQuery(String query) {
+        final ValidatedQuery result = new ValidatedQuery();
+        result.setErrors(validationErrors);
 
-        ValidatedQuery result = new ValidatedQuery();
-        result.errors = validationErrors;
-
-        Document document;
+        final Document document;
 
         try {
-
             document = parser.parseDocument(query);
-            result.parsedQuery = document;
-
-        } catch (Exception e) {
-            ValidationError err = new ValidationError(ValidationErrorType.InvalidSyntax, new SourceLocation(0, 0), "Invalid query syntax.");
+            result.setParsedQuery(document);
+        } catch (ParseCancellationException e) {
+            final ValidationError err =
+                    new ValidationError(ValidationErrorType.InvalidSyntax, new SourceLocation(0, 0), "Invalid query syntax.");
             validationErrors.add(err);
-            result.valid = false;
-
+            result.setValid(false);
             return result;
         }
 
         validationErrors.addAll(validator.validateDocument(schema, document));
-        if (validationErrors.size() > 0) {
-            result.valid = false;
-
-            return result;
-
-        }
-
-        result.valid = true;
-
+        result.setValid(validationErrors.size() == 0);
+//        if (validationErrors.size() > 0) {
+//            result.setValid(false);
+//            return result;
+//        }
+//        result.setValid(true);
         return result;
-
     }
-
 }

@@ -1,9 +1,11 @@
 package org.hypergraphql;
 
+/*
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import java.io.InputStream;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -18,11 +20,7 @@ import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
-
-
-import java.io.InputStream;
-
-
+*/
 /**
  * Created by philipcoates on 2017-10-19T20:22
  */

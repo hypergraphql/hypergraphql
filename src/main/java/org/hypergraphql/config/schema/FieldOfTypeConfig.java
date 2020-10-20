@@ -1,51 +1,22 @@
 package org.hypergraphql.config.schema;
 
 import graphql.schema.GraphQLOutputType;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.hypergraphql.datafetching.services.Service;
 
+@RequiredArgsConstructor
+@Getter
 public class FieldOfTypeConfig {
 
-    public String getId() {
-        return id;
-    }
+    private final String name;
+    private final String id;
+    private final Service service;
+    private final GraphQLOutputType graphqlOutputType;
+    private final boolean isList;
+    private final String targetName;
 
-    public Service getService() {
-        return service;
-    }
-
-    public GraphQLOutputType getGraphqlOutputType() {
-        return graphqlOutputType;
-    }
-
-    public Boolean isList() {
+    public boolean isList() {
         return isList;
     }
-
-    public String getTargetName() {
-        return targetName;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    private String id;
-    private String name;
-    private Service service;
-    private GraphQLOutputType graphqlOutputType;
-    private Boolean isList;
-    private String targetName;
-
-    public FieldOfTypeConfig(String name, String id, Service service, GraphQLOutputType graphqlOutputType, Boolean isList, String targetName) {
-
-        this.name = name;
-        this.id=id;
-        this.service=service;
-        this.graphqlOutputType = graphqlOutputType;
-        this.targetName=targetName;
-        this.isList=isList;
-
-    }
-
-
 }
