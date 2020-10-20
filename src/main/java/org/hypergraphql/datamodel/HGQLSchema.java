@@ -358,7 +358,7 @@ public class HGQLSchema {
     ) {
 
         type.getChildren().forEach(node -> {
-            if (node.getClass().getSimpleName().equals("FieldDefinition")) {
+            if (node.getClass().isAssignableFrom(FieldDefinition.class)) {
                 final var field = (FieldDefinition) node;
                 final var fieldURI = schemaNamespace + typeName + "/" + field.getName();
 

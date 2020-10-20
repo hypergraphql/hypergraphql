@@ -12,6 +12,7 @@ import graphql.schema.idl.TypeDefinitionRegistry;
 import graphql.schema.validation.InvalidSchemaException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,8 @@ import static org.hypergraphql.util.HGQLConstants.URIS;
 @Slf4j
 @Getter
 public class HGQLSchemaWiring {
+
+    private static final String SERVICE_PACKAGE_NAME = "org.hypergraphql.datafetching.services";
 
     private final HGQLSchema hgqlSchema;
     private final GraphQLSchema schema;
@@ -89,17 +92,15 @@ public class HGQLSchemaWiring {
         }
     }
 
-    // TODO - investigate alternatives
     private Map<String, Service> generateServices(final List<ServiceConfig> serviceConfigs) {
 
         final Map<String, Service> services = new HashMap<>();
-        final var packageName = "org.hypergraphql.datafetching.services";
 
         serviceConfigs.forEach(serviceConfig -> {
             try {
                 final var type = serviceConfig.getType();
 
-                final var serviceType = Class.forName(packageName + "." + type);
+                final var serviceType = Class.forName(SERVICE_PACKAGE_NAME + "." + type);
                 final var service = (Service) serviceType.getConstructors()[0].newInstance();
 
                 service.setParameters(serviceConfig);
@@ -119,7 +120,7 @@ public class HGQLSchemaWiring {
 
     private GraphQLSchema generateSchema() {
 
-        final Set<String> typeNames = this.hgqlSchema.getTypes().keySet();
+        final Collection<String> typeNames = this.hgqlSchema.getTypes().keySet();
         final var builtQueryType = registerGraphQLQueryType(this.hgqlSchema.getTypes().get("Query"));
         final Set<GraphQLType> builtTypes = typeNames.stream()
                 .filter(typeName -> !typeName.equals("Query"))
@@ -180,7 +181,7 @@ public class HGQLSchemaWiring {
         final var description = "Instances of \"" + uri + "\".";
         final List<GraphQLFieldDefinition> builtFields;
         final Map<String, FieldOfTypeConfig> fields = type.getFields();
-        final Set<String> fieldNames = fields.keySet();
+        final Collection<String> fieldNames = fields.keySet();
         builtFields = fieldNames.stream()
                 .map(fieldName -> registerGraphQLField(type.getField(fieldName)))
                 .collect(Collectors.toList());

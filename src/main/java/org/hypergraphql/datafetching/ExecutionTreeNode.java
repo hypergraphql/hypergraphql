@@ -268,7 +268,7 @@ public class ExecutionTreeNode {
         final Collection<Selection> selections = selectionSet.getSelections();
 
         for (final Selection child : selections) {
-            if (child.getClass().getSimpleName().equals("Field")) {
+            if (child.getClass().isAssignableFrom(Field.class)) {
                 final var field = (Field) child;
                 if (hgqlSchema.getFields().containsKey(field.getName())) {
                     final Service serviceConfig;
