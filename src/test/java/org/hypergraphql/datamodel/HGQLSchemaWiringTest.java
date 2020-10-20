@@ -19,7 +19,7 @@ class HGQLSchemaWiringTest {
 
         Executable executable = () -> new HGQLSchemaWiring(null, null, null);
         Throwable exception = assertThrows(HGQLConfigurationException.class, executable);
-        assertEquals("Unable to perform schema wiring", exception.getMessage());
+        assertEquals("Registry cannot be null", exception.getMessage());
     }
 
     @Test
@@ -28,7 +28,7 @@ class HGQLSchemaWiringTest {
 
         Executable executable = () -> new HGQLSchemaWiring(null, "local", new ArrayList<>());
         Throwable exception = assertThrows(HGQLConfigurationException.class, executable);
-        assertEquals("Unable to perform schema wiring", exception.getMessage());
+        assertEquals("Registry cannot be null", exception.getMessage());
     }
 
     @Test
@@ -37,7 +37,7 @@ class HGQLSchemaWiringTest {
 
         Executable executable = () -> new HGQLSchemaWiring(null, null, new ArrayList<>());
         Throwable exception = assertThrows(HGQLConfigurationException.class, executable);
-        assertEquals("Unable to perform schema wiring", exception.getMessage());
+        assertEquals("Registry cannot be null", exception.getMessage());
     }
 
     @Test
@@ -47,7 +47,7 @@ class HGQLSchemaWiringTest {
         TypeDefinitionRegistry registry = mock(TypeDefinitionRegistry.class);
         Executable executable = () -> new HGQLSchemaWiring(registry, null, null);
         Throwable exception = assertThrows(HGQLConfigurationException.class, executable);
-        assertEquals("Unable to perform schema wiring", exception.getMessage());
+        assertEquals("Schema name cannot be null", exception.getMessage());
     }
 
     @Test
@@ -57,6 +57,6 @@ class HGQLSchemaWiringTest {
         TypeDefinitionRegistry registry = mock(TypeDefinitionRegistry.class);
         Executable executable = () -> new HGQLSchemaWiring(registry, "local", null);
         Throwable exception = assertThrows(HGQLConfigurationException.class, executable);
-        assertEquals("Unable to perform schema wiring", exception.getMessage());
+        assertEquals("Service configurations cannot be null", exception.getMessage());
     }
 }
