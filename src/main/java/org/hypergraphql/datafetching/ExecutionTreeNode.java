@@ -186,7 +186,7 @@ public class ExecutionTreeNode {
         }
     }
 
-    @SuppressWarnings({"checkstyle:NestedIfDepth", "checkstyle:IllegalCatch"})
+    @SuppressWarnings({"checkstyle:NestedIfDepth"})
     private JsonNode traverse(final Field field, final String parentId, final String parentType) {
 
         final var subFields = field.getSelectionSet();
@@ -210,19 +210,11 @@ public class ExecutionTreeNode {
                     );
 
                     if (this.childrenNodes.containsKey(parentId)) {
-                        try {
-                            this.childrenNodes.get(parentId).getForest().add(childNode);
-                        } catch (Exception e) {
-                            LOGGER.error("Problem adding parent", e);
-                        }
+                        this.childrenNodes.get(parentId).getForest().add(childNode);
                     } else {
                         final var forest = new ExecutionForest();
                         forest.getForest().add(childNode);
-                        try {
-                            this.childrenNodes.put(parentId, forest);
-                        } catch (Exception e) {
-                            LOGGER.error("Problem adding child", e);
-                        }
+                        this.childrenNodes.put(parentId, forest);
                     }
                 }
             }

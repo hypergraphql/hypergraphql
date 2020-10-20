@@ -9,6 +9,7 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.schema.validation.InvalidSchemaException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +44,7 @@ import static org.hypergraphql.util.HGQLConstants.URIS;
  */
 @Slf4j
 @Getter
-public class HGQLSchemaWiring { // TODO - Remove cs suppressions
+public class HGQLSchemaWiring {
 
     private final HGQLSchema hgqlSchema;
     private final GraphQLSchema schema;
@@ -63,16 +64,27 @@ public class HGQLSchemaWiring { // TODO - Remove cs suppressions
 
     private final List<GraphQLArgument> getByIdQueryArgs = List.of(defaultArguments.get(URIS));
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
     public HGQLSchemaWiring(final TypeDefinitionRegistry registry,
                             final String schemaName,
                             final List<ServiceConfig> serviceConfigs) {
+
+        if (registry == null) {
+            throw new HGQLConfigurationException("Registry cannot be null");
+        }
+
+        if (schemaName == null) {
+            throw new HGQLConfigurationException("Schema name cannot be null");
+        }
+
+        if (serviceConfigs == null) {
+            throw new HGQLConfigurationException("Service configurations cannot be null");
+        }
 
         try {
             this.hgqlSchema = new HGQLSchema(registry, schemaName, generateServices(serviceConfigs));
             this.schema = generateSchema();
 
-        } catch (Exception e) {
+        } catch (InvalidSchemaException e) {
             throw new HGQLConfigurationException("Unable to perform schema wiring", e);
         }
     }

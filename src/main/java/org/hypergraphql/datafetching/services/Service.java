@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.jena.query.QuerySolution;
@@ -160,11 +161,7 @@ public abstract class Service { // TODO - Review cs suppression
 
         Collection<String> subjects; // TODO - variable reuse
         Collection<String> objects; // TODO - variable reuse
-        if (input == null) {
-            objects = new HashSet<>();
-        } else {
-            objects = input;
-        }
+        objects = Objects.requireNonNullElseGet(input, HashSet::new);
 
         // NB: This hasn't been converted to use the NIO streaming API as it uses reentrant recursion
         for (final QueryNode queryNode : path) {
