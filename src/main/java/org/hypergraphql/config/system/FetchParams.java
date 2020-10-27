@@ -2,7 +2,6 @@ package org.hypergraphql.config.system;
 
 import graphql.language.Field;
 import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.GraphQLTypeUtil;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
@@ -54,12 +53,10 @@ public class FetchParams {
         return null;
     }
 
-    // GraphQLNamedSchemaElement
     private String extractTargetURI(final DataFetchingEnvironment environment, final HGQLSchema schema, final String predicate) {
 
-        final var parentTypeName = GraphQLTypeUtil.simplePrint(environment.getParentType());
-//        final var parentTypeName = environment.getParentType().getName();
-        if (!"Query".equals(parentTypeName)) {
+        final var parentTypeName = environment.getParentType().getName();
+        if (!parentTypeName.equals("Query")) {
             final var targetName =
                     schema.getTypes().get(parentTypeName).getField(predicate).getTargetName();
 
