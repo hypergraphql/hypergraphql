@@ -28,8 +28,7 @@ repositories {
 }
 
 ext {
-//    graphqlVersion = '15.0'
-    graphqlVersion = '2018-11-15T21-34-14-7110576-ignored-chars'
+    graphqlVersion = '15.0'
     jenaVersion = '3.8.0'
 }
 dependencies {
