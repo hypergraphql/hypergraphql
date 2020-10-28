@@ -54,11 +54,9 @@ public class FetchParams {
         return null;
     }
 
-    // GraphQLNamedSchemaElement
     private String extractTargetURI(final DataFetchingEnvironment environment, final HGQLSchema schema, final String predicate) {
 
         final var parentTypeName = GraphQLTypeUtil.simplePrint(environment.getParentType());
-//        final var parentTypeName = environment.getParentType().getName();
         if (!"Query".equals(parentTypeName)) {
             final var targetName =
                     schema.getTypes().get(parentTypeName).getField(predicate).getTargetName();
