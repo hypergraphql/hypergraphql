@@ -31,7 +31,6 @@ public class FetcherFactory {
 
     public DataFetcher<String> typeFetcher(Map<String, TypeConfig> types) {
         return environment -> {
-//            final var typeName = environment.getParentType().getName();
             final var typeName = GraphQLTypeUtil.simplePrint(environment.getParentType());
             return (types.containsKey(typeName)) ? types.get(typeName).getId() : null;
         };
