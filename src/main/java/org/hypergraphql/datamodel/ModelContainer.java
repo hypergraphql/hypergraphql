@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
@@ -22,7 +23,7 @@ public class ModelContainer {
 
     public String getDataOutput(final String format) {
 
-        final var out = new StringWriter();
+        val out = new StringWriter();
         model.write(out, format);
         return out.toString();
     }
@@ -39,7 +40,7 @@ public class ModelContainer {
 
     List<RDFNode> getSubjectsOfObjectProperty(final String predicateURI, final String objectURI) {
 
-        final var iterator = this.model.listSubjectsWithProperty(getPropertyFromUri(predicateURI), getResourceFromUri(objectURI));
+        val iterator = this.model.listSubjectsWithProperty(getPropertyFromUri(predicateURI), getResourceFromUri(objectURI));
         final List<RDFNode> nodeList = new ArrayList<>();
         iterator.forEachRemaining(nodeList::add);
         return nodeList;
@@ -54,9 +55,9 @@ public class ModelContainer {
                                   final String predicateURI,
                                   final Map<String, Object> args) {
 
-        final var iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
+        val iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
         while (iterator.hasNext()) {
-            final var data = iterator.next();
+            val data = iterator.next();
             if (data.isLiteral()) {
                 return data.asLiteral().getString();
             }
@@ -70,7 +71,7 @@ public class ModelContainer {
 
         final List<String> valList = new ArrayList<>();
 
-        final var iterator = model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
+        val iterator = model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
 
         while (iterator.hasNext()) {
             RDFNode data = iterator.next();
@@ -94,7 +95,7 @@ public class ModelContainer {
 
     List<RDFNode> getValuesOfObjectProperty(final RDFNode subject, final String predicateURI, final String targetURI) {
 
-        final var iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
+        val iterator = this.model.listObjectsOfProperty(subject.asResource(), getPropertyFromUri(predicateURI));
         final List<RDFNode> rdfNodes = new ArrayList<>();
         iterator.forEachRemaining(node -> {
             if (!node.isLiteral()) {

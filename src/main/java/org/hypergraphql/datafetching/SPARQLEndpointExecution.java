@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -39,28 +40,28 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
     public SPARQLExecutionResult call() {
         final Map<String, Collection<String>> resultSet = new HashMap<>();
         markers.forEach(marker -> resultSet.put(marker, new HashSet<>()));
-        final var unionModel = ModelFactory.createDefaultModel();
-        final var converter = new SPARQLServiceConverter(schema);
-        final var sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);
+        val unionModel = ModelFactory.createDefaultModel();
+        val converter = new SPARQLServiceConverter(schema);
+        val sparqlQuery = converter.getSelectQuery(query, inputSubset, rootType);
         log.debug(sparqlQuery);
 
-        final var credsProvider = new BasicCredentialsProvider();
-        final var credentials =
+        val credsProvider = new BasicCredentialsProvider();
+        val credentials =
                 new UsernamePasswordCredentials(this.sparqlEndpointService.getUser(), this.sparqlEndpointService.getPassword());
         credsProvider.setCredentials(AuthScope.ANY, credentials);
-        final var httpclient = HttpClients.custom()
+        val httpclient = HttpClients.custom()
                 .setDefaultCredentialsProvider(credsProvider)
                 .build();
         HttpOp.setDefaultHttpClient(httpclient);
 
         ARQ.init();
-        final var jenaQuery = QueryFactory.create(sparqlQuery);
+        val jenaQuery = QueryFactory.create(sparqlQuery);
 
-        final var qEngine = QueryExecutionFactory.createServiceRequest(this.sparqlEndpointService.getUrl(), jenaQuery);
+        val qEngine = QueryExecutionFactory.createServiceRequest(this.sparqlEndpointService.getUrl(), jenaQuery);
         qEngine.setClient(httpclient);
         //qEngine.setSelectContentType(ResultsFormat.FMT_RS_XML.getSymbol());
 
-        final var results = qEngine.execSelect();
+        val results = qEngine.execSelect();
 
         results.forEachRemaining(solution -> {
             markers.stream().filter(solution::contains).forEach(marker ->
@@ -69,7 +70,7 @@ public class SPARQLEndpointExecution implements Callable<SPARQLExecutionResult> 
             unionModel.add(this.sparqlEndpointService.getModelFromResults(query, solution, schema));
         });
 
-        final var sparqlExecutionResult = new SPARQLExecutionResult(resultSet, unionModel);
+        val sparqlExecutionResult = new SPARQLExecutionResult(resultSet, unionModel);
         log.debug("Result: {}", sparqlExecutionResult);
 
         return sparqlExecutionResult;

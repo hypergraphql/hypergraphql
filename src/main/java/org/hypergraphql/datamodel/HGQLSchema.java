@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.hypergraphql.config.schema.FieldConfig;
@@ -80,10 +81,10 @@ public class HGQLSchema {
         populateHGQLRDFSchemaBaseTypes();
 
         final Map<String, TypeDefinition> registryTypes = registry.types();
-        final var context = registryTypes.get("__Context");
+        val context = registryTypes.get("__Context");
 
         if (context == null) {
-            final var e =
+            val e =
                     new HGQLConfigurationException("The provided GraphQL schema IDL specification is missing the"
                             + "obligatory __Context type (see specs at http://hypergraphql.org).");
             log.error("Context not set!", e);
@@ -122,11 +123,11 @@ public class HGQLSchema {
 
         fieldNodes.forEach(rdfNode -> {
 
-            final var name = rdfSchema.getValueOfDataProperty(rdfNode, HGQL_HAS_NAME);
-            final var href = rdfSchema.getValueOfObjectProperty(rdfNode, HGQL_HREF);
-            final var serviceNode = rdfSchema.getValueOfObjectProperty(rdfNode, HGQL_HAS_SERVICE);
+            val name = rdfSchema.getValueOfDataProperty(rdfNode, HGQL_HAS_NAME);
+            val href = rdfSchema.getValueOfObjectProperty(rdfNode, HGQL_HREF);
+            val serviceNode = rdfSchema.getValueOfObjectProperty(rdfNode, HGQL_HAS_SERVICE);
 
-            final var fieldConfig = new FieldConfig(href.asResource().getURI());
+            val fieldConfig = new FieldConfig(href.asResource().getURI());
             fields.put(name, fieldConfig);
         });
 
@@ -135,12 +136,12 @@ public class HGQLSchema {
 
         queryFieldNodes.forEach(node -> {
 
-            final var name = rdfSchema.getValueOfDataProperty(node, HGQL_HAS_NAME);
-            final var serviceNode = rdfSchema.getValueOfObjectProperty(node, HGQL_HAS_SERVICE);
-            final var serviceId = rdfSchema.getValueOfDataProperty(serviceNode, HGQL_HAS_ID);
+            val name = rdfSchema.getValueOfDataProperty(node, HGQL_HAS_NAME);
+            val serviceNode = rdfSchema.getValueOfObjectProperty(node, HGQL_HAS_SERVICE);
+            val serviceId = rdfSchema.getValueOfDataProperty(serviceNode, HGQL_HAS_ID);
 
-            final var type = (queryGetFieldNodes.contains(node)) ? HGQL_QUERY_GET_FIELD : HGQL_QUERY_GET_BY_ID_FIELD;
-            final var fieldConfig = new QueryFieldConfig(services.get(serviceId), type);
+            val type = (queryGetFieldNodes.contains(node)) ? HGQL_QUERY_GET_FIELD : HGQL_QUERY_GET_BY_ID_FIELD;
+            val fieldConfig = new QueryFieldConfig(services.get(serviceId), type);
             queryFields.put(name, fieldConfig);
         });
 
@@ -148,29 +149,29 @@ public class HGQLSchema {
         typeNodes.addAll(rdfSchema.getSubjectsOfObjectProperty(RDF_TYPE, HGQL_QUERY_TYPE));
 
         typeNodes.forEach(rdfNode -> {
-            final var typeName = rdfSchema.getValueOfDataProperty(rdfNode, HGQL_HAS_NAME);
-            final var typeHref = rdfSchema.getValueOfObjectProperty(rdfNode, HGQL_HREF);
-            final var typeURI = (typeHref != null) ? typeHref.asResource().getURI() : null;
+            val typeName = rdfSchema.getValueOfDataProperty(rdfNode, HGQL_HAS_NAME);
+            val typeHref = rdfSchema.getValueOfObjectProperty(rdfNode, HGQL_HREF);
+            val typeURI = (typeHref != null) ? typeHref.asResource().getURI() : null;
 
             final List<RDFNode> fieldsOfType = rdfSchema.getValuesOfObjectProperty(rdfNode, HGQL_HAS_FIELD);
             final Map<String, FieldOfTypeConfig> fieldConfig = new HashMap<>();
 
             fieldsOfType.forEach(field -> {
 
-                final var fieldOfTypeName = rdfSchema.getValueOfDataProperty(field, HGQL_HAS_NAME);
-                final var href = rdfSchema.getValueOfObjectProperty(field, HGQL_HREF);
-                final var hrefURI = (href != null) ? href.asResource().getURI() : null;
-                final var serviceNode = rdfSchema.getValueOfObjectProperty(field, HGQL_HAS_SERVICE);
-                final var serviceId = rdfSchema.getValueOfDataProperty(serviceNode, HGQL_HAS_ID);
-                final var outputTypeNode = rdfSchema.getValueOfObjectProperty(field, HGQL_OUTPUT_TYPE);
-                final var graphqlOutputType = getGraphQLOutputType(outputTypeNode);
-                final var isList = getIsList(outputTypeNode);
-                final var targetTypeName = getTargetTypeName(outputTypeNode);
-                final var fieldOfTypeConfig = new FieldOfTypeConfig(fieldOfTypeName, hrefURI, services.get(serviceId), graphqlOutputType, isList, targetTypeName);
+                val fieldOfTypeName = rdfSchema.getValueOfDataProperty(field, HGQL_HAS_NAME);
+                val href = rdfSchema.getValueOfObjectProperty(field, HGQL_HREF);
+                val hrefURI = (href != null) ? href.asResource().getURI() : null;
+                val serviceNode = rdfSchema.getValueOfObjectProperty(field, HGQL_HAS_SERVICE);
+                val serviceId = rdfSchema.getValueOfDataProperty(serviceNode, HGQL_HAS_ID);
+                val outputTypeNode = rdfSchema.getValueOfObjectProperty(field, HGQL_OUTPUT_TYPE);
+                val graphqlOutputType = getGraphQLOutputType(outputTypeNode);
+                val isList = getIsList(outputTypeNode);
+                val targetTypeName = getTargetTypeName(outputTypeNode);
+                val fieldOfTypeConfig = new FieldOfTypeConfig(fieldOfTypeName, hrefURI, services.get(serviceId), graphqlOutputType, isList, targetTypeName);
                 fieldConfig.put(fieldOfTypeName, fieldOfTypeConfig);
             });
 
-            final var typeConfig = new TypeConfig(typeName, typeURI, fieldConfig);
+            val typeConfig = new TypeConfig(typeName, typeURI, fieldConfig);
             this.types.put(typeName, typeConfig);
         });
     }
@@ -186,12 +187,12 @@ public class HGQLSchema {
     }
 
     private Boolean getIsList(final RDFNode outputTypeNode) {
-        final var outputNode = rdfSchema.getValueOfObjectProperty(outputTypeNode, RDF_TYPE);
-        final var typeURI = outputNode.asResource().getURI();
+        val outputNode = rdfSchema.getValueOfObjectProperty(outputTypeNode, RDF_TYPE);
+        val typeURI = outputNode.asResource().getURI();
         if (typeURI.equals(HGQL_LIST_TYPE)) {
             return true;
         } else {
-            final var childOutputNode = rdfSchema.getValueOfObjectProperty(outputTypeNode, HGQL_OF_TYPE);
+            val childOutputNode = rdfSchema.getValueOfObjectProperty(outputTypeNode, HGQL_OF_TYPE);
             if (childOutputNode != null) {
                 return getIsList(childOutputNode);
             } else {
@@ -201,21 +202,21 @@ public class HGQLSchema {
     }
 
     private GraphQLOutputType getGraphQLOutputType(final RDFNode outputTypeNode) {
-        final var outputNode = rdfSchema.getValueOfObjectProperty(outputTypeNode, RDF_TYPE);
-        final var typeURI = outputNode.asResource().getURI();
+        val outputNode = rdfSchema.getValueOfObjectProperty(outputTypeNode, RDF_TYPE);
+        val typeURI = outputNode.asResource().getURI();
         if (typeURI.equals(HGQL_SCALAR_TYPE)) {
             return SCALAR_TYPES_TO_GRAPHQL_OUTPUT.get(outputTypeNode.asResource().getURI());
         }
         if (typeURI.equals(HGQL_OBJECT_TYPE)) {
-            final var typeName = rdfSchema.getValueOfDataProperty(outputTypeNode, HGQL_HAS_NAME);
+            val typeName = rdfSchema.getValueOfDataProperty(outputTypeNode, HGQL_HAS_NAME);
             return new GraphQLTypeReference(typeName);
         }
         if (typeURI.equals(HGQL_LIST_TYPE)) {
-            final var childOutputNode = rdfSchema.getValueOfObjectProperty(outputTypeNode, HGQL_OF_TYPE);
+            val childOutputNode = rdfSchema.getValueOfObjectProperty(outputTypeNode, HGQL_OF_TYPE);
             return new GraphQLList(getGraphQLOutputType(childOutputNode));
         }
         if (typeURI.equals(HGQL_NON_NULL_TYPE)) {
-            final var childOutputNode = rdfSchema.getValueOfObjectProperty(outputTypeNode, HGQL_OF_TYPE);
+            val childOutputNode = rdfSchema.getValueOfObjectProperty(outputTypeNode, HGQL_OF_TYPE);
             return new GraphQLNonNull(getGraphQLOutputType(childOutputNode));
         }
         return null;
@@ -224,8 +225,8 @@ public class HGQLSchema {
     private String getOutputType(final Type type) {
 
         if (type.getClass() == TypeName.class) {
-            final var castType = (TypeName) type;
-            final var name = castType.getName();
+            val castType = (TypeName) type;
+            val name = castType.getName();
 
             if (SCALAR_TYPES.containsKey(name)) {
                 return SCALAR_TYPES.get(name);
@@ -234,18 +235,18 @@ public class HGQLSchema {
             }
         }
 
-        final var dummyNode = schemaNamespace + UUID.randomUUID();
+        val dummyNode = schemaNamespace + UUID.randomUUID();
 
         if (type.getClass() == ListType.class) {
-            final var castType = (ListType) type;
-            final var subTypeUri = getOutputType(castType.getType());
+            val castType = (ListType) type;
+            val subTypeUri = getOutputType(castType.getType());
             rdfSchema.insertObjectTriple(dummyNode, RDF_TYPE, HGQL_LIST_TYPE);
             rdfSchema.insertObjectTriple(dummyNode, HGQL_OF_TYPE, subTypeUri);
         }
 
         if (type.getClass() == NonNullType.class) {
-            final var castType = (NonNullType) type;
-            final var subTypeUri = getOutputType(castType.getType());
+            val castType = (NonNullType) type;
+            val subTypeUri = getOutputType(castType.getType());
             rdfSchema.insertObjectTriple(dummyNode, RDF_TYPE, HGQL_NON_NULL_TYPE);
             rdfSchema.insertObjectTriple(dummyNode, HGQL_OF_TYPE, subTypeUri);
         }
@@ -277,8 +278,8 @@ public class HGQLSchema {
         final Map<String, String> contextMap = new HashMap<>();
 
         children.forEach(node -> {
-            final var field = (FieldDefinition) node;
-            final var iri = ((StringValue) field.getDirective("href").getArgument("iri").getValue()).getValue();
+            val field = (FieldDefinition) node;
+            val iri = ((StringValue) field.getDirective("href").getArgument("iri").getValue()).getValue();
             contextMap.put(field.getName(), iri);
         });
         return contextMap;
@@ -287,7 +288,7 @@ public class HGQLSchema {
     private void populateServices(final Map<String, Service> services) {
         final Collection<String> serviceIds = services.keySet();
         serviceIds.forEach(serviceId -> {
-            final var serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
+            val serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
             rdfSchema.insertObjectTriple(serviceURI, RDF_TYPE, HGQL_SERVICE);
             rdfSchema.insertStringLiteralTriple(serviceURI, HGQL_HAS_ID, serviceId);
         });
@@ -302,13 +303,13 @@ public class HGQLSchema {
 
         typeNames.forEach(typeName -> {
 
-            final var typeUri = schemaNamespace + typeName;
+            val typeUri = schemaNamespace + typeName;
             rdfSchema.insertStringLiteralTriple(typeUri, HGQL_HAS_NAME, typeName);
             rdfSchema.insertObjectTriple(typeUri, HGQL_HREF, contextMap.get(typeName));
             rdfSchema.insertObjectTriple(typeUri, RDF_TYPE, HGQL_OBJECT_TYPE);
 
 
-            final var type = registryTypes.get(typeName);
+            val type = registryTypes.get(typeName);
             populateDirectives(type, typeName, typeUri);
             populateChildTypes(type, typeName, typeUri, contextMap);
         });
@@ -322,8 +323,8 @@ public class HGQLSchema {
         final List<Directive> directives = type.getDirectives();
         directives.forEach(dir -> {
             if (dir.getName().equals("service")) {
-                final var getQueryUri = typeUri + "_GET";
-                final var getByIdQueryUri = typeUri + "_GET_BY_ID";
+                val getQueryUri = typeUri + "_GET";
+                val getByIdQueryUri = typeUri + "_GET_BY_ID";
 
                 rdfSchema.insertObjectTriple(getQueryUri, RDF_TYPE, HGQL_QUERY_FIELD);
                 rdfSchema.insertObjectTriple(getQueryUri, RDF_TYPE, HGQL_QUERY_GET_FIELD);
@@ -334,16 +335,16 @@ public class HGQLSchema {
                 rdfSchema.insertObjectTriple(schemaNamespace + "query", HGQL_HAS_FIELD, getByIdQueryUri);
                 rdfSchema.insertStringLiteralTriple(getByIdQueryUri, HGQL_HAS_NAME, typeName + "_GET_BY_ID");
 
-                final var outputListTypeURI = schemaNamespace + UUID.randomUUID();
+                val outputListTypeURI = schemaNamespace + UUID.randomUUID();
 
                 rdfSchema.insertObjectTriple(outputListTypeURI, RDF_TYPE, HGQL_LIST_TYPE);
                 rdfSchema.insertObjectTriple(outputListTypeURI, HGQL_OF_TYPE, typeUri);
 
                 rdfSchema.insertObjectTriple(getQueryUri, HGQL_OUTPUT_TYPE, outputListTypeURI);
                 rdfSchema.insertObjectTriple(getByIdQueryUri, HGQL_OUTPUT_TYPE, outputListTypeURI);
-                final var serviceId = ((StringValue) dir.getArgument("id").getValue()).getValue();
+                val serviceId = ((StringValue) dir.getArgument("id").getValue()).getValue();
 
-                final var serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
+                val serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
                 rdfSchema.insertObjectTriple(getQueryUri, HGQL_HAS_SERVICE, serviceURI);
                 rdfSchema.insertObjectTriple(getByIdQueryUri, HGQL_HAS_SERVICE, serviceURI);
             }
@@ -359,8 +360,8 @@ public class HGQLSchema {
 
         type.getChildren().forEach(node -> {
             if (node.getClass().isAssignableFrom(FieldDefinition.class)) {
-                final var field = (FieldDefinition) node;
-                final var fieldURI = schemaNamespace + typeName + "/" + field.getName();
+                val field = (FieldDefinition) node;
+                val fieldURI = schemaNamespace + typeName + "/" + field.getName();
 
                 rdfSchema.insertStringLiteralTriple(fieldURI, HGQL_HAS_NAME, field.getName());
                 rdfSchema.insertObjectTriple(fieldURI, HGQL_HREF, contextMap.get(field.getName()));
@@ -368,12 +369,12 @@ public class HGQLSchema {
                 rdfSchema.insertObjectTriple(fieldURI, RDF_TYPE, HGQL_FIELD);
                 rdfSchema.insertObjectTriple(typeUri, HGQL_HAS_FIELD, fieldURI);
 
-                final var serviceId = ((StringValue) field.getDirective("service").getArgument("id").getValue()).getValue();
-                final var serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
+                val serviceId = ((StringValue) field.getDirective("service").getArgument("id").getValue()).getValue();
+                val serviceURI = HGQL_SERVICE_NAMESPACE + serviceId;
                 rdfSchema.insertObjectTriple(fieldURI, HGQL_HAS_SERVICE, serviceURI);
                 rdfSchema.insertObjectTriple(serviceURI, RDF_TYPE, HGQL_SERVICE);
 
-                final var outputTypeUri = getOutputType(field.getType());
+                val outputTypeUri = getOutputType(field.getType());
                 rdfSchema.insertObjectTriple(fieldURI, HGQL_OUTPUT_TYPE, outputTypeUri);
 
             }

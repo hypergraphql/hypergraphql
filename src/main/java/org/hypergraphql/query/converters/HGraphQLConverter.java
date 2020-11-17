@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import lombok.val;
 import org.hypergraphql.config.schema.QueryFieldConfig;
 import org.hypergraphql.datamodel.HGQLSchema;
 
@@ -41,8 +42,8 @@ public abstract class HGraphQLConverter {
             final String rootType) {
 
         final Map<String, QueryFieldConfig> queryFields = schema.getQueryFields();
-        final var jsonNodeText = jsonNodeName(jsonQuery);
-        final var root = !jsonQuery.isArray() && queryFields.containsKey(jsonNodeText);
+        val jsonNodeText = jsonNodeName(jsonQuery);
+        val root = !jsonQuery.isArray() && queryFields.containsKey(jsonNodeText);
 
         if (root) {
             if (queryFields.get(jsonNodeText).type().equals(HGQL_QUERY_GET_FIELD)) {
@@ -61,7 +62,7 @@ public abstract class HGraphQLConverter {
         for (final String  uri : uris) {
             quotedUris.add(String.format(QUOTE, uri));
         }
-        final var uriSequence = String.join(DELIMITER, quotedUris);
+        val uriSequence = String.join(DELIMITER, quotedUris);
         return String.format(URIS_S, uriSequence);
     }
 
@@ -98,17 +99,17 @@ public abstract class HGraphQLConverter {
     private static String getSelectRoot_GET_BY_ID(final HGQLSchema schema, final JsonNode jsonQuery) {
 
         final Collection<String> uris = new HashSet<>();
-        final var urisArray = (ArrayNode) jsonQuery.get(ARGS).get(URIS);
+        val urisArray = (ArrayNode) jsonQuery.get(ARGS).get(URIS);
         urisArray.elements().forEachRemaining(el -> uris.add(el.asText()));
-        final var key = jsonNodeName(jsonQuery) + urisString(uris);
-        final var content = getSubQuery(schema, jsonQuery.get(FIELDS), jsonNodeTarget(jsonQuery));
+        val key = jsonNodeName(jsonQuery) + urisString(uris);
+        val content = getSubQuery(schema, jsonQuery.get(FIELDS), jsonNodeTarget(jsonQuery));
         return queryString(key + content);
     }
 
     private static String getSelectRoot_GET(final HGQLSchema schema, final JsonNode jsonQuery) {
 
-        final var key = jsonNodeName(jsonQuery) + getArgsString(jsonQuery.get(ARGS));
-        final var content = getSubQuery(schema, jsonQuery.get(FIELDS), jsonNodeTarget(jsonQuery));
+        val key = jsonNodeName(jsonQuery) + getArgsString(jsonQuery.get(ARGS));
+        val content = getSubQuery(schema, jsonQuery.get(FIELDS), jsonNodeTarget(jsonQuery));
         return queryString(key + content);
     }
 
@@ -118,9 +119,9 @@ public abstract class HGraphQLConverter {
             final Collection<String> input,
             final String rootType) {
 
-        final var topQueryFieldName = rootType + BY_ID;
-        final var key = topQueryFieldName + urisString(input);
-        final var content = getSubQuery(schema, jsonQuery, rootType);
+        val topQueryFieldName = rootType + BY_ID;
+        val key = topQueryFieldName + urisString(input);
+        val content = getSubQuery(schema, jsonQuery, rootType);
         return queryString(key + content);
     }
 
@@ -147,9 +148,9 @@ public abstract class HGraphQLConverter {
             final Iterator<JsonNode> fields = fieldsJson.elements();
 
             fields.forEachRemaining(field -> {
-                final var fieldsArray = (field.get(FIELDS).isNull()) ? null : (ArrayNode) field.get(FIELDS);
-                final var arg = (field.get(ARGS).isNull()) ? EMPTY_STRING : langString((ObjectNode) field.get(ARGS));
-                final var fieldString = jsonNodeName(field) + arg + SPACE + getSubQuery(schema, fieldsArray, jsonNodeTarget(field));
+                val fieldsArray = (field.get(FIELDS).isNull()) ? null : (ArrayNode) field.get(FIELDS);
+                val arg = (field.get(ARGS).isNull()) ? EMPTY_STRING : langString((ObjectNode) field.get(ARGS));
+                val fieldString = jsonNodeName(field) + arg + SPACE + getSubQuery(schema, fieldsArray, jsonNodeTarget(field));
                 subQueryStrings.add(fieldString);
             });
         }

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.services.HGQLQueryService;
@@ -124,17 +125,14 @@ public class Controller {
         // post method for accessing the GraphQL getService
         hgqlService.post(config.getGraphqlConfig().graphQLPath(), (req, res) -> {
 
-            final var service = new HGQLQueryService(config);
+            val service = new HGQLQueryService(config);
 
-            final var query = consumeRequest(req);
-            final var acceptType = req.headers("accept");
+            val query = consumeRequest(req);
+            val acceptType = req.headers("accept");
 
-            final var mime = MIME_MAP.getOrDefault(acceptType, null);
-            final var contentType = MIME_MAP.getOrDefault(acceptType, "application/json");
-            final var graphQLCompatible = GRAPHQL_COMPATIBLE_TYPE.getOrDefault(acceptType, true);
-//            final var mime = MIME_MAP.getOrDefault(acceptType, null);
-//            final var contentType = MIME_MAP.containsKey(acceptType) ? acceptType : "application/json";
-//            final var graphQLCompatible = GRAPHQL_COMPATIBLE_TYPE.getOrDefault(acceptType, true);
+            val mime = MIME_MAP.getOrDefault(acceptType, null);
+            val contentType = MIME_MAP.getOrDefault(acceptType, "application/json");
+            val graphQLCompatible = GRAPHQL_COMPATIBLE_TYPE.getOrDefault(acceptType, true);
 
             res.type(contentType);
 
@@ -147,7 +145,7 @@ public class Controller {
 
             setResponseHeaders(req, res);
 
-            final var mapper = new ObjectMapper();
+            val mapper = new ObjectMapper();
             if (graphQLCompatible) {
                 return mapper.readTree(new ObjectMapper().writeValueAsString(result));
             } else {
@@ -164,9 +162,9 @@ public class Controller {
 
         hgqlService.get(config.getGraphqlConfig().graphQLPath(), (req, res) -> {
 
-            final var acceptType = req.headers("accept"); // TODO
+            val acceptType = req.headers("accept"); // TODO
 
-            final var isRdfContentType =
+            val isRdfContentType =
                     MIME_MAP.containsKey(acceptType)
                             && GRAPHQL_COMPATIBLE_TYPE.containsKey(acceptType)
                             && !GRAPHQL_COMPATIBLE_TYPE.get(acceptType);
@@ -192,8 +190,8 @@ public class Controller {
 
     private String consumeJSONBody(final String body) throws IOException {
 
-        final var mapper = new ObjectMapper();
-        final var requestObject = mapper.readTree(body);
+        val mapper = new ObjectMapper();
+        val requestObject = mapper.readTree(body);
         if (requestObject.get("query") == null) {
             throw new IllegalArgumentException(
                     "Body appears to be JSON but does not contain required 'query' attribute: " + body
@@ -227,7 +225,7 @@ public class Controller {
                 "x-auth-token"
         );
 
-        final var origin = Objects.requireNonNullElse(request.headers(ORIGIN_HEADER), WILDCARD);
+        val origin = Objects.requireNonNullElse(request.headers(ORIGIN_HEADER), WILDCARD);
         response.header("Access-Control-Allow-Origin", origin); // TODO
         if (!WILDCARD.equals(origin)) {
             response.header("Vary", ORIGIN_HEADER);

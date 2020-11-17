@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import lombok.Getter;
+import lombok.val;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.config.schema.HGQLVocabulary;
@@ -43,13 +44,11 @@ public class SPARQLEndpointService extends SPARQLService {
     ) {
 
         final Map<String, Collection<String>> resultSet = new HashMap<>();
-        final var unionModel = ModelFactory.createDefaultModel();
+        val unionModel = ModelFactory.createDefaultModel();
         final Collection<Future<SPARQLExecutionResult>> futureSPARQLresults = new HashSet<>();
-
         final List<String> inputList = getStrings(query, input, markers, rootType, schema, resultSet);
 
         do {
-
             final Collection<String> inputSubset = new HashSet<>();
             int i = 0;
             while (i < VALUES_SIZE_LIMIT && !inputList.isEmpty()) {
@@ -57,15 +56,12 @@ public class SPARQLEndpointService extends SPARQLService {
                 inputList.remove(0);
                 i++;
             }
-            final var executor = Executors.newFixedThreadPool(50);
-            final var execution = buildExecutor(query, inputSubset, markers, schema, rootType);
+            val executor = Executors.newFixedThreadPool(50);
+            val execution = buildExecutor(query, inputSubset, markers, schema, rootType);
             futureSPARQLresults.add(executor.submit(execution));
-
         } while (inputList.size() > VALUES_SIZE_LIMIT);
-
         iterateFutureResults(futureSPARQLresults, unionModel, resultSet);
-
-        final var treeExecutionResult = new TreeExecutionResult();
+        val treeExecutionResult = new TreeExecutionResult();
         treeExecutionResult.setResultSet(resultSet);
         treeExecutionResult.setModel(unionModel);
 
@@ -77,10 +73,9 @@ public class SPARQLEndpointService extends SPARQLService {
             final Model unionModel,
             final Map<String, Collection<String>> resultSet
     ) {
-
         for (Future<SPARQLExecutionResult> futureExecutionResult : futureSPARQLResults) {
             try {
-                final var result = futureExecutionResult.get();
+                val result = futureExecutionResult.get();
                 unionModel.add(result.getModel());
                 resultSet.putAll(result.getResultSet());
             } catch (InterruptedException
@@ -112,15 +107,12 @@ public class SPARQLEndpointService extends SPARQLService {
 
     @Override
     public void setParameters(final ServiceConfig serviceConfig) {
-
         super.setParameters(serviceConfig);
-
         setId(serviceConfig.getId());
         this.url = serviceConfig.getUrl();
         this.user = serviceConfig.getUser();
         setGraph(serviceConfig.getGraph());
         this.password = serviceConfig.getPassword();
-
     }
 
     @Override

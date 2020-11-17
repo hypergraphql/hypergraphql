@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
@@ -36,13 +37,13 @@ public class LocalSPARQLExecution extends SPARQLEndpointExecution {
         final Map<String, Collection<String>> resultSet = new HashMap<>();
         getMarkers().forEach(marker -> resultSet.put(marker, new HashSet<>()));
 
-        final var unionModel = ModelFactory.createDefaultModel();
-        final var converter = new SPARQLServiceConverter(getSchema());
-        final var sparqlQuery = converter.getSelectQuery(getQuery(), getInputSubset(), getRootType());
+        val unionModel = ModelFactory.createDefaultModel();
+        val converter = new SPARQLServiceConverter(getSchema());
+        val sparqlQuery = converter.getSelectQuery(getQuery(), getInputSubset(), getRootType());
         log.debug(sparqlQuery);
-        final var jenaQuery = QueryFactory.create(sparqlQuery);
-        final var qexec = QueryExecutionFactory.create(jenaQuery, model);
-        final var results = qexec.execSelect();
+        val jenaQuery = QueryFactory.create(sparqlQuery);
+        val qexec = QueryExecutionFactory.create(jenaQuery, model);
+        val results = qexec.execSelect();
 
         results.forEachRemaining(solution -> {
 
@@ -52,7 +53,7 @@ public class LocalSPARQLExecution extends SPARQLEndpointExecution {
                 }
             });
 
-            final var modelFromResults = getSparqlEndpointService().getModelFromResults(getQuery(), solution, getSchema());
+            val modelFromResults = getSparqlEndpointService().getModelFromResults(getQuery(), solution, getSchema());
             unionModel.add(modelFromResults);
         });
 

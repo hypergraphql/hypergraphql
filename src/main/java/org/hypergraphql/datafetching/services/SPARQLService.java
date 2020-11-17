@@ -2,21 +2,17 @@ package org.hypergraphql.datafetching.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Collection;
+import lombok.Getter;
+import lombok.Setter;
 import org.hypergraphql.config.system.ServiceConfig;
 import org.hypergraphql.datafetching.SPARQLEndpointExecution;
 import org.hypergraphql.datamodel.HGQLSchema;
 
+@Getter
+@Setter
 public abstract class SPARQLService extends Service {
 
     private String graph;
-
-    public void setGraph(String graph) {
-        this.graph = graph;
-    }
-
-    public String getGraph() {
-        return graph;
-    }
 
     public void setParameters(final ServiceConfig serviceConfig) {
 

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.val;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -51,7 +52,7 @@ public abstract class Service { // TODO - Review cs suppression
                                      final QuerySolution results,
                                      final HGQLSchema schema) {
 
-        final var model = ModelFactory.createDefaultModel();
+        val model = ModelFactory.createDefaultModel();
         if (query.isNull()) {
             return model;
         }
@@ -61,13 +62,13 @@ public abstract class Service { // TODO - Review cs suppression
             final Iterator<JsonNode> nodesIterator = query.elements();
 
             while (nodesIterator.hasNext()) {
-                final var currentNode = nodesIterator.next();
-                final var currentModel = buildModel(results, currentNode, schema);
+                val currentNode = nodesIterator.next();
+                val currentModel = buildModel(results, currentNode, schema);
                 model.add(currentModel);
                 model.add(getModelFromResults(currentNode.get(FIELDS), results, schema));
             }
         } else {
-            final var currentModel = buildModel(results, query, schema);
+            val currentModel = buildModel(results, query, schema);
             model.add(currentModel);
             model.add(getModelFromResults(query.get(FIELDS), results, schema));
         }
@@ -79,14 +80,14 @@ public abstract class Service { // TODO - Review cs suppression
                              final JsonNode currentNode,
                              final HGQLSchema schema) {
 
-        final var model = ModelFactory.createDefaultModel();
+        val model = ModelFactory.createDefaultModel();
 
-        final var propertyString = schema.getFields().get(currentNode.get(NAME).asText());
-        final var targetTypeString = schema.getTypes().get(currentNode.get(TARGET_NAME).asText());
+        val propertyString = schema.getFields().get(currentNode.get(NAME).asText());
+        val targetTypeString = schema.getTypes().get(currentNode.get(TARGET_NAME).asText());
 
         populateModel(results, currentNode, model, propertyString, targetTypeString);
 
-        final var queryField = schema.getQueryFields().get(currentNode.get(NAME).asText());
+        val queryField = schema.getQueryFields().get(currentNode.get(NAME).asText());
 
         if (queryField != null) {
 
@@ -97,9 +98,9 @@ public abstract class Service { // TODO - Review cs suppression
             } else {
                 typeName = currentNode.get(ALIAS).asText();
             }
-            final var object = results.getResource(currentNode.get(NODE_ID).asText());
-            final var subject = model.createResource(HGQL_QUERY_URI);
-            final var predicate = model.createProperty("", HGQL_QUERY_NAMESPACE + typeName);
+            val object = results.getResource(currentNode.get(NODE_ID).asText());
+            val subject = model.createResource(HGQL_QUERY_URI);
+            val predicate = model.createProperty("", HGQL_QUERY_NAMESPACE + typeName);
             model.add(subject, predicate, object);
         }
         return model;
@@ -143,11 +144,11 @@ public abstract class Service { // TODO - Review cs suppression
     private Collection<String> findRootIdentifiers(final Model model, final TypeConfig targetName) {
 
         final Collection<String> identifiers = new HashSet<>();
-        final var currentModel = ModelFactory.createDefaultModel();
-        final var res = currentModel.createResource(targetName.getId());
-        final var property = currentModel.createProperty(RDF_TYPE);
+        val currentModel = ModelFactory.createDefaultModel();
+        val res = currentModel.createResource(targetName.getId());
+        val property = currentModel.createProperty(RDF_TYPE);
 
-        final var iterator = model.listResourcesWithProperty(property, res);
+        val iterator = model.listResourcesWithProperty(property, res);
 
         while (iterator.hasNext()) {
             identifiers.add(iterator.nextResource().toString());
@@ -174,8 +175,8 @@ public abstract class Service { // TODO - Review cs suppression
             objects = new HashSet<>();
             if (!subjects.isEmpty()) {
                 for (final String subject : subjects) {
-                    final var subjectResource = model.createResource(subject);
-                    final var partialObjects = model.listObjectsOfProperty(subjectResource, queryNode.getNode());
+                    val subjectResource = model.createResource(subject);
+                    val partialObjects = model.listObjectsOfProperty(subjectResource, queryNode.getNode());
                     while (partialObjects.hasNext()) {
                         objects.add(partialObjects.next().toString());
                     }
@@ -183,7 +184,7 @@ public abstract class Service { // TODO - Review cs suppression
 
             } else {
 
-                final var objectsIterator = model.listObjectsOfProperty(queryNode.getNode());
+                val objectsIterator = model.listObjectsOfProperty(queryNode.getNode());
                 while (objectsIterator.hasNext()) {
                     objects.add(objectsIterator.next().toString());
                 }
@@ -214,7 +215,7 @@ public abstract class Service { // TODO - Review cs suppression
                                         LinkedList<QueryNode> path,
                                         final HGQLSchema schema) {
 
-        final var model = ModelFactory.createDefaultModel();
+        val model = ModelFactory.createDefaultModel();
 
         if (path == null) {
             path = new LinkedList<>();
@@ -226,7 +227,7 @@ public abstract class Service { // TODO - Review cs suppression
             final Iterator<JsonNode> iterator = query.elements();
 
             while (iterator.hasNext()) {
-                final var currentNode = iterator.next();
+                val currentNode = iterator.next();
                 getFieldPath(paths, path, schema, model, currentNode);
             }
         } else {
@@ -241,18 +242,18 @@ public abstract class Service { // TODO - Review cs suppression
                               final JsonNode currentNode) {
 
         final LinkedList<QueryNode> newPath = new LinkedList<>(path);
-        final var nodeMarker = currentNode.get(NODE_ID).asText();
-        final var nodeName = currentNode.get(NAME).asText();
-        final var field = schema.getFields().get(nodeName);
+        val nodeMarker = currentNode.get(NODE_ID).asText();
+        val nodeName = currentNode.get(NAME).asText();
+        val field = schema.getFields().get(nodeName);
         if (field == null) {
             throw new RuntimeException("field not found");
         }
 
-        final var predicate = model.createProperty(field.getId());
-        final var queryNode = new QueryNode(predicate, nodeMarker);
+        val predicate = model.createProperty(field.getId());
+        val queryNode = new QueryNode(predicate, nodeMarker);
         newPath.add(queryNode);
         paths.add(newPath);
-        final var fields = currentNode.get(FIELDS);
+        val fields = currentNode.get(FIELDS);
         if (fields != null && !fields.isNull()) {
             getQueryPathsRecursive(fields, paths, newPath, schema);
         }
@@ -267,17 +268,17 @@ public abstract class Service { // TODO - Review cs suppression
     ) {
 
         if (propertyString != null && !(currentNode.get(PARENT_ID).asText().equals("null"))) {
-            final var predicate = model.createProperty("", propertyString.getId());
-            final var subject = results.getResource(currentNode.get(PARENT_ID).asText());
-            final var object = results.get(currentNode.get(NODE_ID).asText());
+            val predicate = model.createProperty("", propertyString.getId());
+            val subject = results.getResource(currentNode.get(PARENT_ID).asText());
+            val object = results.get(currentNode.get(NODE_ID).asText());
             if (predicate != null && subject != null && object != null) {
                 model.add(subject, predicate, object);
             }
         }
 
         if (targetTypeString != null) {
-            final var subject = results.getResource(currentNode.get(NODE_ID).asText());
-            final var object = model.createResource(targetTypeString.getId());
+            val subject = results.getResource(currentNode.get(NODE_ID).asText());
+            val object = model.createResource(targetTypeString.getId());
             if (subject != null && object != null) {
                 model.add(subject, RDF.type, object);
             }
