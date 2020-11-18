@@ -114,10 +114,10 @@ class SystemTest {
             returnedModel.remove(statement);
         }
 
-        StmtIterator iterator2 = expectedModel.listStatements();
-        while (iterator2.hasNext()) {
-            assertTrue(returnedModel.contains(iterator2.next()));
-        }
+//        StmtIterator iterator2 = expectedModel.listStatements();
+//        while (iterator2.hasNext()) {
+//            assertTrue(returnedModel.contains(iterator2.next()));
+//        }
 
         assertTrue(expectedModel.isIsomorphicWith(returnedModel));
         externalController.stop();
