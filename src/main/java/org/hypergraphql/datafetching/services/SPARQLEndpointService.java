@@ -30,6 +30,7 @@ import static org.hypergraphql.util.HGQLConstants.URIS;
 public class SPARQLEndpointService extends SPARQLService {
 
     public static final int VALUES_SIZE_LIMIT = 100;
+    private static final int THREAD_POOL_SIZE = 50;
     private String url;
     private String user;
     private String password;
@@ -56,7 +57,7 @@ public class SPARQLEndpointService extends SPARQLService {
                 inputList.remove(0);
                 i++;
             }
-            val executor = Executors.newFixedThreadPool(50);
+            val executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
             val execution = buildExecutor(query, inputSubset, markers, schema, rootType);
             futureSPARQLresults.add(executor.submit(execution));
         } while (inputList.size() > VALUES_SIZE_LIMIT);

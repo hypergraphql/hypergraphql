@@ -19,14 +19,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.jena.rdf.model.Model;
 import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.datafetching.services.Service;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.exception.HGQLConfigurationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.hypergraphql.util.HGQLConstants.ALIAS;
 import static org.hypergraphql.util.HGQLConstants.ARGS;
@@ -36,10 +35,11 @@ import static org.hypergraphql.util.HGQLConstants.NODE_ID;
 import static org.hypergraphql.util.HGQLConstants.PARENT_ID;
 import static org.hypergraphql.util.HGQLConstants.TARGET_NAME;
 
+@Slf4j
 @Getter
 public class ExecutionTreeNode {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExecutionTreeNode.class);
+    private static final int THREAD_POOL_SIZE = 50; // TODO - configure from props
 
     private Service service; // getService configuration
     private JsonNode query; // GraphQL in a basic Json format
@@ -54,7 +54,7 @@ public class ExecutionTreeNode {
         if (schema.getQueryFields().containsKey(field.getName())) {
             this.service = schema.getQueryFields().get(field.getName()).service();
         } else if (schema.getFields().containsKey(field.getName())) {
-            LOGGER.info("here");
+            log.debug("here");
         } else {
             throw new HGQLConfigurationException("Field '" + field.getName() + "' not found in schema");
         }
@@ -307,7 +307,7 @@ public class ExecutionTreeNode {
         final Collection<Model> computedModels = new HashSet<>();
         //    StoredModel.getInstance().add(model);
         final Collection<String> vars = resultSet.keySet();
-        val executor = Executors.newFixedThreadPool(50);
+        val executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
         final Collection<Future<Model>> futureModels = new HashSet<>();
         vars.forEach(var -> {
             val executionChildren = this.childrenNodes.get(var);
@@ -325,7 +325,7 @@ public class ExecutionTreeNode {
                 computedModels.add(futureModel.get());
             } catch (InterruptedException
                     | ExecutionException e) {
-                LOGGER.error("Problem adding execution result", e);
+                log.error("Problem adding execution result", e);
             }
         });
         computedModels.forEach(model::add);

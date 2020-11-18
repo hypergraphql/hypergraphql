@@ -17,6 +17,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 @Getter
 public class ExecutionForest  {
 
+    private static final int THREAD_POOL_SIZE = 10; // TODO - make this configurable
     private final Set<ExecutionTreeNode> forest;
 
     public ExecutionForest() {
@@ -25,7 +26,7 @@ public class ExecutionForest  {
 
     public Model generateModel() {
 
-        val executor = Executors.newFixedThreadPool(10);
+        val executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
         val model = ModelFactory.createDefaultModel();
         final Set<Future<Model>> futureModels = new HashSet<>();
         getForest().forEach(node -> {
