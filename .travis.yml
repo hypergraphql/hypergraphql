@@ -12,7 +12,7 @@ before_install:
   - export PATH=$GRADLE_HOME/bin:$PATH
   - gradle -v
 
-script: gradle clean build shadowJar --scan
+script: gradle clean build shadowJar --stacktrace
 
 jobs:
   include:
