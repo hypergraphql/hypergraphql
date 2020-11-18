@@ -6,7 +6,7 @@ jdk:
 - openjdk11
 
 before_install:
-  - wget http://services.gradle.org/distributions/gradle-6.7-bin.zip
+  - wget https://services.gradle.org/distributions/gradle-6.7-bin.zip
   - unzip -qq gradle-6.7-bin.zip
   - export GRADLE_HOME=$PWD/gradle-6.7
   - export PATH=$GRADLE_HOME/bin:$PATH
