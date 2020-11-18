@@ -29,3 +29,6 @@ jobs:
       on:
         repo: hypergraphql/hypergraphql
         tags: true
+
+after_failure:
+  - cat build/test-results/test/*.xml
