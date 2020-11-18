@@ -12,7 +12,7 @@ before_install:
   - export PATH=$GRADLE_HOME/bin:$PATH
   - gradle -v
 
-script: gradle clean build shadowJar
+script: gradle clean build shadowJar --scan
 
 jobs:
   include:
@@ -29,6 +29,3 @@ jobs:
       on:
         repo: hypergraphql/hypergraphql
         tags: true
-
-after_failure:
-  - cat build/test-results/test/*.xml
