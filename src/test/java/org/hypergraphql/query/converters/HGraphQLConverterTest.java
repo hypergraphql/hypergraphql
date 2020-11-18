@@ -1,23 +1,22 @@
 package org.hypergraphql.query.converters;
 
-import java.util.HashSet;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 import org.hypergraphql.Controller;
 import org.hypergraphql.config.system.HGQLConfig;
+import org.hypergraphql.datafetching.ExecutionForest;
 import org.hypergraphql.datafetching.ExecutionForestFactory;
+import org.hypergraphql.datafetching.ExecutionTreeNode;
 import org.hypergraphql.query.QueryValidator;
 import org.hypergraphql.services.HGQLConfigService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Slf4j
 class HGraphQLConverterTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(HGraphQLConverterTest.class);
 
     private Controller controller;
     private HGQLConfig config;
@@ -160,32 +159,41 @@ class HGraphQLConverterTest {
         assertTrue(generateRewritingForRootReturnValidity(query));
     }
 
-    // TODO - These methods seem a little complicated
     private boolean generateRewritingForRootReturnValidity(String inputQuery) {
 
-        final var validatedQuery = new QueryValidator(config.getSchema()).validateQuery(inputQuery);
-        final var queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery(), config.getHgqlSchema());
+        final var queryExecutionForest = buildForestFromQuery(inputQuery);
         final var node = queryExecutionForest.getForest().iterator().next();
+        return generateRewritingForValidity(inputQuery, node, Set.of());
+    }
+
+    private boolean generateRewritingForNonRootReturnValidity(String inputQuery, Set<String> inputSet) {
+
+        final var queryExecutionForest = buildForestFromQuery(inputQuery);
+        final var node = queryExecutionForest.getForest()
+                .iterator()
+                .next()
+                .getChildrenNodes()
+                .get("x_1")
+                .getForest()
+                .iterator()
+                .next();
+        return generateRewritingForValidity(inputQuery, node, inputSet);
+    }
+
+    private boolean generateRewritingForValidity(final String inputQuery, final ExecutionTreeNode node, final Set<String> inputSet) {
+
         final var query = node.getQuery();
         final var typeName = node.getRootType();
-        final var gqlQuery = HGraphQLConverter.convertToHGraphQL(config.getHgqlSchema(), query, new HashSet<>(), typeName);
-        LOGGER.debug(gqlQuery);
+        final var gqlQuery = HGraphQLConverter.convertToHGraphQL(config.getHgqlSchema(), query, inputSet, typeName);
+        log.debug(gqlQuery);
         final var testQueryValidation = new QueryValidator(config.getSchema()).validateQuery(gqlQuery);
 
         return testQueryValidation.getValid();
     }
 
-    private boolean generateRewritingForNonRootReturnValidity(String inputQuery, Set<String> inputSet) {
+    private ExecutionForest buildForestFromQuery(final String inputQuery) {
 
         final var validatedQuery = new QueryValidator(config.getSchema()).validateQuery(inputQuery);
-        final var queryExecutionForest = new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery(), config.getHgqlSchema());
-        final var node = queryExecutionForest.getForest().iterator().next().getChildrenNodes().get("x_1").getForest().iterator().next();
-        final var query = node.getQuery();
-        final var typeName = node.getRootType();
-        final var gqlQuery = HGraphQLConverter.convertToHGraphQL(config.getHgqlSchema(), query, inputSet, typeName);
-        LOGGER.debug(gqlQuery);
-        final var testQueryValidation = new QueryValidator(config.getSchema()).validateQuery(gqlQuery);
-
-        return testQueryValidation.getValid();
+        return new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery(), config.getHgqlSchema());
     }
 }
