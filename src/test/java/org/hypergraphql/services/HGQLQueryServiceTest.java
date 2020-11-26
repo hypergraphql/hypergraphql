@@ -1,8 +1,7 @@
 package org.hypergraphql.services;
 
-import java.io.InputStream;
 import java.util.Map;
-import org.hypergraphql.config.system.HGQLConfig;
+import lombok.val;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -16,12 +15,12 @@ class HGQLQueryServiceTest {
     @Test
     void results_with_no_accept_type() {
 
-        final String configPath = "test_config.json";
-        final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(configPath);
-        HGQLConfig config = configService.loadHGQLConfig(configPath, inputStream, true);
-        HGQLQueryService service = new HGQLQueryService(config);
+        val configPath = "test_config.json";
+        val inputStream = getClass().getClassLoader().getResourceAsStream(configPath);
+        val config = configService.loadHGQLConfig(configPath, inputStream, true);
+        val service = new HGQLQueryService(config);
 
-        final String query = "{\n"
+        val query = "{\n"
                 + "Company_GET(limit:1, offset:3) {\n"
                 + "  name\n"
                 + "  owner {\n"

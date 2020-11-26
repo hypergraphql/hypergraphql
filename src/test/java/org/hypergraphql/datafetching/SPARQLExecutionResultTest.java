@@ -3,7 +3,7 @@ package org.hypergraphql.datafetching;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import org.apache.jena.rdf.model.Model;
+import lombok.val;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +14,7 @@ class SPARQLExecutionResultTest {
     @Test
     void toString_should_produce_intelligible_results() {
 
-        final Model model = ModelFactory.createDefaultModel();
+        val model = ModelFactory.createDefaultModel();
         model.add(
                 model.createStatement(
                         model.createResource("http://data.hypergraphql.org/resources/123456"),
@@ -23,10 +23,10 @@ class SPARQLExecutionResultTest {
                 )
         );
 
-        final SPARQLExecutionResult result = new SPARQLExecutionResult(generateSimpleResultSet(), model);
-        final String toString = result.toString();
+        val result = new SPARQLExecutionResult(generateSimpleResultSet(), model);
+        val toString = result.toString();
 
-        final String expectedToS = "RESULTS\nModel : \n"
+        val expectedToS = "RESULTS\nModel : \n"
                 + "<ModelCom   {http://data.hypergraphql.org/resources/123456 "
                 + "@http://data.hypergraphql.org/ontology/name \"Test\"@en} |  "
                 + "[http://data.hypergraphql.org/resources/123456, http://data.hypergraphql.org/ontology/name, \"Test\"@en]>\n"

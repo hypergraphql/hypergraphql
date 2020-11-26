@@ -4,13 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import org.apache.http.HttpEntity;
+import lombok.val;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.jena.atlas.web.MediaType;
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.services.HGQLConfigService;
@@ -37,9 +36,9 @@ class ControllerTest {
     @BeforeEach
     void startServer() {
 
-        final HGQLConfigService configService = new HGQLConfigService();
+        val configService = new HGQLConfigService();
 
-        final String configPath = "test_config.json";
+        val configPath = "test_config.json";
         controller = new Controller();
         config = configService.loadHGQLConfig(configPath, getClass().getClassLoader().getResourceAsStream(configPath), true);
         controller.start(config);
@@ -56,11 +55,11 @@ class ControllerTest {
     void should_get_for_graphql() throws Exception {
 
         Thread.sleep(ONE_S_IN_MS);
-        final String path = BASE_PATH + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphQLPath();
+        val path = BASE_PATH + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphQLPath();
 
-        final Envelope envelope = getPath(path, "text/turtle");
+        val envelope = getPath(path, "text/turtle");
 
-        final Model model = ModelFactory.createDefaultModel();
+        val model = ModelFactory.createDefaultModel();
         model.read(envelope.streamBody(), "", "text/turtle");
         assertTrue(model.size() > 0);
         assertEquals(TRIPLE_COUNT, model.size());
@@ -70,11 +69,11 @@ class ControllerTest {
     void should_get_for_graphiql() throws Exception {
 
         Thread.sleep(ONE_S_IN_MS);
-        final String path = BASE_PATH + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphiQLPath();
-        final Envelope envelope = getPath(path, "application/json"); // TODO
-        final String contentType = envelope.getContentType();
+        val path = BASE_PATH + config.getGraphqlConfig().port() + config.getGraphqlConfig().graphiQLPath();
+        val envelope = getPath(path, "application/json"); // TODO
+        val contentType = envelope.getContentType();
         assertNotNull(contentType);
-        final MediaType mediaType = MediaType.createFromContentType(contentType);
+        val mediaType = MediaType.createFromContentType(contentType);
         assertEquals("text/html", mediaType.getContentType()); // TODO
     }
 
@@ -83,10 +82,10 @@ class ControllerTest {
         final Envelope envelope;
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
-            final HttpGet get = new HttpGet(path);
+            val get = new HttpGet(path);
             get.addHeader("Accept", acceptHeader);
-            final HttpEntity entity = httpClient.execute(get).getEntity();
-            final String body = EntityUtils.toString(entity, StandardCharsets.UTF_8);
+            val entity = httpClient.execute(get).getEntity();
+            val body = EntityUtils.toString(entity, StandardCharsets.UTF_8);
             envelope = new Envelope(entity.getContentType().getValue(), body);
         }
         return envelope;
