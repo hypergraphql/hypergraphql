@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.hypergraphql.config.system.ServiceConfig;
@@ -31,12 +32,12 @@ public final class HGraphQLService extends Service {
 
         final Model model;
         final Map<String, Collection<String>> resultSet;
-        final var graphQlQuery = HGraphQLConverter.convertToHGraphQL(schema, query, input, rootType);
+        val graphQlQuery = HGraphQLConverter.convertToHGraphQL(schema, query, input, rootType);
         model = getModelFromRemote(graphQlQuery);
 
         resultSet = getResultSet(model, query, input, markers, schema);
 
-        final var treeExecutionResult = new TreeExecutionResult();
+        val treeExecutionResult = new TreeExecutionResult();
         treeExecutionResult.setResultSet(resultSet);
         treeExecutionResult.setModel(model);
 
@@ -45,30 +46,22 @@ public final class HGraphQLService extends Service {
 
     Model getModelFromRemote(final String graphQlQuery) {
 
-        final var mapper = new ObjectMapper();
-
-        final var bodyParam = mapper.createObjectNode();
-
+        val mapper = new ObjectMapper();
+        val bodyParam = mapper.createObjectNode();
         bodyParam.put("query", graphQlQuery);
-
-        final var model = ModelFactory.createDefaultModel();
-
+        val model = ModelFactory.createDefaultModel();
         log.debug("\n" + url);
         log.debug("\n" + graphQlQuery);
 
         try {
-
             final HttpResponse<InputStream> response = Unirest.post(url)
                     .header("Accept", "application/rdf+xml")
                     .body(bodyParam.toString())
                     .asBinary();
-
             model.read(response.getBody(), "RDF/XML");
-
         } catch (UnirestException e) {
             e.printStackTrace();
         }
-
         return model;
     }
 

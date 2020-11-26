@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.hypergraphql.config.schema.FieldOfTypeConfig;
 import org.hypergraphql.config.schema.TypeConfig;
 import org.hypergraphql.config.system.ServiceConfig;
@@ -98,10 +99,10 @@ public class HGQLSchemaWiring {
 
         serviceConfigs.forEach(serviceConfig -> {
             try {
-                final var type = serviceConfig.getType();
+                val type = serviceConfig.getType();
 
-                final var serviceType = Class.forName(SERVICE_PACKAGE_NAME + "." + type);
-                final var service = (Service) serviceType.getConstructors()[0].newInstance();
+                val serviceType = Class.forName(SERVICE_PACKAGE_NAME + "." + type);
+                val service = (Service) serviceType.getConstructors()[0].newInstance();
 
                 service.setParameters(serviceConfig);
 
@@ -121,7 +122,7 @@ public class HGQLSchemaWiring {
     private GraphQLSchema generateSchema() {
 
         final Collection<String> typeNames = this.hgqlSchema.getTypes().keySet();
-        final var builtQueryType = registerGraphQLQueryType(this.hgqlSchema.getTypes().get("Query"));
+        val builtQueryType = registerGraphQLQueryType(this.hgqlSchema.getTypes().get("Query"));
         final Set<GraphQLType> builtTypes = typeNames.stream()
                 .filter(typeName -> !typeName.equals("Query"))
                 .map(typeName -> registerGraphQLType(this.hgqlSchema.getTypes().get(typeName)))
@@ -134,7 +135,7 @@ public class HGQLSchemaWiring {
     }
 
     private GraphQLFieldDefinition getIdField() {
-        final var fetcherFactory = new FetcherFactory(hgqlSchema);
+        val fetcherFactory = new FetcherFactory(hgqlSchema);
 
         return newFieldDefinition()
                 .type(GraphQLID)
@@ -144,7 +145,7 @@ public class HGQLSchemaWiring {
     }
 
     private GraphQLFieldDefinition getTypeField() {
-        final var fetcherFactory = new FetcherFactory(hgqlSchema);
+        val fetcherFactory = new FetcherFactory(hgqlSchema);
 
         return newFieldDefinition()
                 .type(GraphQLID)
@@ -155,8 +156,8 @@ public class HGQLSchemaWiring {
 
     private GraphQLObjectType registerGraphQLQueryType(final TypeConfig type) {
 
-        final var typeName = type.getName();
-        final var description = "Top queryable predicates. "
+        val typeName = type.getName();
+        val description = "Top queryable predicates. "
                 + "_GET queries return all objects of a given type, possibly restricted by limit and offset values. "
                 + "_GET_BY_ID queries require a set of URIs to be specified.";
 
@@ -176,9 +177,9 @@ public class HGQLSchemaWiring {
 
     private GraphQLObjectType registerGraphQLType(final TypeConfig type) {
 
-        final var typeName = type.getName();
-        final var uri = this.hgqlSchema.getTypes().get(typeName).getId();
-        final var description = "Instances of \"" + uri + "\".";
+        val typeName = type.getName();
+        val uri = this.hgqlSchema.getTypes().get(typeName).getId();
+        val description = "Instances of \"" + uri + "\".";
         final List<GraphQLFieldDefinition> builtFields;
         final Map<String, FieldOfTypeConfig> fields = type.getFields();
         final Collection<String> fieldNames = fields.keySet();
@@ -197,7 +198,7 @@ public class HGQLSchemaWiring {
     }
 
     private GraphQLFieldDefinition registerGraphQLField(final FieldOfTypeConfig field) {
-        final var fetcherFactory = new FetcherFactory(hgqlSchema);
+        val fetcherFactory = new FetcherFactory(hgqlSchema);
         if (SCALAR_TYPES.containsKey(field.getTargetName())) {
             return getBuiltField(field, fetcherFactory.literalValuesFetcher());
         } else {
@@ -206,7 +207,7 @@ public class HGQLSchemaWiring {
     }
 
     private GraphQLFieldDefinition registerGraphQLQueryField(final FieldOfTypeConfig field) {
-        final var fetcherFactory = new FetcherFactory(hgqlSchema);
+        val fetcherFactory = new FetcherFactory(hgqlSchema);
         return getBuiltQueryField(field, fetcherFactory.instancesOfTypeFetcher());
     }
 
@@ -222,7 +223,7 @@ public class HGQLSchemaWiring {
             throw new HGQLConfigurationException("Value of 'service' for field '" + field.getName() + "' cannot be null");
         }
 
-        final var description = field.getId() + " (source: " + field.getService().getId() + ").";
+        val description = field.getId() + " (source: " + field.getService().getId() + ").";
 
         return newFieldDefinition()
                 .name(field.getName())
@@ -243,15 +244,15 @@ public class HGQLSchemaWiring {
             args.addAll(getByIdQueryArgs);
         }
 
-        final var queryFieldConfig = this.hgqlSchema.getQueryFields().get(field.getName());
+        val queryFieldConfig = this.hgqlSchema.getQueryFields().get(field.getName());
 
-        final var service = queryFieldConfig.service();
+        val service = queryFieldConfig.service();
         if (service == null) {
             throw new HGQLConfigurationException("Service for field '" + field.getName() + "':['"
                     + queryFieldConfig.type() + "'] not specified (null)");
         }
-        final var serviceId = service.getId();
-        final var description = (queryFieldConfig.type().equals(HGQL_QUERY_GET_FIELD))
+        val serviceId = service.getId();
+        val description = (queryFieldConfig.type().equals(HGQL_QUERY_GET_FIELD))
                 ? "Get instances of " + field.getTargetName() + " (service: " + serviceId + ")"
                 : "Get instances of " + field.getTargetName() + " by URIs (service: " + serviceId + ")";
 

@@ -6,6 +6,7 @@ import graphql.schema.GraphQLTypeUtil;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.apache.jena.rdf.model.RDFNode;
 import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.config.schema.TypeConfig;
@@ -31,15 +32,15 @@ public class FetcherFactory {
 
     public DataFetcher<String> typeFetcher(Map<String, TypeConfig> types) {
         return environment -> {
-            final var typeName = GraphQLTypeUtil.simplePrint(environment.getParentType());
+            val typeName = GraphQLTypeUtil.simplePrint(environment.getParentType());
             return (types.containsKey(typeName)) ? types.get(typeName).getId() : null;
         };
     }
 
     public DataFetcher<List<RDFNode>> instancesOfTypeFetcher() {
         return environment -> {
-            final var field = (Field) environment.getFields().toArray()[0];
-            final var predicate = (field.getAlias() == null) ? field.getName() : field.getAlias();
+            val field = (Field) environment.getFields().toArray()[0];
+            val predicate = (field.getAlias() == null) ? field.getName() : field.getAlias();
             final ModelContainer client = environment.getContext();
             return client.getValuesOfObjectProperty(
                     HGQLVocabulary.HGQL_QUERY_URI,
@@ -50,7 +51,7 @@ public class FetcherFactory {
 
     public DataFetcher<List<RDFNode>> objectsFetcher() {
         return environment -> {
-            final var params = new FetchParams(environment, schema);
+            val params = new FetchParams(environment, schema);
             return params.getClient().getValuesOfObjectProperty(
                     params.getSubjectResource(),
                     params.getPredicateURI(),
@@ -61,7 +62,7 @@ public class FetcherFactory {
 
     public DataFetcher<List<String>> literalValuesFetcher() {
         return environment -> {
-            final var params = new FetchParams(environment, schema);
+            val params = new FetchParams(environment, schema);
             return params.getClient().getValuesOfDataProperty(
                     params.getSubjectResource(),
                     params.getPredicateURI(),

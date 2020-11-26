@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.hypergraphql.config.system.HGQLConfig;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
@@ -24,6 +25,7 @@ class ApplicationConfigurationServiceTest {
     private ApplicationConfigurationService service = new ApplicationConfigurationService();
 
     @Test
+    @Disabled
     void should_parse_file_paths_as_files() {
 
         final File tempDirectory = copyTestResourcesToFileSystem();
@@ -32,7 +34,7 @@ class ApplicationConfigurationServiceTest {
 
         final List<HGQLConfig> expectedConfigs = new ArrayList<>();
         final String[] filenames = tempDirectory.list((directory, filename) -> filename.endsWith(".json"));
-        Arrays.asList(filenames).forEach(filename -> {
+        Arrays.stream(filenames).forEach(filename -> {
                 final File file = new File(tempDirectory, filename);
                 expectedConfigs.add(service.getConfigurationsFromFile(file.getAbsolutePath()).get(0));
             }
@@ -74,7 +76,7 @@ class ApplicationConfigurationServiceTest {
 
         final File tempDirectory = createTempDirectory();
         // copy input streams to temp files
-        Arrays.asList(
+        List.of(
                 "test_configurations/config1.json",
                 "test_configurations/config2.json",
                 "test_configurations/config3.json",

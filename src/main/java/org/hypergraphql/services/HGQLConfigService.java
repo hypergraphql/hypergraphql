@@ -16,6 +16,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hypergraphql.config.system.HGQLConfig;
@@ -147,7 +148,7 @@ public class HGQLConfigService {
         }
         final String filename = fn.startsWith("/") ? fn.substring(fn.indexOf("/") + 1) : fn;
         log.debug("For filename: {}", filename);
-        final var resourceStream = getClass().getClassLoader().getResourceAsStream(filename);
+        val resourceStream = getClass().getClassLoader().getResourceAsStream(filename);
         if (resourceStream == null) {
             throw new HGQLConfigurationException(String.format("Schema at path '%1$s' does not exist", schemaPath));
         }

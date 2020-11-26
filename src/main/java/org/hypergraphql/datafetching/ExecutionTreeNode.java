@@ -19,13 +19,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.jena.rdf.model.Model;
 import org.hypergraphql.config.schema.HGQLVocabulary;
 import org.hypergraphql.datafetching.services.Service;
 import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.exception.HGQLConfigurationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.hypergraphql.util.HGQLConstants.ALIAS;
 import static org.hypergraphql.util.HGQLConstants.ARGS;
@@ -35,10 +35,11 @@ import static org.hypergraphql.util.HGQLConstants.NODE_ID;
 import static org.hypergraphql.util.HGQLConstants.PARENT_ID;
 import static org.hypergraphql.util.HGQLConstants.TARGET_NAME;
 
+@Slf4j
 @Getter
 public class ExecutionTreeNode {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExecutionTreeNode.class);
+    private static final int THREAD_POOL_SIZE = 50; // TODO - configure from props
 
     private Service service; // getService configuration
     private JsonNode query; // GraphQL in a basic Json format
@@ -53,7 +54,7 @@ public class ExecutionTreeNode {
         if (schema.getQueryFields().containsKey(field.getName())) {
             this.service = schema.getQueryFields().get(field.getName()).service();
         } else if (schema.getFields().containsKey(field.getName())) {
-            LOGGER.info("here");
+            log.debug("here");
         } else {
             throw new HGQLConfigurationException("Field '" + field.getName() + "' not found in schema");
         }
@@ -103,9 +104,8 @@ public class ExecutionTreeNode {
 
     public String toString(final int i) {
 
-        final var space = "\t".repeat(Math.max(0, i));
-
-        final var result = new StringBuilder("\n")
+        val space = "\t".repeat(Math.max(0, i));
+        val result = new StringBuilder("\n")
             .append(space).append("ExecutionNode ID: ").append(this.executionId).append("\n")
             .append(space).append("Service ID: ").append(this.service.getId()).append("\n")
             .append(space).append("Query: ").append(this.query.toString()).append("\n")
@@ -129,13 +129,13 @@ public class ExecutionTreeNode {
                                    final String parentId,
                                    final String parentType) {
 
-        final var mapper = new ObjectMapper();
-        final var queryNode = mapper.createArrayNode();
+        val mapper = new ObjectMapper();
+        val queryNode = mapper.createArrayNode();
 
         int i = 0;
         for (final Field field : fields) {
             i++;
-            final String nodeId = parentId + "_" + i;
+            val nodeId = parentId + "_" + i;
             queryNode.add(getFieldJson(field, parentId, nodeId, parentType));
         }
         return queryNode;
@@ -146,17 +146,16 @@ public class ExecutionTreeNode {
                                   final String nodeId,
                                   final String parentType) {
 
-        final var mapper = new ObjectMapper();
-        final var queryNode = mapper.createObjectNode();
-
+        val mapper = new ObjectMapper();
+        val queryNode = mapper.createObjectNode();
         queryNode.put(NAME, field.getName());
         queryNode.put(ALIAS, field.getAlias());
         queryNode.put(PARENT_ID, parentId);
         queryNode.put(NODE_ID, nodeId);
         final List<Argument> args = field.getArguments();
 
-        final var contextLdKey = (field.getAlias() == null) ? field.getName() : field.getAlias();
-        final var contextLdValue = getContextLdValue(contextLdKey);
+        val contextLdKey = (field.getAlias() == null) ? field.getName() : field.getAlias();
+        val contextLdValue = getContextLdValue(contextLdKey);
 
         this.ldContext.put(contextLdKey, contextLdValue);
 
@@ -166,8 +165,8 @@ public class ExecutionTreeNode {
             queryNode.set(ARGS, getArgsJson(args));
         }
 
-        final var fieldConfig = hgqlSchema.getTypes().get(parentType).getField(field.getName());
-        final var targetName = fieldConfig.getTargetName();
+        val fieldConfig = hgqlSchema.getTypes().get(parentType).getField(field.getName());
+        val targetName = fieldConfig.getTargetName();
 
         queryNode.put(TARGET_NAME, targetName);
         queryNode.set(FIELDS, this.traverse(field, nodeId, parentType));
@@ -187,11 +186,11 @@ public class ExecutionTreeNode {
     @SuppressWarnings({"checkstyle:NestedIfDepth"}) // TODO - address this
     private JsonNode traverse(final Field field, final String parentId, final String parentType) {
 
-        final var subFields = field.getSelectionSet();
+        val subFields = field.getSelectionSet();
         if (subFields != null) {
 
-            final var fieldConfig = hgqlSchema.getTypes().get(parentType).getField(field.getName());
-            final var targetName = fieldConfig.getTargetName();
+            val fieldConfig = hgqlSchema.getTypes().get(parentType).getField(field.getName());
+            val targetName = fieldConfig.getTargetName();
 
             final Map<Service, Collection<Field>> splitFields = getPartitionedFields(targetName, subFields);
 
@@ -199,7 +198,7 @@ public class ExecutionTreeNode {
 
             for (final Map.Entry<Service, Collection<Field>> entry : splitFields.entrySet()) {
                 if (!entry.getKey().equals(this.service)) {
-                    final var childNode = new ExecutionTreeNode(
+                    val childNode = new ExecutionTreeNode(
                             entry.getKey(),
                             entry.getValue(),
                             parentId,
@@ -210,7 +209,7 @@ public class ExecutionTreeNode {
                     if (this.childrenNodes.containsKey(parentId)) {
                         this.childrenNodes.get(parentId).getForest().add(childNode);
                     } else {
-                        final var forest = new ExecutionForest();
+                        val forest = new ExecutionForest();
                         forest.getForest().add(childNode);
                         this.childrenNodes.put(parentId, forest);
                     }
@@ -228,13 +227,12 @@ public class ExecutionTreeNode {
 
     private JsonNode getArgsJson(final List<Argument> args) {
 
-        final var mapper = new ObjectMapper();
-        final var argNode = mapper.createObjectNode();
+        val mapper = new ObjectMapper();
+        val argNode = mapper.createObjectNode();
 
         for (final Argument arg : args) {
-
-            final var value = arg.getValue();
-            final var type = value.getClass().getSimpleName();
+            val value = arg.getValue();
+            val type = value.getClass().getSimpleName();
 
             switch (type) {
                 case "IntValue":
@@ -247,7 +245,7 @@ public class ExecutionTreeNode {
                     argNode.put(arg.getName(), ((BooleanValue) value).isValue());
                     break;
                 case "ArrayValue":
-                    final var arrayNode = mapper.createArrayNode();
+                    val arrayNode = mapper.createArrayNode();
                     value.getChildren().forEach(child -> arrayNode.add(((StringValue) child).getValue()));
                     argNode.set(arg.getName(), arrayNode);
                     break;
@@ -269,7 +267,7 @@ public class ExecutionTreeNode {
 
         for (final Selection child : selections) {
             if (child.getClass().isAssignableFrom(Field.class)) {
-                final var field = (Field) child;
+                val field = (Field) child;
                 if (hgqlSchema.getFields().containsKey(field.getName())) {
                     final Service serviceConfig;
                     if (hgqlSchema.getTypes().containsKey(parentType)) {
@@ -303,20 +301,20 @@ public class ExecutionTreeNode {
 
     Model generateTreeModel(final Collection<String> input) {
 
-        final var executionResult = service.executeQuery(query, input, childrenNodes.keySet(), rootType, hgqlSchema);
+        val executionResult = service.executeQuery(query, input, childrenNodes.keySet(), rootType, hgqlSchema);
         final Map<String, Collection<String>> resultSet = executionResult.getResultSet();
-        final var model = executionResult.getModel();
+        val model = executionResult.getModel();
         final Collection<Model> computedModels = new HashSet<>();
         //    StoredModel.getInstance().add(model);
         final Collection<String> vars = resultSet.keySet();
-        final var executor = Executors.newFixedThreadPool(50);
+        val executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
         final Collection<Future<Model>> futureModels = new HashSet<>();
         vars.forEach(var -> {
-            final var executionChildren = this.childrenNodes.get(var);
+            val executionChildren = this.childrenNodes.get(var);
             if (executionChildren.getForest().size() > 0) {
                 final Collection<String> values = resultSet.get(var);
                 executionChildren.getForest().forEach(node -> {
-                    final var childExecution = new FetchingExecution(values, node);
+                    val childExecution = new FetchingExecution(values, node);
                     futureModels.add(executor.submit(childExecution));
                 });
             }
@@ -327,7 +325,7 @@ public class ExecutionTreeNode {
                 computedModels.add(futureModel.get());
             } catch (InterruptedException
                     | ExecutionException e) {
-                LOGGER.error("Problem adding execution result", e);
+                log.error("Problem adding execution result", e);
             }
         });
         computedModels.forEach(model::add);

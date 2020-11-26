@@ -2,7 +2,7 @@ package org.hypergraphql.config.system;
 
 import graphql.language.Field;
 import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.GraphQLType;
+import graphql.schema.GraphQLNamedType;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +41,7 @@ class FetchParamsTest {
 
         when(fieldConfig.getId()).thenReturn(uri);
 
-        GraphQLType parent = mock(GraphQLType.class);
+        GraphQLNamedType parent = mock(GraphQLNamedType.class);
         when(environment.getParentType()).thenReturn(parent);
         when(parent.getName()).thenReturn("Query");
 
@@ -72,7 +72,7 @@ class FetchParamsTest {
 
         when(fieldConfig.getId()).thenReturn(uri);
 
-        GraphQLType parent = mock(GraphQLType.class);
+        GraphQLNamedType parent = mock(GraphQLNamedType.class);
         when(environment.getParentType()).thenReturn(parent);
         when(parent.getName()).thenReturn("non-Query");
 

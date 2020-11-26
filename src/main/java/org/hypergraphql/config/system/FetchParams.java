@@ -6,6 +6,7 @@ import graphql.schema.GraphQLTypeUtil;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
+import lombok.val;
 import org.apache.jena.rdf.model.Resource;
 import org.hypergraphql.config.schema.FieldConfig;
 import org.hypergraphql.datamodel.HGQLSchema;
@@ -23,7 +24,7 @@ public class FetchParams {
     public FetchParams(final DataFetchingEnvironment environment, final HGQLSchema hgqlSchema)
             throws HGQLConfigurationException {
 
-        final var predicate = extractPredicate(environment);
+        val predicate = extractPredicate(environment);
         predicateURI = extractPredicateUri(hgqlSchema, predicate);
         targetURI = extractTargetURI(environment, hgqlSchema, predicate);
         subjectResource = environment.getSource();
@@ -47,7 +48,7 @@ public class FetchParams {
             throw new HGQLConfigurationException("Schema has no fields");
         }
 
-        final var fieldConfig = fields.get(predicate);
+        val fieldConfig = fields.get(predicate);
         if (fieldConfig != null) {
             return fieldConfig.getId();
         }
@@ -56,9 +57,9 @@ public class FetchParams {
 
     private String extractTargetURI(final DataFetchingEnvironment environment, final HGQLSchema schema, final String predicate) {
 
-        final var parentTypeName = GraphQLTypeUtil.simplePrint(environment.getParentType());
+        val parentTypeName = GraphQLTypeUtil.simplePrint(environment.getParentType());
         if (!"Query".equals(parentTypeName)) {
-            final var targetName =
+            val targetName =
                     schema.getTypes().get(parentTypeName).getField(predicate).getTargetName();
 
             if (schema.getTypes().containsKey(targetName)

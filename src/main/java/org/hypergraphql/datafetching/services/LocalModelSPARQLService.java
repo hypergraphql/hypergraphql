@@ -7,7 +7,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -19,14 +21,11 @@ import org.hypergraphql.datamodel.HGQLSchema;
 import org.hypergraphql.exception.HGQLConfigurationException;
 import org.hypergraphql.util.LangUtils;
 
+@Getter
 @Slf4j
 public final class LocalModelSPARQLService extends SPARQLEndpointService {
 
     private Model model;
-
-    public Model getModel() {
-        return model;
-    }
 
     @Override
     public void setParameters(final ServiceConfig serviceConfig) {
@@ -38,11 +37,11 @@ public final class LocalModelSPARQLService extends SPARQLEndpointService {
 
         log.debug("Current path: " + new File(".").getAbsolutePath());
 
-        final var cwd = new File(".");
+        val cwd = new File(".");
         try (var fis = new FileInputStream(new File(cwd, serviceConfig.getFilepath()));
             var in = new BufferedInputStream(fis)) {
             this.model = ModelFactory.createDefaultModel();
-            final var lang = LangUtils.forName(serviceConfig.getFiletype());
+            val lang = LangUtils.forName(serviceConfig.getFiletype());
             RDFDataMgr.read(model, in, lang);
         } catch (FileNotFoundException e) {
             throw new HGQLConfigurationException("Unable to locate local RDF file", e);

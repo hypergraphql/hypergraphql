@@ -9,21 +9,20 @@ import graphql.language.SelectionSet;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.val;
 import org.hypergraphql.datamodel.HGQLSchema;
 
 public class ExecutionForestFactory {
 
     public ExecutionForest getExecutionForest(final Document queryDocument, final HGQLSchema schema) {
 
-        final var forest = new ExecutionForest();
-
-        final var queryFields = selectionSet(queryDocument);
-
-        final var counter = new AtomicInteger(0);
+        val forest = new ExecutionForest();
+        val queryFields = selectionSet(queryDocument);
+        val counter = new AtomicInteger(0);
         queryFields.getSelections().forEach(child -> { // query fields - why no args?
 
             if (child.getClass().isAssignableFrom(Field.class)) {
-                final var nodeId = "x_" + counter.incrementAndGet();
+                val nodeId = "x_" + counter.incrementAndGet();
                 forest.getForest().add(new ExecutionTreeNode((Field) child, nodeId, schema));
             }
         });
@@ -32,14 +31,11 @@ public class ExecutionForestFactory {
 
     private SelectionSet selectionSet(final Document queryDocument) {
 
-        final var definition = queryDocument.getDefinitions().get(0);
-
+        val definition = queryDocument.getDefinitions().get(0);
         if (definition.getClass().isAssignableFrom(FragmentDefinition.class)) {
-
             return getFragmentSelectionSet(queryDocument);
-
         } else if (definition.getClass().isAssignableFrom(OperationDefinition.class)) {
-            final var operationDefinition = (OperationDefinition) definition;
+            val operationDefinition = (OperationDefinition) definition;
             return operationDefinition.getSelectionSet();
         }
         throw new IllegalArgumentException(queryDocument.getClass().getName() + " is not supported");
@@ -48,8 +44,8 @@ public class ExecutionForestFactory {
     private SelectionSet getFragmentSelectionSet(final Document queryDocument) {
 
         // NPE
-        final var fragmentDefinition = (FragmentDefinition) queryDocument.getDefinitions().get(0);
-        final var originalSelectionSet = fragmentDefinition.getSelectionSet();
+        val fragmentDefinition = (FragmentDefinition) queryDocument.getDefinitions().get(0);
+        val originalSelectionSet = fragmentDefinition.getSelectionSet();
 
         final Optional<Definition> optionalDefinition = queryDocument.getDefinitions()
                 .stream()
@@ -65,11 +61,9 @@ public class ExecutionForestFactory {
         }
 
         // NPE?
-        final var operationSelection = (Field) operationDefinition.getSelectionSet().getSelections().get(0);
-
-        final var typeFieldName = operationSelection.getName();
-
-        final var newSelection = Field.newField()
+        val operationSelection = (Field) operationDefinition.getSelectionSet().getSelections().get(0);
+        val typeFieldName = operationSelection.getName();
+        val newSelection = Field.newField()
                 .name(typeFieldName)
                 .arguments(operationSelection.getArguments())
                 .selectionSet(originalSelectionSet)

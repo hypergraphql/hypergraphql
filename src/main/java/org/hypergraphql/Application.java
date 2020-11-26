@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
@@ -29,8 +30,8 @@ public abstract class Application {
 
         final String[] trimmedArgs = trimValues(args);
 
-        final var options = buildOptions();
-        final var parser = new DefaultParser();
+        val options = buildOptions();
+        val parser = new DefaultParser();
         final CommandLine commandLine;
         try {
             commandLine = parser.parse(options, trimmedArgs);
@@ -38,11 +39,11 @@ public abstract class Application {
             throw new HGQLConfigurationException("Unable to parse command line", e);
         }
 
-        final var service = new ApplicationConfigurationService();
+        val service = new ApplicationConfigurationService();
 
         final List<HGQLConfig> configurations;
 
-        final var showBanner = !commandLine.hasOption("nobanner");
+        val showBanner = !commandLine.hasOption("nobanner");
 
         if (commandLine.hasOption("config") || commandLine.hasOption("s3")) {
 
@@ -91,12 +92,12 @@ public abstract class Application {
     ) {
 
         // look for environment variables
-        final var configPath = properties.get("hgql_config");
+        val configPath = properties.get("hgql_config");
         if (StringUtils.isBlank(configPath)) {
             throw new HGQLConfigurationException("No configuration parameters seem to have been provided");
         }
-        final var username = properties.get("hgql_username");
-        final var password = properties.get("hgql_password");
+        val username = properties.get("hgql_username");
+        val password = properties.get("hgql_password");
 
         log.debug("Config path: {}", configPath);
         log.debug("Username: {}", username);
@@ -170,9 +171,9 @@ public abstract class Application {
     ) {
         if (commandLine.hasOption("s3")) {
 
-            final var s3url = commandLine.getOptionValue("s3");
-            final var accessKey = commandLine.getOptionValue('u');
-            final var secretKey = commandLine.getOptionValue('p');
+            val s3url = commandLine.getOptionValue("s3");
+            val accessKey = commandLine.getOptionValue('u');
+            val secretKey = commandLine.getOptionValue('p');
 
             // URL lookup
             return service.readConfigurationFromS3(s3url, accessKey, secretKey);
@@ -200,8 +201,8 @@ public abstract class Application {
 
     private static void showBanner() throws IOException {
 
-        final var bannerFile = "banner.txt";
-        final var bannerInputStream = Application.class.getClassLoader().getResourceAsStream(bannerFile);
+        val bannerFile = "banner.txt";
+        val bannerInputStream = Application.class.getClassLoader().getResourceAsStream(bannerFile);
         if (bannerInputStream == null) {
             System.out.println(Application.class.getClassLoader().getResource(bannerFile));
             System.err.println("Banner is null");
@@ -210,7 +211,7 @@ public abstract class Application {
             log.info("Banner file doesn't seem to exist");
         } else {
             IOUtils.copy(bannerInputStream, System.out);
-            final var version = System.getProperty("hgql_version");
+            val version = System.getProperty("hgql_version");
             if (version == null) {
                 System.out.println("----------------------------------------------------------------------\n");
             } else {

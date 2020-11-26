@@ -5,7 +5,14 @@ language: java
 jdk:
 - openjdk11
 
-script: gradle clean build shadowJar
+before_install:
+  - wget https://services.gradle.org/distributions/gradle-6.7-bin.zip
+  - unzip -qq gradle-6.7-bin.zip
+  - export GRADLE_HOME=$PWD/gradle-6.7
+  - export PATH=$GRADLE_HOME/bin:$PATH
+  - gradle -v
+
+script: gradle clean build shadowJar --stacktrace
 
 jobs:
   include:
