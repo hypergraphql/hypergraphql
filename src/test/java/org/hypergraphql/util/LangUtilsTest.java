@@ -1,5 +1,6 @@
 package org.hypergraphql.util;
 
+import lombok.val;
 import org.apache.jena.riot.Lang;
 import org.junit.jupiter.api.Test;
 
@@ -64,8 +65,8 @@ class LangUtilsTest {
     @Test
     void should_reject_unknown_type() {
 
-        final String message = "GremLin is not currently supported";
-        final Exception thrown = assertThrows(RuntimeException.class, () -> LangUtils.forName("GremLin"));
+        val message = "GremLin is not currently supported";
+        val thrown = assertThrows(RuntimeException.class, () -> LangUtils.forName("GremLin"));
         assertEquals(message, thrown.getMessage());
     }
 }

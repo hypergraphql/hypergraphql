@@ -3,10 +3,10 @@ package org.hypergraphql.services;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import lombok.val;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.hypergraphql.config.system.HGQLConfig;
@@ -28,14 +28,14 @@ class ApplicationConfigurationServiceTest {
     @Disabled
     void should_parse_file_paths_as_files() {
 
-        final File tempDirectory = copyTestResourcesToFileSystem();
+        val tempDirectory = copyTestResourcesToFileSystem();
         final List<HGQLConfig> configurations = service.getConfigFiles(tempDirectory.getAbsolutePath());
         assertNotNull(configurations);
 
         final List<HGQLConfig> expectedConfigs = new ArrayList<>();
         final String[] filenames = tempDirectory.list((directory, filename) -> filename.endsWith(".json"));
         Arrays.stream(filenames).forEach(filename -> {
-                final File file = new File(tempDirectory, filename);
+            val file = new File(tempDirectory, filename);
                 expectedConfigs.add(service.getConfigurationsFromFile(file.getAbsolutePath()).get(0));
             }
         );
@@ -49,7 +49,7 @@ class ApplicationConfigurationServiceTest {
 //    @Test
 //    void should_parse_individual_file() throws Exception {
 //
-//        final File tempFile = copyTestResourceToFileSystem("test_configurations/config4.json");
+//        val tempFile = copyTestResourceToFileSystem("test_configurations/config4.json");
 //        final List<HGQLConfig> configurations = service.getConfigFiles(tempFile.getAbsolutePath());
 //        assertNotNull(configurations);
 //
@@ -74,7 +74,7 @@ class ApplicationConfigurationServiceTest {
 
     private File copyTestResourcesToFileSystem() {
 
-        final File tempDirectory = createTempDirectory();
+        val tempDirectory = createTempDirectory();
         // copy input streams to temp files
         List.of(
                 "test_configurations/config1.json",
@@ -91,7 +91,7 @@ class ApplicationConfigurationServiceTest {
 
 //    private File copyTestResourceToFileSystem(final String path) {
 //
-//        final File tempDirectory = createTempDirectory();
+//        val tempDirectory = createTempDirectory();
 //        copyClasspathResourceToTemp(tempDirectory, path);
 //        return new File(tempDirectory, new File(path).getName());
 //    }
@@ -100,8 +100,8 @@ class ApplicationConfigurationServiceTest {
 
         try {
 
-            final File tempFile = File.createTempFile("hgql_", ".json", tempDirectory);
-            final InputStream in = getClass().getClassLoader().getResourceAsStream(path);
+            val tempFile = File.createTempFile("hgql_", ".json", tempDirectory);
+            val in = getClass().getClassLoader().getResourceAsStream(path);
             IOUtils.copy(in, new FileOutputStream(tempFile));
             tempFile.renameTo(new File(tempDirectory, FilenameUtils.getName(path)));
             tempFile.deleteOnExit();
@@ -113,8 +113,8 @@ class ApplicationConfigurationServiceTest {
 
     private File createTempDirectory() {
 
-        final String tmpDir = System.getProperty("java.io.tmpdir");
-        final File tempDirectory = new File(tmpDir + (tmpDir.endsWith("/") ? "" : "/") + "hgql");
+        val tmpDir = System.getProperty("java.io.tmpdir");
+        val tempDirectory = new File(tmpDir + (tmpDir.endsWith("/") ? "" : "/") + "hgql");
         tempDirectory.mkdirs();
         tempDirectory.deleteOnExit();
         return tempDirectory;

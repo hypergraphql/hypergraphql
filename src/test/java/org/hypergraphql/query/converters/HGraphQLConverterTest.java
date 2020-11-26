@@ -2,6 +2,7 @@ package org.hypergraphql.query.converters;
 
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.hypergraphql.Controller;
 import org.hypergraphql.config.system.HGQLConfig;
 import org.hypergraphql.datafetching.ExecutionForest;
@@ -24,9 +25,9 @@ class HGraphQLConverterTest {
     @BeforeEach
     void startUp() {
 
-        final var configPath = "test_config.json";
-        final var configService = new HGQLConfigService();
-        final var inputStream = getClass().getClassLoader().getResourceAsStream(configPath);
+        val configPath = "test_config.json";
+        val configService = new HGQLConfigService();
+        val inputStream = getClass().getClassLoader().getResourceAsStream(configPath);
         config = configService.loadHGQLConfig(configPath, inputStream, true); // ???
         if (controller == null) {
             controller = new Controller();
@@ -45,7 +46,7 @@ class HGraphQLConverterTest {
     @Test
     void rewritingValidityOfGet() {
 
-        final var testQuery = "{\n"
+        val testQuery = "{\n"
                 + "Company_GET(limit:1, offset:3) {\n"
                 + "  name\n"
                 + "  owner {\n"
@@ -57,14 +58,14 @@ class HGraphQLConverterTest {
                 + "}\n"
                 + "}";
 
-        final var test = generateRewritingForRootReturnValidity(testQuery);
+        val test = generateRewritingForRootReturnValidity(testQuery);
         assertTrue(test);
     }
 
     @Test
     void rewritingValidityOfGetByID() {
 
-        final var testQuery = "{\n"
+        val testQuery = "{\n"
                 + "Company_GET_BY_ID(uris:[\"http://test1\", \"http://test2\", \"http://test3\"]) {\n"
                 + "  name\n"
                 + "  owner {\n"
@@ -76,14 +77,14 @@ class HGraphQLConverterTest {
                 + "}\n"
                 + "}";
 
-        final var test = generateRewritingForRootReturnValidity(testQuery);
+        val test = generateRewritingForRootReturnValidity(testQuery);
         assertTrue(test);
     }
 
     @Test
     void rewritingValidityOfNonRootQuery() {
 
-        final var query = "{\n"
+        val query = "{\n"
                 + "  Person_GET(limit:10) {\n"
                 + "    name\n"
                 + "    _id\n"
@@ -100,14 +101,14 @@ class HGraphQLConverterTest {
             "http://test3"
         );
 
-        final var test = generateRewritingForNonRootReturnValidity(query, inputSet);
+        val test = generateRewritingForNonRootReturnValidity(query, inputSet);
         assertTrue(test);
     }
 
     @Test
     void simple_fragment() {
 
-        final var query = "fragment PersonAttrs on Person {\n"
+        val query = "fragment PersonAttrs on Person {\n"
                 + "  prefLabel(lang: \"en\")\n"
                 + "  altLabel\n"
                 + "}\n"
@@ -125,7 +126,7 @@ class HGraphQLConverterTest {
     @Test
     void nested_fragment() {
 
-        final var query = "fragment PersonAttrs on Person {\n"
+        val query = "fragment PersonAttrs on Person {\n"
                 + "  prefLabel(lang: \"en\")\n"
                 + "  altLabel\n"
                 + "}\n"
@@ -161,15 +162,15 @@ class HGraphQLConverterTest {
 
     private boolean generateRewritingForRootReturnValidity(String inputQuery) {
 
-        final var queryExecutionForest = buildForestFromQuery(inputQuery);
-        final var node = queryExecutionForest.getForest().iterator().next();
+        val queryExecutionForest = buildForestFromQuery(inputQuery);
+        val node = queryExecutionForest.getForest().iterator().next();
         return generateRewritingForValidity(inputQuery, node, Set.of());
     }
 
     private boolean generateRewritingForNonRootReturnValidity(String inputQuery, Set<String> inputSet) {
 
-        final var queryExecutionForest = buildForestFromQuery(inputQuery);
-        final var node = queryExecutionForest.getForest()
+        val queryExecutionForest = buildForestFromQuery(inputQuery);
+        val node = queryExecutionForest.getForest()
                 .iterator()
                 .next()
                 .getChildrenNodes()
@@ -182,18 +183,18 @@ class HGraphQLConverterTest {
 
     private boolean generateRewritingForValidity(final String inputQuery, final ExecutionTreeNode node, final Set<String> inputSet) {
 
-        final var query = node.getQuery();
-        final var typeName = node.getRootType();
-        final var gqlQuery = HGraphQLConverter.convertToHGraphQL(config.getHgqlSchema(), query, inputSet, typeName);
+        val query = node.getQuery();
+        val typeName = node.getRootType();
+        val gqlQuery = HGraphQLConverter.convertToHGraphQL(config.getHgqlSchema(), query, inputSet, typeName);
         log.debug(gqlQuery);
-        final var testQueryValidation = new QueryValidator(config.getSchema()).validateQuery(gqlQuery);
+        val testQueryValidation = new QueryValidator(config.getSchema()).validateQuery(gqlQuery);
 
         return testQueryValidation.getValid();
     }
 
     private ExecutionForest buildForestFromQuery(final String inputQuery) {
 
-        final var validatedQuery = new QueryValidator(config.getSchema()).validateQuery(inputQuery);
+        val validatedQuery = new QueryValidator(config.getSchema()).validateQuery(inputQuery);
         return new ExecutionForestFactory().getExecutionForest(validatedQuery.getParsedQuery(), config.getHgqlSchema());
     }
 }
