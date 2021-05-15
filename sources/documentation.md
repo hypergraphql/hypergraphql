@@ -56,7 +56,7 @@ where `/hgql/config` refers to an absolute server location
 3. Deploy this executable JAR onto another container, such as AWS ElasticBeanstalk, see [this section on running in a container](/container/)
 4. For an explanation of remote configuration options, see [this section on running in a container](/container/)
 
-The latest (v1.0.3) version of the executable JAR [can be downloaded here](/resources/hypergraphql-1.0.3-exe.jar)
+The latest (v2.0.0) version of the executable JAR [can be downloaded here](/resources/hypergraphql-2.0.0-exe.jar)
 
 By default, the HyperGraphQL server starts at: 
 
