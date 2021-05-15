@@ -1,0 +1,44 @@
+type __Context {
+    Person:         _@href(iri: "http://dbpedia.org/ontology/Person")
+    Company:        _@href(iri: "http://dbpedia.org/ontology/Company")
+    City:           _@href(iri: "http://dbpedia.org/ontology/City")
+    Country:        _@href(iri: "http://dbpedia.org/ontology/Country")
+    name:           _@href(iri: "http://xmlns.com/foaf/0.1/name")
+    label:          _@href(iri: "http://www.w3.org/2000/01/rdf-schema#label")
+    deathPlace:     _@href(iri: "http://dbpedia.org/ontology/deathPlace")
+    birthPlace:     _@href(iri: "http://dbpedia.org/ontology/birthPlace")
+    deathDate:      _@href(iri: "http://dbpedia.org/ontology/deathDate")
+    birthDate:      _@href(iri: "http://dbpedia.org/ontology/birthDate")
+    netWorth:       _@href(iri: "http://dbpedia.org/property/netWorth")
+    locationCity:   _@href(iri: "http://dbpedia.org/ontology/locationCity")
+    owner:          _@href(iri: "http://dbpedia.org/ontology/owner")
+    country:        _@href(iri: "http://dbpedia.org/ontology/country")
+    leader:         _@href(iri: "http://dbpedia.org/ontology/leader")
+}
+
+type Person @service(id:"dbpedia-sparql") {
+    name: String @service(id:"dbpedia-sparql")
+    label: [String] @service(id:"dbpedia-sparql")
+    deathPlace: City @service(id:"dbpedia-sparql")
+    birthPlace: City @service(id:"dbpedia-sparql")
+    deathDate: String @service(id:"dbpedia-sparql")
+    birthDate: String @service(id:"dbpedia-sparql")
+    netWorth: String @service(id:"dbpedia-sparql")
+}
+
+type Company @service(id:"dbpedia-sparql") {
+    name: [String] @service(id:"dbpedia-sparql")
+    label: [String] @service(id:"dbpedia-sparql")
+    locationCity: City @service(id:"dbpedia-sparql")
+    owner: [Person] @service(id:"dbpedia-sparql")
+}
+
+type City @service(id:"dbpedia-sparql") {
+    label: [String] @service(id:"dbpedia-sparql")
+    country: Country @service(id:"dbpedia-sparql")
+    leader: Person @service(id:"dbpedia-sparql")
+}
+
+type Country @service(id:"dbpedia-sparql") {
+    label: [String] @service(id:"dbpedia-sparql")
+}

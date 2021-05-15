@@ -1,0 +1,19 @@
+{
+    "name": "hgql-example-with-sparql",
+    "schema": "gql/schema.graphql",
+    "server": {
+        "port": 8080,
+        "graphql": "/graphql",
+        "graphiql": "/graphiql"
+    },
+    "services": [
+        {
+            "id": "dbpedia-sparql",
+            "type": "SPARQLEndpointService",
+            "url": "http://dbpedia.org/sparql/",
+            "graph": "http://dbpedia.org",
+            "user": "",
+            "password": ""
+        }
+    ]
+}
