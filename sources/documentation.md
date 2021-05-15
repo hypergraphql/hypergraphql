@@ -46,12 +46,12 @@ e.g.: `gradle execute -Pa="--classpath, --config, config.json"`
 1. `gradle clean build shadowJar` 
 This will build two JAR files in `build/libs`:
     - `hypergraphql-<version>.jar`, <br/>
-    e.g.: `hypergraphql-1.0.3.jar`
+    e.g.: `hypergraphql-2.0.0.jar`
     - `hypergraphql-<version>-exe.jar`, <br/>
-    e.g. `hypergraphql-1.0.3-exe.jar`
+    e.g. `hypergraphql-2.0.0-exe.jar`
 2. Run the executable JAR<br/>
 `java -jar build/libs/<exe-jar> [<args>]`, 
-<br/>e.g.: `java -jar build/libs/hypergraphql-1.0.3-exe.jar --config /hgql/config/config.json`<br/> 
+<br/>e.g.: `java -jar build/libs/hypergraphql-2.0.0-exe.jar --config /hgql/config/config.json`<br/> 
 where `/hgql/config` refers to an absolute server location
 3. Deploy this executable JAR onto another container, such as AWS ElasticBeanstalk, see [this section on running in a container](/container/)
 4. For an explanation of remote configuration options, see [this section on running in a container](/container/)

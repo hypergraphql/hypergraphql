@@ -82,5 +82,5 @@ They were deployed in a ZIP file with the structure:
 
 The `config` and `schema` files are those described in the [Demo] (/demo/) and [Tutorial] (/tutorial/) sections.
 `Procfile` looks like:
-`web: java -jar -Xmx1024 hypergraphql-1.0.3-exe.jar -config demo_services`
+`web: java -jar -Xmx1024 hypergraphql-2.0.0-exe.jar -config demo_services`
 
