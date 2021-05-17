@@ -30,4 +30,4 @@ jobs:
         repo: hypergraphql/hypergraphql
         tags: true
     after_failure:
-      - cat reports/tests/test/*.txt
+      - cat reports/tests/test/classes/*.html
