@@ -22,9 +22,11 @@
         <p>A GraphQL interface for querying and serving linked data on the Web.</p>
 
 
+          <ul>
           {% for item in site.data.samplelist.docs %}
-             <m><a href="/{{ item.url }}">{{ item.title }}</a><br/></m>
+             <li><a href="/{{ item.url }}">{{ item.title }}</a></li>
           {% endfor %}
+          </ul>
       </header>
       <footer>
           <p><a href="{{ site.github.repository_url }}">View the Project on GitHub <small>{{ github_name }}</small></a>
