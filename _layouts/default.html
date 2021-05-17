@@ -20,13 +20,9 @@
         <img src="https://raw.githubusercontent.com/hypergraphql/hypergraphql/gh-pages/sources/hgql-logo.png" style="width: 60%; padding: 10px; display: block; margin: 0 auto;" alt="logo">
       
         <p>A GraphQL interface for querying and serving linked data on the Web.</p>
-
-
-          <ul>
           {% for item in site.data.samplelist.docs %}
-             <li><a href="/{{ item.url }}">{{ item.title }}</a></li>
+             <m><a href="/{{ item.url }}">{{ item.title }}</a></m><br />
           {% endfor %}
-          </ul>
       </header>
       <footer>
           <p><a href="{{ site.github.repository_url }}">View the Project on GitHub <small>{{ github_name }}</small></a>
