@@ -6,7 +6,7 @@ HyperGraphQL is a [GraphQL](http://graphql.org) interface for querying and servi
 <img src="https://www.hypergraphql.org/sources/front-diagram.svg" alt="diagram">
 
 ### Release
-This is v1.0.3, a minor release that enables language support for query fragments and tidies some code.
+This is v2.0.0: major changes at this point are to bring the code in line with Java 8 / Java 11 specifications, moving to use more lambdas, fluent styles, etc., and to upgrade the GraphQL library (and other libraries) underlying.
 ### License note:
  This software has been developed and is maintained by Epeirogenic AB. It 
           is released under Apache License 2.0. See [LICENSE.TXT](https://github.com/hypergraphql/hypergraphql/blob/master/LICENSE.TXT) for more infromation. 
