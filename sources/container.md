@@ -6,6 +6,8 @@ permalink: /container/
 
 # Overview
 
+## This section will shortly be completely rewritten for Docker and Kubernetes
+
 This section describes how to run an instance of HyperGraphQL in a container, such as 
 [Amazon Web Services ElasticBeanstalk](https://aws.amazon.com/elasticbeanstalk/), as well as how to configure these from 
 remote locations,
