@@ -200,8 +200,12 @@ public abstract class Application {
     }
 
     private static void showBanner() throws IOException {
-
         val bannerFile = "banner.txt";
+        showBanner(bannerFile);
+    }
+
+    private static void showBanner(final String bannerFile) throws IOException {
+
         val bannerInputStream = Application.class.getClassLoader().getResourceAsStream(bannerFile);
         if (bannerInputStream == null) {
             System.out.println(Application.class.getClassLoader().getResource(bannerFile));
