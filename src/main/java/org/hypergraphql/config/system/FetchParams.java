@@ -33,7 +33,7 @@ public class FetchParams {
 
     private String extractPredicate(DataFetchingEnvironment environment) {
 
-        final List<Field> fields = environment.getFields();
+        final List<Field> fields = environment.getMergedField().getFields();
         if (fields == null || fields.isEmpty()) {
             return null;
         }

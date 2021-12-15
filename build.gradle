@@ -2,7 +2,6 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
-        jcenter()
     }
 }
 
@@ -15,20 +14,16 @@ apply plugin: 'java'
 apply plugin: 'checkstyle'
 
 group = 'org.hypergraphql'
-version = '3.0.0'
-
-sourceCompatibility = 17
-targetCompatibility = 17
+version = '3.0.1'
 
 repositories {
     mavenLocal()
     mavenCentral()
-    jcenter()
 }
 
 ext {
-    graphqlVersion = '15.0'
-    jenaVersion = '3.8.0'
+    graphqlVersion = '15.0' as String
+    jenaVersion = '3.8.0' as String
 }
 dependencies {
 
@@ -42,9 +37,10 @@ dependencies {
     implementation group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
     implementation group: 'org.apache.jena', name: 'jena-fuseki-embedded', version: '3.8.0'
 
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.16.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.16.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.16.0'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.16.0'
+    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.32'
 
     implementation group: 'com.sparkjava', name: 'spark-core', version: '2.9.2'
     implementation group: 'com.sparkjava', name: 'spark-template-velocity', version: '2.7.1'
@@ -54,13 +50,13 @@ dependencies {
 
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.5.11'
 
-    testCompileOnly('org.apiguardian:apiguardian-api:1.1.0')
+    testCompileOnly('org.apiguardian:apiguardian-api:1.1.2')
 
     testImplementation(
-            'org.junit.jupiter:junit-jupiter-api:5.7.0'
+            'org.junit.jupiter:junit-jupiter-api:5.8.2'
     )
     testRuntimeOnly(
-            'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+            'org.junit.jupiter:junit-jupiter-engine:5.8.2'
     )
 
     testCompileOnly group: 'org.projectlombok', name:'lombok', version: '1.18.16'

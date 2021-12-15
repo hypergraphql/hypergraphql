@@ -1,5 +1,6 @@
 package org.hypergraphql.config.system;
 
+import graphql.execution.MergedField;
 import graphql.language.Field;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLNamedType;
@@ -33,7 +34,9 @@ class FetchParamsTest {
         val field1 = mock(Field.class);
 
         final List<Field> fields = Collections.singletonList(field1);
-        when(environment.getFields()).thenReturn(fields);
+        val mergedField = mock(MergedField.class);
+        when(environment.getMergedField()).thenReturn(mergedField);
+        when(environment.getMergedField().getFields()).thenReturn(fields);
         when(field1.getName()).thenReturn("field1");
 
         val fieldConfig = mock(FieldConfig.class);
@@ -64,7 +67,9 @@ class FetchParamsTest {
         val field1 = mock(Field.class);
 
         final List<Field> fields = Collections.singletonList(field1);
-        when(environment.getFields()).thenReturn(fields);
+        val mergedField = mock(MergedField.class);
+        when(environment.getMergedField()).thenReturn(mergedField);
+        when(environment.getMergedField().getFields()).thenReturn(fields);
         when(field1.getName()).thenReturn("field1");
 
         val fieldConfig = mock(FieldConfig.class);
