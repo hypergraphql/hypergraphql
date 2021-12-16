@@ -15,7 +15,8 @@ apply plugin: 'maven'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 group = 'org.hypergraphql'
-version = '1.0.3'
+version = '1.0.3-log4shell-patched'
+//version = '1.0.3'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -38,9 +39,14 @@ dependencies {
     compile group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
     compile group: 'org.apache.jena', name: 'jena-fuseki-embedded', version: jenaVersion
 
-    compile group: 'log4j', name: 'log4j', version: '1.2.17'
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+//    compile group: 'log4j', name: 'log4j', version: '1.2.17'
+//    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+//    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.16.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.16.0'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.32'
 
     compile group: 'com.sparkjava', name: 'spark-core', version: '2.5'
     compile group: 'com.sparkjava', name: 'spark-template-velocity', version: '2.5.5'
