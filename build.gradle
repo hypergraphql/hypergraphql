@@ -2,20 +2,21 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.0'
     }
 }
 
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'com.github.johnrengelman.shadow'
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'java'
+}
+
+ext {
+    jenaVersion = '3.8.0'
+    log4jVersion = '2.17.1'
+}
 
 group = 'org.hypergraphql'
-version = '1.0.3-log4shell-patched'
+version = '1.0.3-log4shell-patched-' + log4jVersion
 //version = '1.0.3'
 
 sourceCompatibility = 1.8
@@ -24,41 +25,35 @@ targetCompatibility = 1.8
 repositories {
     mavenLocal()
     mavenCentral()
-    jcenter()
 }
 
-ext {
-    jenaVersion = '3.8.0'
-}
 dependencies {
-    
-    compile group: 'com.graphql-java', name: 'graphql-java', version: '2018-11-15T21-34-14-7110576-ignored-chars'
 
-    compile group: 'org.apache.jena', name: 'jena-arq', version: jenaVersion
-    compile group: 'org.apache.jena', name: 'jena', version: jenaVersion
-    compile group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
-    compile group: 'org.apache.jena', name: 'jena-fuseki-embedded', version: jenaVersion
+    // Changed from 'compile' to 'implementation' for Gradle v7
 
-//    compile group: 'log4j', name: 'log4j', version: '1.2.17'
-//    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-//    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    implementation group: 'com.graphql-java', name: 'graphql-java', version: '2018-11-15T21-34-14-7110576-ignored-chars'
 
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.16.0'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.16.0'
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
-    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.32'
+    implementation group: 'org.apache.jena', name: 'jena-arq', version: jenaVersion
+    implementation group: 'org.apache.jena', name: 'jena', version: jenaVersion
+    implementation group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
+    implementation group: 'org.apache.jena', name: 'jena-fuseki-embedded', version: jenaVersion
 
-    compile group: 'com.sparkjava', name: 'spark-core', version: '2.5'
-    compile group: 'com.sparkjava', name: 'spark-template-velocity', version: '2.5.5'
-    compile group: 'com.sparkjava', name: 'spark-core', version: '2.5'
-    compile group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.9'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.327'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4jVersion
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
+    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.32'
 
-    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.11.0'
+    implementation group: 'com.sparkjava', name: 'spark-core', version: '2.5'
+    implementation group: 'com.sparkjava', name: 'spark-template-velocity', version: '2.5.5'
+    implementation group: 'com.sparkjava', name: 'spark-core', version: '2.5'
+    implementation group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.9'
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.327'
 
-    testCompile group: 'org.junit.platform', name: 'junit-platform-gradle-plugin', version: '1.2.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.11.0'
 
-    testCompileOnly('org.apiguardian:apiguardian-api:1.0.0')
+    testImplementation group: 'org.junit.platform', name: 'junit-platform-gradle-plugin', version: '1.2.0'
+
+    testImplementation('org.apiguardian:apiguardian-api:1.0.0')
 
     testImplementation(
             'org.junit.jupiter:junit-jupiter-api:5.1.0'
